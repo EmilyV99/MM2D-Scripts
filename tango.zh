@@ -1,0 +1,676 @@
+const int TANGO_DEBUG = 0;
+
+//start tango.zh
+// tango.zh
+// Version 1.3.1
+typedef const int GVAR;
+// Standard settings -----------------------------------------------------------
+
+// How fast messages scroll.
+const int __TANGO_SCROLL_SPEED = 4;
+
+// How much holding A speeds up text.
+const int __TANGO_SPEEDUP_FACTOR = 5;
+
+// If this is enabled, speedup keys pressed in the same frame a slot
+// was activated will be ignored until they're pressed again.
+const int __TANGO_IGNORE_NEWLY_PRESSED_SPEED_KEYS = 1;
+
+// Whether the current string scrolls up before displaying the next one
+// rather than just disappearing.
+const int __TANGO_SCROLL_TO_NEXT = 0;
+
+// Whether holding A or B speeds up scrolling to the next message.
+const int __TANGO_SCROLL_SPEEDUP = 0;
+
+// Whether a sound is played when a space is printed.
+const int __TANGO_SFX_ON_SPACE = 1;
+
+// Whether there's a delay before a space, as with printable characters.
+const int __TANGO_DELAY_ON_SPACE = 1;
+
+// Strings that advance automatically will wait this long before doing so.
+const int __TANGO_AUTO_ADVANCE_TIME = 180;
+
+// Whether [[double brackets]] change the text color instead of being printed.
+const int __TANGO_ENABLE_BRACKET_HIGHLIGHT = 1;
+
+// Menu cursors will take this long to travel between options.
+// A speed of 1 or less is instantaneous.
+const int __TANGO_MENU_CURSOR_TRAVEL_TIME = 0;
+
+// The layer to draw on.
+const int __TANGO_DRAWING_LAYER = 6;
+
+// Which offscreen bitmap to use for text rendering.
+const int __TANGO_BITMAP = 6;
+
+// String codes are marked by this character.
+// 64 is @
+const int __TANGO_CODE_DELIMITER = 64;
+
+// The maximum length of a string handled by @string. Increasing this will
+// make the function take more space in the buffer, regardless of the argument.
+// It's not necessary to account for the null terminator.
+const int __TANGO_MAX_STRING_FUNC_LENGTH = 16;
+
+// Logging level.
+// 0: Don't log anything
+// 1: Only log errors
+// 2: Log all messages (only if loggingFull.zh is used)
+const int __TANGO_LOGGING_LEVEL = 1;
+
+// Whether to display a notification onscreen when an error is logged.
+const int __TANGO_ONSCREEN_NOTIFICATION = 1;
+
+// Onscreen error notification colors.
+const int __TANGO_ERROR_NOTIFICATION_TEXT_COLOR = 1;
+const int __TANGO_ERROR_NOTIFICATION_BG_COLOR = 0;
+
+// End standard settings -------------------------------------------------------
+
+
+
+// Advanced settings -----------------------------------------------------------
+
+//custom functions and vars moved to seperate section of file
+
+// Menu data
+const int __TANGO_MAX_MENU_ITEMS = 20;
+float __Tango_Data[94]; // 34+3*__TANGO_MAX_MENU_ITEMS
+
+// Style data
+const int __TANGO_NUM_STYLES = 10;
+int __Tango_Styles[480]; // 48 * __TANGO_NUM_STYLES
+
+// Text buffer and slots
+int __Tango_Buffer[2048]; // Arbitrary size
+
+const int __TANGO_NUM_SLOTS = 2;
+int __Tango_SlotData[48]; // 24 * __TANGO_NUM_SLOTS
+
+// Slot types and definitions
+const int TANGO_SLOT_NORMAL = 0;
+
+int __Tango_SlotDefs[] = {
+    // 0
+    TANGO_SLOT_NORMAL,
+    0, 1024,  // Starting index and length in __Tango_Buffer
+    0, 0,     // X, Y on offscreen bitmap
+    256, 512, // Width, height on offscreen bitmap
+    
+    // 1
+    TANGO_SLOT_NORMAL,
+    1024, 1024,
+    256, 0,
+    256, 512
+};
+
+// These must be implemented in order for TANGO_FLAG_FREEZE_SCREEN to work.
+void __Tango_FreezeScreen()
+{
+}
+
+void __Tango_UnfreezeScreen()
+{
+}
+
+// Edit these functions to change which buttons are used.
+
+// Return Link->Press* for advance/end string button
+bool __Tango_PressAdvance(int waitTime)
+{
+    if(waitTime>=90)
+        return Link->InputA || Link->InputB;
+    else
+        return Link->PressA;
+}
+
+// Return Link->Input* for advance/end string button
+bool __Tango_InputAdvance()
+{
+    return Link->InputA;
+}
+
+// Unset Link->Input* and Link->Press* for advance/end string button
+void __Tango_UnpressAdvance()
+{
+    Link->InputA=false;
+    Link->PressA=false;
+}
+
+// Return Link->Press* for speedup button
+bool __Tango_PressSpeedup()
+{
+    return Link->PressA;
+}
+
+// Return Link->Input* for speedup button
+bool __Tango_InputSpeedup()
+{
+    return Link->InputA;
+}
+
+// Unset Link->Input* and Link->Press* for speedup button
+void __Tango_UnpressSpeedup()
+{
+    Link->InputA=false;
+    Link->PressA=false;
+}
+
+// Return Link->Press* for super speed button
+bool __Tango_PressSuperSpeed()
+{
+    return Link->PressB;
+}
+
+// Return Link->Input* for super speed button
+bool __Tango_InputSuperSpeed()
+{
+    return Link->InputB;
+}
+
+// Unset Link->Input* and Link->Press* for super speed button
+void __Tango_UnpressSuperSpeed()
+{
+    Link->InputB=false;
+    Link->PressB=false;
+}
+
+// Return Link->Press* for menu select button
+bool __Tango_PressMenuSelect()
+{
+    return Link->PressA;
+}
+
+// Return Link->Press* for menu cancel button
+bool __Tango_PressMenuCancel()
+{
+    return Link->PressB;
+}
+
+// Return Link->Input* for both menu select and cancel buttons
+bool __Tango_InputMenu()
+{
+    return Link->InputA || Link->InputB;
+}
+
+// Unset Link->Input* and Link->Press* for menu select and cancel buttons
+void __Tango_UnpressMenu()
+{
+    Link->InputA=false;
+    Link->PressA=false;
+    Link->InputB=false;
+    Link->PressB=false;
+}
+
+
+// Import stringControlCode.zh instead of stringControlCodeDisabled.zh
+// to enable string control codes.
+//import "tango/1.3/stringControlCodeDisabled.zh"
+import "tango/1.3/stringControlCode.zh"
+
+
+// Import loggingFull.zh instead of loggingMinimal.zh for more useful
+// error messages. This will bloat scripts, so it should only be used
+// for debugging.
+import "tango/1.3/loggingMinimal.zh"
+//import "tango/1.3/loggingFull.zh"
+
+// End advanced settings -------------------------------------------------------
+
+
+import "tango/1.3/access.zh"
+import "tango/1.3/common.zh"
+import "tango/1.3/deprecated.zh"
+import "tango/1.3/drawing.zh"
+import "tango/1.3/font.zh"
+import "tango/1.3/functions.zh"
+import "tango/1.3/loading.zh"
+import "tango/1.3/menu.zh"
+import "tango/1.3/messages.zh"
+import "tango/1.3/metrics.zh"
+import "tango/1.3/processing.zh"
+import "tango/1.3/style.zh"
+import "tango/1.3/user.zh"
+import "tango/1.3/validation.zh"
+
+import "tango/1.3/script.z"
+//end tango.zh
+//start tango custom vars and functions
+// Custom variables
+float Tango_D[8]; // Access as @d0 to @d7; can be safely removed
+
+const float VAR_TANGO_D0 =  0.0055;
+const float VAR_TANGO_D7 =  0.0062;
+const float VAR_BSTATE = 8.6287;
+const float VAR_SHOPSTR = 241.2379;
+const float VAR_SPRICE = 36.4390;
+const float VAR_TTEMP = 5.5232;
+const float VAR_TTEMPI = 38.6633;
+const float VAR_BANKBAL = 28.9609;
+const float VAR_ANPC = 0.1144;
+
+float Tango_GetCustomVar(int var)
+{
+    if(var>=VAR_TANGO_D0 && var<=VAR_TANGO_D7)
+        return Tango_D[(var-VAR_TANGO_D0)*10000];
+	else if(var==VAR_BSTATE)
+		return BottleStateForTango;
+	else if(var==VAR_SPRICE)
+		return shopPrice;
+	else if(var==VAR_SHOPSTR)
+		return shopString;
+	else if(var==VAR_TTEMP)
+		return 0;//Write-Only
+	else if(var==VAR_TTEMPI)
+		return tangoTempI;
+	else if(var==VAR_BANKBAL)
+		return fullCounter(CR_BANKBAL);
+	else if(var==VAR_ANPC)
+		return getGlobalVar(GVAR_ACTIVENPCID,GV_MISC);
+    else
+    {
+        Tango_LogUndefinedVariable(var);
+        return 0;
+    }
+}
+
+void Tango_SetCustomVar(int var, float value)
+{
+    if(var>=VAR_TANGO_D0 && var<=VAR_TANGO_D7)
+        Tango_D[(var-VAR_TANGO_D0)*10000]=value;
+	else if(var==VAR_BSTATE)
+		BottleStateForTango = value;
+	else if(var==VAR_SPRICE)
+		shopPrice=value;
+	else if(var==VAR_SHOPSTR)
+		return;//Read-Only
+	else if(var==VAR_TTEMP)
+		tangoTemp = value;
+	else if(var==VAR_TTEMPI)
+		tangoTempI = value;
+	else if(var==VAR_BANKBAL)
+		Game->Counter[CR_BANKBAL]=value;
+	else if(var==VAR_ANPC)
+		setGlobalVar(GVAR_ACTIVENPCID,GV_MISC,value);
+    else
+        Tango_LogUndefinedVariable(var);
+}
+
+// Custom functions
+const float FUNC_HASBOT = 14.3597;
+const float FUNC_FILLBOT = 89.0308;
+const float FUNC_EMPTYBOT = 597.2882;
+const float FUNC_NPCEND = 27.5090;
+
+float __Tango_RunCustomFunction(float function, float args)
+{
+	if(function==FUNC_HASBOT){
+		if(CanFillBottle())return 1;
+		return 0;
+	} else if(function==FUNC_FILLBOT){
+		if(!CanFillBottle())return 0;
+		FillBottle(args[0]);
+		return 1;
+	} else if(function==FUNC_EMPTYBOT){
+		if(ClearBottle(args[0]))return 1;
+		return 0;
+	} else if(function==FUNC_NPCEND){
+		if(!Tango_SlotIsActive(getGlobalVar(GVAR_MAINTANGOSLOT,GV_MISC))){
+			return 1;
+		}//@waituntil(@npcend)@close()
+		return 0;
+	}
+    Tango_LogUndefinedFunction(function);
+    return 0;
+}
+//end
+//start Majora's tango.zh Functions
+const int TSTYLE_MAJORAS = 0;
+const int TSTYLE_SIGNS = 1;
+const int TSTYLE_ICAPTION = 2;
+const int TSTYLE_NPCNAME  = 3;
+const int TANGO_MENU_CURSOR_COMBO = 14085;
+int subscreenTangoSlot = TANGO_INVALID;
+GVAR GVAR_MAINTANGOSLOT = 4;
+GVAR GVAR_ACTIVENPCID = 5;
+GVAR GVAR_NPCTANGOSLOT = 6;
+bool subscreenCursorChanged = false;
+
+void ShowMessageAndWait(int msg){
+	ShowMessageAndWait(msg,false,false);
+}
+
+void ShowMessageAndWait(int msg, bool menu4way){
+	ShowMessageAndWait(msg,menu4way,false);
+}
+
+void ShowMessageAndWait(int msg, bool menu4way, bool isNPC){
+	
+	int slot = ShowMessage(msg,TSTYLE_MAJORAS);
+	handleMessageSlot(slot,menu4way,isNPC);
+}
+
+const int MAXNAMELENGTH = 75; //This must be >= the longest NPC name, + the length of the tango commands
+
+void getNPCName(int buf, int NPCid){
+	remchr(buf,0);
+	strcpy(buf,NPCNames[NPCid]);
+	strcat(buf,"@waituntil(@npcend())@close()"); //Literal here is Tango function to wait for MAINSLOT to be finished / UNFINISHED /
+}
+
+void ShowNPCStringAndWait(int str, int NPCid, bool menu4way){
+	setGlobalVar(GVAR_ACTIVENPCID,GV_MISC,NPCid);
+	ShowStringAndWait(str,menu4way,true);
+	setGlobalVar(GVAR_ACTIVENPCID,GV_MISC,0);
+}
+
+void ShowNPCMessageAndWait(int str, int NPCid, bool menu4way){
+	setGlobalVar(GVAR_ACTIVENPCID,GV_MISC,NPCid);
+	ShowMessageAndWait(str,menu4way,true);
+	setGlobalVar(GVAR_ACTIVENPCID,GV_MISC,0);
+}
+
+//start Overloads
+void ShowNPCMessageAndWait(int str, int NPCid){
+	ShowNPCMessageAndWait(str,NPCid,false);
+}
+
+void ShowNPCStringAndWait(int str, int NPCid){
+	ShowNPCStringAndWait(str,NPCid,false);
+}//end
+
+void ShowStringAndWait(int str){
+	ShowStringAndWait(str,false,false);
+}
+
+void ShowStringAndWait(int str, bool menu4way){
+	ShowStringAndWait(str,menu4way,false);
+}
+
+void ShowStringAndWait(int str, bool menu4way, bool isNPC){
+	int slot = ShowString(str,TSTYLE_MAJORAS);
+	handleMessageSlot(slot,menu4way,isNPC);
+}
+
+void SignShowMessageAndWait(int msg){
+	int slot = ShowMessage(msg,TSTYLE_SIGNS);
+	while(!Tango_SlotIsActive(slot)||!Tango_SlotIsFinished(slot))Waitframe();
+	Tango_ScrollSlot(slot,-Tango_GetSlotMaxScrollPos(slot));
+	handleMessageSlot(slot,false,false);
+}
+
+void handleMessageSlot(int slot, bool menu4way){
+	handleMessageSlot(slot,menu4way,false);
+}
+
+void handleMessageSlot(int slot){
+	handleMessageSlot(slot,false,false);
+}
+
+void handleMessageSlot(int slot, bool menu4way, bool isNPC){//start handleMessageSlot
+	int delay = 0;
+	int NPCname[MAXNAMELENGTH];
+	int lastid = 0;
+	if(isNPC)initNPCSlot();
+	while(Tango_SlotIsActive(slot)){
+		bool menuActive = Tango_MenuIsActive();
+		if(isNPC){
+			int slot = getGlobalVar(GVAR_NPCTANGOSLOT,GV_MISC);
+			if(getGlobalVar(GVAR_ACTIVENPCID,GV_MISC)!=lastid){
+				lastid = getGlobalVar(GVAR_ACTIVENPCID,GV_MISC);
+				getNPCName(NPCname, lastid);
+				NPCTileSetup(Tango_GetStringWidth(NPCNames[lastid],Tango_GetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_TEXT_FONT)));
+				initNPCSlot();
+				Tango_LoadString(slot,NPCname);
+			}
+		}
+		if(Tango_SlotIsFinished(slot)||menuActive||waitingForA){
+			int maxScroll = Tango_GetSlotMaxScrollPos(slot);
+			int scroll = Tango_GetSlotScrollPos(slot);
+			//Scrolling
+			float scrollSpeed = 1.5;
+			if(Link->InputA)scrollSpeed*=2;
+			if(Link->InputUp)
+				Tango_ScrollSlot(slot, -scrollSpeed);
+			else if(Link->InputDown)
+				Tango_ScrollSlot(slot, scrollSpeed);
+			//Scroll arrows
+			if(scroll<maxScroll){
+				Screen->FastCombo(7,208,56+9,14084,0,OP_OPAQUE);
+				delay = __TANGO_AUTO_ADVANCE_TIME;
+				if(Link->PressB){
+					Link->PressB=false;
+					Link->InputB=false;
+					Tango_ScrollSlot(slot,maxScroll);
+				}
+			}
+			if(!menuActive&&(scroll==maxScroll||waitingForA)){
+				Screen->FastCombo(7,208,48+9,14088,0,OP_OPAQUE);//Press A indicatior
+			}
+			if(scroll>0){
+				Screen->FastCombo(7,208,18+9,14086,0,OP_OPAQUE);
+			}
+			//Fix menu cursor when scrolling
+			if(menuActive&&scroll!=maxScroll){
+				Tango_SetMenuCursor(0,0);
+				NoDirs();
+			} else if(menuActive){
+				Tango_SetMenuCursor(TANGO_MENU_CURSOR_COMBO,0);
+				if(menuActive&&!menu4way){
+					if(Link->PressRight){
+						VTango_ChoiceShift(1);
+					} else if(Link->PressLeft){
+						VTango_ChoiceShift(-1);
+					}
+					NoDirs();
+				}
+			}
+			if(scroll!=maxScroll&&!waitingForA)NoAction();
+			if(delay>0){
+				delay--;
+				Link->InputA=Link->PressA;
+				Link->InputB=Link->PressB;
+			}
+			if(Link->PressA)waitingForA=false;
+		}
+		Link->PressStart=false;
+		Link->InputStart=false;
+		Waitframe();
+	}
+	if(isNPC)closeNPC();
+}//end handleMessageSlot
+
+void VTango_ChoiceShift(int shift){
+	int pos = Tango_GetMenuCursorPosition()+shift;
+	if(pos>=__Tango_Data[__TDIDX_CHOICE_COUNT])pos=0;
+	else if(pos<0)pos=__Tango_Data[__TDIDX_CHOICE_COUNT]-1;
+	Tango_SetMenuCursorPosition(pos);
+}
+
+int ShowMessage(int msg, int style){
+	int slot = getGlobalVar(GVAR_MAINTANGOSLOT,GV_MISC);
+	if(slot==TANGO_INVALID){
+		slot = Tango_GetFreeSlot(TANGO_SLOT_ANY);
+		if(slot==TANGO_INVALID)
+			return TANGO_INVALID;
+		setGlobalVar(GVAR_MAINTANGOSLOT,GV_MISC,slot);
+	}
+	Tango_ClearSlot(slot);
+	Tango_LoadMessage(slot,msg);
+	Tango_SetSlotStyle(slot,style);
+	Tango_SetSlotPosition(slot,32,25);//16 (+9)
+	Tango_ActivateSlot(slot);
+	
+	return slot;
+}
+
+int ShowString(int str, int style){
+	int slot = getGlobalVar(GVAR_MAINTANGOSLOT,GV_MISC);
+	if(slot==TANGO_INVALID){
+		slot = Tango_GetFreeSlot(TANGO_SLOT_ANY);
+		if(slot==TANGO_INVALID)
+			return TANGO_INVALID;
+		setGlobalVar(GVAR_MAINTANGOSLOT,GV_MISC,slot);
+	}
+	Tango_ClearSlot(slot);
+	Tango_LoadString(slot,str);
+	Tango_SetSlotStyle(slot,style);
+	Tango_SetSlotPosition(slot,32,25);//16
+	Tango_ActivateSlot(slot);
+	
+	return slot;
+}
+
+void TangoInit(){
+	setupStyles();
+	Tango_Start();
+	setGlobalVar(GVAR_MAINTANGOSLOT,GV_MISC,TANGO_INVALID);
+	setGlobalVar(GVAR_NPCTANGOSLOT,GV_MISC,TANGO_INVALID);
+	setGlobalVar(GVAR_ACTIVENPCID,GV_MISC,0);
+}
+
+void initNPCSlot(){
+	int slot = getGlobalVar(GVAR_NPCTANGOSLOT,GV_MISC);
+	if(slot==TANGO_INVALID){
+		slot = Tango_GetFreeSlot(TANGO_SLOT_ANY);
+		setGlobalVar(GVAR_NPCTANGOSLOT,GV_MISC,slot);
+	}
+	Tango_ClearSlot(slot);
+	Tango_SetSlotStyle(slot,TSTYLE_NPCNAME);
+	Tango_SetSlotPosition(slot,32,0);//55
+	Tango_ActivateSlot(slot);
+}
+
+void closeNPC(){
+	int slot = getGlobalVar(GVAR_NPCTANGOSLOT,GV_MISC);
+	Tango_ClearSlot(slot);
+}
+
+void showItemCaption(int str){
+	if(subscreenTangoSlot==TANGO_INVALID){
+		subscreenTangoSlot = Tango_GetFreeSlot(TANGO_SLOT_ANY);
+	} else if(!Tango_SlotIsActive(subscreenTangoSlot)||subscreenCursorChanged){
+		Tango_ClearSlot(subscreenTangoSlot);
+		Tango_LoadString(subscreenTangoSlot,str);
+		Tango_SetSlotStyle(subscreenTangoSlot,TSTYLE_ICAPTION);
+		Tango_SetSlotPosition(subscreenTangoSlot,64,128);
+		Tango_ActivateSlot(subscreenTangoSlot);
+		Link->PressA=false;
+		Link->InputA=false;
+	}
+}
+
+void hideItemCaption(){
+	if(subscreenTangoSlot!=TANGO_INVALID&&Tango_SlotIsActive(subscreenTangoSlot)){
+		Tango_ClearSlot(subscreenTangoSlot);
+		Tango_ReserveSlot(subscreenTangoSlot);
+	}
+}
+
+void NPCTileSetup(int width){
+	tTraceS("Width in pix, before clamp: ");tTrace(width);
+	width = Clamp(width+10,0,12*16);//+10 for the 5 pixels on either side of the box
+	tTraceS("Width in pix, after clamp: ");tTrace(width);
+	tTraceS("Width in tiles: ");tTrace(Ceiling(width/16));
+	tTraceNL();
+	ClearTileBlock(12188,12219);
+	for(int i = 0; i < width; i+=16){
+		if(i<16)
+			CopyTileBlock(12180,12200,12188+Floor(i/16));
+		else if(i>=width-16)
+			CopyTileBlock(12182,12202,12188+Floor(i/16));
+		else
+			CopyTileBlock(12181,12201,12188+Floor(i/16));
+	}
+}
+
+void setupStyles(){//start styles
+	//COMMON: (Default and Signs)
+	bool looping = true;
+	for(int i = TSTYLE_MAJORAS;looping;){
+		Tango_SetStyleAttribute(i,TANGO_STYLE_BACKDROP_TYPE,TANGO_BACKDROP_TILE);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_BACKDROP_CSET,0);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_BACKDROP_TILE,12088);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_BACKDROP_WIDTH,12);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_BACKDROP_HEIGHT,3);
+		
+		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_FONT,TANGO_FONT_GUI);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_CSET,0);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_COLOR,1);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_X,8);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_Y,3);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_WIDTH,176);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_HEIGHT,42);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_SPEED,5);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_SFX,18);
+		
+		//Alt (()) [[]] {{}} <<>>
+		Tango_SetStyleAttribute(i,TANGO_STYLE_ALT_CSET_1,1);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_ALT_COLOR_1,7);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_ALT_CSET_2,0);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_ALT_COLOR_2,7);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_ALT_CSET_3,1);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_ALT_COLOR_3,3);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_ALT_CSET_4,5);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_ALT_COLOR_4,13);
+		
+		Tango_SetStyleAttribute(i,TANGO_STYLE_MENU_CURSOR_COMBO,TANGO_MENU_CURSOR_COMBO);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_MENU_CURSOR_CSET,0);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_MENU_CHOICE_INDENT,16);
+		
+		Tango_SetStyleAttribute(i,TANGO_STYLE_MENU_CURSOR_MOVE_SFX,5);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_MENU_SELECT_SFX,83);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_MENU_CANCEL_SFX,5);
+		if(i==TSTYLE_MAJORAS){
+			i = TSTYLE_SIGNS;
+		} else if(i==TSTYLE_SIGNS){
+			i = TSTYLE_NPCNAME;
+		} else if(i==TSTYLE_NPCNAME){
+			looping = false;
+		}
+	}
+	//Flags
+	Tango_SetStyleAttribute(TSTYLE_MAJORAS,TANGO_STYLE_FLAGS,TANGO_FLAG_ENABLE_SPEEDUP | TANGO_FLAG_ENABLE_SUPER_SPEED);
+	Tango_SetStyleAttribute(TSTYLE_SIGNS,TANGO_STYLE_FLAGS,TANGO_FLAG_INSTANTANEOUS);
+	
+	//Item Caption
+	Tango_SetStyleAttribute(TSTYLE_ICAPTION,TANGO_STYLE_BACKDROP_TYPE,TANGO_BACKDROP_CLEAR);
+	Tango_SetStyleAttribute(TSTYLE_ICAPTION,TANGO_STYLE_TEXT_FONT,TANGO_FONT_MAJORAS2D);
+	Tango_SetStyleAttribute(TSTYLE_ICAPTION,TANGO_STYLE_TEXT_CSET,5);
+	Tango_SetStyleAttribute(TSTYLE_ICAPTION,TANGO_STYLE_TEXT_X,0);
+	Tango_SetStyleAttribute(TSTYLE_ICAPTION,TANGO_STYLE_TEXT_Y,0);
+	Tango_SetStyleAttribute(TSTYLE_ICAPTION,TANGO_STYLE_TEXT_WIDTH,144);
+	Tango_SetStyleAttribute(TSTYLE_ICAPTION,TANGO_STYLE_TEXT_HEIGHT,32);
+	Tango_SetStyleAttribute(TSTYLE_ICAPTION,TANGO_STYLE_TEXT_SPEED,999);
+	Tango_SetStyleAttribute(TSTYLE_ICAPTION,TANGO_STYLE_TEXT_SFX,18);
+	Tango_SetStyleAttribute(TSTYLE_ICAPTION,TANGO_STYLE_FLAGS,TANGO_FLAG_INSTANTANEOUS | TANGO_FLAG_CENTERED);
+	
+	//NPC Names
+	Tango_SetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_BACKDROP_WIDTH,12);
+	Tango_SetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_BACKDROP_HEIGHT,2);
+	Tango_SetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_TEXT_CSET,1);
+	Tango_SetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_TEXT_COLOR,3);
+	Tango_SetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_TEXT_X,5);
+	Tango_SetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_TEXT_Y,11);
+	Tango_SetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_TEXT_WIDTH,132);
+	Tango_SetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_TEXT_HEIGHT,16);
+	Tango_SetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_FLAGS,TANGO_FLAG_INSTANTANEOUS);
+	Tango_SetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_BACKDROP_TILE,12188);
+}//end
+
+//start customtracers
+void tTraceS(int str){
+	if(TANGO_DEBUG)TraceS(str);
+}
+
+void tTrace(int i){
+	if(TANGO_DEBUG)Trace(i);
+}
+
+void tTraceNL(){
+	if(TANGO_DEBUG)TraceNL();
+}
+//end customtracers
+//end tango.zh Functions

@@ -1,0 +1,88 @@
+const int SFX_SKULLTULA_DROP = 87;
+const int SFX_SKULLTULA_HIDE = 88;
+const int SFX_SKULLTULA_SPIN = 54;
+const int SFX_SKULLTULA_FLIP = 17;
+const int COMBO_SKULLTULA_DEFAULT = 14132;
+
+ffc script Skulltula{
+	void run(){
+		if(!ScreenEFlag(SEF_LIST2,SEFL2_ALWAYSRET)&&(Screen->State[ST_ENEMYNORETURN]||Screen->State[ST_TEMPNORETURN])){TraceS("quitting");this->Data=GH_INVISIBLE_COMBO;Quit();}
+		if(this->Data==COMBO_FFC_GHST||this->Data==GH_INVISIBLE_COMBO)this->Data=COMBO_SKULLTULA_DEFAULT;
+		int combo = this->Data;
+		npc ghost = Ghost_InitCreate(this,180);
+		int thisID = getNPCfromUID(ghost);
+		int defenses[41];
+		for(int i = 0;i<41;i++){
+			defenses[i]=ghost->Defense[i];
+			if(i!=NPCD_HOOKSHOT)ghost->Defense[i]=NPCDT_BLOCK;
+		}
+		defenses[NPCD_HOOKSHOT]=NPCDT_ONEHITKILL;
+		ghost->Defense[NPCD_HOOKSHOT]=NPCDT_ONEHITKILL;
+		Ghost_Data = GH_INVISIBLE_COMBO;
+		bool visible = false;
+		int timer = 0;
+		bool flipped = false;
+		int lastHP = ghost->HP;
+		while(true){
+			while(isFrozen)Ghost_Waitframe(this,ghost,true,true);
+			if(dist(32)&&!visible){
+				for(int i = 4;i>0;i--)Ghost_Waitframe(this,ghost,true,true);
+				Audio->PlaySound(SFX_SKULLTULA_DROP);
+				visible=true;
+				flipped=false;
+			} else if(!dist(48)&&visible){
+				Audio->PlaySound(SFX_SKULLTULA_HIDE);
+				visible=false;
+				for(int i = 0;i<41;i++){
+					if(i!=NPCD_HOOKSHOT)
+						ghost->Defense[i]=NPCDT_BLOCK;
+				}
+			}
+			if(Link->HitBy[0]==thisID)Audio->PlaySound(SFX_SKULLTULA_SPIN);
+			if(visible){
+				Screen->Line(4, ghost->X+8, ghost->Y, ghost->X+8, 0, 0x01, 1,0,0,0,128);
+				ghost->CollDetection=true;
+				if(flipped||ghost->Stun){
+					Ghost_Data=combo+1;
+					if(Link->HitBy[0]==thisID||ghost->HitBy[2]>0)timer=119;
+					if(ghost->Stun){
+						timer=0;
+						for(int i = 0;i<41;i++){
+							ghost->Defense[i]=defenses[i];
+						}
+					} else if(timer>60)if(timer==119||Rand(1,100)<=2){//31% chance to stay flipped for 2 seconds, 69% chance to flip back before that
+						flipped=false;
+						Audio->PlaySound(SFX_SKULLTULA_FLIP);
+						if(!ghost->Stun)
+							for(int i = 0;i<41;i++){
+								if(i!=NPCD_HOOKSHOT)
+									ghost->Defense[i]=NPCDT_BLOCK;
+							}
+						timer=0;
+					}
+				} else {
+					Ghost_Data=combo;
+					if(Link->HitBy[0]==thisID)timer=1;
+					if(timer==0){
+						flipped=true;
+						Audio->PlaySound(SFX_SKULLTULA_FLIP);
+						for(int i = 0;i<41;i++){
+							ghost->Defense[i]=defenses[i];
+						}
+						timer=0;
+					}
+				}
+			} else {
+				ghost->CollDetection=false;
+				Ghost_Data=GH_INVISIBLE_COMBO;
+			}
+			timer = (timer+1)%120;
+			lastHP=ghost->HP;
+			Ghost_Waitframe(this,ghost,true,true);
+		}
+	}
+	
+	bool dist(int radius){
+		return (Abs((Link->X+8)-(Ghost_X+8))<radius&&Abs((Link->Y+8)-(Ghost_Y+8))<radius);
+	}
+}
