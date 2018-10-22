@@ -1,5 +1,5 @@
 import "std.zh"
-//GVARs used: 0-7
+//GVARs used: 0-9
 //start typedefs
 typedef const int GVAR;
 //end typedefs
@@ -312,6 +312,15 @@ const int I_DEED_TOWN = 179;
 const int I_INFMAG = 152;
 const int I_MASK_ZORA = 131;
 //end
+//start Palette
+GVAR GVAR_PALETTE = 8;
+GVAR GVAR_LAST_SUN_STATE = 9;
+const int PAL_DAY = 0;
+const int PAL_SUNSET = 1;
+const int PAL_NIGHT = 2;
+const int PAL_SUNRISE = 3;
+const int PAL_LENS = 4;
+//end Palette
 const int COMBO_INVIS = 4;
 const int COMBO_SOLID = 38408;
 const int TILE_INVIS = 5;
@@ -352,6 +361,7 @@ bool hideLayer4 = false;
 int lastScreen = -1;
 int lastMap = -1;
 int lastLevel = -1;
+int lastDMap = -1;
 bool songOfStormsRain = false;
 bool isFrozen = false;
 bool owlSaved = false;
@@ -384,8 +394,7 @@ global script Init{
 //start Global Script
 global script Global{
 	void run(){//start mainGlobal
-		Trace(FRAMES_SECOND);Trace(FRAMES_MINUTE);Trace(FRAMES_HOUR);
-		bool greyscale = false;
+		bool isLensTinted = false;
 		setEnterEndsTyping(true);
 		setAllowBackspaceDelete(true);
 		setOverflowWraps(false);
@@ -411,13 +420,12 @@ global script Global{
 		//start Global Script Scope Vars
 		lweapon zoraBoom1;
 		lweapon zoraBoom2;
-		bool wasDayPalette = true;
 		//end
 		//Tango_ConvertVariableName("anpc");
 		//Tango_ConvertFunctionName("npcend");
 		while(true){
 			handleTyping();
-			if(debugEnabled)wasDayPalette = testingMenu(wasDayPalette);
+			if(debugEnabled)testingMenu();
 			//start
 			if(scrnChanged){
 				scrnChanged=false;
@@ -429,9 +437,13 @@ global script Global{
 				lastScreen = Game->GetCurScreen();
 				lastMap = Game->GetCurMap();
 			}
-			if(lastLevel!=Game->GetCurLevel()){
-				changedLevel();
-				lastLevel = Game->GetCurLevel();
+			if(lastDMap!=Game->GetCurDMap()){
+				changedDMap();
+				lastDMap = Game->GetCurDMap();
+				if(lastLevel!=Game->GetCurLevel()){
+					changedLevel();
+					lastLevel = Game->GetCurLevel();
+				}
 			}
 			layer4Toggle();
 			if(subscreen){
@@ -451,12 +463,12 @@ global script Global{
 				gameframe=0;
 			}//end FrameCounters
 			//start Time passing
-			if(!freezeTime&&!isFrozen&&(!slowTime||!(gameframe%2))&&(!ScreenFlag(SF_MISC,SFM_SCRIPT1))&&!songFrames){
+			bool timeIsNotFrozen = (!freezeTime&&!isFrozen&&(!slowTime||!(gameframe%2))&&(!ScreenFlag(SF_MISC,SFM_SCRIPT1))&&!songFrames);
+			if(timeIsNotFrozen){
 				time++;
 				trueTime+= FRAME;
 				if(time%FRAMES_HOUR == 0){
 					hour++;
-					wasDayPalette = timePalette(wasDayPalette);
 					time=0;
 					if(hour>=24){
 						hour-=24;
@@ -574,19 +586,21 @@ global script Global{
 			Overhead_Update();
 			UpdateGhostZH1();
 			//end
-			//if(UsingItem(53)&&fullCounter(CR_MAGIC)>2)Game->GreyscaleOn();
-			//else Game->GreyscaleOff();
 			if(UsingItem(53)&&fullCounter(CR_MAGIC)>2){
-				if(!greyscale){
-					Graphics->Greyscale(true);
-					greyscale=true;
+				if(!isLensTinted){
+					Graphics->Tint(-17,-48,5);
+					setGlobalVar(GVAR_PALETTE,GV_MISC,PAL_LENS);
+					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,-1);
+					isLensTinted=true;
 				}
 			} else {
-				if(greyscale){
-					Graphics->Greyscale(false);
-					greyscale=false;
+				if(isLensTinted){
+					Graphics->ClearTint();
+					setGlobalVar(GVAR_PALETTE,GV_MISC,PAL_DAY);
+					isLensTinted=false;
 				}
 			}
+			if(!isLensTinted && timeIsNotFrozen)timePalette();
 			Waitdraw();			
 			passiveSubscreen();
 			if(!isFrozen||isBottleFrozen){
@@ -660,11 +674,26 @@ global script Global{
 	void changedScreens(){
 		songOfStormsRain = false;
 		if(!floating)Link->Invisible=false;
+		int palState = getGlobalVar(GVAR_PALETTE,GV_MISC);
+		if(!isOverworldScreen() && !(palState == PAL_DAY || palState == PAL_LENS)){
+			Graphics->ClearTint();
+			setGlobalVar(GVAR_PALETTE,GV_MISC,PAL_DAY);
+		}
 	}
 	
 	void changedLevel(){
 		torchPuzzleState=0;
 		torchPuzzleTimer=0;
+	}
+	
+	void changedDMap(){
+		Graphics->ClearTint();
+		if(getGlobalVar(GVAR_PALETTE,GV_MISC)==PAL_LENS){
+			Graphics->Tint(-17,-48,5);
+		} else {
+			setGlobalVar(GVAR_PALETTE,GV_MISC,PAL_DAY);
+			timePalette();
+		}
 	}
 	
 	void varDecrements(){
@@ -746,21 +775,119 @@ global script Global{
 			else warpNumFloors++;
 		}
 	}//end
-	bool timePalette(bool wasDay){//start
-		if(!wasDay&&isDay()){
-			Game->DMapPalette[0]=0x09A;
-			Game->DMapPalette[1]=0x09A;
-			Game->DMapPalette[2]=0x09A;
-			return true;
-		} else if(wasDay&&!isDay()){
-			Game->DMapPalette[0]=0x09B;
-			Game->DMapPalette[1]=0x09B;
-			Game->DMapPalette[2]=0x09B;
-			return false;
+	const int MULT_SUNRISE = 1;
+	void timePalette(){//start
+		int pal = 0;
+		if(isOverworldScreen()){
+			switch(hour){
+				case 5:{
+					pal = PAL_SUNRISE;
+				break;}
+				case 17:{
+					pal = PAL_SUNSET;
+				break;}
+				default:{
+					if(hour>5&&hour<17){
+						pal = PAL_DAY;
+					} else {
+						pal = PAL_NIGHT;
+					}
+				}
+			}
 		}
+		if(getGlobalVar(GVAR_PALETTE,GV_MISC)==pal){
+			if(pal!=PAL_SUNRISE && pal!=PAL_SUNSET)return;
+			int suntime = 0;
+			if(pal==PAL_SUNSET){
+				if(time<Div(FRAMES_HOUR*MULT_SUNRISE,3)){
+					suntime=0;
+				} else if(time<Div(FRAMES_HOUR*MULT_SUNRISE,2)){
+					suntime=1;
+				} else if(time<Div(FRAMES_HOUR*MULT_SUNRISE,3)*2){
+					suntime=2;
+				} else if(time<Div(FRAMES_HOUR*MULT_SUNRISE,4)*3){
+					suntime=3;
+				} else {
+					suntime=4;
+				}
+			} else {
+				if(time<Div(FRAMES_HOUR,4)){
+					suntime=0;
+				} else if(time<Div(FRAMES_HOUR,3)){
+					suntime=1;
+				} else if(time<Div(FRAMES_HOUR,2)){
+					suntime=2;
+				} else if(time<Div(FRAMES_HOUR,3)*2){
+					suntime=3;
+				} else {
+					suntime=4;
+				}
+			}
+			if(getGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC)==suntime)return;
+		}
+		switch(pal){
+			case PAL_DAY:
+				Graphics->ClearTint();
+				setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,-1);
+				break;
+			case PAL_NIGHT:
+				Graphics->ClearTint();
+				Graphics->Tint(-21,-23,-10);
+				setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,-1);
+				break;
+			case PAL_SUNSET:
+				Graphics->ClearTint();
+				if(time<Div(FRAMES_HOUR,3)){
+					//Third
+					Graphics->Tint(0,-2,-7);
+					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,0);
+				} else if(time<Div(FRAMES_HOUR,2)){
+					//Half
+					Graphics->Tint(-3,-6,-11);
+					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,1);
+				} else if(time<Div(FRAMES_HOUR,3)*2){
+					//two-third
+					Graphics->Tint(-6,-9,-11);
+					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,2);
+				} else if(time<Div(FRAMES_HOUR,4)*3){
+					//three-quarter
+					Graphics->Tint(-13,-13,-11);
+					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,3);
+				} else {
+					//last-quarted
+					Graphics->Tint(-15,-15,-7);
+					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,4);
+				}
+				break;
+			case PAL_SUNRISE:
+				Graphics->ClearTint();
+				if(time<Div(FRAMES_HOUR,4)){
+					//Quarter
+					Graphics->Tint(-16,-20,-14);
+					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,0);
+				} else if(time<Div(FRAMES_HOUR,3)){
+					//Third
+					Graphics->Tint(-14,-16,-13);
+					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,1);
+				} else if(time<Div(FRAMES_HOUR,2)){
+					//Half
+					Graphics->Tint(-13,-13,-13);
+					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,2);
+				} else if(time<Div(FRAMES_HOUR,3)*2){
+					//Second third
+					Graphics->Tint(-9,-9,-9);
+					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,3);
+				} else {
+					//Last third
+					Graphics->Tint(-5,-5,-5);
+					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,4);
+				}
+				break;
+		}
+		setGlobalVar(GVAR_PALETTE,GV_MISC,pal);
 	}//end
 	//start TestingMenu
-	bool testingMenu(bool wasDayPalette){//start
+	void testingMenu(){//start
 		if(!dbsetup)debugSetup();
 		if(!isFrozen){
 			if(Link->PressEx3){
@@ -791,7 +918,7 @@ global script Global{
 							trueTime-=(3600*24*FRAME);
 						}
 					}
-					wasDayPalette = timePalette(!isDay());
+					if(getGlobalVar(GVAR_PALETTE,GV_MISC)!=PAL_LENS)timePalette();
 				}
 				if(Link->PressDown){
 					hour--;
@@ -808,7 +935,7 @@ global script Global{
 							trueTime+=(3600*24*FRAME);
 						}
 					}
-					wasDayPalette = timePalette(!isDay());
+					if(getGlobalVar(GVAR_PALETTE,GV_MISC)!=PAL_LENS)timePalette();
 				}
 				if(Link->PressRight){
 					day++;
@@ -856,7 +983,6 @@ global script Global{
 				Link->PressStart=false;Link->InputStart=false;
 			}
 		}
-		return wasDayPalette;
 	}//end
 	
 	void debugSetup(){//start
@@ -1152,16 +1278,16 @@ void activateSong(int song){//start Song Functions
 		int args[8] = {44,1};
 		RunFFCScript(FFC_SHOWSTRING,args);
 	} else if(song==SONG_EponasSong){
-		//INSERT CODE//Do something here when Epona's Song is played!
+		//INSERT CODE/Do something here when Epona's Song is played!
 	} else if(song==SONG_SongOfStorms){
 		if(!(DUNGEONS[Game->GetCurDMap()]||ScreenFlag(SF_ROOMTYPE,SFR_INTERIOR)||ScreenFlag(SF_ROOMTYPE,SFR_DUNGEON))){
 			Audio->PlayMIDI(MIDI_THESTORM);
 			songOfStormsRain=true;
 		}
 	} else if(song==SONG_GoronsLullaby){
-		//INSERT CODE//Do something here when Goron's Lullaby is played!
+		//INSERT CODE/Do something here when Goron's Lullaby is played!
 	} else if(song==SONG_OathToOrder){
-		//INSERT CODE//Do something here when Oath to Order is played!
+		//INSERT CODE/Do something here when Oath to Order is played!
 	} else if(song==SONG_SongOfSoaring){
 		if(owlStates==0){
 		
@@ -5038,6 +5164,13 @@ void loadFPSstate(){
 }//end
 int fullCounter(int counter){//start
 	return Game->Counter[counter]+Game->DCounter[counter];
+}//end
+bool isOverworldScreen(){//start
+	dmapdata dm = Game->LoadDMapData(Game->GetCurDMap());
+	if(IsDungeonFlag())return false;
+	if(IsInteriorFlag())return false;
+	if(dm->Type%2)return true;
+	return false;
 }//end
 //end Misc Functions
 
