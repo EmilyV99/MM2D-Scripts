@@ -70,7 +70,7 @@ void __LinkMovement_UpdateInput(){
 
 //Function adds extra movement to Link's step speed
 void __LinkMovement_SpeedChange(){
-	if(Link->Action==LA_NONE||Link->Action==LA_WALKING){
+	if(Link->Action==LA_NONE||Link->Action==LA_WALKING||Link->Action==LA_SWIMMING){
 		if(LinkMovement[LM_STICKX]!=0||LinkMovement[LM_STICKY]!=0){
 			float movementSpeed = LinkMovement[LM_MOVEBOOST];
 			//We're calculating CanWalk for all directions in advance to hopefully save a bit on speed.
