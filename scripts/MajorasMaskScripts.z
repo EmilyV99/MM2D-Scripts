@@ -2,6 +2,7 @@ import "std.zh"
 //GVARs used: 0-9
 //start typedefs
 typedef const int GVAR;
+typedef const int DEFINE;
 //end typedefs
 
 import "scripts/string.zh"
@@ -12,6 +13,7 @@ import "tango/font/GUI.zh"
 import "tango/font/MajoraFont.zh"
 import "ghost.zh"
 import "scripts/TypeAString v1-1.zh"
+import "scripts/Tint.zh"
 //start ghost imports
 import "scripts/ghost/Skulltula.z"
 //end
@@ -313,14 +315,14 @@ const int I_INFMAG = 152;
 const int I_MASK_ZORA = 131;
 //end
 //start Palette
-GVAR GVAR_PALETTE = 8;
-GVAR GVAR_LAST_SUN_STATE = 9;
-const int PAL_DAY = 0;
-const int PAL_SUNSET = 1;
-const int PAL_NIGHT = 2;
-const int PAL_SUNRISE = 3;
-const int PAL_LENS = 4;
+GVAR GV_PAL = 1000;
+DEFINE NUM_PAL = 4;
+GVAR TINT_DAY = 0;
+GVAR TINT_SUNSETORANGE = 1;
+GVAR TINT_NIGHT = 2;
+GVAR TINT_LENS = 3;
 //end Palette
+//start MISC
 const int COMBO_INVIS = 4;
 const int COMBO_SOLID = 38408;
 const int TILE_INVIS = 5;
@@ -374,6 +376,7 @@ bool freezeTime = false;
 bool debug = false;
 bool dbsetup = false;
 bool debugEnabled = false;
+//end MISC
 //end Misc global vars
 //start Init Script
 global script Init{
@@ -388,10 +391,14 @@ global script Init{
 		int saveName[16];
 		Game->GetSaveName(saveName);
 		if(!strcmp(saveName,"Venrob"))debugEnabled=true;
+		setGlobalVar(TINT_DAY,GV_PAL,createTintPalette(0,0,0));
+		setGlobalVar(TINT_SUNSETORANGE,GV_PAL,createTintPalette(-3,-9,-14));
+		setGlobalVar(TINT_NIGHT,GV_PAL,createTintPalette(-21,-23,-10));
+		setGlobalVar(TINT_LENS,GV_PAL,createTintPalette(-17,-48,5));
 	}
 }
 //end
-//start Global Script
+//start Active Script
 global script Global{
 	void run(){//start mainGlobal
 		bool isLensTinted = false;
@@ -400,8 +407,7 @@ global script Global{
 		setOverflowWraps(false);
 		//start init
 		ClearTrace();
-		int init[] = "Launching TLoZ: Majora's Mask 2D...";
-		TraceS(init);TraceNL();
+		TraceS("Launching TLoZ: Majora's Mask 2D...");TraceNL();
 		if(Link->Item[81])Game->MCounter[CR_BOMBCHUS]=40;
 		bool scrnChanged = false;
 		LinkMovement_Init();
@@ -463,8 +469,8 @@ global script Global{
 				gameframe=0;
 			}//end FrameCounters
 			//start Time passing
-			bool timeIsNotFrozen = (!freezeTime&&!isFrozen&&(!slowTime||!(gameframe%2))&&(!ScreenFlag(SF_MISC,SFM_SCRIPT1))&&!songFrames);
-			if(timeIsNotFrozen){
+			bool timeIsNotFrozen = (!isFrozen&&(!slowTime||!(gameframe%2))&&(!ScreenFlag(SF_MISC,SFM_SCRIPT1))&&!songFrames);
+			if(!freezeTime&&timeIsNotFrozen){//freezeTime is a debug, and should ONLY apply to this block, not other sections that use `timeIsNotFrozen`.
 				time++;
 				trueTime+= FRAME;
 				if(time%FRAMES_HOUR == 0){
@@ -479,6 +485,11 @@ global script Global{
 				if(day>3){
 					destruction();
 				}
+				unpauseGradient();
+			}
+			else
+			{
+				pauseGradient();
 			}
 			//end Time Passing
 			bombCheck();
@@ -562,7 +573,6 @@ global script Global{
 			//
 			handleEXItems();
 			handleMasks();
-			drawExtraLayerEffects();
 			//end
 			if(subscreen){//start
 				NoAction();
@@ -584,23 +594,22 @@ global script Global{
 			Link->PressR=false;Link->InputR=false;
 			Link->PressL=false;Link->InputL=false;
 			Overhead_Update();
+			drawExtraLayerEffects();
 			UpdateGhostZH1();
 			//end
 			if(UsingItem(53)&&fullCounter(CR_MAGIC)>2){
 				if(!isLensTinted){
-					Graphics->Tint(-17,-48,5);
-					setGlobalVar(GVAR_PALETTE,GV_MISC,PAL_LENS);
-					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,-1);
+					setTint(getGlobalVar(TINT_LENS,GV_PAL),true);
 					isLensTinted=true;
 				}
 			} else {
 				if(isLensTinted){
-					Graphics->ClearTint();
-					setGlobalVar(GVAR_PALETTE,GV_MISC,PAL_DAY);
+					setTint(getGlobalVar(TINT_LENS,GV_PAL),false);
 					isLensTinted=false;
 				}
 			}
-			if(!isLensTinted && timeIsNotFrozen)timePalette();
+			timePalette();
+			runTints();
 			Waitdraw();			
 			passiveSubscreen();
 			if(!isFrozen||isBottleFrozen){
@@ -669,16 +678,35 @@ global script Global{
 		if(songOfStormsRain){
 			Screen->DrawScreen(5,LAYERSMAP1,LAYERSCREEN_RAIN,0,0,0);
 		}
+		int downdmap = getDownDMap();
+		int updmap = getUpDMap();
+		if(downdmap>-1){
+			int screen = getDownScreen(false);
+			if(screen>-1){
+				dmapdata ddmap = Game->LoadDMapData(downdmap);
+				drawItemFromScreen(ddmap->Map,screen,2);
+			}
+		}
+		if(updmap>-1){
+			int screen = getUpScreen(false);
+			if(screen>-1){
+				dmapdata udmap = Game->LoadDMapData(updmap);
+				drawItemFromScreen(udmap->Map,screen,4);
+			}
+		}
+	}
+	
+	void drawItemFromScreen(int map, int screen, int layer){
+		if(!Game->GetScreenState(map, screen, ST_ITEM)){
+			mapdata m = Game->LoadMapData(map,screen);
+			if(m->HasItem)
+				Screen->FastTile(layer,m->ItemX,m->ItemY,loadItemTile(m->Item),loadItemTile(m->Item),OP_TRANS);
+		}
 	}
 	
 	void changedScreens(){
 		songOfStormsRain = false;
 		if(!floating)Link->Invisible=false;
-		int palState = getGlobalVar(GVAR_PALETTE,GV_MISC);
-		if(!isOverworldScreen() && !(palState == PAL_DAY || palState == PAL_LENS)){
-			Graphics->ClearTint();
-			setGlobalVar(GVAR_PALETTE,GV_MISC,PAL_DAY);
-		}
 	}
 	
 	void changedLevel(){
@@ -687,13 +715,7 @@ global script Global{
 	}
 	
 	void changedDMap(){
-		Graphics->ClearTint();
-		if(getGlobalVar(GVAR_PALETTE,GV_MISC)==PAL_LENS){
-			Graphics->Tint(-17,-48,5);
-		} else {
-			setGlobalVar(GVAR_PALETTE,GV_MISC,PAL_DAY);
-			timePalette();
-		}
+		
 	}
 	
 	void varDecrements(){
@@ -714,6 +736,10 @@ global script Global{
 			canFall=false;
 			rafting=true;
 		}
+	}
+	
+	void doLensTint(){
+		Graphics->Tint(-17,-48,5);
 	}//end
 	void raftingCheck(){//start rafting
 		if(Link->Action==LA_RAFTING){
@@ -775,116 +801,68 @@ global script Global{
 			else warpNumFloors++;
 		}
 	}//end
-	const int MULT_SUNRISE = 1;
+	const int MULT_SUNRISE = 2;
 	void timePalette(){//start
-		int pal = 0;
-		if(isOverworldScreen()){
-			switch(hour){
-				case 5:{
-					pal = PAL_SUNRISE;
-				break;}
-				case 17:{
-					pal = PAL_SUNSET;
-				break;}
-				default:{
-					if(hour>5&&hour<17){
-						pal = PAL_DAY;
-					} else {
-						pal = PAL_NIGHT;
-					}
+		if(hour>=6-MULT_SUNRISE && hour < 6)
+		{
+			setTint(getGlobalVar(TINT_NIGHT,GV_PAL),false);
+			setTint(getGlobalVar(TINT_DAY,GV_PAL),false);
+			if(!isActiveGradient())
+			{
+				runGradient(getGlobalVar(TINT_NIGHT,GV_PAL),getGlobalVar(TINT_DAY,GV_PAL),FRAMES_HOUR*MULT_SUNRISE,true);
+			}
+		}
+		else if(hour>=18-MULT_SUNRISE && hour < 18)
+		{
+			setTint(getGlobalVar(TINT_NIGHT,GV_PAL),false);
+			setTint(getGlobalVar(TINT_DAY,GV_PAL),false);
+			if(time == 0 && hour == 18-MULT_SUNRISE)
+			{
+				runGradient(getGlobalVar(TINT_DAY,GV_PAL),getGlobalVar(TINT_SUNSETORANGE,GV_PAL),FRAMES_HOUR*MULT_SUNRISE/2);
+			}
+			
+			if(!(MULT_SUNRISE%2))
+			{
+				if(time==0 && hour == 18-(MULT_SUNRISE/2))
+				{
+					runGradient(getGlobalVar(TINT_SUNSETORANGE,GV_PAL),getGlobalVar(TINT_NIGHT,GV_PAL),1 + FRAMES_HOUR*MULT_SUNRISE/2);
+				}
+			}
+			else
+			{
+				if(time==FRAMES_HOUR/2 && hour == 18-Ceiling(MULT_SUNRISE))
+				{
+					runGradient(getGlobalVar(TINT_SUNSETORANGE,GV_PAL),getGlobalVar(TINT_NIGHT,GV_PAL),FRAMES_HOUR*MULT_SUNRISE/2);
 				}
 			}
 		}
-		if(getGlobalVar(GVAR_PALETTE,GV_MISC)==pal){
-			if(pal!=PAL_SUNRISE && pal!=PAL_SUNSET)return;
-			int suntime = 0;
-			if(pal==PAL_SUNSET){
-				if(time<Div(FRAMES_HOUR*MULT_SUNRISE,3)){
-					suntime=0;
-				} else if(time<Div(FRAMES_HOUR*MULT_SUNRISE,2)){
-					suntime=1;
-				} else if(time<Div(FRAMES_HOUR*MULT_SUNRISE,3)*2){
-					suntime=2;
-				} else if(time<Div(FRAMES_HOUR*MULT_SUNRISE,4)*3){
-					suntime=3;
-				} else {
-					suntime=4;
-				}
-			} else {
-				if(time<Div(FRAMES_HOUR,4)){
-					suntime=0;
-				} else if(time<Div(FRAMES_HOUR,3)){
-					suntime=1;
-				} else if(time<Div(FRAMES_HOUR,2)){
-					suntime=2;
-				} else if(time<Div(FRAMES_HOUR,3)*2){
-					suntime=3;
-				} else {
-					suntime=4;
-				}
-			}
-			if(getGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC)==suntime)return;
+		else if(hour > 5 && hour < 18-MULT_SUNRISE)
+		{
+			endGradient();
+			setTint(getGlobalVar(TINT_NIGHT,GV_PAL),false);
+			setTint(getGlobalVar(TINT_SUNSETORANGE,GV_PAL),false);
+			setTint(getGlobalVar(TINT_DAY,GV_PAL),true);
+			//refreshTint();
 		}
-		switch(pal){
-			case PAL_DAY:
-				Graphics->ClearTint();
-				setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,-1);
-				break;
-			case PAL_NIGHT:
-				Graphics->ClearTint();
-				Graphics->Tint(-21,-23,-10);
-				setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,-1);
-				break;
-			case PAL_SUNSET:
-				Graphics->ClearTint();
-				if(time<Div(FRAMES_HOUR,3)){
-					//Third
-					Graphics->Tint(0,-2,-7);
-					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,0);
-				} else if(time<Div(FRAMES_HOUR,2)){
-					//Half
-					Graphics->Tint(-3,-6,-11);
-					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,1);
-				} else if(time<Div(FRAMES_HOUR,3)*2){
-					//two-third
-					Graphics->Tint(-6,-9,-11);
-					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,2);
-				} else if(time<Div(FRAMES_HOUR,4)*3){
-					//three-quarter
-					Graphics->Tint(-13,-13,-11);
-					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,3);
-				} else {
-					//last-quarted
-					Graphics->Tint(-15,-15,-7);
-					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,4);
-				}
-				break;
-			case PAL_SUNRISE:
-				Graphics->ClearTint();
-				if(time<Div(FRAMES_HOUR,4)){
-					//Quarter
-					Graphics->Tint(-16,-20,-14);
-					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,0);
-				} else if(time<Div(FRAMES_HOUR,3)){
-					//Third
-					Graphics->Tint(-14,-16,-13);
-					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,1);
-				} else if(time<Div(FRAMES_HOUR,2)){
-					//Half
-					Graphics->Tint(-13,-13,-13);
-					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,2);
-				} else if(time<Div(FRAMES_HOUR,3)*2){
-					//Second third
-					Graphics->Tint(-9,-9,-9);
-					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,3);
-				} else {
-					//Last third
-					Graphics->Tint(-5,-5,-5);
-					setGlobalVar(GVAR_LAST_SUN_STATE,GV_MISC,4);
-				}
-				break;
+		else if(hour > 17 || hour < 6-MULT_SUNRISE)
+		{
+			endGradient();
+			setTint(getGlobalVar(TINT_NIGHT,GV_PAL),true);
+			setTint(getGlobalVar(TINT_SUNSETORANGE,GV_PAL),false);
+			setTint(getGlobalVar(TINT_DAY,GV_PAL),false);
+			//refreshTint();
 		}
-		setGlobalVar(GVAR_PALETTE,GV_MISC,pal);
+		if(isOverworldScreen())
+		{
+			unhideGradient();
+		}
+		else
+		{
+			hideGradient();
+			setTint(getGlobalVar(TINT_NIGHT,GV_PAL),false);
+			setTint(getGlobalVar(TINT_SUNSETORANGE,GV_PAL),false);
+			setTint(getGlobalVar(TINT_DAY,GV_PAL),true);
+		}
 	}//end
 	//start TestingMenu
 	void testingMenu(){//start
@@ -900,6 +878,12 @@ global script Global{
 				//drawDebugString(0,6,NPCNames[(gameframe/10)%4],false);
 				//drawDebugInt(0,8,trueTime);
 				//drawDebugInfo(B_item);
+				drawDebugString(256,0,"R:   ",true);
+				drawDebugString(256,8,"G:   ",true);
+				drawDebugString(256,16,"B:   ",true);
+				drawDebugInt(256,0,getTintVar(DATA_R_SUM),true);
+				drawDebugInt(256,8,getTintVar(DATA_G_SUM),true);
+				drawDebugInt(256,16,getTintVar(DATA_B_SUM),true);
 				
 				canFall=false;
 				
@@ -918,7 +902,7 @@ global script Global{
 							trueTime-=(3600*24*FRAME);
 						}
 					}
-					if(getGlobalVar(GVAR_PALETTE,GV_MISC)!=PAL_LENS)timePalette();
+					timePalette();
 				}
 				if(Link->PressDown){
 					hour--;
@@ -935,7 +919,7 @@ global script Global{
 							trueTime+=(3600*24*FRAME);
 						}
 					}
-					if(getGlobalVar(GVAR_PALETTE,GV_MISC)!=PAL_LENS)timePalette();
+					timePalette();
 				}
 				if(Link->PressRight){
 					day++;
@@ -1042,12 +1026,44 @@ global script Global{
 		Screen->DrawString(7,x,y,FONT_Z3SMALL,0x01,0x00,format,str,OP_OPAQUE);
 	}
 	
-	void drawDebugInt(int x, int y, int num){
+	void drawDebugInt(int x, int y, int num, bool right){
+		if(right)x-=Cond(num<0,4,0) + Cond(num<10 && num > -10,4,Cond(num<100&&num>-100,8,Cond(num<1000&&num>-1000,12,16)));
 		Screen->DrawInteger(7,x,y,FONT_Z3SMALL,0x01,0x00,0,0,num,0,OP_OPAQUE);
+	}
+	
+	void drawDebugInt(int x, int y, int num){
+		drawDebugInt(x,y,num,false);
 	}//end
 	//end TestingMenu
 }
 //end Global Script
+//start OnContinue Script
+global script onFileLoad{
+	void run(){
+		if(owlSaved){
+			owlSaved=false;
+			Game->ContinueDMap=0;
+			Game->ContinueScreen=0;
+			Game->Save();
+		} else {
+			Link->Warp(0,0);
+			resetTime();
+			Game->ContinueDMap=0;
+			Game->ContinueScreen=0;
+			Game->Save();
+		}
+		tintOnExit();
+	}
+}//end
+//start OnExit Script
+global script onExit
+{
+	void run()
+	{
+	
+	}
+}
+//end OnExit Script
 //end Global
 //start time funcs
 bool isAfter(int aday, int anhour, bool equal){
@@ -1182,19 +1198,36 @@ void ocarina(){//start ocMode
 	NoAction();
 }//end ocMode
 void drawNotes(){//start
+	//Border ripped from renameLink
+	const int BORDERTILE = 11196;
+	const int FIRSTX = 64;
+	const int FIRSTY = 48;
+	Screen->FastTile(6,FIRSTX-16,FIRSTY-16,BORDERTILE,2,OP_OPAQUE);
+	Screen->FastTile(6,FIRSTX-16,FIRSTY,BORDERTILE+20,2,OP_OPAQUE);
+	Screen->FastTile(6,FIRSTX-16,FIRSTY+16,BORDERTILE+40,2,OP_OPAQUE);
+	for(int i = FIRSTX; i <= FIRSTX+(16*7); i+=16)
+	{
+		Screen->FastTile(6,i,FIRSTY-16,BORDERTILE+1,2,OP_OPAQUE);
+		Screen->FastTile(6,i,FIRSTY,BORDERTILE+1+20,2,OP_OPAQUE);
+		Screen->FastTile(6,i,FIRSTY+16,BORDERTILE+1+40,2,OP_OPAQUE);
+	}
+	Screen->FastTile(6,FIRSTX+(16*7)+16,FIRSTY-16,BORDERTILE+2,2,OP_OPAQUE);
+	Screen->FastTile(6,FIRSTX+(16*7)+16,FIRSTY,BORDERTILE+2+20,2,OP_OPAQUE);
+	Screen->FastTile(6,FIRSTX+(16*7)+16,FIRSTY+16,BORDERTILE+2+40,2,OP_OPAQUE);
+	//
 	for(int note=0;note<8;note++){
 		if(!currSong[note]){
-			Screen->FastCombo(6,64+(16*note),48,0,0,128);
+			Screen->FastCombo(6,FIRSTX+(16*note),FIRSTY,0,0,128); //Why draw an invisible combo?
 		} else if(currSong[note]==1){
-			Screen->FastTile(6,64+(16*note),48,NOTETILE_A,NOTECSET_A,128);
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_A,NOTECSET_A,128);
 		} else if(currSong[note]==2){
-			Screen->FastTile(6,64+(16*note),48,NOTETILE_DOWN,NOTECSET_DOWN,128);
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_DOWN,NOTECSET_DOWN,128);
 		} else if(currSong[note]==3){
-			Screen->FastTile(6,64+(16*note),48,NOTETILE_RIGHT,NOTECSET_RIGHT,128);
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_RIGHT,NOTECSET_RIGHT,128);
 		} else if(currSong[note]==4){
-			Screen->FastTile(6,64+(16*note),48,NOTETILE_LEFT,NOTECSET_LEFT,128);
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_LEFT,NOTECSET_LEFT,128);
 		} else if(currSong[note]==5){
-			Screen->FastTile(6,64+(16*note),48,NOTETILE_UP,NOTECSET_UP,128);
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_UP,NOTECSET_UP,128);
 		}
 	}
 }//end
@@ -1597,7 +1630,7 @@ void heightWarp(){
 bool warpUp(){
 	int dmap = getUpDMap();
 	if(dmap!=-1){
-		int scr = getUpScreen();
+		int scr = getUpScreen(true);
 		Link->PitWarp(dmap,scr);
 		return true;
 	}
@@ -1607,7 +1640,7 @@ bool warpUp(){
 bool warpDown(){
 	int dmap = getDownDMap();
 	if(dmap!=-1){
-		int scr = getDownScreen();
+		int scr = getDownScreen(true);
 		Link->PitWarp(dmap,scr);
 		return true;
 	}
@@ -1619,10 +1652,12 @@ int getDownDMap(){
 	return DMAP_DOWN[Game->GetCurDMap()];
 }
 
-int getDownScreen(){
+int getDownScreen(bool mod){
 	int dmap = getDownDMap();
 	if(dmap==-1)return -1;
-	return MapToDMap(Screen->LayerScreen(3),dmap);
+	if(mod)
+		return MapToDMap(Screen->LayerScreen(3),dmap);
+	return Screen->LayerScreen(3);
 }
 
 int getUpDMap(){
@@ -1630,10 +1665,12 @@ int getUpDMap(){
 	return DMAP_UP[Game->GetCurDMap()];
 }
 
-int getUpScreen(){
+int getUpScreen(bool mod){
 	int dmap = getUpDMap();
 	if(dmap==-1)return -1;
-	return MapToDMap(Screen->LayerScreen(4),dmap);
+	if(mod)
+		return MapToDMap(Screen->LayerScreen(4),dmap);
+	return Screen->LayerScreen(4);
 }
 
 bool isCenteredOnPlacedFlag(int flag, bool notType, bool yesType, int type, bool notInherent, bool yesInherent, int inherent){
@@ -1689,7 +1726,7 @@ void checkFall(){
 
 void linkPitfall(){
 	int dmap = getDownDMap();
-	int scr = getDownScreen();
+	int scr = getDownScreen(true);
 	if(!(dmap==-1||scr==-1)){
 		int combosAt[] = {ComboAt(Link->X+3,Link->Y+9),ComboAt(Link->X+12,Link->Y+9),ComboAt(Link->X+3,Link->Y+12),ComboAt(Link->X+12,Link->Y+12)};
 		for(int i = 0;i<4;i++){
@@ -1721,12 +1758,14 @@ void linkPitfall(){
 //end FallDown
 //start Jump DEPENDENCY FallDown
 void checkJump(){
-	if(!floating&&!Deku_flying&&form!=2&&canFall){
-		int jumpDir = wouldJump();
-		if(jumpDir!=-1){
-			floatDir = jumpDir;
-			setFloating();
-			canFall=false;
+	if(form!=2){
+		if(canFall&&!floating&&!Deku_flying){
+			int jumpDir = wouldJump();
+			if(jumpDir!=-1){
+				floatDir = jumpDir;
+				setFloating();
+				canFall=false;
+			}
 		}
 	} else if(!floating&&form==2){
 		rampJump();
@@ -1737,6 +1776,7 @@ void checkJump(){
 void setFloating(){
 	bool sfx = true;
 	floating = getFloating();
+	if(floating==-1)return;
 	if(!floating)sfx = false;
 	floatPix=2;
 	if(sfx)
@@ -1744,16 +1784,17 @@ void setFloating(){
 }
 
 int getFloating(){
-	if(!form){
+	if(!form || form==4){
 		if(mask==12)return 32;
 		return 24;
 	} else if(form==1){
 		return 16;
 	} else if(form==3){
 		return 32;
-	} else {
+	} else if(form==2){
 		return 0;
 	}
+	return -1;
 }
 
 void jump(){//start jump
@@ -4536,22 +4577,6 @@ void warpToOwl(int index){//start
 			break;
 	}//UNFINISHED// add more owls
 }//end
-global script onFileLoad{//start
-	void run(){
-		if(owlSaved){
-			owlSaved=false;
-			Game->ContinueDMap=0;
-			Game->ContinueScreen=0;
-			Game->Save();
-		} else {
-			Link->Warp(0,0);
-			resetTime();
-			Game->ContinueDMap=0;
-			Game->ContinueScreen=0;
-			Game->Save();
-		}
-	}
-}//end
 void quickSave(int scrn, int dmap){//start
 	tangoTemp=false;
 	ShowMessageAndWait(43);
@@ -4916,7 +4941,7 @@ void incGlobalVar(int index, int add, int inc){
 	gvars[index+add]+=inc;
 }
 
-const int GV_CHEST = 1000;
+GVAR GV_CHEST = GV_PAL + NUM_PAL;
 bool getChestState(int index){
     return getGlobalVar(index,GV_CHEST)!=0;
 }
