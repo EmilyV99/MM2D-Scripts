@@ -2902,7 +2902,7 @@ void handleTransformations(lweapon zoraBoom1, lweapon zoraBoom2){//start
 			} else {
 				dekuFly();
 			}
-			int linkcombot = Screen->ComboT[ComboAt(Link->X+8,Link->Y+8)];
+			int linkcombot = Screen->ComboT[ComboAt(Link->X+8,Link->Y+12)];
 			if(!Deku_flying&&(linkcombot==CT_WATER||linkcombot==CT_SHALLOWWATER)){
 				Deku_floating--;
 				if(isTouchingComboBy(COMBO_LILYPAD,8)){
