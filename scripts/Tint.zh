@@ -138,9 +138,9 @@ void tintInit()
 }
 
 /*
-	OnExit() function; run in an onExit() script. Makes tints properly save/load
+	OnContinue() function; run in an onContinue() script. Makes tints properly save/load.
 */
-void tintOnExit()
+void tintOnContinue()
 {
 	//Clear the tint, and set all current tint in the queue to be tinted next frame- i.e. first frame after loading
 	Graphics->ClearTint();
