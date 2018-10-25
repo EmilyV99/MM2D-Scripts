@@ -215,6 +215,9 @@ const int SFX_GORONROLL_BEGIN = 73;
 const int SFX_GORONROLL_LOOP = 74;
 const int SFX_GORONROLL_SPEEDUP = 75;
 const int SFX_GORONROLL_SPEEDLOOP = 76;
+const int SPEEDBOOST_BUNNY_WATER = 0.51;
+const int SPEEDBOOST_BUNNY_LAND = 1.02;
+const int SPEEDBOOST_ZORA_WATER = 1.5;
 int Deku_floating = 60;
 int Deku_flying = 0;
 int DekuFlightSpeedMod = -.5;
@@ -963,6 +966,9 @@ global script Global{
 				}
 				if(Link->PressEx1)Link->Warp(0,0x24);
 				if(Link->PressEx4)Link->PitWarp(Game->GetCurDMap(),Game->GetCurDMapScreen());
+				if(Link->InputB && B_item == I_LENS) useItem = I_LENS;
+				else if(Link->InputEx1 && EX1_item == I_LENS) useItem = I_LENS;
+				else if(Link->InputEx2 && EX2_item == I_LENS) useItem = I_LENS;
 				NoAction();
 				Link->PressStart=false;Link->InputStart=false;
 			}
@@ -2768,7 +2774,9 @@ void handleMasks(){
 			}
 			break;}
 		case 12:{
-			LinkMovement_SetLinkSpeedBoost(1.02);
+			if(Link->Action==LA_SWIMMING)
+				LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_BUNNY_WATER);
+			else LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_BUNNY_LAND);
 			break;}
 	}
 }
@@ -3043,6 +3051,7 @@ void handleTransformations(lweapon zoraBoom1, lweapon zoraBoom2){//start
 		Link->Item[8]=false;
 		Link->Item[37]=false;
 		Link->Item[136] = true;
+		if(Link->Action==LA_SWIMMING)LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_ZORA_WATER);
 		handleZoraScreenChange();
 		//end ZORA
 	} else if(form==4){//start DEITY
@@ -4302,23 +4311,29 @@ bool wasOnWaterLedge = false;
 void highLedgeFromWater(){
 	if(!wasOnWaterLedge){
 		if(Link->Action==LA_SWIMMING){
-			if(LinkOnFlagMod(CF_NOWATERLEDGE2,0,LinkMovement[LM_STICKY]*2,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,0,LinkMovement[LM_STICKY]*2,0,true))){
-				if(LinkMovement[LM_STICKY]==1){
-					Link->Dir=DIR_DOWN;
-				} else {
-					Link->Dir=DIR_UP;
+			if(LinkOnFlagMod(CF_NOWATERLEDGE2,0,LinkMovement[LM_STICKY]*3,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,0,LinkMovement[LM_STICKY]*3,0,true))){
+				if(LinkMovement[LM_STICKX]==0){
+					if(LinkMovement[LM_STICKY]==1){
+						Link->Dir=DIR_DOWN;
+					} else if (LinkMovement[LM_STICKY]==-1){
+						Link->Dir=DIR_UP;
+					}
 				}
 				Link->InputDown=false;
 				Link->InputUp=false;
+				LinkMovement_SetLinkSpeedBoost(0);
 			}
-			if(LinkOnFlagMod(CF_NOWATERLEDGE2,LinkMovement[LM_STICKX]*2,0,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,LinkMovement[LM_STICKX]*2,0,0,true))){
-				if(LinkMovement[LM_STICKX]==1){
-					Link->Dir=DIR_RIGHT;
-				} else {
-					Link->Dir=DIR_LEFT;
+			if(LinkOnFlagMod(CF_NOWATERLEDGE2,LinkMovement[LM_STICKX]*3,0,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,LinkMovement[LM_STICKX]*3,0,0,true))){
+				if(LinkMovement[LM_STICKY]==0){
+					if(LinkMovement[LM_STICKX]==1){
+						Link->Dir=DIR_RIGHT;
+					} else if (LinkMovement[LM_STICKX]==-1){
+						Link->Dir=DIR_LEFT;
+					}
 				}
 				Link->InputLeft=false;
 				Link->InputRight=false;
+				LinkMovement_SetLinkSpeedBoost(0);
 			}
 		} else {
 			wasOnWaterLedge=LinkOnFlag(CF_NOWATERLEDGE)||LinkOnFlag(CF_NOWATERLEDGE2);
@@ -4927,6 +4942,7 @@ ffc script ShowString{
 int gvars[214747];
 GVAR GVAR_BLASTMASKCOOLDOWN = 0;
 const int GV_MISC = 0;
+GVAR GV_CHEST = GV_PAL + NUM_PAL;
 GVAR GVAR_START_RESET = GV_CHEST;
 GVAR GVAR_END_RESET = GV_CHEST+1000;
 int getGlobalVar(int index, int add){
@@ -4941,7 +4957,6 @@ void incGlobalVar(int index, int add, int inc){
 	gvars[index+add]+=inc;
 }
 
-GVAR GV_CHEST = GV_PAL + NUM_PAL;
 bool getChestState(int index){
     return getGlobalVar(index,GV_CHEST)!=0;
 }
