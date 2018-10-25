@@ -378,6 +378,7 @@ int warpNumFloors = 0;
 bool freezeTime = false;
 bool debug = false;
 bool dbsetup = false;
+bool dbdraw = false;
 bool debugEnabled = false;
 //end MISC
 //end Misc global vars
@@ -871,80 +872,96 @@ global script Global{
 	void testingMenu(){//start
 		if(!dbsetup)debugSetup();
 		if(!isFrozen){
-			if(Link->PressEx3){
+			if(Input->ReadKey[KEY_TILDE])//Don't call ReadKey, it calls NoAction!
+			{
 				debug=!debug;
+				//Game->TypingMode = !Game->TypingMode;
 				Link->CollDetection=!debug;
 				canFall=!debug;
 			}
-			if(debug){
-				drawDebugString(0,0,"DEBUG MODE",false);
-				//drawDebugString(0,6,NPCNames[(gameframe/10)%4],false);
+			if(debug || dbdraw)
+			{
 				//drawDebugInt(0,8,trueTime);
 				//drawDebugInfo(B_item);
 				drawDebugString(256,0,"R:   ",true);
-				drawDebugString(256,8,"G:   ",true);
-				drawDebugString(256,16,"B:   ",true);
+				drawDebugString(256,6,"G:   ",true);
+				drawDebugString(256,12,"B:   ",true);
 				drawDebugInt(256,0,getTintVar(DATA_R_SUM),true);
-				drawDebugInt(256,8,getTintVar(DATA_G_SUM),true);
-				drawDebugInt(256,16,getTintVar(DATA_B_SUM),true);
-				
+				drawDebugInt(256,6,getTintVar(DATA_G_SUM),true);
+				drawDebugInt(256,12,getTintVar(DATA_B_SUM),true);
+			}
+			if(debug)
+			{
+				drawDebugString(0,0,"DEBUG MODE",false);
 				canFall=false;
-				
-				if(Link->PressUp){
+				//Hour manipulation
+				if(Input->ReadKey[KEY_UP])
+				{
 					hour++;
 					trueTime+=3600*FRAME;
-					if(hour>23){
+					if(hour>23)
+					{
 						hour-=24;
 					}
-					if(hour==6){
+					if(hour==6)
+					{
 						day++;
-						if(day>3){
+						if(day>3)
+						{
 							day-=3;
 							trueTime-=(3600*24*FRAME);
 							trueTime-=(3600*24*FRAME);
 							trueTime-=(3600*24*FRAME);
 						}
 					}
-					timePalette();
 				}
-				if(Link->PressDown){
+				if(Input->ReadKey[KEY_DOWN])
+				{
 					hour--;
 					trueTime-=3600*FRAME;
-					if(hour<0){
+					if(hour<0)
+					{
 						hour+=24;
 					}
-					if(hour==5){
+					if(hour==5)
+					{
 						day--;
-						if(day<1){
+						if(day<1)
+						{
 							day+=3;
 							trueTime+=(3600*24*FRAME);
 							trueTime+=(3600*24*FRAME);
 							trueTime+=(3600*24*FRAME);
 						}
 					}
-					timePalette();
 				}
-				if(Link->PressRight){
+				//Day manipulation
+				if(Input->ReadKey[KEY_RIGHT])
+				{
 					day++;
 					trueTime+=(3600*24*FRAME);
-					if(day>3){
+					if(day>3)
+					{
 						day-=3;
 						trueTime-=(3600*24*FRAME);
 						trueTime-=(3600*24*FRAME);
 						trueTime-=(3600*24*FRAME);
 					}
 				}
-				if(Link->PressLeft){
+				if(Input->ReadKey[KEY_LEFT])
+				{
 					day--;
 					trueTime-=(3600*24*FRAME);
-					if(day<1){
+					if(day<1)
+					{
 						day+=3;
 						trueTime+=(3600*24*FRAME);
 						trueTime+=(3600*24*FRAME);
 						trueTime+=(3600*24*FRAME);
 					}
 				}
-				if(Link->PressL){
+				if(Input->ReadKey[KEY_EQUALS])//Refill Ammo
+				{
 					Game->Counter[CR_BOMBS]=Game->MCounter[CR_BOMBS];
 					Game->Counter[CR_RUPEES]=Game->MCounter[CR_RUPEES];
 					Game->Counter[CR_ARROWS]=Game->MCounter[CR_ARROWS];
@@ -960,15 +977,14 @@ global script Global{
 					Game->DCounter[CR_DEKUNUTS]=0;
 					Game->DCounter[CR_MAGICBEANS]=0;
 				}
-				if(Link->PressA){
+				if(Input->ReadKey[KEY_ENTER])//Freeze time
+				{
 					freezeTime=!freezeTime;
 					slowTime=freezeTime;
 				}
-				if(Link->PressEx1)Link->Warp(0,0x24);
-				if(Link->PressEx4)Link->PitWarp(Game->GetCurDMap(),Game->GetCurDMapScreen());
-				if(Link->InputB && B_item == I_LENS) useItem = I_LENS;
-				else if(Link->InputEx1 && EX1_item == I_LENS) useItem = I_LENS;
-				else if(Link->InputEx2 && EX2_item == I_LENS) useItem = I_LENS;
+				if(Input->ReadKey[KEY_0])Link->Warp(0,0x24);//Warp to test area
+				if(Input->ReadKey[KEY_R])Link->PitWarp(Game->GetCurDMap(),Game->GetCurDMapScreen());//Reset the screen by pitwarping to it
+				if(Input->ReadKey[KEY_BACKSLASH])dbdraw = !dbdraw;
 				NoAction();
 				Link->PressStart=false;Link->InputStart=false;
 			}
@@ -1058,7 +1074,7 @@ global script onFileLoad{
 			Game->ContinueScreen=0;
 			Game->Save();
 		}
-		tintOnExit();
+		tintOnContinue();
 	}
 }//end
 //start OnExit Script
