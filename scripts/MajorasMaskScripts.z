@@ -1,5 +1,5 @@
 import "std.zh"
-//GVARs used: 0-9
+//GVARs used: 0-7 misc
 //start typedefs
 typedef const int GVAR;
 typedef const int DEFINE;
@@ -4927,8 +4927,8 @@ ffc script ShowString{
 int gvars[214747];
 GVAR GVAR_BLASTMASKCOOLDOWN = 0;
 const int GV_MISC = 0;
-GVAR GVAR_START_RESET = 1000;
-GVAR GVAR_END_RESET = 2000;
+GVAR GVAR_START_RESET = GV_CHEST;
+GVAR GVAR_END_RESET = GV_CHEST+1000;
 int getGlobalVar(int index, int add){
     return gvars[index+add];
 }
