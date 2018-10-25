@@ -680,7 +680,7 @@ global script Global{
 	
 	void drawExtraLayerEffects(){
 		if(songOfStormsRain){
-			Screen->DrawScreen(5,LAYERSMAP1,LAYERSCREEN_RAIN,0,0,0);
+			Screen->DrawScreen(6,LAYERSMAP1,LAYERSCREEN_RAIN,0,0,0);
 		}
 		int downdmap = getDownDMap();
 		int updmap = getUpDMap();
