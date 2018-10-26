@@ -614,6 +614,7 @@ global script Global{
 			}
 			timePalette();
 			runTints();
+			runHeightBitmap();
 			Waitdraw();			
 			passiveSubscreen();
 			if(!isFrozen||isBottleFrozen){
@@ -1087,6 +1088,32 @@ global script onExit
 }
 //end OnExit Script
 //end Global
+//start BitmapDraw 
+void HeightFastCombo(int layer, int x, int y, int combo, int cset, int opacity)
+{
+	/*int RT = Cond(layer<4,RT_BITMAP0,RT_BITMAP1);
+	Screen->SetRenderTarget(RT);
+	Screen->FastCombo(layer, x, y, combo, cset, OP_OPAQUE);
+	Screen->SetRenderTarget(-1);*/
+	Screen->FastCombo(layer,x,y,combo,cset,opacity);
+}
+
+void HeightFastTile(int layer, int x, int y, int tile, int cset, int opacity)
+{
+	/*int RT = Cond(layer<4,RT_BITMAP0,RT_BITMAP1);
+	Screen->SetRenderTarget(RT);
+	Screen->FastTile(layer, x, y, tile, cset, OP_OPAQUE);
+	Screen->SetRenderTarget(-1);*/
+	Screen->FastTile(layer,x,y,tile,cset,opacity);
+}
+
+void runHeightBitmap()
+{
+	/*Screen->DrawBitmap(2,RT_BITMAP0,0,0,256,176,0,0,256,176,0,false);
+	Screen->DrawBitmap(4,RT_BITMAP1,0,0,256,176,0,0,256,176,0,false);
+	*/
+}
+//end BitmapDraw
 //start time funcs
 bool isAfter(int aday, int anhour, bool equal){
 	return (day>aday)||(aday==day&&(hourconv(hour)>hourconv(anhour)||(equal&&hourconv(anhour)==hourconv(hour))));
@@ -6042,9 +6069,9 @@ void Overhead_Update() {
     for (location = 0; location < 176; ++location) {
       int combo = Overhead_Data[OVERHEAD_COMBOS + offset + location];
       if (combo) {
-        Screen->FastCombo(layer, ComboX(location) + x, ComboY(location) + y,
+        HeightFastCombo(layer, ComboX(location) + x, ComboY(location) + y,
                           combo, Overhead_Data[OVERHEAD_CSETS + offset + location],
-                          opaque);
+						  opaque);
       }
     }
   }
