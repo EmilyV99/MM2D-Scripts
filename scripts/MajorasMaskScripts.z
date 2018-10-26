@@ -699,13 +699,14 @@ global script Global{
 				drawItemFromScreen(udmap->Map,screen,4);
 			}
 		}
+		//Include FFC draws to layers here
 	}
 	
 	void drawItemFromScreen(int map, int screen, int layer){
 		if(!Game->GetScreenState(map, screen, ST_ITEM)){
 			mapdata m = Game->LoadMapData(map,screen);
 			if(m->HasItem)
-				Screen->FastTile(layer,m->ItemX,m->ItemY,loadItemTile(m->Item),loadItemTile(m->Item),OP_TRANS);
+				HeightFastTile(layer,m->ItemX,m->ItemY,loadItemTile(m->Item),loadItemTile(m->Item),OP_TRANS);
 		}
 	}
 	
@@ -1091,27 +1092,29 @@ global script onExit
 //start BitmapDraw 
 void HeightFastCombo(int layer, int x, int y, int combo, int cset, int opacity)
 {
-	/*int RT = Cond(layer<4,RT_BITMAP0,RT_BITMAP1);
+	int RT = Cond(layer<4,RT_BITMAP0,RT_BITMAP1);
 	Screen->SetRenderTarget(RT);
 	Screen->FastCombo(layer, x, y, combo, cset, OP_OPAQUE);
-	Screen->SetRenderTarget(-1);*/
-	Screen->FastCombo(layer,x,y,combo,cset,opacity);
+	Screen->SetRenderTarget(RT_SCREEN);
 }
 
 void HeightFastTile(int layer, int x, int y, int tile, int cset, int opacity)
 {
-	/*int RT = Cond(layer<4,RT_BITMAP0,RT_BITMAP1);
+	int RT = Cond(layer<4,RT_BITMAP0,RT_BITMAP1);
 	Screen->SetRenderTarget(RT);
 	Screen->FastTile(layer, x, y, tile, cset, OP_OPAQUE);
-	Screen->SetRenderTarget(-1);*/
-	Screen->FastTile(layer,x,y,tile,cset,opacity);
+	Screen->SetRenderTarget(RT_SCREEN);
 }
 
 void runHeightBitmap()
 {
-	/*Screen->DrawBitmap(2,RT_BITMAP0,0,0,256,176,0,0,256,176,0,false);
-	Screen->DrawBitmap(4,RT_BITMAP1,0,0,256,176,0,0,256,176,0,false);
-	*/
+	Screen->DrawBitmap(2,RT_BITMAP0,0,0,256,176,0,0,256,176,0,true);
+	Screen->DrawBitmap(4,RT_BITMAP1,0,0,256,176,0,0,256,176,0,true);
+	Screen->SetRenderTarget(RT_BITMAP0);
+	Screen->Rectangle(2,0,0,256,176,0,1,0,0,0,true,OP_OPAQUE);
+	Screen->SetRenderTarget(RT_BITMAP1);
+	Screen->Rectangle(4,0,0,256,176,0,1,0,0,0,true,OP_OPAQUE);
+	Screen->SetRenderTarget(RT_SCREEN);
 }
 //end BitmapDraw
 //start time funcs
