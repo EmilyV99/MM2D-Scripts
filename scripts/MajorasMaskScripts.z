@@ -236,19 +236,19 @@ const int RAFT_Y = 3;
 //end Rafting vars
 //start Misc global vars
 //start Sound Constants
-const int MIDI_THESTORM = 204;
-const int SFX_SHIELD = 63;
-const int SFX_DEKUNUT_SNAP = 79;
-const int SFX_DEKUNUT_FREEZE = 80;
+DEFINE MIDI_THESTORM = 204;
+DEFINE SFX_SHIELD = 63;
+DEFINE SFX_DEKUNUT_SNAP = 79;
+DEFINE SFX_DEKUNUT_FREEZE = 80;
 //end Sound Constants
 //start LayerScreens
-const int LAYERSMAP1 = 2;
-const int LAYERSCREEN_RAIN = 0x00; 
-const int LAYERSCREEN_SAVING = 0x10;
+DEFINE LAYERSMAP1 = 2;
+DEFINE LAYERSCREEN_RAIN = 0x00; 
+DEFINE LAYERSCREEN_SAVING = 0x10;
 //end LayerScreens
 //start Times
-const int FRAME = 0.0001;
-const int FRAMES_SECOND = 1;
+DEFINE FRAME = 0.0001;
+DEFINE FRAMES_SECOND = 1;
 int FRAMES_MINUTE = 60;
 int FRAMES_HOUR = 3600;
 int TIME_SECOND = FRAMES_SECOND*FRAME;
@@ -256,66 +256,66 @@ int TIME_MINUTE = FRAMES_MINUTE*FRAME;
 int TIME_HOUR = FRAMES_HOUR*FRAME;
 //end
 //start Item Constants
-const int I_MASK_ALLNIGHT = 188;
-const int I_BOMBBAG_BIG = 82;
-const int I_QUIVER_BIG = 75;
-const int I_BOMBBAG_BIGGEST = 83;
-const int I_QUIVER_BIGGEST = 76;
-const int I_MASK_BLAST = 189;
-const int I_BOMBBAG = 81;
-const int I_BOMBBAG_POWDERKEG = 106;
-const int I_BOMBCHUS = 139;
-const int I_BOMBS = 3;
-const int I_BOWARROW = 13;
-const int I_MASK_BREMEN = 193;
-const int I_MASK_BUNNYHOOD = 194;
-const int I_MASK_CAPTAINHAT = 205;
-const int I_DEKUSPINCHARGE = 135;
-const int I_MASK_CIRCUS = 198;
-const int I_MASK_COUPLES = 200;
-const int I_MASK_DEKU = 144;
-const int I_DEKUNUTS = 140;
-const int I_MASK_DONGERO = 195;
-const int I_DOUBLEDEF = 208;
-const int I_MASK_DEITY = 207;
-const int I_FIREARROWS = 14;
-const int I_FLIPPERS2 = 214;
-const int I_MASK_GARO = 204;
-const int I_MASK_GIANT = 206;
-const int I_MASK_GIBDO = 203;
-const int I_SWORD_GILDED = 7;
-const int I_MASK_GORON = 127;
-const int I_MASK_GFAIRY = 191;
-const int I_SWORD_GFAIRY = 211;
-const int I_HYLIANSHIELD = 8;
-const int I_ICEARROWS = 57;
-const int I_MASK_KAFEI = 199;
-const int I_MASK_KAMARO = 202;
-const int I_MASK_KEATON = 192;
-const int I_SWORD_KOKIRI = 5;
-const int I_LETTERKAFEI = 183;
-const int I_LIGHTARROWS = 137;
-const int I_MAGICBEANS = 153;
-const int I_MASK_SCENTS = 196;
-const int I_MASK_TRUTH = 201;
-const int I_MIRRORSHIELD = 37;
-const int I_MOONSTEAR = 178;
-const int I_DEED_MOUNTAIN = 181;
-const int I_OCARINA = 31;
-const int I_DEED_OCEAN = 182;
-const int I_PENDANTOFMEMORIES = 185;
-const int I_MASK_POSTMANSHAT = 187;
-const int I_POWDERKEG = 48;
-const int I_QUIVER = 74;
-const int I_SWORD_RAZOR = 6;
-const int I_MASK_ROMANI = 197;
-const int I_ROOMKEY = 186;
-const int I_SPECIALDELIVERY = 184;
-const int I_MASK_STONE = 190;
-const int I_DEED_SWAMP = 180;
-const int I_DEED_TOWN = 179;
-const int I_INFMAG = 152;
-const int I_MASK_ZORA = 131;
+DEFINE I_MASK_ALLNIGHT = 188;
+DEFINE I_BOMBBAG_BIG = 82;
+DEFINE I_QUIVER_BIG = 75;
+DEFINE I_BOMBBAG_BIGGEST = 83;
+DEFINE I_QUIVER_BIGGEST = 76;
+DEFINE I_MASK_BLAST = 189;
+DEFINE I_BOMBBAG = 81;
+DEFINE I_BOMBBAG_POWDERKEG = 106;
+DEFINE I_BOMBCHUS = 139;
+DEFINE I_BOMBS = 3;
+DEFINE I_BOWARROW = 13;
+DEFINE I_MASK_BREMEN = 193;
+DEFINE I_MASK_BUNNYHOOD = 194;
+DEFINE I_MASK_CAPTAINHAT = 205;
+DEFINE I_DEKUSPINCHARGE = 135;
+DEFINE I_MASK_CIRCUS = 198;
+DEFINE I_MASK_COUPLES = 200;
+DEFINE I_MASK_DEKU = 144;
+DEFINE I_DEKUNUTS = 140;
+DEFINE I_MASK_DONGERO = 195;
+DEFINE I_DOUBLEDEF = 208;
+DEFINE I_MASK_DEITY = 207;
+DEFINE I_FIREARROWS = 14;
+DEFINE I_FLIPPERS2 = 214;
+DEFINE I_MASK_GARO = 204;
+DEFINE I_MASK_GIANT = 206;
+DEFINE I_MASK_GIBDO = 203;
+DEFINE I_SWORD_GILDED = 7;
+DEFINE I_MASK_GORON = 127;
+DEFINE I_MASK_GFAIRY = 191;
+DEFINE I_SWORD_GFAIRY = 211;
+DEFINE I_HYLIANSHIELD = 8;
+DEFINE I_ICEARROWS = 57;
+DEFINE I_MASK_KAFEI = 199;
+DEFINE I_MASK_KAMARO = 202;
+DEFINE I_MASK_KEATON = 192;
+DEFINE I_SWORD_KOKIRI = 5;
+DEFINE I_LETTERKAFEI = 183;
+DEFINE I_LIGHTARROWS = 137;
+DEFINE I_MAGICBEANS = 153;
+DEFINE I_MASK_SCENTS = 196;
+DEFINE I_MASK_TRUTH = 201;
+DEFINE I_MIRRORSHIELD = 37;
+DEFINE I_MOONSTEAR = 178;
+DEFINE I_DEED_MOUNTAIN = 181;
+DEFINE I_OCARINA = 31;
+DEFINE I_DEED_OCEAN = 182;
+DEFINE I_PENDANTOFMEMORIES = 185;
+DEFINE I_MASK_POSTMANSHAT = 187;
+DEFINE I_POWDERKEG = 48;
+DEFINE I_QUIVER = 74;
+DEFINE I_SWORD_RAZOR = 6;
+DEFINE I_MASK_ROMANI = 197;
+DEFINE I_ROOMKEY = 186;
+DEFINE I_SPECIALDELIVERY = 184;
+DEFINE I_MASK_STONE = 190;
+DEFINE I_DEED_SWAMP = 180;
+DEFINE I_DEED_TOWN = 179;
+DEFINE I_INFMAG = 152;
+DEFINE I_MASK_ZORA = 131;
 //end
 //start Palette
 GVAR GV_PAL = 1000;
@@ -326,22 +326,26 @@ GVAR TINT_NIGHT = 2;
 GVAR TINT_LENS = 3;
 //end Palette
 //start MISC
-const int COMBO_INVIS = 4;
-const int COMBO_SOLID = 38408;
-const int TILE_INVIS = 5;
-const int CR_MAGICBEANS = 9;
-const int RAZSWORD_USES = 100;
-const int RAZSWORD_ID = 6;
-const int INF_MAGIC = 152;
-const int DEKU_MAX_TIMER = 240;
-const int ARRTYPE_FIRE = 1;
-const int ARRTYPE_ICE = 2;
-const int ARRTYPE_LIGHT = 3;
-const int SPRITE_FIREARROW = 90;
-const int FFC_SHOWSTRING = 16;
-const int FFC_CHEST = 12;
-const int FFC_CHANGENAME = 24;
-const int FFCMISC_DRAWTRANS_COMBOSTORE = 15;
+DEFINE COMBO_INVIS = 4;
+DEFINE COMBO_SOLID = 38408;
+DEFINE COMBO_CHEST = 38385;
+DEFINE TILE_INVIS = 5;
+DEFINE CR_MAGICBEANS = 9;
+DEFINE RAZSWORD_USES = 100;
+DEFINE RAZSWORD_ID = 6;
+DEFINE INF_MAGIC = 152;
+DEFINE DEKU_MAX_TIMER = 240;
+DEFINE ARRTYPE_FIRE = 1;
+DEFINE ARRTYPE_ICE = 2;
+DEFINE ARRTYPE_LIGHT = 3;
+DEFINE SPRITE_FIREARROW = 90;
+DEFINE FFC_SHOWSTRING = 16;
+DEFINE FFC_CHEST = 12;
+DEFINE FFC_OWL = 22;
+DEFINE FFC_CHANGENAME = 24;
+DEFINE FFC_NPC = 6;
+DEFINE FFCMISC_DRAWTRANS_COMBOSTORE = 15;
+DEFINE MAX_NONRESERVED_FFC = 26;
 bool torchPuzzleStates[8];
 int torchPuzzleTimer = 0;
 int dekuStickLitTimer = 0;
@@ -427,6 +431,9 @@ global script Global{
 		//end Ocarina init
 		subscreen = false;
 		//end init
+		//start init bitmaps
+		clearBitmap(RT_BITMAP0);
+		//end init bitmaps
 		//start Global Script Scope Vars
 		lweapon zoraBoom1;
 		lweapon zoraBoom2;
@@ -614,6 +621,7 @@ global script Global{
 			}
 			timePalette();
 			runTints();
+			runHeightBitmap();
 			Waitdraw();			
 			passiveSubscreen();
 			if(!isFrozen||isBottleFrozen){
@@ -683,28 +691,61 @@ global script Global{
 			Screen->DrawScreen(6,LAYERSMAP1,LAYERSCREEN_RAIN,0,0,0);
 		}
 		int downdmap = getDownDMap();
-		int updmap = getUpDMap();
 		if(downdmap>-1){
 			int screen = getDownScreen(false);
 			if(screen>-1){
 				dmapdata ddmap = Game->LoadDMapData(downdmap);
-				drawItemFromScreen(ddmap->Map,screen,2);
+				drawHeightLayerData(ddmap->Map,screen,2);
 			}
 		}
-		if(updmap>-1){
-			int screen = getUpScreen(false);
-			if(screen>-1){
-				dmapdata udmap = Game->LoadDMapData(updmap);
-				drawItemFromScreen(udmap->Map,screen,4);
+		if(!hideLayer4)
+		{
+			int updmap = getUpDMap();
+			if(updmap>-1){
+				int screen = getUpScreen(false);
+				if(screen>-1){
+					dmapdata udmap = Game->LoadDMapData(updmap);
+					drawHeightLayerData(udmap->Map,screen,4);
+				}
 			}
 		}
 	}
 	
-	void drawItemFromScreen(int map, int screen, int layer){
+	void drawHeightLayerData(int map, int screen, int layer){
+		mapdata m = Game->LoadMapData(map,screen);
 		if(!Game->GetScreenState(map, screen, ST_ITEM)){
-			mapdata m = Game->LoadMapData(map,screen);
 			if(m->HasItem)
-				Screen->FastTile(layer,m->ItemX,m->ItemY,loadItemTile(m->Item),loadItemTile(m->Item),OP_TRANS);
+				HeightFastTile(layer,m->ItemX,m->ItemY,loadItemTile(m->Item),loadItemTile(m->Item),OP_TRANS);
+		}
+		for(int i = MIN_FFC; i < MAX_NONRESERVED_FFC; i++)
+		{
+			int data = m->FFCData[i];
+			switch(m->FFCScript[i])
+			{
+				case FFC_CHEST:
+					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getChestCombo(data,m->GetFFCInitD(i, 1)),m->FFCCSet[i],OP_OPAQUE);
+					break;
+				case FFC_OWL:
+					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getOwlCombo(m->GetFFCInitD(i, 0)),m->FFCCSet[i],OP_OPAQUE);
+					break;
+				case FFC_NPC:
+					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getNPCCombo(m->FFCData[i], m->GetFFCInitD(i, 0)+0, m->GetFFCInitD(i, 1)+0, m->GetFFCInitD(i, 2)+0, m->GetFFCInitD(i, 3)+0, m->GetFFCInitD(i, 4)+0, m->GetFFCInitD(i, 5)+0, (m->GetFFCInitD(i, 7))>0),m->FFCCSet[i],OP_OPAQUE);
+					break;
+				default:
+					if(data==0)break;
+					if(data==COMBO_INVIS)break;
+					combodata cdata = Game->LoadComboData(data);
+					int tile = cdata->Tile;
+					int ffwidth = m->FFCTileWidth[i];
+					int ffheight = m->FFCTileHeight[i];
+					for(int width = 0; width < ffwidth; width++)
+					{
+						for(int height = 0; height < ffheight; height++)
+						{
+							HeightFastTile(layer,m->FFCX[i]+(width*16),m->FFCY[i]+(height*16),tile+(width)+(height*20),m->FFCCSet[i],Cond((m->FFCFlags[i] & FFCBF_TRANS)>0,OP_TRANS,OP_OPAQUE));
+						}
+					}
+			}
 		}
 	}
 	
@@ -1087,6 +1128,88 @@ global script onExit
 }
 //end OnExit Script
 //end Global
+//start BitmapDraw 
+void HeightFastCombo(int layer, int x, int y, int combo, int cset, int opacity)
+{
+	if(combo==0)return;
+	if(combo==COMBO_INVIS)return;
+	if(hideLayer4 && layer>=4)return;
+	//Screen->FastCombo(layer, x, y, combo, cset, OP_TRANS);
+	if(layer>4)x+=256;
+	if(opacity!=OP_OPAQUE)y+=176;
+	Screen->SetRenderTarget(RT_BITMAP0);
+	Screen->FastCombo(1, x, y, combo, cset, OP_OPAQUE);
+	Screen->SetRenderTarget(RT_SCREEN);
+}
+
+void HeightFastTile(int layer, int x, int y, int tile, int cset, int opacity)
+{
+	if(tile==TILE_INVIS)return;
+	if(hideLayer4 && layer>=4)return;
+	//Screen->FastTile(layer, x, y, tile, cset, OP_TRANS);
+	if(layer>4)x+=256;
+	if(opacity!=OP_OPAQUE)y+=176;
+	Screen->SetRenderTarget(RT_BITMAP0);
+	Screen->FastTile(1, x, y, tile, cset, OP_OPAQUE);
+	Screen->SetRenderTarget(RT_SCREEN);
+}
+
+void HeightFastComboFFC(int layer, int x, int y, int combo, int cset, int opacity)
+{
+	if(combo==0)return;
+	if(combo==COMBO_INVIS)return;
+	if(hideLayer4 && layer>=4)return;
+	//Screen->FastCombo(layer, x, y, combo, cset, OP_TRANS);
+	if(layer>4)x+=256;
+	if(opacity!=OP_OPAQUE)y+=176;
+	Screen->SetRenderTarget(RT_BITMAP0);
+	Screen->FastCombo(2, x, y, combo, cset, OP_OPAQUE);
+	Screen->SetRenderTarget(RT_SCREEN);
+}
+
+void HeightFastTileFFC(int layer, int x, int y, int tile, int cset, int opacity)
+{
+	if(tile==TILE_INVIS)return;
+	if(hideLayer4 && layer>=4)return;
+	//Screen->FastTile(layer, x, y, tile, cset, OP_TRANS);
+	if(layer>4)x+=256;
+	if(opacity!=OP_OPAQUE)y+=176;
+	Screen->SetRenderTarget(RT_BITMAP0);
+	Screen->FastTile(2, x, y, tile, cset, OP_OPAQUE);
+	Screen->SetRenderTarget(RT_SCREEN);
+}
+
+void HeightFastComboScreen(int layer, int x, int y, int combo, int cset, int opacity)
+{
+	if(combo==0)return;
+	if(combo==COMBO_INVIS)return;
+	if(hideLayer4 && layer>=4)return;
+	//Screen->FastCombo(layer, x, y, combo, cset, OP_TRANS);
+	if(layer>4)x+=256;
+	if(opacity!=OP_OPAQUE)y+=176;
+	Screen->SetRenderTarget(RT_BITMAP0);
+	Screen->FastCombo(0, x, y, combo, cset, OP_OPAQUE);
+	Screen->SetRenderTarget(RT_SCREEN);
+}
+
+void runHeightBitmap()
+{
+	//Draw bitmaps to the screen
+	Screen->DrawBitmapEx(2,RT_BITMAP0,0,0,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
+	Screen->DrawBitmapEx(4,RT_BITMAP0,256,0,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
+	Screen->DrawBitmapEx(2,RT_BITMAP0,0,176,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
+	Screen->DrawBitmapEx(4,RT_BITMAP0,256,176,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
+	//Clear the bitmap
+	clearBitmap(RT_BITMAP0);
+}
+
+void clearBitmap(int bitmap)
+{
+	Screen->SetRenderTarget(bitmap);
+	Screen->Rectangle(2,0,0,512,512,0,1,0,0,0,true,OP_OPAQUE);
+	Screen->SetRenderTarget(RT_SCREEN);
+}
+//end BitmapDraw
 //start time funcs
 bool isAfter(int aday, int anhour, bool equal){
 	return (day>aday)||(aday==day&&(hourconv(hour)>hourconv(anhour)||(equal&&hourconv(anhour)==hourconv(hour))));
@@ -3639,8 +3762,9 @@ ffc script NPC{
 	//
 	//ComboUnder should be a solid version of the combo beneath the FFC
 	//
-	void run(int NPCid, bool fake, int startday, int starthour, int endday, int endhour, int comboUnder, bool special){//start NPC setup
-		int NPCcombo = this->Data;
+	void run(int NPCid, int NPCcombo, int startday, int starthour, int endday, int endhour, int comboUnder, bool special){//start NPC setup
+		if(NPCcombo == COMBO_INVIS || NPCcombo == 0)
+			NPCcombo = this->Data;
 		this->Data = COMBO_INVIS;
 		int loc = ComboAt(this->X,this->Y);
 		bool visible = false;
@@ -3653,7 +3777,7 @@ ffc script NPC{
 		}
         while(!special){//start
 			while(visible){
-				if(!fake && AgainstFFCBase(this->X,this->Y) && Link->PressA){
+				if(AgainstFFCBase(this->X,this->Y) && Link->PressA){
 					Link->InputA = false;
 					Link->PressA = false;
 					interact(NPCid);
@@ -3661,7 +3785,7 @@ ffc script NPC{
 				if(isAfter(endday,endhour,true)){
 					visible=false;
 					this->Data = COMBO_INVIS;
-					if(!fake)Screen->ComboD[loc]=comboDefault;
+					Screen->ComboD[loc]=comboDefault;
 				}
 				Waitframe();
 			}
@@ -3669,7 +3793,7 @@ ffc script NPC{
 				if(isAfter(startday,starthour,true)&&isBefore(endday,endhour,false)){
 					visible=true;
 					this->Data = NPCcombo;
-					if(!fake)Screen->ComboD[loc]=comboUnder;
+					Screen->ComboD[loc]=comboUnder;
 				}
 				Waitframe();
 			}
@@ -3827,7 +3951,6 @@ ffc script NPC{
 			}
 		}
 	}//end interact
-	
 	//start bankFuncs
 	bool bankDeposit(){
 		bool notnew = fullCounter(CR_BANKBAL);
@@ -3870,6 +3993,28 @@ ffc script NPC{
 		return withdrawn;
 	}//end bankFuncs
 }
+
+int getNPCCombo(int data, int id, int NPCcombo, int startday, int starthour, int endday, int endhour, bool special)
+{
+	if(NPCcombo == COMBO_INVIS || NPCcombo == 0)
+		NPCcombo = data;
+	if(!special)
+	{
+		if(isAfter(startday,starthour,true)&&isBefore(endday,endhour,false)) return NPCcombo;
+		return 0;
+	}
+	switch(id)
+	{
+		case 1:
+		case 2:
+		case 5:
+		case 6:
+			return NPCcombo;
+		default:
+			return 0;
+	}
+}
+
 //end NPC
 //start FFC Cutscene 
 //Key: 1 = One-Time, R = Repeating (resets each cycle)
@@ -3880,18 +4025,23 @@ ffc script cutscene{
 		this->Data = COMBO_INVIS;
 		bool waiting = true;
 		if(cutsceneID==1){//start Happy Mask Salesman appears behind you! (1)
-				if(CS1_seen){
+				if(CS1_seen)
+				{
 					HMS_visible = true;
 					Quit();
 				}
-				while(!CS1_seen){
-					while(waiting){
-						if(Link->X>this->X-32&&Link->X<this->X+32&&Link->Y>this->Y-8){
+				while(!CS1_seen)
+				{
+					while(waiting)
+					{
+						if(Link->X>this->X-32&&Link->X<this->X+32&&Link->Y>this->Y-8)
+						{
 							waiting=false;
 						}
 						Waitframe();
 					}
-					if(CS1_seen){
+					if(CS1_seen)
+					{
 						Quit();
 					}
 					HMS_visible = true;
@@ -3905,10 +4055,12 @@ ffc script cutscene{
 				//end 1
 		}else if(cutsceneID==2){//start Opening the Festival Door (R)
 				while(waiting){
-					if(day==3&&!hour&&!time){
+					if(day==3&&!hour&&!time)
+					{
 						//Play SFX for festival door opening //UNFINISHED//
 					}
-					if(isAfter(3,24,true)){
+					if(isAfter(3,24,true))
+					{
 						Waitframe();
 						Screen->ComboD[ComboAt(this->X+15,this->Y+15)]+=2;
 						Screen->ComboD[ComboAt(this->X,this->Y+15)]+=2;
@@ -3924,56 +4076,59 @@ ffc script cutscene{
 				bool waiting2 = true;
 				while(waiting){
 					Waitframe();
-					if(!arg1){
-						if(day>=2){
-							for(int i=0;i<6;i++){
+					if(!arg1) // Floor 2
+					{
+						if(day>=2)
+						{
+							for(int i=0;i<6;i++)
+							{
 								Screen->ComboD[combos[i]]=38402;
 							}
-							if(Link->X>=this->X-8&&Link->X<this->X+48&&Link->Y>=this->Y-8&&Link->Y<this->Y+32){
+							if(Link->X>=this->X-8&&Link->X<this->X+48&&Link->Y>=this->Y-8&&Link->Y<this->Y+32)
+							{
 								Link->X=this->X+16;
 								Link->Y=this->Y+32;
 							}
-							while(true){
-								for(int i=0;i<6&&!hideLayer4;i++){
-									Screen->FastCombo(4,ComboX(combos[i]),ComboY(combos[i]),38400,2,OP_TRANS);
+							while(true)
+							{
+								for(int i=0;i<6;i++)
+								{
+									HeightFastCombo(4,ComboX(combos[i]),ComboY(combos[i]),38400,2,OP_TRANS);
 								}
-								if(waiting2&&day==3){
-									waiting2=false;
-									int args[8] = {0,1,1};
-									ffc f = Screen->LoadFFC(RunFFCScript(FFC_CHEST,args));
-									f->X=this->X+16;
-									f->Y=this->Y;
-									f->Flags[FFCF_OVERLAY]=true;
-									f->Flags[FFCF_TRANS]=true;
+								if(day==3)
+								{
+									HeightFastComboFFC(4,this->X+16,this->Y,getChestCombo(COMBO_CHEST,1),0,OP_OPAQUE);
 								}
 								Waitframe();
 							}
 						}
-					} else if(arg1==1){
-						if(day>=2&&waiting2){
-							for(int i=0;i<6;i++){
+					}
+					else if(arg1==1) // Floor 3
+					{
+						if(day>=2&&waiting2)
+						{
+							for(int i=0;i<6;i++)
+							{
 								//if((i==2 && day == 3 && hour < 18) || (i==3 && day == 2))continue;
 								Screen->ComboD[combos[i]]=38404;
 								Screen->ComboC[combos[i]]=2;
 							}
 							waiting2=false;
 						}
-						if(day==3){
+						if(day==3)
+						{
 							int args[8] = {39,1};
 							ffc f = Screen->LoadFFC(RunFFCScript(FFC_CHEST,args));
 							f->X=this->X+16;
 							f->Y=this->Y;
 							waiting=false;
 						}
-					} else if(arg1==2){
-						if(day==3){
-							int args[8] = {0,1,1};
-							ffc f = Screen->LoadFFC(RunFFCScript(FFC_CHEST,args));
-							f->X=this->X+16;
-							f->Y=this->Y;
-							f->Flags[FFCF_OVERLAY]=true;
-							f->Flags[FFCF_TRANS]=true;
-							waiting=false;
+					}
+					else if(arg1==2) // Floor 1
+					{
+						if(day==3)
+						{
+							HeightFastComboFFC(4,this->X+16,this->Y,getChestCombo(COMBO_CHEST,1),0,OP_OPAQUE);
 						}
 					}
 				}
@@ -4557,6 +4712,11 @@ ffc script warpCustomReturn{
 const int COMBO_OWLOFF = 38380;
 const int COMBO_OWLON = 38384;
 int owlStates = 0000000000b;
+int getOwlCombo(int index)
+{
+	if(owlStates&Pow(2,index)) return COMBO_OWLON;
+	return COMBO_OWLOFF;
+}
 ffc script owlStatue{//start
 	void run(int index,bool isFake){
 		int trueValue = Pow(2,index);
@@ -4675,7 +4835,7 @@ ffc script Shop{
 const int SFX_CHEST_APPEAR = SFX_SECRET;
 ffc script chest{
 	void run(int itemID, int index, bool fake, bool killAllEnemies){
-		if(this->Data==COMBO_INVIS||!this->Data)this->Data=38385;
+		if(this->Data==COMBO_INVIS||!this->Data)this->Data=COMBO_CHEST;
 		int closed = this->Data;
 		int open = this->Data+1;
 		if(getChestState(index))this->Data=open;
@@ -4715,6 +4875,13 @@ ffc script chest{
 	bool AgainstComboBase(int x, int y){
 		return Link->Z == 0 && ((Link->Dir == DIR_UP && Link->Y == y+8 && Abs(Link->X-x) < 8)||(Link->Dir == DIR_DOWN && Link->Y == y-16 && Abs(Link->X-x) < 8)||(Link->Dir == DIR_LEFT && Link->X == x+16 && Abs(Link->Y-y) < 8)||(Link->Dir == DIR_RIGHT && Link->X == x-16 && Abs(Link->Y-y) < 8));
     }
+}
+
+int getChestCombo(int data, int index)
+{
+	if(data == COMBO_INVIS || data == 0)data = COMBO_CHEST;
+	if(getChestState(index))data++;
+	return data;
 }
 //end chests
 //start ladder/vine
@@ -5908,7 +6075,7 @@ ffc script Bombchu_FFC{
 int OVERHEAD_INVISIBLE = 1;
 
 // These are the layers that are used. Set to 1 to enable, and 0 to disable.
-const int OVERHEAD_USE_L3 = 0;
+const int OVERHEAD_USE_L3 = 1;
 const int OVERHEAD_USE_L4 = 1;
 const int OVERHEAD_USE_L5 = 0;
 const int OVERHEAD_USE_L6 = 0;
@@ -5932,122 +6099,118 @@ const int OVERHEAD_STATE_SCROLLING = 1;
 const int OVERHEAD_STATE_WORKING = 2;
 
 void Overhead_Update() {
-	if(hideLayer4){
-		OVERHEAD_INVISIBLE = 1;
-	} else {
-		OVERHEAD_INVISIBLE = 0;
+	int map; int screen; int location; int layer; bool under; int offset;
+
+	// If this is the first time this function has been called, do some setup.
+	if (OVERHEAD_STATE_UNINIT == Overhead_Data[OVERHEAD_STATE]) {
+		Overhead_Data[OVERHEAD_STATE] = OVERHEAD_STATE_SCROLLING;
+		Overhead_Data[OVERHEAD_LAST_SCREEN] = -1;
+		for (layer = 3; layer <= 6; ++layer) {
+			Overhead_Data[OVERHEAD_SCREENS + layer - 3] = -1;
+		}
 	}
-  int map; int screen; int location; int layer; bool under; int offset;
 
-  // If this is the first time this function has been called, do some setup.
-  if (OVERHEAD_STATE_UNINIT == Overhead_Data[OVERHEAD_STATE]) {
-    Overhead_Data[OVERHEAD_STATE] = OVERHEAD_STATE_SCROLLING;
-    Overhead_Data[OVERHEAD_LAST_SCREEN] = -1;
-    for (layer = 3; layer <= 6; ++layer) {
-      Overhead_Data[OVERHEAD_SCREENS + layer - 3] = -1;
-    }
-  }
+	// If we've left our current screen, reset the layers we killed.
+	screen = (Game->GetCurMap() << 8) + Game->GetCurScreen();
+	if (screen != Overhead_Data[OVERHEAD_LAST_SCREEN]) {
+		for (layer = 3; layer <= 6; ++layer) {
+			// Skip if this layer wasn't recorded.
+			if (-1 == Overhead_Data[OVERHEAD_SCREENS + layer - 3]) {continue;}
 
-  // If we've left our current screen, reset the layers we killed.
-  screen = (Game->GetCurMap() << 8) + Game->GetCurScreen();
-  if (screen != Overhead_Data[OVERHEAD_LAST_SCREEN]) {
-    for (layer = 3; layer <= 6; ++layer) {
-      // Skip if this layer wasn't recorded.
-      if (-1 == Overhead_Data[OVERHEAD_SCREENS + layer - 3]) {continue;}
+			// Replace the lost data.
+			map = Overhead_Data[OVERHEAD_SCREENS + layer - 3] >> 8;
+			screen = Overhead_Data[OVERHEAD_SCREENS + layer - 3] % 256;
+			offset = 176 * (layer - 3);
+			for (location = 0; location < 176; ++location) {
+				Game->SetComboData(map, screen, location, Overhead_Data[OVERHEAD_COMBOS + offset + location]);
+			}
+		}
 
-      // Replace the lost data.
-      map = Overhead_Data[OVERHEAD_SCREENS + layer - 3] >> 8;
-      screen = Overhead_Data[OVERHEAD_SCREENS + layer - 3] % 256;
-      offset = 176 * (layer - 3);
-      for (location = 0; location < 176; ++location) {
-        Game->SetComboData(map, screen, location, Overhead_Data[OVERHEAD_COMBOS + offset + location]);
-      }
-    }
+		// Remember what screen we're on, so we can tell if we've moved.
+		Overhead_Data[OVERHEAD_LAST_SCREEN] = (Game->GetCurMap() << 8) + Game->GetCurScreen();
+		Overhead_Data[OVERHEAD_STATE] = OVERHEAD_STATE_SCROLLING;
 
-    // Remember what screen we're on, so we can tell if we've moved.
-    Overhead_Data[OVERHEAD_LAST_SCREEN] = (Game->GetCurMap() << 8) + Game->GetCurScreen();
-    Overhead_Data[OVERHEAD_STATE] = OVERHEAD_STATE_SCROLLING;
+		// If we've just started scrolling, figure out what direction it's in so
+		// we can draw the deleted combos properly. Also reset the timer.
+		if (LA_SCROLLING == Link->Action) {
+			if (-16 == Link->X) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_RIGHT;}
+			if (256 == Link->X) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_LEFT;}
+			if (-16 == Link->Y) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_DOWN;}
+			if (176 == Link->Y) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_UP;}
+			Overhead_Data[OVERHEAD_TIMER] = 0;
+		}
+	}
 
-    // If we've just started scrolling, figure out what direction it's in so
-    // we can draw the deleted combos properly. Also reset the timer.
-    if (LA_SCROLLING == Link->Action) {
-      if (-16 == Link->X) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_RIGHT;}
-      if (256 == Link->X) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_LEFT;}
-      if (-16 == Link->Y) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_DOWN;}
-      if (176 == Link->Y) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_UP;}
-      Overhead_Data[OVERHEAD_TIMER] = 0;
-    }
-  }
+	// If we've finished scrolling, copy over the layers and delete them.
+	if (LA_SCROLLING != Link->Action && OVERHEAD_STATE_SCROLLING == Overhead_Data[OVERHEAD_STATE]) {
+		for (layer = 3; layer <= 6; ++layer) {
+			// Skip this layer if we're not configured to use it.
+			if (3 == layer && !OVERHEAD_USE_L3) {continue;}
+			if (4 == layer && !OVERHEAD_USE_L4) {continue;}
+			if (5 == layer && !OVERHEAD_USE_L5) {continue;}
+			if (6 == layer && !OVERHEAD_USE_L6) {continue;}
 
-  // If we've finished scrolling, copy over the layers and delete them.
-  if (LA_SCROLLING != Link->Action && OVERHEAD_STATE_SCROLLING == Overhead_Data[OVERHEAD_STATE]) {
-    for (layer = 3; layer <= 6; ++layer) {
-      // Skip this layer if we're not configured to use it.
-      if (3 == layer && !OVERHEAD_USE_L3) {continue;}
-      if (4 == layer && !OVERHEAD_USE_L4) {continue;}
-      if (5 == layer && !OVERHEAD_USE_L5) {continue;}
-      if (6 == layer && !OVERHEAD_USE_L6) {continue;}
+			// If this screen doesn't use this layer, mark as not in use and skip.
+			map = Screen->LayerMap(layer);
+			screen = Screen->LayerScreen(layer);
+			if (-1 == map || -1 == screen) {
+				Overhead_Data[OVERHEAD_SCREENS + layer - 3] = -1;
+				continue;
+			}
 
-      // If this screen doesn't use this layer, mark as not in use and skip.
-      map = Screen->LayerMap(layer);
-      screen = Screen->LayerScreen(layer);
-      if (-1 == map || -1 == screen) {
-        Overhead_Data[OVERHEAD_SCREENS + layer - 3] = -1;
-        continue;
-      }
+			// Save this layer's screen location.
+			Overhead_Data[OVERHEAD_SCREENS + layer - 3] = (map << 8) + screen;
 
-      // Save this layer's screen location.
-      Overhead_Data[OVERHEAD_SCREENS + layer - 3] = (map << 8) + screen;
+			// Grab every combo and cset, and delete the original.
+			offset = (layer - 3) * 176;
+			for (location = 0; location < 176; ++location) {
+				// Grab the data.
+				Overhead_Data[OVERHEAD_COMBOS + offset + location] = Game->GetComboData(map, screen, location);
+				Overhead_Data[OVERHEAD_CSETS + offset + location] = Game->GetComboCSet(map, screen, location);
+				// Delete the original.
+				Game->SetComboData(map, screen, location, 0);
+			}
+		}
 
-      // Grab every combo and cset, and delete the original.
-      offset = (layer - 3) * 176;
-      for (location = 0; location < 176; ++location) {
-        // Grab the data.
-        Overhead_Data[OVERHEAD_COMBOS + offset + location] = Game->GetComboData(map, screen, location);
-        Overhead_Data[OVERHEAD_CSETS + offset + location] = Game->GetComboCSet(map, screen, location);
-        // Delete the original.
-        Game->SetComboData(map, screen, location, 0);
-      }
-    }
+		// Update the state so we know we've copied the data.
+		Overhead_Data[OVERHEAD_STATE] = OVERHEAD_STATE_WORKING;
+	}
 
-    // Update the state so we know we've copied the data.
-    Overhead_Data[OVERHEAD_STATE] = OVERHEAD_STATE_WORKING;
-  }
+	//Modified for Majora's Mask
+	under = true;
 
-  //Modified for Majora's Mask
-  under = true;
+	// Offsets for scrolling.
+	int x = 0;
+	int y = 0;
+	if (OVERHEAD_STATE_SCROLLING == Overhead_Data[OVERHEAD_STATE]) {
+		if (DIR_LEFT == Overhead_Data[OVERHEAD_SCROLL_DIR]) {x = Overhead_Data[OVERHEAD_TIMER];}
+		if (DIR_RIGHT == Overhead_Data[OVERHEAD_SCROLL_DIR]) {x = -Overhead_Data[OVERHEAD_TIMER];}
+		if (DIR_UP == Overhead_Data[OVERHEAD_SCROLL_DIR]) {y = Overhead_Data[OVERHEAD_TIMER];}
+		if (DIR_DOWN == Overhead_Data[OVERHEAD_SCROLL_DIR]) {y = -Overhead_Data[OVERHEAD_TIMER];}
+		Overhead_Data[OVERHEAD_TIMER] += OVERHEAD_SCROLL_SPEED;
+	}
 
-  // Offsets for scrolling.
-  int x = 0;
-  int y = 0;
-  if (OVERHEAD_STATE_SCROLLING == Overhead_Data[OVERHEAD_STATE]) {
-    if (DIR_LEFT == Overhead_Data[OVERHEAD_SCROLL_DIR]) {x = Overhead_Data[OVERHEAD_TIMER];}
-    if (DIR_RIGHT == Overhead_Data[OVERHEAD_SCROLL_DIR]) {x = -Overhead_Data[OVERHEAD_TIMER];}
-    if (DIR_UP == Overhead_Data[OVERHEAD_SCROLL_DIR]) {y = Overhead_Data[OVERHEAD_TIMER];}
-    if (DIR_DOWN == Overhead_Data[OVERHEAD_SCROLL_DIR]) {y = -Overhead_Data[OVERHEAD_TIMER];}
-    Overhead_Data[OVERHEAD_TIMER] += OVERHEAD_SCROLL_SPEED;
-  }
+	// Don't draw if we're under and have it set to be invisible then.
+	//if (under && OVERHEAD_INVISIBLE) {return;}
 
-  // Don't draw if we're under and have it set to be invisible then.
-  if (under && OVERHEAD_INVISIBLE) {return;}
+	// Draw the overhead layers.
+	//int opaque = Cond(under, OP_TRANS, OP_OPAQUE);
+	for (layer = 3; layer <= 6; ++layer) {
+		// Make sure the layer exists.
+		if (-1 == Overhead_Data[OVERHEAD_SCREENS + layer - 3]) {continue;}
+		if(hideLayer4&&layer==4)continue;
 
-  // Draw the overhead layers.
-  int opaque = Cond(under, OP_TRANS, OP_OPAQUE);
-  for (layer = 3; layer <= 6; ++layer) {
-    // Make sure the layer exists.
-    if (-1 == Overhead_Data[OVERHEAD_SCREENS + layer - 3]) {continue;}
-
-    // Draw the layer.
-    offset = (layer - 3) * 176;
-    for (location = 0; location < 176; ++location) {
-      int combo = Overhead_Data[OVERHEAD_COMBOS + offset + location];
-      if (combo) {
-        Screen->FastCombo(layer, ComboX(location) + x, ComboY(location) + y,
-                          combo, Overhead_Data[OVERHEAD_CSETS + offset + location],
-                          opaque);
-      }
-    }
-  }
+		// Draw the layer.
+		offset = (layer - 3) * 176;
+		for (location = 0; location < 176; ++location) {
+			int combo = Overhead_Data[OVERHEAD_COMBOS + offset + location];
+			if (combo) {
+				HeightFastComboScreen(layer, ComboX(location) + x, ComboY(location) + y,
+								combo, Overhead_Data[OVERHEAD_CSETS + offset + location],
+								OP_OPAQUE);
+			}
+		}
+	}
 }
 //end LayerOverhead
 //start bottleStateNames
