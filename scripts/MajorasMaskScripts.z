@@ -3743,12 +3743,10 @@ ffc script NPC{
 		this->Data = COMBO_INVIS;
 		int loc = ComboAt(this->X,this->Y);
 		bool visible = false;
-		int comboDefault;
+		Waitframe();//Grayswandir's overhead layers script wipes remote screens combos. This causes a conflict if we fall down from an above screen, or raise from a lower screen; Waitframe() fixes this, for now.
+		int comboDefault = Screen->ComboD[loc];
 		if(NPCid==3&&GetCurDMap()!=0){//Hardcode for Bremor to make it not conflict with the cutscene on that screen
 			comboDefault = 38404;
-			Waitframe();
-		} else {
-			comboDefault = Screen->ComboD[loc];
 		}
         while(!special){//start
 			while(visible){
