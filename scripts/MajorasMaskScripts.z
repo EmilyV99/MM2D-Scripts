@@ -3757,7 +3757,7 @@ ffc script NPC{
 					Link->PressA = false;
 					interact(NPCid);
 				}
-				if(isAfter(endday,endhour,true)){
+				if(isAfter(endday,endhour,true) || isBefore(startday,startHour,false)){
 					visible=false;
 					this->Data = COMBO_INVIS;
 					Screen->ComboD[loc]=comboDefault;
