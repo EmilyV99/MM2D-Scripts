@@ -1175,9 +1175,9 @@ void HeightFastComboScreen(int layer, int x, int y, int combo, int cset, int opa
 void runHeightBitmap()
 {
 	//Draw bitmaps to the screen
-	Screen->DrawBitmapEx(2,RT_BITMAP0,0,0,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
+	Screen->DrawBitmapEx(3,RT_BITMAP0,0,0,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
 	Screen->DrawBitmapEx(4,RT_BITMAP0,256,0,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
-	Screen->DrawBitmapEx(2,RT_BITMAP0,0,176,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
+	Screen->DrawBitmapEx(3,RT_BITMAP0,0,176,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
 	Screen->DrawBitmapEx(4,RT_BITMAP0,256,176,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
 	//Clearing the bitmap here causes issues; clearBitmap() has been moved to the beginning of global while(true)
 	//Clear the bitmap
