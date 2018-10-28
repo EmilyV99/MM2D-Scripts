@@ -183,6 +183,7 @@ const int CR_DEKUNUTS = 8;
 int floating = 0;
 int floatDir = 0;
 bool canFall = true;
+bool debugCanFall = false;
 bool rafting = false;
 const int CT_PITFALL = 142;//Script 1 Combo Type
 const int CT_LEDGE = 143;//Script 2 Combo Type
@@ -782,6 +783,8 @@ global script Global{
 			canFall=false;
 			rafting=true;
 		}
+		
+		if(debugCanFall)canFall=false;
 	}//end
 	void raftingCheck(){//start rafting
 		if(Link->Action==LA_RAFTING){
@@ -931,6 +934,8 @@ global script Global{
 			if(debug)
 			{
 				drawDebugString(0,0,"DEBUG MODE",false);
+				drawDebugString(0,156,"   TDBG: ~ | TIME: UDLR | REF: = | FRZ: ENTER | WARP: NUMS             ",false);
+				drawDebugString(0,162,"       REFRESH: R | DBDRAW: \\ | CANFALL: F | UPDOWN: []               ",false);
 				canFall=false;
 				//Hour manipulation
 				if(Input->ReadKey[KEY_UP])
@@ -1023,6 +1028,9 @@ global script Global{
 				if(Input->ReadKey[KEY_0])Link->Warp(0,0x24);//Warp to test area
 				if(Input->ReadKey[KEY_R])Link->PitWarp(Game->GetCurDMap(),Game->GetCurDMapScreen());//Reset the screen by pitwarping to it
 				if(Input->ReadKey[KEY_BACKSLASH])dbdraw = !dbdraw;
+				if(Input->ReadKey[KEY_F])debugCanFall = !debugCanFall;
+				if(Input->ReadKey[KEY_OPENBRACE])warpDown();
+				if(Input->ReadKey[KEY_CLOSEBRACE])warpUp();
 				NoAction();
 				Link->PressStart=false;Link->InputStart=false;
 			}
