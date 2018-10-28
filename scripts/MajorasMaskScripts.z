@@ -1135,10 +1135,10 @@ void HeightFastCombo(int layer, int x, int y, int combo, int cset, int opacity)
 	if(combo==COMBO_INVIS)return;
 	if(hideLayer4 && layer>=4)return;
 	//Screen->FastCombo(layer, x, y, combo, cset, OP_TRANS);
-	if(layer>4)x+=256;
+	if(layer>=4)x+=256;
 	if(opacity!=OP_OPAQUE)y+=176;
 	Screen->SetRenderTarget(RT_BITMAP0);
-	Screen->FastCombo(1, x, y, combo, cset, OP_OPAQUE);
+	Screen->FastCombo(4, x, y, combo, cset, OP_OPAQUE);
 	Screen->SetRenderTarget(RT_SCREEN);
 }
 
@@ -1147,35 +1147,10 @@ void HeightFastTile(int layer, int x, int y, int tile, int cset, int opacity)
 	if(tile==TILE_INVIS)return;
 	if(hideLayer4 && layer>=4)return;
 	//Screen->FastTile(layer, x, y, tile, cset, OP_TRANS);
-	if(layer>4)x+=256;
+	if(layer>=4)x+=256;
 	if(opacity!=OP_OPAQUE)y+=176;
 	Screen->SetRenderTarget(RT_BITMAP0);
-	Screen->FastTile(1, x, y, tile, cset, OP_OPAQUE);
-	Screen->SetRenderTarget(RT_SCREEN);
-}
-
-void HeightFastComboFFC(int layer, int x, int y, int combo, int cset, int opacity)
-{
-	if(combo==0)return;
-	if(combo==COMBO_INVIS)return;
-	if(hideLayer4 && layer>=4)return;
-	//Screen->FastCombo(layer, x, y, combo, cset, OP_TRANS);
-	if(layer>4)x+=256;
-	if(opacity!=OP_OPAQUE)y+=176;
-	Screen->SetRenderTarget(RT_BITMAP0);
-	Screen->FastCombo(2, x, y, combo, cset, OP_OPAQUE);
-	Screen->SetRenderTarget(RT_SCREEN);
-}
-
-void HeightFastTileFFC(int layer, int x, int y, int tile, int cset, int opacity)
-{
-	if(tile==TILE_INVIS)return;
-	if(hideLayer4 && layer>=4)return;
-	//Screen->FastTile(layer, x, y, tile, cset, OP_TRANS);
-	if(layer>4)x+=256;
-	if(opacity!=OP_OPAQUE)y+=176;
-	Screen->SetRenderTarget(RT_BITMAP0);
-	Screen->FastTile(2, x, y, tile, cset, OP_OPAQUE);
+	Screen->FastTile(4, x, y, tile, cset, OP_OPAQUE);
 	Screen->SetRenderTarget(RT_SCREEN);
 }
 
@@ -1185,10 +1160,10 @@ void HeightFastComboScreen(int layer, int x, int y, int combo, int cset, int opa
 	if(combo==COMBO_INVIS)return;
 	if(hideLayer4 && layer>=4)return;
 	//Screen->FastCombo(layer, x, y, combo, cset, OP_TRANS);
-	if(layer>4)x+=256;
+	if(layer>=4)x+=256;
 	if(opacity!=OP_OPAQUE)y+=176;
 	Screen->SetRenderTarget(RT_BITMAP0);
-	Screen->FastCombo(0, x, y, combo, cset, OP_OPAQUE);
+	Screen->FastCombo(1, x, y, combo, cset, OP_OPAQUE);
 	Screen->SetRenderTarget(RT_SCREEN);
 }
 
@@ -1206,7 +1181,7 @@ void runHeightBitmap()
 void clearBitmap(int bitmap)
 {
 	Screen->SetRenderTarget(bitmap);
-	Screen->Rectangle(2,0,0,512,512,0,1,0,0,0,true,OP_OPAQUE);
+	Screen->Rectangle(0,0,0,512,512,0,1,0,0,0,true,OP_OPAQUE);
 	Screen->SetRenderTarget(RT_SCREEN);
 }
 //end BitmapDraw
@@ -4093,11 +4068,11 @@ ffc script cutscene{
 							{
 								for(int i=0;i<6;i++)
 								{
-									HeightFastCombo(4,ComboX(combos[i]),ComboY(combos[i]),38400,2,OP_TRANS);
+									HeightFastCombo(4,ComboX(combos[i]),ComboY(combos[i]),38400,2,OP_OPAQUE);
 								}
 								if(day==3)
 								{
-									HeightFastComboFFC(4,this->X+16,this->Y,getChestCombo(COMBO_CHEST,1),0,OP_OPAQUE);
+									HeightFastCombo(4,this->X+16,this->Y,getChestCombo(COMBO_CHEST,1),0,OP_OPAQUE);
 								}
 								Waitframe();
 							}
@@ -4126,9 +4101,14 @@ ffc script cutscene{
 					}
 					else if(arg1==2) // Floor 1
 					{
+						if(day==2)
+						{
+							HeightFastCombo(4,this->X,this->Y+16,31761,0,OP_OPAQUE);//Draw Bremor from the third layer
+						}
 						if(day==3)
 						{
-							HeightFastComboFFC(4,this->X+16,this->Y,getChestCombo(COMBO_CHEST,1),0,OP_OPAQUE);
+							HeightFastCombo(4,this->X+16,this->Y,getChestCombo(COMBO_CHEST,1),0,OP_OPAQUE);//Draw the chest on the third layer
+							HeightFastCombo(4,this->X+32,this->Y,31761,0,OP_OPAQUE);//Draw Bremor from the third layer
 						}
 					}
 				}
