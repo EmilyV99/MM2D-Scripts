@@ -782,10 +782,6 @@ global script Global{
 			canFall=false;
 			rafting=true;
 		}
-	}
-	
-	void doLensTint(){
-		Graphics->Tint(-17,-48,5);
 	}//end
 	void raftingCheck(){//start rafting
 		if(Link->Action==LA_RAFTING){
