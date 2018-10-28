@@ -441,6 +441,7 @@ global script Global{
 		//Tango_ConvertVariableName("anpc");
 		//Tango_ConvertFunctionName("npcend");
 		while(true){
+			clearBitmap(RT_BITMAP0);
 			handleTyping();
 			if(debugEnabled)testingMenu();
 			//start
@@ -1174,8 +1175,9 @@ void runHeightBitmap()
 	Screen->DrawBitmapEx(4,RT_BITMAP0,256,0,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
 	Screen->DrawBitmapEx(2,RT_BITMAP0,0,176,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
 	Screen->DrawBitmapEx(4,RT_BITMAP0,256,176,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
+	//Clearing the bitmap here causes issues; clearBitmap() has been moved to the beginning of global while(true)
 	//Clear the bitmap
-	clearBitmap(RT_BITMAP0);
+	//clearBitmap(RT_BITMAP0);
 }
 
 void clearBitmap(int bitmap)
