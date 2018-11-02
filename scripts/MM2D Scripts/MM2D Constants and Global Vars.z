@@ -1,0 +1,488 @@
+/////////////////////////////////////////////////
+//                                             //
+// MM2D Script: Constants and Global Variables //
+//                                             //
+/////////////////////////////////////////////////
+
+//start Ocarina Global Variables
+//A combo representing the pressed button, with a transparent background
+DEFINE NOTETILE_A = 892;
+DEFINE NOTETILE_DOWN = 894;
+DEFINE NOTETILE_RIGHT = 893;
+DEFINE NOTETILE_LEFT = 895;
+DEFINE NOTETILE_UP = 896;
+//The CSet to draw the given combo in
+DEFINE NOTECSET_A = 0;
+DEFINE NOTECSET_DOWN = 0;
+DEFINE NOTECSET_RIGHT = 0;
+DEFINE NOTECSET_LEFT = 0;
+DEFINE NOTECSET_UP = 0;
+//The SFX id for the given note SFX (or use the default IDs, just be sure to use the same ones in ZQuest!)
+int NOTESOUND_A = 200;
+int NOTESOUND_DOWN = 201;
+int NOTESOUND_RIGHT = 202;
+int NOTESOUND_LEFT = 203;
+int NOTESOUND_UP = 204;
+
+bool DISPLAYTEXTONSONGLEARN = true;
+//Sound FX to play if the played song is not a valid song
+DEFINE SFX_ERROR = 64;
+//List of songs:
+int SONGNOTES_SongOfTime[] = {3,1,2,3,1,2,0,0};
+int SONGNOTES_EponasSong[] = {5,4,3,5,4,3,0,0};
+int SONGNOTES_SongOfStorms[] = {1,2,5,1,2,5,0,0};
+int SONGNOTES_GoronsLullaby[] = {1,3,4,1,3,4,3,1};
+int SONGNOTES_OathToOrder[] = {3,2,1,2,3,5,0,0};
+int SONGNOTES_SongOfSoaring[] = {2,4,5,2,4,5,0,0};
+int SONGNOTES_SongOfHealing[] = {4,3,2,4,3,2,0,0};
+int SONGNOTES_ElegyOfEmptiness[] = {3,4,3,2,3,5,4,0};
+int SONGNOTES_NewWaveBossaNova[] = {4,5,4,3,2,4,3,0};
+int SONGNOTES_SongOfDoubleTime[] = {3,3,1,1,2,2,0,0};
+int SONGNOTES_SongOfInvertedTime[] = {2,1,3,2,1,3,0,0};
+int SONGNOTES_SonataOfAwakening[] = {5,4,5,4,1,3,1,0};
+int SONGNOTES_ScarecrowsSong[8];
+//Add custom songs:
+//Put a name directly after the underscore, and numbers for notes in each spot.
+//A=1,DOWN=2,RIGHT=3,LEFT=4,UP=5, and if the song is less than 8 notes, fill the ending spots with 0s. The // before the line of code must also be removed for the song to function.
+//int[] SONGNOTES_ = {,,,,,,,};
+//Song indexes
+DEFINE SONG_SongOfTime = 0;
+DEFINE SONG_EponasSong = 2;
+DEFINE SONG_SongOfStorms = 4;
+DEFINE SONG_GoronsLullaby = 12;
+DEFINE SONG_OathToOrder = 13;
+DEFINE SONG_SongOfSoaring = 14;
+DEFINE SONG_SongOfHealing = 15;
+DEFINE SONG_ElegyOfEmptiness = 16;
+DEFINE SONG_NewWaveBossaNova = 17;
+DEFINE SONG_SongOfDoubleTime = 18;
+DEFINE SONG_SongOfInvertedTime = 19;
+DEFINE SONG_SonataOfAwakening = 20;
+DEFINE SONG_ScarecrowsSong = 21;
+//Song MIDI IDs -- set these to the number of the MIDI you want to play, which should be the song played.
+DEFINE SONGMIDI_SongOfTime = 213;
+DEFINE SONGMIDI_EponasSong = 225;
+DEFINE SONGMIDI_SongOfStorms = 221;
+DEFINE SONGMIDI_GoronsLullaby = 237;
+DEFINE SONGMIDI_OathToOrder = 249;
+DEFINE SONGMIDI_SongOfSoaring = 229;
+DEFINE SONGMIDI_SongOfHealing = 217;
+DEFINE SONGMIDI_ElegyOfEmptiness = 245;
+DEFINE SONGMIDI_NewWaveBossaNova = 241;
+DEFINE SONGMIDI_SongOfDoubleTime = 205;
+DEFINE SONGMIDI_SongOfInvertedTime = 209;
+DEFINE SONGMIDI_SonataOfAwakening = 233;
+//ScarecrowsSong has no SONGSOUND! This is intentional, though other songs should all have one!
+bool LEARNED_SONGS[22];
+//Constants
+DEFINE NOTE_A = 1;
+DEFINE NOTE_DOWN = 2;
+DEFINE NOTE_RIGHT = 3;
+DEFINE NOTE_LEFT = 4;
+DEFINE NOTE_UP = 5;
+DEFINE NULL_NOTE = 0;
+DEFINE FRAMESOFSONGFREEZE = 600;
+//Variables
+bool ocarina_mode = false;
+int ocIndex = 0;
+int currSong[8];
+int playedSong = -1;
+int songFrames = 0;
+int midiToReturn = 0;
+bool scarecrowMode = false;
+bool scarecrowRecord = false;
+bool OC_doItemJinx = false;
+//end Ocarina Global Variables
+//start Subscreen Global Variables
+DEFINE SUBSTATE_ITEMS = 0;
+DEFINE SUBSTATE_KEY = 1;
+DEFINE SUBSTATE_MAP = 2;
+DEFINE MAP_SUBSCREEN = 1;
+DEFINE SCRN_SUBSCREEN_ITEM = 48;
+DEFINE SCRN_SUBSCREEN_MAP_OVERWORLD = 96;
+DEFINE SCRN_SUBSCREEN_MAP_DUNGEON = 80;
+DEFINE SCRN_SUBSCREEN_KEY = 64;
+DEFINE CURSOR_ITEM = 45;
+DEFINE CURSOR_CSET = 5;
+DEFINE LARGE_CURSOR_ITEM = 85;
+DEFINE DMAP_TOTAL = 3;
+bool subscreen = false;
+int subState = 0;
+int cursorPos = 0;
+int ITEM_LOCS[] = {33,34,35,36,37,38,41,42,43,44,45,46,49,50,51,52,53,54,57,58,59,60,61,62,65,66,67,68,69,70,73,74,75,76,77,78,81,82,83,84,85,86,89,90,91,92,93,94};
+int KEY_LOCS[] = {27,51,52,53,54,55,57,61,67,68,69,70,71,97,99,101,103,105,91};
+int QUAD_LOCS[] = {27,57,61,91};
+int MAP_LOCS[] = {0};
+int DUNGMAP_LOCS[] = {0};
+bool DUNGEONS[] = {false,false,false,false};
+//
+int cursorIndex = 0;
+int itemIndex = 0;
+DEFINE ITEM_MAX_INDEX = 48;
+DEFINE KEY_MAX_INDEX = 19;
+DEFINE MAP_MAX_INDEX = 0;
+DEFINE DUNGMAP_MAX_INDEX = 0;
+int ItemIDs[] = {187,188,189,190,191,144,31,13,14,57,137,0,192,193,194,195,196,127,3,139,138,140,153,0,197,198,199,200,201,131,48,0,53,52,211,0,202,203,204,205,206,207,146,147,148,149,150,151};
+//Passive:
+DEFINE PASSIVE_TOP = -56;
+DEFINE AX = 123;
+DEFINE AY = -27;
+DEFINE BX = 163;
+DEFINE BY = -27;
+DEFINE EX1X = 184;
+DEFINE EX1Y = -46;
+DEFINE EX2X = 205;
+DEFINE EX2Y = -27;
+DEFINE LX = 144;
+DEFINE LY = -46;
+DEFINE RX = 226;
+DEFINE RY = -46;
+DEFINE MASKX = 184;
+DEFINE MASKY = -22;
+DEFINE DAYSTART_X = 91;
+DEFINE DAYSTART_Y = -24;
+DEFINE DAYNUM_X = 112;
+DEFINE DAYNUM_Y = -24;
+DEFINE TIMESTART_X = 88;
+DEFINE TIMESTART_Y = -15;
+int NumberTiles[] = {12630,12631,12632,12633,12634,12635,12636,12637,12638,12639};
+DEFINE SEMICOLON = 12612;
+DEFINE TAEL_X = 95;
+DEFINE TAEL_Y = -45;
+//end Subscreen Global Variables
+//start Pit Global Variables
+int floating = 0;
+int floatDir = 0;
+bool canFall = true;
+bool debugCanFall = false;
+bool rafting = false;
+DEFINE SFX_JUMPING = 45;
+//end Pit Global Variables
+//start EX Item Button Global Variables
+int EX1_item = 0;
+int EX2_item = 0;
+int B_item = 0;
+//end EX Item Button Global Variables
+//start FormVars
+//Link Tile Modifier items
+DEFINE FORM1 = 123;
+DEFINE FORM2 = 124;
+DEFINE FORM3 = 125;
+DEFINE FORM4 = 126;
+DEFINE FORM2CURLED = 128;
+DEFINE FORM_SHIELD = 129;
+DEFINE FORM_M_SHIELD = 130;
+DEFINE FORM2SPIKED = 132;
+//
+DEFINE ITEM_POUND = 54;
+DEFINE ITEM_BUBBLE = 25;
+DEFINE ITEM_DEKUNUT = 140;
+DEFINE COMBO_LILYPAD = 7372;
+DEFINE SPRITE_NONE = 89;
+DEFINE MAGICCOST_SPIKEROLL = 1;
+DEFINE EVERYXFRAMES_SPIKEROLL = 10;
+DEFINE NPCMISC_LASTSPIKEHIT = 0;
+DEFINE SFX_DEKUHOP = 89;
+DEFINE SFX_GORONCURL = 65;
+DEFINE SFX_GORONUNCURL = 66;
+DEFINE SFX_DEKUDIVE = 67;
+DEFINE SFX_DEKULAUNCH = 68;
+DEFINE SFX_DEKUFLIGHT = 69;
+DEFINE SFX_DEKUSPIN = 70;
+DEFINE SFX_GORONPUNCH = 71;
+DEFINE SFX_GORONPOUND = 72;
+DEFINE SFX_GORONROLL_BEGIN = 73;
+DEFINE SFX_GORONROLL_LOOP = 74;
+DEFINE SFX_GORONROLL_SPEEDUP = 75;
+DEFINE SFX_GORONROLL_SPEEDLOOP = 76;
+DEFINE SPEEDBOOST_BUNNY_WATER = 0.51;
+DEFINE SPEEDBOOST_BUNNY_LAND = 1.02;
+DEFINE SPEEDBOOST_ZORA_WATER = 1.5;
+DEFINE FIRST_MASK_TILE = 65220;
+int form = 1;
+int mask = 1;
+int currMaskTile = 65221;
+int Deku_floating = 60;
+int Deku_flying = 0;
+int DekuFlightSpeedMod = -.5;
+bool curled = false;
+int useItem = 0;
+int timeRolling = 0;
+int spikeStartTime = 0;
+bool spikedRolling = false;
+//end FormVars
+//start Rafting vars
+int Rafting[4] = {-1,-1,-1,-1};
+DEFINE RAFT_DIR = 0;
+DEFINE RAFT_UP = 1;
+DEFINE RAFT_X = 2;
+DEFINE RAFT_Y = 3;
+//end Rafting vars
+//start Sound Constants
+DEFINE MIDI_THESTORM = 204;
+DEFINE SFX_SHIELD = 63;
+DEFINE SFX_DEKUNUT_SNAP = 79;
+DEFINE SFX_DEKUNUT_FREEZE = 80;
+//end Sound Constants
+//start LayerScreens
+DEFINE LAYERSMAP1 = 2;
+DEFINE LAYERSCREEN_RAIN = 0x00; 
+DEFINE LAYERSCREEN_SAVING = 0x10;
+//end LayerScreens
+//start Times
+DEFINE FRAME = 0.0001;
+DEFINE FRAMES_SECOND = 1;
+int FRAMES_MINUTE = 60;
+int FRAMES_HOUR = 3600;
+int TIME_SECOND = FRAMES_SECOND*FRAME;
+int TIME_MINUTE = FRAMES_MINUTE*FRAME;
+int TIME_HOUR = FRAMES_HOUR*FRAME;
+//end
+//start Item Constants
+DEFINE I_MASK_ALLNIGHT = 188;
+DEFINE I_BOMBBAG_BIG = 82;
+DEFINE I_QUIVER_BIG = 75;
+DEFINE I_BOMBBAG_BIGGEST = 83;
+DEFINE I_QUIVER_BIGGEST = 76;
+DEFINE I_MASK_BLAST = 189;
+DEFINE I_BOMBBAG = 81;
+DEFINE I_BOMBBAG_POWDERKEG = 106;
+DEFINE I_BOMBCHUS = 139;
+DEFINE I_BOMBS = 3;
+DEFINE I_BOWARROW = 13;
+DEFINE I_MASK_BREMEN = 193;
+DEFINE I_MASK_BUNNYHOOD = 194;
+DEFINE I_MASK_CAPTAINHAT = 205;
+DEFINE I_DEKUSPINCHARGE = 135;
+DEFINE I_MASK_CIRCUS = 198;
+DEFINE I_MASK_COUPLES = 200;
+DEFINE I_MASK_DEKU = 144;
+DEFINE I_DEKUNUTS = 140;
+DEFINE I_MASK_DONGERO = 195;
+DEFINE I_DOUBLEDEF = 208;
+DEFINE I_MASK_DEITY = 207;
+DEFINE I_FIREARROWS = 14;
+DEFINE I_FLIPPERS2 = 214;
+DEFINE I_MASK_GARO = 204;
+DEFINE I_MASK_GIANT = 206;
+DEFINE I_MASK_GIBDO = 203;
+DEFINE I_SWORD_GILDED = 7;
+DEFINE I_MASK_GORON = 127;
+DEFINE I_MASK_GFAIRY = 191;
+DEFINE I_SWORD_GFAIRY = 211;
+DEFINE I_HYLIANSHIELD = 8;
+DEFINE I_ICEARROWS = 57;
+DEFINE I_MASK_KAFEI = 199;
+DEFINE I_MASK_KAMARO = 202;
+DEFINE I_MASK_KEATON = 192;
+DEFINE I_SWORD_KOKIRI = 5;
+DEFINE I_LETTERKAFEI = 183;
+DEFINE I_LIGHTARROWS = 137;
+DEFINE I_MAGICBEANS = 153;
+DEFINE I_MASK_SCENTS = 196;
+DEFINE I_MASK_TRUTH = 201;
+DEFINE I_MIRRORSHIELD = 37;
+DEFINE I_MOONSTEAR = 178;
+DEFINE I_DEED_MOUNTAIN = 181;
+DEFINE I_OCARINA = 31;
+DEFINE I_DEED_OCEAN = 182;
+DEFINE I_PENDANTOFMEMORIES = 185;
+DEFINE I_MASK_POSTMANSHAT = 187;
+DEFINE I_POWDERKEG = 48;
+DEFINE I_QUIVER = 74;
+DEFINE I_SWORD_RAZOR = 6;
+DEFINE I_MASK_ROMANI = 197;
+DEFINE I_ROOMKEY = 186;
+DEFINE I_SPECIALDELIVERY = 184;
+DEFINE I_MASK_STONE = 190;
+DEFINE I_DEED_SWAMP = 180;
+DEFINE I_DEED_TOWN = 179;
+DEFINE I_INFMAG = 152;
+DEFINE I_MASK_ZORA = 131;
+DEFINE I_TAEL_1 = 212;
+DEFINE I_TAEL_2 = 213;
+DEFINE I_REMAINS1 = 158;
+DEFINE I_REMAINS2 = 159;
+DEFINE I_REMAINS3 = 160;
+DEFINE I_REMAINS4 = 161;
+DEFINE I_DEKUSTICK = 138;
+//end
+//start Palette
+DEFINE MULT_SUNRISE = 2;
+//end Palette
+//start MISC
+//Combos
+DEFINE COMBO_INVIS = 4;
+DEFINE COMBO_SOLID = 38408;
+DEFINE COMBO_CHEST = 38385;
+DEFINE COMBO_SOIL = 13920;
+DEFINE COMBO_BEANSPROUT = 13921;
+DEFINE COMBO_BEANPLANT = 13922;
+DEFINE COMBO_OWLOFF = 38380;
+DEFINE COMBO_OWLON = 38384;
+DEFINE COMBO_FRZ1 = 13826;
+DEFINE COMBO_FRZ2 = 13827;
+//Tiles
+DEFINE TILE_INVIS = 5;
+DEFINE TILE_DEKUSTICK_UNLIT = 64180;
+DEFINE TILE_DEKUSTICK_LIT = 64200;
+DEFINE TILE_NOTE_DEFAULT = 12614;
+DEFINE TILE_DROP = 12590;
+//WIP TILES
+DEFINE TILE_REMAINS1UL = 0;
+DEFINE TILE_REMAINS2UL = 0;
+DEFINE TILE_REMAINS3UL = 0;
+DEFINE TILE_REMAINS4UL = 0;
+//CSets
+DEFINE CSET_DROP = 0;
+//Counters
+DEFINE CR_MAGICBEANS = 9;
+DEFINE CR_BOMBCHUS = 7;
+DEFINE CR_DEKUNUTS = 8;
+DEFINE CR_BANKBAL = 10;
+//Combo Flags
+DEFINE CF_NOWATERLEDGE = CF_SCRIPT11; //Can only get out by using deku or freezing water
+DEFINE CF_NOWATERLEDGE2 = CF_SCRIPT12; //Can only get out by freezing water
+DEFINE CF_BOMBCHU1 = 98; //Combo solidity on combos locations with this flag will be treated opposite by the bombchu.
+DEFINE CF_BOMBCHU2 = 102;
+//Combo Types
+DEFINE CT_PITFALL = CT_SCRIPT1;
+DEFINE CT_LEDGE = CT_SCRIPT2;
+DEFINE CT_BOMBCHU = 143;
+//LW Types
+DEFINE LW_DEKUSTICK = 34;
+DEFINE LW_BOMBCHU = 40; //The weapon ID of the bombchu, must be unique and between 31 and 40.
+//EW Types
+//SFX/MIDI
+DEFINE SFX_BANKMENU = 18;
+DEFINE SFX_CHEST_APPEAR = SFX_SECRET;
+DEFINE SFX_BOMBCHU = 17;
+//NPC IDs
+DEFINE ID_TATL = 5;
+//MSG IDs
+DEFINE MSG_SHOPS = 37;
+//Tango
+DEFINE TSTYLE_MAJORAS = 0;
+DEFINE TSTYLE_SIGNS = 1;
+DEFINE TSTYLE_ICAPTION = 2;
+DEFINE TSTYLE_NPCNAME  = 3;
+DEFINE TANGO_MENU_CURSOR_COMBO = 14085;
+DEFINE MAXNAMELENGTH = 75; //This must be >= the longest NPC name, + the length of the tango commands
+//Misc
+DEFINE RAZSWORD_USES = 100;
+DEFINE RAZSWORD_ID = 6;
+DEFINE INF_MAGIC = 152;
+DEFINE DEKU_MAX_TIMER = 240;
+DEFINE ARRTYPE_FIRE = 1;
+DEFINE ARRTYPE_ICE = 2;
+DEFINE ARRTYPE_LIGHT = 3;
+DEFINE SPRITE_FIREARROW = 90;
+//FFC Scripts
+DEFINE FFC_SHOWSTRING = 16;
+DEFINE FFC_CHEST = 12;
+DEFINE FFC_OWL = 22;
+DEFINE FFC_CHANGENAME = 24;
+DEFINE FFC_NPC = 6;
+DEFINE FFC_STATE = 15;
+DEFINE FFC_SOFTSOIL = 10;
+DEFINE MAX_NONRESERVED_FFC = 26;
+//Torch puzzle vars
+bool torchPuzzleStates[8];
+int torchPuzzleTimer = 0;
+int dekuStickLitTimer = 0;
+int torchPuzzleState = 0000000000000000b;
+int torchPuzzles = 0000000000000000b;
+int swordCounter = 0;
+//Time vars
+int time = 0;
+int hour = 6;
+int day = 1;
+bool slowTime = false;
+int trueTime = 0;
+//Global clock
+int gameframe = 0;
+int freezeFrames = 0;
+bool isFrozen = false;
+bool isBottleFrozen = false;
+//Item vars
+bool hasMirrorShield = false;
+int usingItem = 0;
+int arrowType = 0;//1=fire,2=ice,3=light
+int beanCounter = 0;
+//Subscreen Vars
+bool pressA = false;
+//Tango Vars
+bool tangoTemp = false;
+int tangoTempI = 0;
+//Location Trackers
+int lastScreen = -1;
+int lastMap = -1;
+int lastLevel = -1;
+int lastDMap = -1;
+//Misc
+int LinkActionOld = 0;
+int floatPix = 2;
+bool slotWasDisplayed = false;
+bool fakeSong = false;
+bool hideLayer4 = false;
+bool songOfStormsRain = false;
+bool owlSaved = false;
+int warpNumFloors = 0;
+//Debug Vars
+bool freezeTime = false;
+bool debug = false;
+bool dbsetup = false;
+bool dbdraw = false;
+bool debugEnabled = false;
+//end MISC
+
+//start Global Vars Array
+int gvars[214747];
+//
+GVAR GV_MISC = 0;
+GVAR GVAR_BLASTMASKCOOLDOWN = 0;
+GVAR GVAR_BANK_REW1 = 1;
+GVAR GVAR_BANK_REW2 = 2;
+GVAR GVAR_BANK_REW3 = 3;
+GVAR GVAR_MAINTANGOSLOT = 4;
+GVAR GVAR_ACTIVENPCID = 5;
+GVAR GVAR_NPCTANGOSLOT = 6;
+GVAR GVAR_DIFFICULTY = 7;
+//
+GVAR GV_PAL = 1000;
+GVAR TINT_DAY = 0;
+GVAR TINT_SUNSETORANGE = 1;
+GVAR TINT_NIGHT = 2;
+GVAR TINT_LENS = 3;
+DEFINE NUM_PAL = 4;
+//
+GVAR GV_CHEST = GV_PAL + NUM_PAL;
+GVAR GVAR_START_RESET = GV_CHEST;
+GVAR GVAR_END_RESET = GV_CHEST+1000;
+////
+int getGlobalVar(int index, int add)
+{
+    return gvars[index+add];
+}
+
+void setGlobalVar(int index, int add, int state)
+{
+	gvars[index+add]=state;
+}
+
+void incGlobalVar(int index, int add, int inc)
+{
+	gvars[index+add]+=inc;
+}
+
+bool getChestState(int index)
+{
+    return getGlobalVar(index,GV_CHEST)!=0;
+}
+
+void setChestState(int index, bool state)
+{
+	if(state)setGlobalVar(index,GV_CHEST,1);
+	else setGlobalVar(index,GV_CHEST,0);
+}
+//end Global Vars Array

@@ -1,0 +1,787 @@
+////////////////////////////////////////
+//                                    //
+//      MM2D Script: Subscreen        //
+//                                    //
+////////////////////////////////////////
+
+
+void toggleSubscreen(){//start
+	subscreen=!subscreen;
+	if(subscreen){
+		Screen_Freeze(2);
+		Game->PlaySound(81);
+	} else {
+		Screen_Freeze(0);
+		Game->PlaySound(82);
+		hideItemCaption();
+	}
+}//end
+
+void runSubscreen(){
+	subscreenCursorChanged = false;
+	bool dungeon = false;
+	if(Game->GetCurDMap()<DMAP_TOTAL){
+		dungeon = DUNGEONS[Game->GetCurDMap()];
+	}
+	//start SwapScreen
+	int lastSubState = subState;
+	if(Link->PressR){
+		subState++;
+		if(subState>2){
+			subState = 0;
+		}
+		cursorPos = 0;
+	} else if(Link->PressL){
+		subState--;
+		if(subState<0){
+			subState = 2;
+		}
+		cursorPos = 0;
+	}
+	if(!cursorPos){
+		if(subState == SUBSTATE_ITEMS){
+			cursorPos = ITEM_LOCS[6];
+			cursorIndex = 6;
+		} else if(subState==SUBSTATE_KEY){
+			cursorPos = KEY_LOCS[1];
+			cursorIndex = 1;
+		} else if(subState==SUBSTATE_MAP){
+			if(dungeon){
+				cursorPos = DUNGMAP_LOCS[0];
+				cursorIndex = 0;
+			} else {
+				cursorPos = MAP_LOCS[0];
+				cursorIndex = 0;
+			}
+		}
+	}
+	if(subState!=lastSubState){
+		subscreenCursorChanged = true;
+	}
+	//end SwapScreen
+	//start MoveCursor
+	int lastIndex = cursorIndex;
+	if(!subState){
+		if(Link->PressDown){
+			cursorIndex+=12;
+		} else if(Link->PressUp){
+			cursorIndex-=12;
+		} else if(Link->PressRight){
+			cursorIndex++;
+		} else if(Link->PressLeft){
+			cursorIndex--;
+		}
+		if(cursorIndex>=ITEM_MAX_INDEX){
+			cursorIndex-=ITEM_MAX_INDEX;
+		} else if(cursorIndex<0){
+			cursorIndex+=ITEM_MAX_INDEX;
+		}
+		cursorPos = ITEM_LOCS[cursorIndex];
+	} else if(subState==1){
+		if(Link->PressDown){
+			if(!cursorIndex)cursorIndex=18;
+			else if(cursorIndex>=1&&cursorIndex<=5)cursorIndex+=7;
+			else if(cursorIndex==6)cursorIndex=17;
+			else if(cursorIndex==7)cursorIndex=18;
+			else if(cursorIndex==8||cursorIndex==9)cursorIndex=14;
+			else if(cursorIndex==10)cursorIndex=15;
+			else if(cursorIndex==11||cursorIndex==12)cursorIndex=16;
+			else if(cursorIndex==13||cursorIndex==14)cursorIndex=1;
+			else if(cursorIndex==15)cursorIndex=3;
+			else if(cursorIndex==16)cursorIndex=5;
+			else if(cursorIndex==17)cursorIndex=6;
+			else if(cursorIndex==18)cursorIndex=0;
+		} else if(Link->PressUp){
+			if(!cursorIndex)cursorIndex=18;
+			else if(cursorIndex>=8&&cursorIndex<=12)cursorIndex-=7;
+			else if(cursorIndex==6)cursorIndex=17;
+			else if(cursorIndex==7)cursorIndex=0;
+			else if(cursorIndex==1||cursorIndex==2)cursorIndex=14;
+			else if(cursorIndex==3)cursorIndex=15;
+			else if(cursorIndex==4||cursorIndex==5)cursorIndex=16;
+			else if(cursorIndex==13)cursorIndex=1;
+			else if(cursorIndex==14)cursorIndex=8;
+			else if(cursorIndex==15)cursorIndex=10;
+			else if(cursorIndex==16)cursorIndex=12;
+			else if(cursorIndex==17)cursorIndex=6;
+			else if(cursorIndex==18)cursorIndex=0;
+		} else if(Link->PressRight){
+			if(cursorIndex==12){
+				cursorIndex=6;
+			}else if(cursorIndex==7){
+				cursorIndex=13;
+			} else {
+				cursorIndex++;
+			}
+			if(cursorIndex>=KEY_MAX_INDEX){
+				cursorIndex=0;
+			}
+		} else if(Link->PressLeft){
+			if(cursorIndex==13){
+				cursorIndex=7;
+			} else {
+				cursorIndex--;
+			}
+			if(cursorIndex<0){
+				cursorIndex=KEY_MAX_INDEX-1;
+			}
+		}
+		cursorPos = KEY_LOCS[cursorIndex];
+	} else if(subState==2){
+		if(dungeon){
+		
+		} else {
+		
+		}
+	}
+	if(cursorIndex!=lastIndex){
+		Game->PlaySound(5);
+		subscreenCursorChanged = true;
+	}
+	//end MoveCursor
+	int cursorRow = locToRow(cursorPos);
+	int cursorCol = locToCol(cursorPos);
+	//start DrawThings
+	int itemDescStr[512];
+	if(!subState){
+		drawBase(SCRN_SUBSCREEN_ITEM);
+		//start Draw Item Screen
+		//start Masks
+		if(Link->Item[187]){//Postman's Hat
+			drawTileToLoc(loadItemTile(187),loadItemCSet(187),2,1,6);
+		}
+		if(Link->Item[188]){//All-Night Mask
+			drawTileToLoc(loadItemTile(188),loadItemCSet(188),2,2,6);
+		}
+		if(Link->Item[189]){//Blast Mask
+			drawTileToLoc(loadItemTile(189),loadItemCSet(189),2,3,6);
+		}
+		if(Link->Item[190]){//Stone Mask
+			drawTileToLoc(loadItemTile(190),loadItemCSet(190),2,4,6);
+		}
+		if(Link->Item[191]){//Great Fairy's Mask
+			drawTileToLoc(loadItemTile(191),loadItemCSet(191),2,5,6);
+		}
+		if(Link->Item[144]){//Deku Mask
+			drawTileToLoc(loadItemTile(144),loadItemCSet(144),2,6,6);
+		}
+		if(Link->Item[192]){//Keaton's Mask
+			drawTileToLoc(loadItemTile(192),loadItemCSet(192),3,1,6);
+		}
+		if(Link->Item[193]){//Bremen Mask
+			drawTileToLoc(loadItemTile(193),loadItemCSet(193),3,2,6);
+		}
+		if(Link->Item[194]){//Bunny Hood
+			drawTileToLoc(loadItemTile(194),loadItemCSet(194),3,3,6);
+		}
+		if(Link->Item[195]){//Don Gero's Mask
+			drawTileToLoc(loadItemTile(195),loadItemCSet(195),3,4,6);
+		}
+		if(Link->Item[196]){//Mask of Scents
+			drawTileToLoc(loadItemTile(196),loadItemCSet(196),3,5,6);
+		}
+		if(Link->Item[127]){//Goron Mask
+			drawTileToLoc(loadItemTile(127),loadItemCSet(127),3,6,6);
+		}
+		if(Link->Item[197]){//Romani's Mask
+			drawTileToLoc(loadItemTile(197),loadItemCSet(197),4,1,6);
+		}
+		if(Link->Item[198]){//Circus Leader's Mask
+			drawTileToLoc(loadItemTile(198),loadItemCSet(198),4,2,6);
+		}
+		if(Link->Item[199]){//Kafei's Mask
+			drawTileToLoc(loadItemTile(199),loadItemCSet(199),4,3,6);
+		}
+		if(Link->Item[200]){//Couple's Mask
+			drawTileToLoc(loadItemTile(200),loadItemCSet(200),4,4,6);
+		}
+		if(Link->Item[201]){//Mask of Truth
+			drawTileToLoc(loadItemTile(201),loadItemCSet(201),4,5,6);
+		}
+		if(Link->Item[131]){//Zora Mask
+			drawTileToLoc(loadItemTile(131),loadItemCSet(131),4,6,6);
+		}
+		if(Link->Item[202]){//Kamaro's Mask
+			drawTileToLoc(loadItemTile(202),loadItemCSet(202),5,1,6);
+		}
+		if(Link->Item[203]){//Gibdo Mask
+			drawTileToLoc(loadItemTile(203),loadItemCSet(203),5,2,6);
+		}
+		if(Link->Item[204]){//Garo Mask
+			drawTileToLoc(loadItemTile(204),loadItemCSet(204),5,3,6);
+		}
+		if(Link->Item[205]){//Captain's Hat
+			drawTileToLoc(loadItemTile(205),loadItemCSet(205),5,4,6);
+		}
+		if(Link->Item[206]){//Giant's Mask
+			drawTileToLoc(loadItemTile(206),loadItemCSet(206),5,5,6);
+		}
+		if(Link->Item[207]){//Fierce Deity's Mask
+			drawTileToLoc(loadItemTile(207),loadItemCSet(207),5,6,6);
+		}
+		//end Masks
+		//start Items
+		if(Link->Item[31]){//Ocarina of Time
+			drawTileToLoc(loadItemTile(31),loadItemCSet(31),2,9,6);
+		}
+		if(Link->Item[13]){//Arrow
+			drawTileToLoc(loadItemTile(13),loadItemCSet(13),2,10,6);
+		}
+		if(Link->Item[14]){//Fire Arrow
+			drawTileToLoc(loadItemTile(14),loadItemCSet(14),2,11,6);
+		}
+		if(Link->Item[57]){//Ice Arrow
+			drawTileToLoc(loadItemTile(57),loadItemCSet(57),2,12,6);
+		}
+		if(Link->Item[137]){//Light Arrow
+			drawTileToLoc(loadItemTile(137),loadItemCSet(137),2,13,6);
+		}
+		if(Link->Item[81]){//Bombs (item is 3 for bombs and 139 for bombchus, check is for bomb bag)
+			drawTileToLoc(loadItemTile(3),loadItemCSet(3),3,9,6);
+			drawTileToLoc(loadItemTile(139),loadItemCSet(139),3,10,6);
+		}
+		if(Link->Item[I_DEKUSTICK]){//Deku Stick
+			int tile = loadItemTile(138);
+			if(dekuStickLitTimer>0)tile+=20;
+			drawTileToLoc(tile,loadItemCSet(138),3,11,6);
+		}
+		if(Link->Item[140]){//Deku Nut
+			drawTileToLoc(loadItemTile(140),loadItemCSet(140),3,12,6);
+		}
+		if(Link->Item[153]){//Magic Bean
+			drawTileToLoc(loadItemTile(153),loadItemCSet(153),3,13,6);
+		}
+		if(Link->Item[106]){//Powder Keg (item is 48,check is for bomb bag)
+			drawTileToLoc(loadItemTile(48),loadItemCSet(48),4,9,6);
+		}
+		if(Link->Item[53]){//Lens of Truth
+			drawTileToLoc(loadItemTile(53),loadItemCSet(53),4,11,6);
+		}
+		if(Link->Item[52]){//Hookshot
+			drawTileToLoc(loadItemTile(52),loadItemCSet(52),4,12,6);
+		}
+		if(Link->Item[211]){//GFSword
+			drawTileToLoc(loadItemTile(211),loadItemCSet(211),4,13,6);
+		}
+		//
+		if(Link->Item[146]){
+			drawTileToLoc(loadItemTile(146),loadItemCSet(146),5,9,6);
+		}
+		if(Link->Item[147]){
+			drawTileToLoc(loadItemTile(147),loadItemCSet(147),5,10,6);
+		}
+		if(Link->Item[148]){
+			drawTileToLoc(loadItemTile(148),loadItemCSet(148),5,11,6);
+		}
+		if(Link->Item[149]){
+			drawTileToLoc(loadItemTile(149),loadItemCSet(149),5,12,6);
+		}
+		if(Link->Item[150]){
+			drawTileToLoc(loadItemTile(150),loadItemCSet(150),5,13,6);
+		}
+		if(Link->Item[151]){
+			drawTileToLoc(loadItemTile(151),loadItemCSet(151),5,14,6);
+		}
+		//
+		if(hasQuestItem(1)>0){
+			int qit = getQuestItem(1,0);
+			drawTileToLoc(loadItemTile(qit),loadItemCSet(qit),2,14,6);
+			if(cursorIndex==11){
+				itemdata theItem = Game->LoadItemData(qit);
+				theItem->GetName(itemDescStr);
+			}
+		}
+		if(hasQuestItem(2)>0){
+			int qit = getQuestItem(2,0);
+			drawTileToLoc(loadItemTile(qit),loadItemCSet(qit),3,14,6);
+			if(cursorIndex==23){
+				itemdata theItem = Game->LoadItemData(qit);
+				theItem->GetName(itemDescStr);
+			}
+		}
+		if(hasQuestItem(3)>0){
+			int qit = getQuestItem(3,0);
+			drawTileToLoc(loadItemTile(qit),loadItemCSet(qit),4,14,6);
+			if(cursorIndex==35){
+				itemdata theItem = Game->LoadItemData(qit);
+				theItem->GetName(itemDescStr);
+			}
+		}
+		//
+		//end Items
+		//CURSOR:
+		drawTileToLoc(loadItemTile(CURSOR_ITEM),loadItemCSet(CURSOR_ITEM),cursorRow,cursorCol,6);
+		//Equipping of items is handled in //EX_ITEMS//
+		int itOnCursor = ItemIDs[cursorIndex];
+		if(itOnCursor!=0&&canEquip(itOnCursor)){
+			if(itOnCursor>=146&&itOnCursor<=151){
+				getBottleStateName(getBottleState(itOnCursor-145),itemDescStr);
+			} else {
+				itemdata theItem = Game->LoadItemData(itOnCursor);
+				theItem->GetName(itemDescStr);
+			}
+		}
+		//end Draw Item Screen
+	} else if(subState==1){
+		drawBase(SCRN_SUBSCREEN_KEY);
+		//start Draw Key Screen
+		int cursorNotes[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+		if(Link->Item[31]){//start songs
+			if(LEARNED_SONGS[SONG_SongOfTime]){
+				drawTileToLoc(TILE_NOTE_DEFAULT,0,3,3,6);
+				cursorNotes[1]=SONGNOTES_SongOfTime;
+				if(cursorIndex==1){
+					int cpystr[] = "Song of Time";
+					strcpy(itemDescStr,cpystr);
+					if(pressA){
+						fakeSong = true;
+						playSong(SONGNOTES_SongOfTime);
+						playedSong=-1;
+					}
+				}
+			}
+			if(LEARNED_SONGS[SONG_SongOfHealing]){
+				drawTileToLoc(TILE_NOTE_DEFAULT,0,3,4,6);
+				cursorNotes[2]=SONGNOTES_SongOfHealing;
+				if(cursorIndex==2){
+					int cpystr[] = "Song of Healing";
+					strcpy(itemDescStr,cpystr);
+					if(pressA){
+						fakeSong = true;
+						playSong(SONGNOTES_SongOfHealing);
+						playedSong=-1;
+					}
+				}
+			}
+			if(LEARNED_SONGS[SONG_SongOfStorms]){
+				drawTileToLoc(TILE_NOTE_DEFAULT,0,3,5,6);
+				cursorNotes[3]=SONGNOTES_SongOfStorms;
+				if(cursorIndex==3){
+					int cpystr[] = "Song of Storms";
+					strcpy(itemDescStr,cpystr);
+					if(pressA){
+						fakeSong = true;
+						playSong(SONGNOTES_SongOfStorms);
+						playedSong=-1;
+					}
+				}
+			}
+			if(LEARNED_SONGS[SONG_EponasSong]){
+				drawTileToLoc(TILE_NOTE_DEFAULT,0,3,6,6);
+				cursorNotes[4]=SONGNOTES_EponasSong;
+				if(cursorIndex==4){
+					int cpystr[] = "Epona's Song";
+					strcpy(itemDescStr,cpystr);
+					if(pressA){
+						fakeSong = true;
+						playSong(SONGNOTES_EponasSong);
+						playedSong=-1;
+					}
+				}
+			}
+			if(LEARNED_SONGS[SONG_SongOfSoaring]){
+				drawTileToLoc(TILE_NOTE_DEFAULT,0,3,7,6);
+				cursorNotes[5]=SONGNOTES_SongOfSoaring;
+				if(cursorIndex==5){
+					int cpystr[] = "Song of Soaring";
+					strcpy(itemDescStr,cpystr);
+					if(pressA){
+						fakeSong = true;
+						playSong(SONGNOTES_SongOfSoaring);
+						playedSong=-1;
+					}
+				}
+			}
+			if(LEARNED_SONGS[SONG_SonataOfAwakening]){
+				drawTileToLoc(TILE_NOTE_DEFAULT+1,0,4,3,6);
+				cursorNotes[8]=SONGNOTES_SonataOfAwakening;
+				if(cursorIndex==8){
+					int cpystr[] = "Sonata Of Awakening";
+					strcpy(itemDescStr,cpystr);
+					if(pressA){
+						fakeSong = true;
+						playSong(SONGNOTES_SonataOfAwakening);
+						playedSong=-1;
+					}
+				}
+			}
+			if(LEARNED_SONGS[SONG_GoronsLullaby]){
+				drawTileToLoc(TILE_NOTE_DEFAULT+2,0,4,4,6);
+				cursorNotes[9]=SONGNOTES_GoronsLullaby;
+				if(cursorIndex==9){
+					int cpystr[] = "Goron's Lullaby";
+					strcpy(itemDescStr,cpystr);
+					if(pressA){
+						fakeSong = true;
+						playSong(SONGNOTES_GoronsLullaby);
+						playedSong=-1;
+					}
+				}
+			}
+			if(LEARNED_SONGS[SONG_NewWaveBossaNova]){
+				drawTileToLoc(TILE_NOTE_DEFAULT+3,0,4,5,6);
+				cursorNotes[10]=SONGNOTES_NewWaveBossaNova;
+				if(cursorIndex==10){
+					int cpystr[] = "New Wave Bossa Nova";
+					strcpy(itemDescStr,cpystr);
+					if(pressA){
+						fakeSong = true;
+						playSong(SONGNOTES_NewWaveBossaNova);
+						playedSong=-1;
+					}
+				}
+			}
+			if(LEARNED_SONGS[SONG_ElegyOfEmptiness]){
+				drawTileToLoc(TILE_NOTE_DEFAULT+4,0,4,6,6);
+				cursorNotes[11]=SONGNOTES_ElegyOfEmptiness;
+				if(cursorIndex==11){
+					int cpystr[] = "Elegy Of Emptiness";
+					strcpy(itemDescStr,cpystr);
+					if(pressA){
+						fakeSong = true;
+						playSong(SONGNOTES_ElegyOfEmptiness);
+						playedSong=-1;
+					}
+				}
+			}
+			if(LEARNED_SONGS[SONG_OathToOrder]){
+				drawTileToLoc(TILE_NOTE_DEFAULT+5,0,4,7,6);
+				cursorNotes[12]=SONGNOTES_OathToOrder;
+				if(cursorIndex==12){
+					int cpystr[] = "Oath To Order";
+					strcpy(itemDescStr,cpystr);
+					if(pressA){
+						fakeSong = true;
+						playSong(SONGNOTES_OathToOrder);
+						playedSong=-1;
+					}
+				}
+			}
+		}//end songs
+		if(Link->Item[76]){
+			drawTileToLoc(loadItemTile(76),loadItemCSet(76),6,7,6);
+			if(cursorIndex==16){
+				itemdata theItem = Game->LoadItemData(76);
+				theItem->GetName(itemDescStr);
+			}
+		} else if(Link->Item[75]){
+			drawTileToLoc(loadItemTile(75),loadItemCSet(75),6,7,6);
+			if(cursorIndex==16){
+				itemdata theItem = Game->LoadItemData(75);
+				theItem->GetName(itemDescStr);
+			}
+		} else if(Link->Item[13]){//Check is for Arrows
+			drawTileToLoc(loadItemTile(74),loadItemCSet(74),6,7,6);
+			if(cursorIndex==16){
+				itemdata theItem = Game->LoadItemData(74);
+				theItem->GetName(itemDescStr);
+			}
+		}
+		if(Link->Item[83]){
+			drawTileToLoc(loadItemTile(83),loadItemCSet(83),6,5,6);
+			if(cursorIndex==15){
+				itemdata theItem = Game->LoadItemData(83);
+				theItem->GetName(itemDescStr);
+			}
+		} else if(Link->Item[82]){
+			drawTileToLoc(loadItemTile(82),loadItemCSet(82),6,5,6);
+			if(cursorIndex==15){
+				itemdata theItem = Game->LoadItemData(82);
+				theItem->GetName(itemDescStr);
+			}
+		} else if(Link->Item[81]){
+			drawTileToLoc(loadItemTile(81),loadItemCSet(81),6,5,6);
+			if(cursorIndex==15){
+				itemdata theItem = Game->LoadItemData(81);
+				theItem->GetName(itemDescStr);
+			}
+		}
+		if(Link->Item[7]){
+			drawTileToLoc(loadItemTile(7),loadItemCSet(7),6,1,6);
+			if(cursorIndex==13){
+				itemdata theItem = Game->LoadItemData(7);
+				theItem->GetName(itemDescStr);
+			}
+		} else if(Link->Item[6]){
+			drawTileToLoc(loadItemTile(6),loadItemCSet(6),6,1,6);
+			if(cursorIndex==13){
+				itemdata theItem = Game->LoadItemData(6);
+				theItem->GetName(itemDescStr);
+			}
+		} else {
+			drawTileToLoc(loadItemTile(5),loadItemCSet(5),6,1,6);
+			if(cursorIndex==13){
+				itemdata theItem = Game->LoadItemData(5);
+				theItem->GetName(itemDescStr);
+			}
+		}
+		if(hasMirrorShield){
+			drawTileToLoc(loadItemTile(37),loadItemCSet(37),6,3,6);
+			if(cursorIndex==14){
+				itemdata theItem = Game->LoadItemData(37);
+				theItem->GetName(itemDescStr);
+			}
+		} else {
+			drawTileToLoc(loadItemTile(8),loadItemCSet(8),6,3,6);
+			if(cursorIndex==14){
+				itemdata theItem = Game->LoadItemData(8);
+				theItem->GetName(itemDescStr);
+			}
+		}
+		if(Link->Item[I_REMAINS1]){
+			
+			if(!cursorIndex){
+				itemdata theItem = Game->LoadItemData(I_REMAINS1);
+				theItem->GetName(itemDescStr);
+			}
+		}
+		if(Link->Item[I_REMAINS2]){
+			
+			if(cursorIndex==6){
+				itemdata theItem = Game->LoadItemData(I_REMAINS2);
+				theItem->GetName(itemDescStr);
+			}
+		}if(Link->Item[I_REMAINS3]){
+			
+			if(cursorIndex==7){
+				itemdata theItem = Game->LoadItemData(I_REMAINS3);
+				theItem->GetName(itemDescStr);
+			}
+		}if(Link->Item[I_REMAINS4]){
+			
+			if(cursorIndex==18){
+				itemdata theItem = Game->LoadItemData(I_REMAINS4);
+				theItem->GetName(itemDescStr);
+			}
+		}
+		drawTileToLoc(64640 + (Game->Generic[GEN_HEARTPIECES]),0,6,9,6);
+		if(cursorIndex==17){
+			if(!Game->Generic[GEN_HEARTPIECES]){
+				int cpystr[] = "Heart Pieces";
+				strcpy(itemDescStr,cpystr);
+			} else if(Game->Generic[GEN_HEARTPIECES]==1){
+				int cpystr[] = "Piece of Heart";
+				strcpy(itemDescStr,cpystr);
+			} else if(Game->Generic[GEN_HEARTPIECES]==2){
+				int cpystr[] = "2 Pieces of Heart";
+				strcpy(itemDescStr,cpystr);
+			} else if(Game->Generic[GEN_HEARTPIECES]==3){
+				int cpystr[] = "3 Pieces of Heart";
+				strcpy(itemDescStr,cpystr);
+			}
+		}
+		//Draw song notes
+		if(cursorNotes[cursorIndex]!=0){
+			int notes = cursorNotes[cursorIndex];
+			for(int i = 0;i<8;i++){
+				int note_tile = noteToTile(notes[i]);
+				int note_cset = noteToCSet(notes[i]);
+				drawTileToLoc(note_tile,note_cset,1,1+i,6);
+			}
+		}
+		//CURSOR:
+		bool large = false;
+		for(int i = 0;i<4;i++){
+			if(cursorPos==QUAD_LOCS[i]){
+				large = true;
+			}
+		}
+		if(large){
+			drawTileToLoc(loadItemTile(LARGE_CURSOR_ITEM),loadItemCSet(LARGE_CURSOR_ITEM),cursorRow,cursorCol,6);
+			drawTileToLoc(loadItemTile(LARGE_CURSOR_ITEM)+20,loadItemCSet(LARGE_CURSOR_ITEM),cursorRow,cursorCol+1,6);
+			drawTileToLoc(loadItemTile(LARGE_CURSOR_ITEM)+40,loadItemCSet(LARGE_CURSOR_ITEM),cursorRow+1,cursorCol+1,6);
+			drawTileToLoc(loadItemTile(LARGE_CURSOR_ITEM)+60,loadItemCSet(LARGE_CURSOR_ITEM),cursorRow+1,cursorCol,6);
+		} else {
+			drawTileToLoc(loadItemTile(CURSOR_ITEM),loadItemCSet(CURSOR_ITEM),cursorRow,cursorCol,6);
+		}
+		//end Draw Key Screen
+	} else if(subState==2){
+		if(dungeon){
+			drawBase(SCRN_SUBSCREEN_MAP_DUNGEON);
+		//start Draw Dungeon Map
+		
+		//end Draw Dungeon Map
+		} else {
+			drawBase(SCRN_SUBSCREEN_MAP_OVERWORLD);
+		//start Draw Overworld Map
+		
+		//end Draw Overworld Map
+		}
+	}
+	showItemCaption(itemDescStr);
+	//end DrawThings
+}
+
+void passiveSubscreen(){//start PassiveSubscreen
+	//Inventory
+	int A_tile = TILE_INVIS;
+	int R_tile = TILE_INVIS;
+	int A_cset = 0;
+	int R_cset = 0;
+	int L_tile = TILE_INVIS;
+	int L_cset = 0;
+	int RUPEE_tile = 60;
+	int RUPEE_cset = 5;
+	if(Link->Item[42]){
+		RUPEE_cset = 1;
+	} else if(Link->Item[41]){
+		RUPEE_cset = 0;
+	}
+	if(!form||form==4){
+		A_tile = loadItemTile(Link->ItemA);
+		A_cset = loadItemCSet(Link->ItemA);
+		if(form==4||!Link->Item[210]){
+			if(hasMirrorShield){
+				R_tile = loadItemTile(37);
+				R_cset = loadItemCSet(37);
+			} else {
+				R_tile = loadItemTile(8);
+				R_cset = loadItemCSet(8);
+			}
+		}
+	} else if(form==1){
+		A_tile = loadItemTile(Link->ItemA);
+		A_cset = loadItemCSet(Link->ItemA);
+		if(Game->MCounter[CR_MAGIC]>0){
+			R_tile = loadItemTile(ITEM_BUBBLE);
+			R_cset = loadItemCSet(ITEM_BUBBLE);
+		}
+	} else if(form==2){
+		if(curled){
+			A_tile = loadItemTile(ITEM_POUND);
+			A_cset = loadItemCSet(ITEM_POUND);
+		} else {
+			A_tile = loadItemTile(Link->ItemA);
+			A_cset = loadItemCSet(Link->ItemA);
+		}
+		R_tile = 12591;
+		R_cset = 0;
+	} else if(form==3){
+		A_tile = loadItemTile(Link->ItemA);
+		A_cset = loadItemCSet(Link->ItemA);
+		R_tile = loadItemTile(23);
+		R_cset = loadItemCSet(23);
+	}
+	if(!form)switch(mask){
+		case 7:{
+			if(!getGlobalVar(GVAR_BLASTMASKCOOLDOWN,0)){
+				L_tile=loadItemTile(189);
+				L_cset=loadItemCSet(189);
+			}
+		break;}
+	}
+	int EX1_tile = loadItemTile(EX1_item);
+	int EX2_tile = loadItemTile(EX2_item);
+	int B_tile = loadItemTile(B_item);
+	int B_cset = loadItemCSet(B_item);
+	int EX1_cset = loadItemCSet(EX1_item);
+	int EX2_cset = loadItemCSet(EX2_item);
+	if(EX1_item==I_DEKUSTICK&&dekuStickLitTimer>0)EX1_tile+=20;
+	if(EX2_item==I_DEKUSTICK&&dekuStickLitTimer>0)EX2_tile+=20;
+	if(B_item==I_DEKUSTICK&&dekuStickLitTimer>0)B_tile+=20;
+	if(isArrow(B_item)&&B_item!=13)B_tile++;
+	if(isArrow(EX1_item)&&EX1_item!=13)EX1_tile++;
+	if(isArrow(EX2_item)&&EX2_item!=13)EX2_tile++;
+	if(holdingBomb){
+		EX1_tile=TILE_INVIS;
+		EX2_tile=TILE_INVIS;
+		B_tile=TILE_INVIS;
+		A_tile=loadItemTile(3);
+		A_cset=loadItemCSet(3);
+		R_tile=TILE_DROP;
+		R_cset=CSET_DROP;
+	}
+	if(Deku_flying>0){
+		EX1_tile=TILE_INVIS;
+		EX2_tile=TILE_INVIS;
+		B_tile=TILE_INVIS;
+		A_tile=loadItemTile(ITEM_DEKUNUT);
+		A_cset=loadItemCSet(ITEM_DEKUNUT);
+		R_tile=TILE_DROP;
+		R_cset=CSET_DROP;
+	}
+	Screen->FastTile(7,BX,BY,B_tile,B_cset,OP_OPAQUE);
+	Screen->FastTile(7,EX1X,EX1Y,EX1_tile,EX1_cset,OP_OPAQUE);
+	Screen->FastTile(7,EX2X,EX2Y,EX2_tile,EX2_cset,OP_OPAQUE);
+	Screen->FastTile(7,AX,AY,A_tile,A_cset,OP_OPAQUE);
+	Screen->FastTile(7,RX,RY,R_tile,R_cset,OP_OPAQUE);
+	Screen->FastTile(7,LX,LY,L_tile,L_cset,OP_OPAQUE);
+	//Mask
+	Screen->FastTile(7,MASKX,MASKY,currMaskTile,6,OP_OPAQUE);
+	if(mask==24)Screen->FastTile(7,185,-22,currMaskTile+1,6,OP_OPAQUE);
+	//Rupee Marker
+	Screen->FastTile(7,26,-24,RUPEE_tile,RUPEE_cset,OP_OPAQUE);
+	//Tael
+	if(Link->Item[I_TAEL_1]){
+		Screen->FastTile(7,TAEL_X,TAEL_Y,loadItemTile(I_TAEL_1),0,OP_OPAQUE);
+		Screen->FastTile(7,TAEL_X+16,TAEL_Y,loadItemTile(I_TAEL_2),0,OP_OPAQUE);
+	}
+	//Time
+	if(day<4){
+		if(slowTime){
+			Screen->FastTile(7,DAYSTART_X-8,DAYSTART_Y,12613,0,OP_OPAQUE);
+		}
+		Screen->FastTile(7,DAYSTART_X,DAYSTART_Y,12610,0,OP_OPAQUE);
+		Screen->FastTile(7,DAYSTART_X+16,DAYSTART_Y,12611,0,OP_OPAQUE);
+		Screen->FastTile(7,DAYNUM_X,DAYNUM_Y,NumberTiles[day],0,OP_OPAQUE);
+		Screen->FastTile(7,TIMESTART_X,TIMESTART_Y,NumberTiles[Floor(hour/10)],0,OP_OPAQUE);
+		Screen->FastTile(7,TIMESTART_X+7,TIMESTART_Y,NumberTiles[hour%10],0,OP_OPAQUE);
+		Screen->FastTile(7,TIMESTART_X+12,TIMESTART_Y,SEMICOLON,0,OP_OPAQUE);
+		int minute = Floor(time/FRAMES_MINUTE);
+		Screen->FastTile(7,TIMESTART_X+17,TIMESTART_Y,NumberTiles[Floor(minute/10)],0,OP_OPAQUE);
+		Screen->FastTile(7,TIMESTART_X+24,TIMESTART_Y,NumberTiles[minute%10],0,OP_OPAQUE);
+	} else {
+		Screen->FastTile(7,DAYSTART_X-4,DAYSTART_Y,12608,0,OP_OPAQUE);
+		Screen->FastTile(7,DAYSTART_X+12,DAYSTART_Y,12609,0,OP_OPAQUE);
+	}
+}//end PassiveSubscreen
+
+//start subscreenFunctions
+int noteToTile(int note){
+	if(note==NOTE_A)return NOTETILE_A;
+	if(note==NOTE_DOWN)return NOTETILE_DOWN;
+	if(note==NOTE_RIGHT)return NOTETILE_RIGHT;
+	if(note==NOTE_LEFT)return NOTETILE_LEFT;
+	if(note==NOTE_UP)return NOTETILE_UP;
+	return TILE_INVIS;
+}
+
+int noteToCSet(int note){
+	if(note==NOTE_A)return NOTECSET_A;
+	if(note==NOTE_DOWN)return NOTECSET_DOWN;
+	if(note==NOTE_RIGHT)return NOTECSET_RIGHT;
+	if(note==NOTE_LEFT)return NOTECSET_LEFT;
+	if(note==NOTE_UP)return NOTECSET_UP;
+	return 0;
+}
+
+int loadItemTile(int itID){
+	if(itID == 0)return TILE_INVIS;
+	itemdata i = Game->LoadItemData(itID);
+	int frameNum = 0;
+	if(i->ASpeed>0&&i->AFrames>0)
+		frameNum = Floor((gameframe%(i->ASpeed*i->AFrames))/i->ASpeed);
+	return i->Tile+frameNum;
+}
+
+int loadItemCSet(int itID){
+	if(itID == 0)return 0;
+	itemdata i = Game->LoadItemData(itID);
+	return i->CSet;
+}
+
+void drawTileToLoc(int tile, int cset, int row, int col, int layer){
+	Screen->FastTile(layer,col*16,row*16,tile,cset,OP_OPAQUE);
+}
+
+int locToRow(int loc){
+	return Floor(loc/16);
+}
+
+int locToCol(int loc){
+	return (loc-(Floor(loc/16)*16));
+}
+
+void drawBase(int baseScreen){
+	Screen->DrawScreen(6,MAP_SUBSCREEN,baseScreen,0,0,0);
+}//end subscreenFunctions

@@ -1,0 +1,843 @@
+////////////////////////////////////////
+//                                    //
+//     MM2D Script: Global Scripts    //
+//                                    //
+////////////////////////////////////////
+
+//start Init Script
+global script Init
+{
+	void run()
+	{
+		Game->DisableActiveSubscreen=true;
+		CopyTile(TILE_INVIS,19);
+		CopyTile(TILE_INVIS,39);
+		Game->MCounter[CR_DEKUNUTS] = 20;
+		Game->MCounter[CR_MAGICBEANS] = 20;
+		Game->MCounter[CR_BANKBAL] = 5000;
+		setGlobalVar(GVAR_DIFFICULTY,GV_MISC,1);
+		int saveName[16];
+		Game->GetSaveName(saveName);
+		if(!strcmp(saveName,"Venrob"))debugEnabled=true;
+		setGlobalVar(TINT_DAY,GV_PAL,createTintPalette(0,0,0));
+		setGlobalVar(TINT_SUNSETORANGE,GV_PAL,createTintPalette(-3,-9,-14));
+		setGlobalVar(TINT_NIGHT,GV_PAL,createTintPalette(-21,-23,-10));
+		setGlobalVar(TINT_LENS,GV_PAL,createTintPalette(-17,-48,5));
+	}
+}
+//end
+//start Active Script
+global script Global
+{
+	void run()//start mainGlobal
+	{
+		bool isLensTinted = false;
+		setEnterEndsTyping(true);
+		setAllowBackspaceDelete(true);
+		setOverflowWraps(false);
+		//start init
+		ClearTrace();
+		TraceS("Launching TLoZ: Majora's Mask 2D...");TraceNL();
+		if(Link->Item[81])Game->MCounter[CR_BOMBCHUS]=40;
+		bool scrnChanged = false;
+		LinkMovement_Init();
+		TangoInit();
+		StartGhostZH();
+		//start Ocarina init
+		scarecrowMode = false;
+		scarecrowRecord = false;
+		ocIndex = 0;
+		playedSong = -1;
+		songFrames = 0;
+		midiToReturn = 0;
+		//end Ocarina init
+		subscreen = false;
+		//end init
+		//start init bitmaps
+		clearBitmap(RT_BITMAP0);
+		//end init bitmaps
+		//start Global Script Scope Vars
+		lweapon zoraBoom1;
+		lweapon zoraBoom2;
+		//end
+		//Tango_ConvertVariableName("anpc");
+		//Tango_ConvertFunctionName("npcend");
+		while(true)
+		{
+			clearBitmap(RT_BITMAP0);
+			handleTyping();
+			if(debugEnabled)testingMenu();
+			//start
+			if(scrnChanged)
+			{
+				scrnChanged=false;
+				layer4check();
+			}
+			if(lastMap!=Game->GetCurMap()||lastScreen!=Game->GetCurScreen())
+			{
+				scrnChanged=true;
+				changedScreens();
+				lastScreen = Game->GetCurScreen();
+				lastMap = Game->GetCurMap();
+			}
+			if(lastDMap!=Game->GetCurDMap())
+			{
+				changedDMap();
+				lastDMap = Game->GetCurDMap();
+				if(lastLevel!=Game->GetCurLevel())
+				{
+					changedLevel();
+					lastLevel = Game->GetCurLevel();
+				}
+			}
+			layer4Toggle();
+			if(subscreen)
+			{
+				pressA=Link->PressA;
+				Link->PressA=false;
+				Link->InputA=false;
+			}
+			varIntegrity();
+			//end
+			//start FrameCounters
+			if(freezeFrames>0)
+			{
+				NoAction();
+				freezeFrames--;
+			}
+			gameframe++;
+			if(gameframe>=3600)
+			{
+				gameframe=0;
+			}//end FrameCounters
+			//start Time passing
+			bool timeIsNotFrozen = (!isFrozen&&(!slowTime||!(gameframe%2))&&(!ScreenFlag(SF_MISC,SFM_SCRIPT1))&&!songFrames);
+			if(!freezeTime&&timeIsNotFrozen)//freezeTime is a debug, and should ONLY apply to this block, not other sections that use `timeIsNotFrozen`.
+			{
+				time++;
+				trueTime+= FRAME;
+				if(time%FRAMES_HOUR == 0)
+				{
+					hour++;
+					time=0;
+					if(hour>=24)
+					{
+						hour-=24;
+					}
+					else if(hour==6)
+					{
+						day++;
+					}
+				}
+				if(day>3)
+				{
+					destruction();
+				}
+				unpauseGradient();
+			}
+			else
+			{
+				pauseGradient();
+			}
+			//end Time Passing
+			bombCheck();
+			Tango_Update1();
+			//start Ocarina loop
+			if(songFrames>0)
+			{
+				/*if(Game->CappedFPS)
+				{
+					saveFPSstate();
+					Game->CappedFPS=false;
+				}*/
+				TotalNoAction();
+				ocarina_mode = false;
+				Screen_Freeze(2);
+				if(!fakeSong)
+					drawNotes();
+				songFrames--;
+				if(!songFrames)
+				{
+					loadFPSstate();
+					if(midiToReturn!=-6&&midiToReturn<205)
+						Audio->PlayMIDI(midiToReturn);
+					if(!fakeSong&&playedSong>-1)
+						activateSong(playedSong);
+					playedSong=-1;
+					fakeSong=false;
+					if(!subscreen)
+						Screen_Freeze(0);
+				}
+			}
+			else
+			{
+				midiToReturn = Game->GetMIDI();
+			}
+			if(OC_doItemJinx)
+			{
+				if(Link->InputB)
+				{
+					Link->ItemJinx=2;
+				}
+				else
+				{
+					OC_doItemJinx=false;
+				}
+			}
+			if(ocarina_mode)
+			{
+				ocarina();
+				Link->PressStart=false;
+				Link->InputStart=false;
+			}
+			if(scarecrowRecord)
+			{
+				scarecrow();
+			}
+			if(ocarina_mode||scarecrowRecord||songFrames>0)
+			{
+				Link->CollDetection = false;
+			}
+			else
+			{
+				Link->CollDetection = true;
+			}
+			//end Ocarina loopz
+			//start Subscreen
+			if((!isFrozen||subscreen)&&Link->PressStart&&!ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN))
+			{
+				toggleSubscreen();
+			}
+			if(subscreen)
+			{
+				runSubscreen();
+			}
+			//end Subscreen
+			//start
+			if(Tango_AnySlotIsActive())
+			{
+				Screen_Freeze(1);
+				slotWasDisplayed=true;
+			}
+			else if(slotWasDisplayed)
+			{
+				Screen_Freeze(0);
+				slotWasDisplayed=false;
+			}
+			Link->PressStart=false;
+			Link->InputStart=false;
+			razorSwordCheck();
+			//transformaitons
+			handleTransformations(zoraBoom1,zoraBoom2);
+			if(Game->Misc[0]!=Debug->Null())
+			{
+				zoraBoom1=Game->Misc[0];
+				Game->Misc[0]=Debug->Null();
+			}
+			if(Game->Misc[1]!=Debug->Null())
+			{
+				zoraBoom2=Game->Misc[1];
+				Game->Misc[1]=Debug->Null();
+			}
+			//
+			handleEXItems();
+			handleMasks();
+			//end
+			if(subscreen)//start
+			{
+				NoAction();
+			}
+			else if(!isFrozen)
+			{
+				warpfloors();
+				varDecrements();
+				checkJump();
+				heightWarp();
+				checkFall();
+				handleMeltableIce();
+				handleFreezableWater();
+			}//end
+			//start
+			LinkActionOld=Link->Action;
+			raftingCheck();
+			LinkMovement_Update1();
+			if(!isFrozen)
+				highLedgeFromWater();
+			Link->PressR=false;Link->InputR=false;
+			Link->PressL=false;Link->InputL=false;
+			Overhead_Update();
+			drawExtraLayerEffects();
+			UpdateGhostZH1();
+			//end
+			if(UsingItem(53)&&fullCounter(CR_MAGIC)>2)
+			{
+				if(!isLensTinted)
+				{
+					setTint(getGlobalVar(TINT_LENS,GV_PAL),true);
+					isLensTinted=true;
+				}
+			}
+			else
+			{
+				if(isLensTinted)
+				{
+					setTint(getGlobalVar(TINT_LENS,GV_PAL),false);
+					isLensTinted=false;
+				}
+			}
+			timePalette();
+			runTints();
+			runHeightBitmap();
+			Waitdraw();			
+			passiveSubscreen();
+			if(!isFrozen||isBottleFrozen)
+			{
+				EmptyBottleGlobal();
+			}
+			Tango_Update2();
+			UpdateGhostZH2();
+			if(isFrozen)LinkMovement_SetLinkSpeedBoost(0);
+			LinkMovement_Update2();
+			Waitframe();
+		}
+	}//end mainGlobal
+	//start destruction
+	void destruction()
+	{
+		if(!(!Game->GetCurDMap()&&Game->GetCurScreen()==32))
+		{
+			if(subscreen)
+			{
+				toggleSubscreen();
+				Waitframe();
+			}
+			Link->Warp(0,32);
+			Waitframes(2);
+			int args[8];
+			if(LEARNED_SONGS[SONG_SongOfTime]&&Link->Item[31])
+			{
+				args[0]=3;
+			}
+			else
+			{
+				args[0]=4;
+			}
+			RunFFCScript(FFC_SHOWSTRING, args);
+		}
+	}
+	//end destruction
+	//start extra
+	void layer4Toggle()
+	{
+		if(Link->PressEx4)
+		{
+			hideLayer4 = !hideLayer4;
+		}
+	}
+	
+	void layer4check()
+	{
+		//Handle Screen->LayerOpacity[]
+	}
+	
+	void drawExtraLayerEffects()
+	{
+		if(songOfStormsRain)
+		{
+			Screen->DrawScreen(6,LAYERSMAP1,LAYERSCREEN_RAIN,0,0,0);
+		}
+		int downdmap = getDownDMap();
+		if(downdmap>-1)
+		{
+			int screen = getDownScreen(false);
+			if(screen>-1)
+			{
+				dmapdata ddmap = Game->LoadDMapData(downdmap);
+				drawHeightLayerData(ddmap->Map,screen,2);
+			}
+		}
+		if(!hideLayer4)
+		{
+			int updmap = getUpDMap();
+			if(updmap>-1)
+			{
+				int screen = getUpScreen(false);
+				if(screen>-1)
+				{
+					dmapdata udmap = Game->LoadDMapData(updmap);
+					drawHeightLayerData(udmap->Map,screen,4);
+				}
+			}
+		}
+	}
+	
+	void drawHeightLayerData(int map, int screen, int layer)
+	{
+		mapdata m = Game->LoadMapData(map,screen);
+		if(!Game->GetScreenState(map, screen, ST_ITEM))
+		{
+			if(m->HasItem)
+				HeightFastTile(layer,m->ItemX,m->ItemY,loadItemTile(m->Item),loadItemTile(m->Item),OP_TRANS);
+		}
+		for(int i = MIN_FFC; i < MAX_NONRESERVED_FFC; i++)
+		{
+			int data = m->FFCData[i];
+			switch(m->FFCScript[i])
+			{
+				case FFC_CHEST:
+					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getChestCombo(data,m->GetFFCInitD(i, 1)),m->FFCCSet[i],OP_OPAQUE);
+					break;
+				case FFC_OWL:
+					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getOwlCombo(m->GetFFCInitD(i, 0)),m->FFCCSet[i],OP_OPAQUE);
+					break;
+				case FFC_NPC:
+					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getNPCCombo(m->FFCData[i], m->GetFFCInitD(i, 0)+0, m->GetFFCInitD(i, 1)+0, m->GetFFCInitD(i, 2)+0, m->GetFFCInitD(i, 3)+0, m->GetFFCInitD(i, 4)+0, m->GetFFCInitD(i, 5)+0, (m->GetFFCInitD(i, 7))>0),m->FFCCSet[i],OP_OPAQUE);
+					break;
+				default:
+					if(data==0)break;
+					if(data==COMBO_INVIS)break;
+					combodata cdata = Game->LoadComboData(data);
+					int tile = cdata->Tile;
+					int ffwidth = m->FFCTileWidth[i];
+					int ffheight = m->FFCTileHeight[i];
+					for(int width = 0; width < ffwidth; width++)
+					{
+						for(int height = 0; height < ffheight; height++)
+						{
+							HeightFastTile(layer,m->FFCX[i]+(width*16),m->FFCY[i]+(height*16),tile+(width)+(height*20),m->FFCCSet[i],Cond((m->FFCFlags[i] & FFCBF_TRANS)>0,OP_TRANS,OP_OPAQUE));
+						}
+					}
+			}
+		}
+	}
+	
+	void changedScreens()
+	{
+		songOfStormsRain = false;
+		if(!floating)Link->Invisible=false;
+	}
+	
+	void changedLevel()
+	{
+		torchPuzzleState=0;
+		torchPuzzleTimer=0;
+	}
+	
+	void changedDMap()
+	{
+		
+	}
+	
+	void varDecrements()
+	{
+		if(usingBugs>0)usingBugs--;
+		if(beanCounter>0)beanCounter--;
+		if(torchPuzzleTimer>0)torchPuzzleTimer--;
+		if(dekuStickLitTimer>0)dekuStickLitTimer--;
+	}
+	
+	void varIntegrity()
+	{
+		if(floating<0)floating=0;
+		if(Deku_flying<0)Deku_flying=0;
+		if(Game->MCounter[CR_SBOMBS]>1)Game->MCounter[CR_SBOMBS]=1;//PATCHWORK//
+		if(rafting&&Link->Action!=LA_RAFTING)
+		{
+			canFall=true;
+			rafting=false;
+		}
+		else if(!rafting&&Link->Action==LA_RAFTING)
+		{
+			canFall=false;
+			rafting=true;
+		}
+		
+		if(debugCanFall)canFall=false;
+	}//end
+	void raftingCheck()//start rafting
+	{
+		if(Link->Action==LA_RAFTING)
+		{
+			Rafting[RAFT_DIR]=-1;
+			if(Link->PressRight&&CanWalk(Link->X,Link->Y,DIR_RIGHT,16,false))
+			{
+				Link->X+=16;
+				Link->Action=LA_NONE;
+			}
+			else if(Link->PressLeft&&CanWalk(Link->X,Link->Y,DIR_LEFT,16,false))
+			{
+				Link->X-=16;
+				Link->Action=LA_NONE;
+			}
+			else if(Link->PressUp&&CanWalk(Link->X,Link->Y,DIR_UP,16,false))
+			{
+				Link->Y-=16;
+				Link->Action=LA_NONE;
+			}
+			else if(Link->PressDown&&CanWalk(Link->X,Link->Y,DIR_DOWN,16,false))
+			{
+				Link->Y+=16;
+				Link->Action=LA_NONE;
+			}
+		}
+		else if(Rafting[RAFT_DIR]!=-1)
+		{
+			NoAction();
+			if(Rafting[RAFT_UP]>0)
+			{
+				for(int i = 0;i<Rafting[RAFT_UP];Rafting[RAFT_UP]--)
+				{
+					warpUp();
+					//Waitframe(); //Unneeded?
+				}
+				Rafting[RAFT_UP]=-1;
+				int args[8] = {Rafting[RAFT_DIR],0,0,2};
+				Rafting[RAFT_DIR] = -1;
+				Waitframe();
+				RunFFCScript(FFC_SOFTSOIL,args);
+			}
+			else
+			{
+				//
+				Link->Dir=Rafting[RAFT_DIR];
+				if(Rafting[RAFT_X]!=-1&&Rafting[RAFT_Y]!=-1&&!(gameframe%10))
+				{
+					Link->X = Rafting[RAFT_X];
+					Link->Y = Rafting[RAFT_Y];
+				}
+				if(Rafting[RAFT_DIR]==DIR_DOWN)
+				{
+					Link->PressDown=true;
+					Link->InputDown=true;
+				}
+				else if(Rafting[RAFT_DIR]==DIR_RIGHT)
+				{
+					Link->PressRight=true;
+					Link->InputRight=true;
+				}
+				else if(Rafting[RAFT_DIR]==DIR_LEFT)
+				{
+					Link->PressLeft=true;
+					Link->InputLeft=true;
+				}
+				else if(Rafting[RAFT_DIR]==DIR_UP)
+				{
+					Link->PressUp=true;
+					Link->InputUp=true;
+				}
+			}
+		}
+	}//end rafting
+	void warpfloors()//start
+	{
+		if(warpNumFloors>0)
+		{
+			if(!warpUp())warpNumFloors=0;
+			else warpNumFloors--;
+		}
+		else if(warpNumFloors<0)
+		{
+			if(!warpDown())warpNumFloors=0;
+			else warpNumFloors++;
+		}
+	}//end
+	void timePalette()//start
+	{
+		if(hour>=6-MULT_SUNRISE && hour < 6)
+		{
+			setTint(getGlobalVar(TINT_NIGHT,GV_PAL),false);
+			setTint(getGlobalVar(TINT_DAY,GV_PAL),false);
+			if(!isActiveGradient())
+			{
+				runGradient(getGlobalVar(TINT_NIGHT,GV_PAL),getGlobalVar(TINT_DAY,GV_PAL),FRAMES_HOUR*MULT_SUNRISE,true);
+			}
+		}
+		else if(hour>=18-MULT_SUNRISE && hour < 18)
+		{
+			setTint(getGlobalVar(TINT_NIGHT,GV_PAL),false);
+			setTint(getGlobalVar(TINT_DAY,GV_PAL),false);
+			if(time == 0 && hour == 18-MULT_SUNRISE)
+			{
+				runGradient(getGlobalVar(TINT_DAY,GV_PAL),getGlobalVar(TINT_SUNSETORANGE,GV_PAL),FRAMES_HOUR*MULT_SUNRISE/2);
+			}
+			
+			if(!(MULT_SUNRISE%2))
+			{
+				if(time==0 && hour == 18-(MULT_SUNRISE/2))
+				{
+					runGradient(getGlobalVar(TINT_SUNSETORANGE,GV_PAL),getGlobalVar(TINT_NIGHT,GV_PAL),1 + FRAMES_HOUR*MULT_SUNRISE/2);
+				}
+			}
+			else
+			{
+				if(time==FRAMES_HOUR/2 && hour == 18-Ceiling(MULT_SUNRISE))
+				{
+					runGradient(getGlobalVar(TINT_SUNSETORANGE,GV_PAL),getGlobalVar(TINT_NIGHT,GV_PAL),FRAMES_HOUR*MULT_SUNRISE/2);
+				}
+			}
+		}
+		else if(hour > 5 && hour < 18-MULT_SUNRISE)
+		{
+			endGradient();
+			setTint(getGlobalVar(TINT_NIGHT,GV_PAL),false);
+			setTint(getGlobalVar(TINT_SUNSETORANGE,GV_PAL),false);
+			setTint(getGlobalVar(TINT_DAY,GV_PAL),true);
+			//refreshTint();
+		}
+		else if(hour > 17 || hour < 6-MULT_SUNRISE)
+		{
+			endGradient();
+			setTint(getGlobalVar(TINT_NIGHT,GV_PAL),true);
+			setTint(getGlobalVar(TINT_SUNSETORANGE,GV_PAL),false);
+			setTint(getGlobalVar(TINT_DAY,GV_PAL),false);
+			//refreshTint();
+		}
+		if(isOverworldScreen())
+		{
+			unhideGradient();
+		}
+		else
+		{
+			hideGradient();
+			setTint(getGlobalVar(TINT_NIGHT,GV_PAL),false);
+			setTint(getGlobalVar(TINT_SUNSETORANGE,GV_PAL),false);
+			setTint(getGlobalVar(TINT_DAY,GV_PAL),true);
+		}
+	}//end
+	//start TestingMenu
+	void testingMenu()//start
+	{
+		if(!dbsetup)debugSetup();
+		if(!isFrozen){
+			if(Input->ReadKey[KEY_TILDE])//Don't call ReadKey, it calls NoAction!
+			{
+				debug=!debug;
+				//Game->TypingMode = !Game->TypingMode;
+				Link->CollDetection=!debug;
+				canFall=!debug;
+			}
+			if(debug || dbdraw)
+			{
+				//drawDebugInt(0,8,trueTime);
+				//drawDebugInfo(B_item);
+				drawDebugString(256,0,"R:   ",true);
+				drawDebugString(256,6,"G:   ",true);
+				drawDebugString(256,12,"B:   ",true);
+				drawDebugInt(256,0,getTintVar(DATA_R_SUM),true);
+				drawDebugInt(256,6,getTintVar(DATA_G_SUM),true);
+				drawDebugInt(256,12,getTintVar(DATA_B_SUM),true);
+			}
+			if(debug)
+			{
+				drawDebugString(0,0,"DEBUG MODE",false);
+				drawDebugString(0,156,"   TDBG: ~ | TIME: UDLR | REF: = | FRZ: ENTER | WARP: NUMS             ",false);
+				drawDebugString(0,162,"       REFRESH: R | DBDRAW: \\ | CANFALL: F | UPDOWN: []               ",false);
+				canFall=false;
+				//Hour manipulation
+				if(Input->ReadKey[KEY_UP])
+				{
+					hour++;
+					trueTime+=3600*FRAME;
+					if(hour>23)
+					{
+						hour-=24;
+					}
+					if(hour==6)
+					{
+						day++;
+						if(day>3)
+						{
+							day-=3;
+							trueTime-=(3600*24*FRAME);
+							trueTime-=(3600*24*FRAME);
+							trueTime-=(3600*24*FRAME);
+						}
+					}
+				}
+				if(Input->ReadKey[KEY_DOWN])
+				{
+					hour--;
+					trueTime-=3600*FRAME;
+					if(hour<0)
+					{
+						hour+=24;
+					}
+					if(hour==5)
+					{
+						day--;
+						if(day<1)
+						{
+							day+=3;
+							trueTime+=(3600*24*FRAME);
+							trueTime+=(3600*24*FRAME);
+							trueTime+=(3600*24*FRAME);
+						}
+					}
+				}
+				//Day manipulation
+				if(Input->ReadKey[KEY_RIGHT])
+				{
+					day++;
+					trueTime+=(3600*24*FRAME);
+					if(day>3)
+					{
+						day-=3;
+						trueTime-=(3600*24*FRAME);
+						trueTime-=(3600*24*FRAME);
+						trueTime-=(3600*24*FRAME);
+					}
+				}
+				if(Input->ReadKey[KEY_LEFT])
+				{
+					day--;
+					trueTime-=(3600*24*FRAME);
+					if(day<1)
+					{
+						day+=3;
+						trueTime+=(3600*24*FRAME);
+						trueTime+=(3600*24*FRAME);
+						trueTime+=(3600*24*FRAME);
+					}
+				}
+				if(Input->ReadKey[KEY_EQUALS])//Refill Ammo
+				{
+					Game->Counter[CR_BOMBS]=Game->MCounter[CR_BOMBS];
+					Game->Counter[CR_RUPEES]=Game->MCounter[CR_RUPEES];
+					Game->Counter[CR_ARROWS]=Game->MCounter[CR_ARROWS];
+					Game->Counter[CR_SBOMBS]=Game->MCounter[CR_SBOMBS];
+					Game->Counter[CR_BOMBCHUS]=Game->MCounter[CR_BOMBCHUS];
+					Game->Counter[CR_DEKUNUTS]=Game->MCounter[CR_DEKUNUTS];
+					Game->Counter[CR_MAGICBEANS]=Game->MCounter[CR_MAGICBEANS];
+					Game->DCounter[CR_BOMBS]=0;
+					Game->DCounter[CR_RUPEES]=0;
+					Game->DCounter[CR_ARROWS]=0;
+					Game->DCounter[CR_SBOMBS]=0;
+					Game->DCounter[CR_BOMBCHUS]=0;
+					Game->DCounter[CR_DEKUNUTS]=0;
+					Game->DCounter[CR_MAGICBEANS]=0;
+				}
+				if(Input->ReadKey[KEY_ENTER])//Freeze time
+				{
+					freezeTime=!freezeTime;
+					slowTime=freezeTime;
+				}
+				if(Input->ReadKey[KEY_0])Link->Warp(0,0x24);//Warp to test area
+				if(Input->ReadKey[KEY_R])Link->PitWarp(Game->GetCurDMap(),Game->GetCurDMapScreen());//Reset the screen by pitwarping to it
+				if(Input->ReadKey[KEY_BACKSLASH])dbdraw = !dbdraw;
+				if(Input->ReadKey[KEY_F])debugCanFall = !debugCanFall;
+				if(Input->ReadKey[KEY_OPENBRACE])warpDown();
+				if(Input->ReadKey[KEY_CLOSEBRACE])warpUp();
+				NoAction();
+				Link->PressStart=false;Link->InputStart=false;
+			}
+		}
+	}//end
+	
+	void debugSetup(){//start
+		dbsetup=true;
+		Game->Cheat=4;
+		for(int i = 0;i<22;i++)
+		{
+			LEARNED_SONGS[i]=true;
+		}
+		for(int i=0;i<48;i++)
+		{
+			if(ItemIDs[i]!=0)Link->Item[ItemIDs[i]]=true;
+		}
+		//bbags
+		Link->Item[81]=true;
+		Link->Item[82]=true;
+		Link->Item[83]=true;
+		Link->Item[106]=true;
+		//quivs
+		Link->Item[74]=true;
+		Link->Item[75]=true;
+		Link->Item[76]=true;
+		Game->MCounter[CR_LIFE]=320;
+		Game->MCounter[CR_MAGIC]=256;
+		Game->Counter[CR_LIFE]=320;
+		Game->Counter[CR_MAGIC]=256;
+		Game->MCounter[CR_BOMBCHUS]=40;
+		Game->MCounter[CR_ARROWS]=50;
+		Game->MCounter[CR_BOMBS]=40;
+		Game->MCounter[CR_SBOMBS]=1;
+		//extra
+		form=0;
+		mask=12;
+		currMaskTile=FIRST_MASK_TILE+12;
+		HMS_visible=true;
+		CS1_seen=true;
+	}//end
+	
+	void drawDebugInfo(int itID)//start
+	{
+		if(itID!=0)
+		{
+			int str[256];
+			itemdata theItem = Game->LoadItemData(itID);
+			theItem->GetName(str);
+			drawDebugString(256,0,str,true);
+		}
+		if(itID>=146&&itID<=151)//BottleDebugger
+		{
+			int str[256];
+			int bstate = getBottleState(itID-145);
+			getBottleStateName(bstate,str);
+			drawDebugString(256,8,str,true);
+			if(bstate==BS_HOTWATER)drawDebugInt(240,16,springTimers[itID-146]);
+		}
+	}//end
+	
+	//start dbDrawFuncs
+	void drawDebugString(int x, int y, int str,bool right)
+	{
+		int format = TF_NORMAL;
+		if(right)format = TF_RIGHT;
+		Screen->DrawString(7,x,y,FONT_Z3SMALL,0x01,0x00,format,str,OP_OPAQUE);
+	}
+	
+	void drawDebugInt(int x, int y, int num, bool right)
+	{
+		if(right)x-=Cond(num<0,4,0) + Cond(num<10 && num > -10,4,Cond(num<100&&num>-100,8,Cond(num<1000&&num>-1000,12,16)));
+		Screen->DrawInteger(7,x,y,FONT_Z3SMALL,0x01,0x00,0,0,num,0,OP_OPAQUE);
+	}
+	
+	void drawDebugInt(int x, int y, int num)
+	{
+		drawDebugInt(x,y,num,false);
+	}//end
+	//end TestingMenu
+}
+//end Global Script
+//start OnContinue Script
+global script onFileLoad
+{
+	void run()
+	{
+		if(owlSaved)
+		{
+			owlSaved=false;
+			Game->ContinueDMap=0;
+			Game->ContinueScreen=0;
+			Game->Save();
+		}
+		else
+		{
+			Link->Warp(0,0);
+			resetTime();
+			Game->ContinueDMap=0;
+			Game->ContinueScreen=0;
+			Game->Save();
+		}
+		tintOnContinue();
+	}
+}//end
+//start OnExit Script
+global script onExit
+{
+	void run()
+	{
+	
+	}
+}
+//end OnExit Script

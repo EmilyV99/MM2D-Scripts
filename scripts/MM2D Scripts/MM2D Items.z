@@ -1,0 +1,1051 @@
+////////////////////////////////////////
+//                                    //
+//          MM2D Script: Items        //
+//                                    //
+////////////////////////////////////////
+//start ITEM misc
+item script giveAnother{
+	void run(int it1, int it2, int it3, int it4, int it5,int it6,int it7, int it8){
+		Link->Item[it1] = true;
+		Link->Item[it2] = true;
+		Link->Item[it3] = true;
+		Link->Item[it4] = true;
+		Link->Item[it5] = true;
+		Link->Item[it6] = true;
+		Link->Item[it7] = true;
+		Link->Item[it8] = true;
+	}
+}
+
+item script addCounterMax{
+	void run(int cr, int add, int max, int cr2, int add2, int max2){
+		Game->MCounter[cr]+=add;
+		if(Game->MCounter[cr]>max)Game->MCounter[cr]=max;
+		Game->MCounter[cr2]+=add2;
+		if(Game->MCounter[cr2]>max2)Game->MCounter[cr2]=max2;
+	}
+}
+//end ITEM misc
+//start EX Items
+void handleEXItems(){
+	if(!subscreen){
+		if(useItem>0){
+			Link->ItemJinx=0;
+			if(SetBItem(useItem)){
+				Link->PressB = true;
+				Link->InputB = true;
+				useItem = 0;
+				usingItem = useItem;
+			} else {
+				Link->InputB=false;Link->PressB=false;
+			}
+		} else if(Link->InputB&&B_item!=0){
+			if(isArrow(B_item)&&!canShootArrow()){
+				Link->InputB=false;Link->PressB=false;
+			} else if(SetBItem(B_item)){
+				Link->InputB = true;
+				Link->InputEx1=false;
+				Link->InputEx2=false;
+			} else {
+				Link->InputB=false;Link->PressB=false;
+			}
+		} else if(Link->InputEx1&&EX1_item!=0){
+			if(isArrow(EX1_item)&&!canShootArrow()){
+				Link->InputB=false;Link->PressB=false;
+			} else if(SetBItem(EX1_item)){
+				Link->InputB = true;
+				if(Link->PressEx1)Link->PressB = true;
+				Link->InputEx2=false;
+			} else {
+				Link->InputB=false;Link->PressB=false;
+			}
+		} else if(Link->InputEx2&&EX2_item!=0){
+			if(isArrow(EX2_item)&&!canShootArrow()){
+				Link->InputB=false;Link->PressB=false;
+			} else if(SetBItem(EX2_item)){
+				Link->InputB = true;
+				if(Link->PressEx2)Link->PressB = true;
+			} else {
+				Link->InputB=false;Link->PressB=false;
+			}
+		} else if((Link->PressB||Link->InputB)&&!B_item){
+			Link->InputB=false;Link->PressB=false;
+		}
+		
+	} else if(subState == SUBSTATE_ITEMS && (!Link->InputEx3&&(Link->PressEx1||Link->PressEx2||Link->PressB||pressA))){
+		int itID = ItemIDs[cursorIndex];
+		if(canEquip(itID)){
+			if(itID==211){
+				if(!form&&pressA){
+					Link->Item[210] = !Link->Item[210];
+					Game->PlaySound(83);
+				}
+			} else if(!pressA){
+				bool arrow = isArrow(itID);
+				int snd = 83;
+				switch(itID){
+					case 14:{snd=84;break;}
+					case 57:{snd=85;break;}
+					case 137:{snd=86;break;}
+				}
+				Audio->EndSound(83);
+				Audio->EndSound(84);
+				Audio->EndSound(85);
+				Audio->EndSound(86);
+				if(Link->PressEx1){
+					Game->PlaySound(snd);
+					EX1_item = itID;
+					if(EX2_item==itID||(isArrow(EX2_item)&&arrow))EX2_item=0;
+					if(B_item==itID||(isArrow(B_item)&&arrow))B_item=0;
+				} else if(Link->PressEx2){
+					Game->PlaySound(snd);
+					EX2_item = itID;
+					if(EX1_item==itID||(isArrow(EX1_item)&&arrow))EX1_item=0;
+					if(B_item==itID||(isArrow(B_item)&&arrow))B_item=0;
+				} else if(Link->PressB){
+					Game->PlaySound(snd);
+					B_item = itID;
+					SetBItem(itID);
+					if(EX1_item==itID||(isArrow(EX1_item)&&arrow))EX1_item=0;
+					if(EX2_item==itID||(isArrow(EX2_item)&&arrow))EX2_item=0;
+				}
+			}
+		}
+	} else {
+		if(Link->PressB)B_item=0;
+		if(Link->PressEx1)EX1_item=0;
+		if(Link->PressEx2)EX2_item=0;
+	}
+	
+}
+
+bool isArrow(int itID){
+	return (itID==13||itID==14||itID==57||itID==137);
+}
+
+bool canShootArrow(){
+	return (!countLWeaponType(LW_ARROW))&&Game->Counter[CR_ARROWS];
+}
+
+bool SetBItem(int itemID){
+	/*if(force)Link->SetItemSlot(itemID,0,0);
+	else Link->SetItemSlot(itemID,0,1);
+	return GetEquipmentB()==itemID;
+	*/
+	int oldId = GetEquipmentB();
+	int i = 0;
+	while(Link->Item[itemID]&&GetEquipmentB()!=itemID&&i<100){
+		Link->SelectBWeapon(DIR_RIGHT); i++;
+	}
+	if(i>=100){
+		i = 0;
+		while(Link->Item[oldId]&&GetEquipmentB()!=oldId&&i<100){
+			Link->SelectBWeapon(DIR_RIGHT); i++;
+		}
+	}
+	return GetEquipmentB()==itemID;
+}
+
+bool canEquip(int itID){
+	if(itID==3||itID==139){
+		return Link->Item[81];
+	} else if(itID==48){
+		return Link->Item[106];
+	} else {
+		return Link->Item[itID];
+	}
+}
+//end EX Items
+//start throwableBombs
+bool holdingBomb = false;
+DEFINE LWMISC_MOVINGTIME = 0;
+DEFINE LWMISC_FUSE = 1;
+DEFINE LWMISC_EXPLOSIONDAMAGE = 2;
+DEFINE LWMISC_IDENTITY = 3;
+DEFINE LW_THRBOMBS = 31;
+
+void bombCheck(){
+	if(isThrowingBomb()){
+		lweapon bomb = loadLWeaponType(LW_THRBOMBS,0);
+		if(holdingBomb){
+			bomb->X=Link->X;
+			bomb->Y=Link->Y-8;
+			//if(!subscreen)stopScreenTransition(4,4,4,12);
+			if(Link->PressA||Link->PressB||Link->PressEx1||Link->PressEx2){
+				throwBomb();
+				Link->SwordJinx=3;
+				Link->ItemJinx=3;
+			} else if(Link->PressR){
+				placeBomb();
+				Link->PressR=false;
+				Link->InputR=false;
+			}
+			Link->PressStart=false;
+			Link->InputStart=false;
+			NoActionButMoveAndEx4AndA();
+		} else {
+			lweapCollDetect(bomb);
+		}
+		if(!bomb->Misc[LWMISC_MOVINGTIME]){
+			bomb->Step=0;
+		} else if(bomb->Misc[LWMISC_MOVINGTIME]>0){
+			bomb->Misc[LWMISC_MOVINGTIME]--;
+		}
+		if(!bomb->Misc[LWMISC_FUSE]){
+			explosion(bomb->X,bomb->Y,bomb->Misc[LWMISC_EXPLOSIONDAMAGE],bomb->Dir);
+			bomb->DeadState=WDS_DEAD;
+		} else {
+			bomb->Misc[LWMISC_FUSE]--;
+		}
+	} else {
+		holdingBomb=false;
+	}
+}
+
+bool isThrowingBomb(){
+	for(int i = 1;i<=Screen->NumLWeapons();i++){
+		lweapon weap = Screen->LoadLWeapon(i);
+		if(weap->isValid()){
+			if(weap->ID==LW_THRBOMBS){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+lweapon loadLWeaponType(int type,int num){
+	int weapCount = 0;
+	for(int i = 1;i<=Screen->NumLWeapons();i++){
+		lweapon weap = Screen->LoadLWeapon(i);
+		if(weap->isValid()){
+			if(weap->ID==type){
+				if(weapCount==num){
+					return weap;
+				} else {
+					weapCount++;
+				}
+			}
+		}
+	}
+}
+
+int countLWeaponType(int type){
+	int weapCount = 0;
+	for(int i = 1;i<=Screen->NumLWeapons();i++){
+		lweapon weap = Screen->LoadLWeapon(i);
+		if(weap->isValid()){
+			if(weap->ID==type){
+				weapCount++;
+			}
+		}
+	}
+	return weapCount;
+}
+
+lweapon spawnThrowingBomb(int x, int y, int fuse, int damage){
+	lweapon bomb = CreateLWeaponAt(LW_THRBOMBS,x,y);
+	bomb->UseSprite(7);
+	bomb->Behind = false;
+	bomb->CollDetection = false;
+	bomb->Misc[LWMISC_FUSE] = fuse;
+	bomb->Misc[LWMISC_EXPLOSIONDAMAGE] = damage;
+	bomb->Misc[LWMISC_IDENTITY] = 1;
+	return bomb;
+}
+
+void throwBomb(){
+	if(isThrowingBomb()){
+		lweapon bomb = loadLWeaponType(LW_THRBOMBS,0);
+		holdingBomb=false;
+		bomb->Y=Link->Y;
+		bomb->Dir=Link->Dir;
+		bomb->Step=150;
+		bomb->Misc[LWMISC_MOVINGTIME] = 60;
+	}
+}
+
+void placeBomb(){
+	if(isThrowingBomb()){
+		holdingBomb=false;
+		lweapon bomb = loadLWeaponType(LW_THRBOMBS,0);
+		if(Link->Dir==DIR_DOWN){
+			bomb->X=Link->X;
+			bomb->Y=Link->Y+16;
+		} else if(Link->Dir==DIR_RIGHT){
+			bomb->X=Link->X+16;
+			bomb->Y=Link->Y;
+		} else if(Link->Dir==DIR_LEFT){
+			bomb->X=Link->X-16;
+			bomb->Y=Link->Y;
+		} else if(Link->Dir==DIR_UP){
+			bomb->X=Link->X;
+			bomb->Y=Link->Y-16;
+		}
+	}
+}
+
+item script throwableBombs{
+	void run(int fuse, int damage){
+		if(Game->Counter[CR_BOMBS]>0&&!isThrowingBomb()&&Link->Y>=12){
+			spawnThrowingBomb(Link->X,Link->Y-8,fuse,damage);
+			holdingBomb = true;
+			Game->Counter[CR_BOMBS]--;
+		}
+	}
+}
+
+void stopScreenTransition(int pxAway){
+	stopScreenTransition(pxAway,pxAway,pxAway,pxAway);
+}
+
+void explosion(int x, int y, int damage, int dir){
+	lweapon blast = CreateLWeaponAt(LW_BOMBBLAST,x,y);
+	blast->Damage=damage;
+	blast->Dir=dir;
+	blast->UseSprite(9);
+}
+
+void lweapCollDetect(lweapon weap){
+	if(!CanWalk(weap->X,weap->Y,weap->Dir,weap->Step/100,true)){
+		weap->Step=0;
+	} else {
+		stopScreenTransitionLWeap(8,weap);
+	}
+}
+
+void stopScreenTransitionLWeap(int pixelsAway,lweapon weap){
+	if(weap->X<0+pixelsAway)weap->Step=0;
+	if(weap->X>240-pixelsAway)weap->Step=0;
+	if(weap->Y<0+pixelsAway)weap->Step=0;
+	if(weap->Y>160-pixelsAway)weap->Step=0;
+}
+//end throwableBombs
+//start ArrowChange
+item script arrowTypes{
+	void run(int type){
+		arrowType = type;
+	}
+}
+//end ArrowChange
+//start DekuNuts
+item script DekuNuts{
+	void run(int stunSeconds){
+		if(Game->Counter[CR_DEKUNUTS]>0){
+			Game->PlaySound(SFX_DEKUNUT_SNAP);
+			bool freeze = false;
+			for(int i = 0;i<countNPCInRange(CenterLinkX(),CenterLinkY(),40);i++){
+				npc n = getNthNPCInRange(CenterLinkX(),CenterLinkY(),40,i);
+				if((!n->Defense[NPCD_SCRIPT10]||n->Defense[NPCD_SCRIPT10]==3||n->Defense[NPCD_SCRIPT10]==4||n->Defense[NPCD_SCRIPT10]==5)&&!n->Stun){
+					n->Stun=stunSeconds*60;
+					freeze = true;
+				}
+			}
+			if(freeze)Game->PlaySound(SFX_DEKUNUT_FREEZE);
+			Game->Counter[CR_DEKUNUTS]--;
+		}
+	}
+}
+//end DekuNuts
+//start RazorSword
+void razorSwordCheck(){
+	if(swordCounter>=RAZSWORD_USES){
+		Link->Item[RAZSWORD_ID]=false;
+		swordCounter=0;
+	}
+}
+
+item script razorSword{
+	void run(){
+		swordCounter++;
+	}
+}
+//end RazorSword
+//start EmptyBottles
+//X--------------------X
+//|  Bottle Constants  | start
+//X--------------------X
+DEFINE BOTTLE_SETTING_NO_WATER = 0; //Set to 1 if water shouldn't be bottleable
+
+DEFINE TIL_BOTTLE = 63980; //First of the tiles used for the bottle items. Should come in four identical rows.
+                              //Tile order in each row should go as such:
+							  //Empty, Empty, Red Potion, Green Potion, Blue Potion, Water, Fairy, Bee
+
+DEFINE POTION_HEARTS = 20; //Hearts the red potion heals
+DEFINE POTION_MP = 1024; //MP the green potion restores
+DEFINE MILK_HEARTS = 5;
+
+DEFINE LW_WATER = 32; //LWeapon type used for bottled water. Script 1 by default
+DEFINE LW_HOTWATER = 33;
+DEFINE SPR_BOTTLEWATER = 94; //Sprite used for bottled water
+DEFINE SPR_BOTTLEWATERHOT = 95; //^
+DEFINE SFX_BOTTLEWATER = 55; //Sound when water is dumped out
+
+DEFINE FAIRY_HEARTS = 3; //Hearts healed by a fairy
+DEFINE CMB_FAIRY = 13935; //Fairy combo
+DEFINE CS_FAIRY = 8; //Fairy cset
+DEFINE SFX_FAIRY = 53; //Sound that plays when a fairy appears
+
+DEFINE IC_BOTTLE = 70; //Item class used for bottles
+
+DEFINE I_BOTTLE1 = 146; //Item ID for the first bottle (Level 1)
+DEFINE I_BOTTLE2 = 147; //Item ID for the second bottle (Level 2)
+DEFINE I_BOTTLE3 = 148; //Item ID for the third bottle (Level 3)
+DEFINE I_BOTTLE4 = 149; //Item ID for the fourth bottle (Level 4)
+DEFINE I_BOTTLE5 = 150; //Item ID for the fifth bottle (Level 5)
+DEFINE I_BOTTLE6 = 151; //Item ID for the sixth bottle (Level 6)
+
+DEFINE FREQ_HEARTREFILL = 8; //Frequency in frames at which potions/fairies restore hearts
+DEFINE SFX_HEARTREFILL = 22; //Sound when potion/fairy restores a heart
+DEFINE FREQ_MAGICSOUND = 8; //Frequency in frames where the magic refill sound plays
+DEFINE SFX_MAGICREFILL = 23; //Magic refill sound
+						  
+DEFINE TIL_BOTTLESWING = 64111; //Tile of a right facing open bottle used when trying to catch something
+DEFINE CS_BOTTLESWING = 11; //CSet of the swinging bottle
+DEFINE SFX_BOTTLESWING = 30; //Sound used for the bottle being swung
+
+DEFINE I_WATERBOTTLE = 175; //Item for bottle water pickup
+DEFINE I_FAIRYBOTTLE = 177; //Item for bottle fairy pickup
+DEFINE I_HOTWATERBOTTLE = 176; //Item for bottle hot water pickup
+
+DEFINE STR_CANTAFFORD = 29; //Message for when you can't afford an item
+DEFINE STR_NOBOTTLE = 42; //Message for when you don't have a bottle to store a potion in
+DEFINE STR_WATERCOOLED = 36; //Message for when hot spring water cools off
+
+DEFINE C_WHITE = 0x01; //The color white
+DEFINE C_BLACK = 0x0F; //The color black
+
+int TIME_HOTWATER = TIME_HOUR*4;
+
+//X--------------------------X
+//|  Empty Bottle Functions  |
+//X--------------------------X
+
+//X--------------------------------------------------------X
+//|  These constants don't need to be changed.             |
+//|  They just define various states of the empty bottle.  |
+//|  BS_ constants are also used for  the potion filling   |
+//|  pickup item script. Look here to see what to set D2   |
+//|  to for that.                                          |
+//X--------------------------------------------------------X
+
+DEFINE BS_EMPTY = 0;
+DEFINE BS_POTIONRED = 1;
+DEFINE BS_POTIONGREEN = 2;
+DEFINE BS_POTIONBLUE = 3;
+DEFINE BS_WATER = 4;
+DEFINE BS_FAIRY = 5;
+DEFINE BS_MILK = 6;
+DEFINE BS_HALFMILK = 7;
+DEFINE BS_BUG = 8;
+DEFINE BS_CHATEAU = 9;
+DEFINE BS_POE = 10;
+DEFINE BS_BPOE = 11;
+DEFINE BS_HOTWATER = 12;
+DEFINE BS_MUSHROOM = 13;
+DEFINE BS_GOLDDUST = 14;
+DEFINE BS_FISH = 15;
+DEFINE BS_DEKUPRINCESS = 16;
+DEFINE BS_SEAHORSE = 17;
+//DEFINE BS_ZORAEGG = 18;
+
+DEFINE BSI_BOTTLEUSED = 6;
+DEFINE BSI_BOTTLETIMER = 7;
+DEFINE BSI_OLDHP = 8;
+DEFINE BSI_OLDMP = 9;
+DEFINE BSI_FAIRYTIMER = 10;
+DEFINE BSI_FAIRYREVIVE = 11;
+//end
+//vars
+int usingBugs = 0;
+int BottleStateForTango = -1;
+//
+//---------------------------------------------------------X
+//start functions
+
+int BottleState[12];//0-5: States of bottles, 6: Bottle used, 
+                    //7: Potion timer, 8: OldHP, 9: OldMP
+
+int springTimers[6];
+//This function should be called at the beginning of your global and 
+//refreshes the graphics for the bottles.
+void RefreshBottles(){
+	for(int i=0; i<6; i++){
+		CopyTile(TIL_BOTTLE+1+BottleState[i], TIL_BOTTLE+20*i);
+	}
+}
+
+int UsingEmptyBottle(){
+	if(Link->Action!=LA_WALKING&&Link->Action!=LA_NONE)return -1;
+	if(Link->PressA){
+		int id = GetEquipmentA();
+		if(id>0){
+			itemdata A = Game->LoadItemData(id);
+			if(A->Family==IC_BOTTLE)
+				return A->Level-1;
+		}
+	}
+	else if(Link->PressB){
+		int id = GetEquipmentB();
+		if(id>0){
+			itemdata B = Game->LoadItemData(id);
+			if(B->Family==IC_BOTTLE){
+				return B->Level-1;
+			}
+		}
+	}
+	return -1;
+}
+
+bool CanFillBottle(){
+	int bottles[6] = {I_BOTTLE1, I_BOTTLE2, I_BOTTLE3, I_BOTTLE4, I_BOTTLE5, I_BOTTLE6};
+	for(int i=0; i<6; i++){
+		if(Link->Item[bottles[i]]&&BottleState[i]==BS_EMPTY)
+			return true;
+	}
+	return false;
+}
+
+int FillBottle(int state){
+	int bottles[6] = {I_BOTTLE1, I_BOTTLE2, I_BOTTLE3, I_BOTTLE4, I_BOTTLE5, I_BOTTLE6};
+	for(int i=0; i<6; i++){
+		if(Link->Item[bottles[i]]&&BottleState[i]==BS_EMPTY){
+			BottleState[i] = state;
+			RefreshBottles();
+			return i;
+		}
+	}
+}
+
+int HasFairy(){
+	int bottles[6] = {I_BOTTLE1, I_BOTTLE2, I_BOTTLE3, I_BOTTLE4, I_BOTTLE5, I_BOTTLE6};
+	for(int i=0; i<6; i++){
+		if(Link->Item[bottles[i]]&&BottleState[i]==BS_FAIRY)
+			return i;
+	}
+	return -1;
+}
+
+//This function goes in the while loop of your global script before waitdraw
+void EmptyBottleGlobal(){//start defaultBottleCode
+	for(int i=0;i<6;i++){
+		if(springTimers[i]>-45000){
+			if(BottleState[i]==BS_HOTWATER){
+				if(trueTime>=springTimers[i]){
+					BottleState[i]=BS_WATER;
+					RefreshBottles();
+					int args[8] = {STR_WATERCOOLED};
+					RunFFCScript(FFC_SHOWSTRING,args);
+				}
+			} else {
+				springTimers[i]=-45001;
+			}
+		}
+	}
+	int bottle = BottleState[BSI_BOTTLEUSED];
+	if(BottleState[BSI_BOTTLETIMER]>0){
+		bool hpHeal = (BottleState[bottle]==BS_POTIONRED||BottleState[bottle]==BS_MILK||BottleState[bottle]==BS_HALFMILK||BottleState[bottle]==BS_POE||BottleState[bottle]==BS_BPOE);
+		if(hpHeal){
+			if(!(BottleState[BSI_BOTTLETIMER]%FREQ_HEARTREFILL)){
+				Link->HP += 16;
+				Game->PlaySound(SFX_HEARTREFILL);
+				if(Link->HP>=Link->MaxHP){
+					BottleState[BSI_BOTTLETIMER] = 0;
+				}
+			}
+		}
+		else if(BottleState[bottle]==BS_POTIONGREEN){
+			Link->MP += 2;
+			if(!(BottleState[BSI_BOTTLETIMER]%FREQ_MAGICSOUND))
+				Game->PlaySound(SFX_MAGICREFILL);
+			if(Link->MP>=Link->MaxMP){
+				BottleState[BSI_BOTTLETIMER] = 0;
+			}
+		}
+		else if(BottleState[bottle]==BS_POTIONBLUE||BottleState[bottle]==BS_CHATEAU){
+			if(!(BottleState[BSI_BOTTLETIMER]%FREQ_HEARTREFILL)&&Link->HP<BottleState[BSI_OLDHP]+POTION_HEARTS*16&&Link->HP<Link->MaxHP){
+				Link->HP += 16;
+				Game->PlaySound(SFX_HEARTREFILL);
+			}
+			if(Link->MP<BottleState[BSI_OLDMP]+POTION_MP&&Link->MP<Link->MaxMP){
+				if(!(BottleState[BSI_BOTTLETIMER]%FREQ_MAGICSOUND))
+					Game->PlaySound(SFX_MAGICREFILL);
+				Link->MP += 2;
+			}
+			if(Link->HP>=Link->MaxHP&&Link->MP>=Link->MaxMP){
+				BottleState[BSI_BOTTLETIMER] = 0;
+			}
+		}
+		else if(BottleState[bottle]==BS_FAIRY){
+			if(BottleState[BSI_BOTTLETIMER]<2&&BottleState[BSI_FAIRYTIMER]<120)
+				BottleState[BSI_BOTTLETIMER] = 2;
+			BottleState[BSI_FAIRYTIMER]++;
+			int X = Link->X+VectorX(16*(BottleState[BSI_FAIRYTIMER]/120), BottleState[BSI_FAIRYTIMER]*8);
+			int Y = Link->Y+VectorY(8*(BottleState[BSI_FAIRYTIMER]/120), BottleState[BSI_FAIRYTIMER]*8)-BottleState[BSI_FAIRYTIMER]/8;
+			if(BottleState[BSI_FAIRYREVIVE]==1){
+				if(BottleState[BSI_FAIRYTIMER]<10||BottleState[BSI_FAIRYTIMER]>110)
+					Screen->Rectangle(6, 0, 0, 256, 176, C_BLACK, 1, 0, 0, 0, true, 64);
+				else
+					Screen->Rectangle(6, 0, 0, 256, 176, C_BLACK, 1, 0, 0, 0, true, 128);
+				Screen->FastTile(6, Link->X+Link->DrawXOffset, Link->Y+Link->DrawYOffset, Link->Tile, 6, 128);
+			}
+			if(BottleState[BSI_FAIRYTIMER]<80||!(BottleState[BSI_FAIRYTIMER]%2))
+				Screen->FastCombo(6, X, Y, CMB_FAIRY, CS_FAIRY, 128);
+			if(!(BottleState[BSI_BOTTLETIMER]%FREQ_HEARTREFILL)&&Link->HP<Link->MaxHP){
+				Link->HP += 16;
+				Game->PlaySound(SFX_HEARTREFILL);
+			}
+			if(Link->HP>=Link->MaxHP&&BottleState[BSI_FAIRYTIMER]>=120){
+				BottleState[BSI_BOTTLETIMER] = 0;
+			}
+		}
+		BottleState[BSI_BOTTLETIMER]--;
+		NoAction();
+		if(BottleState[BSI_BOTTLETIMER]<=0){
+			if(BottleState[bottle]==BS_MILK){
+				BottleState[bottle]=BS_HALFMILK;
+			} else {
+				BottleState[bottle] = BS_EMPTY;
+			}
+			BottleState[BSI_BOTTLEUSED] = -1;
+			RefreshBottles();
+			Screen_Freeze(0);
+			isBottleFrozen=false;
+		}
+	}
+	else{
+		bottle = UsingEmptyBottle();
+		if(bottle>-1){
+			bool refresh = BottleState[bottle]!=BS_EMPTY;
+			if(BottleState[bottle]==BS_EMPTY){
+				int scriptname[] = "Bottle_Empty";
+				int scriptid = Game->GetFFCScript(scriptname);
+				int Args[8] = {bottle};
+				RunFFCScript(scriptid, Args);
+			} 
+			else if(BottleState[bottle]==BS_POTIONRED){
+				if(Link->HP==Link->MaxHP){
+					Game->PlaySound(SFX_ERROR);
+				}
+				else{
+					BottleState[BSI_BOTTLEUSED] = bottle;
+					BottleState[BSI_BOTTLETIMER] = FREQ_HEARTREFILL*POTION_HEARTS;
+					Screen_Freeze(2);
+					isBottleFrozen=true;
+				}
+			}
+			else if(BottleState[bottle]==BS_POTIONGREEN){
+				if(Link->MP==Link->MaxMP){
+					Game->PlaySound(SFX_ERROR);
+				}
+				else{
+					BottleState[BSI_BOTTLEUSED] = bottle;
+					BottleState[BSI_BOTTLETIMER] = POTION_MP/2;
+					Screen_Freeze(2);
+					isBottleFrozen=true;
+				}
+			}
+			else if(BottleState[bottle]==BS_POTIONBLUE){
+				if(Link->HP==Link->MaxHP&&Link->MP==Link->MaxMP){
+					Game->PlaySound(SFX_ERROR);
+				}
+				else{
+					BottleState[BSI_BOTTLEUSED] = bottle;
+					BottleState[BSI_BOTTLETIMER] = Max(FREQ_HEARTREFILL*POTION_HEARTS, POTION_MP/2);
+					BottleState[BSI_OLDHP] = Link->HP;
+					BottleState[BSI_OLDMP] = Link->MP;
+					Screen_Freeze(2);
+					isBottleFrozen=true;
+				}
+			}
+			else if(BottleState[bottle]==BS_WATER){
+				Link->Action = LA_ATTACKING;
+				lweapon l = CreateLWeaponAt(LW_WATER, Link->X+InFrontX(Link->Dir, 0), Link->Y+InFrontY(Link->Dir, 0));
+				l->UseSprite(SPR_BOTTLEWATER);
+				l->DeadState = (l->ASpeed*l->NumFrames)-2;
+				l->CollDetection = false;
+				Game->PlaySound(SFX_BOTTLEWATER);
+				BottleState[bottle] = BS_EMPTY;
+				RefreshBottles();
+			}
+			else if(BottleState[bottle]==BS_FAIRY){
+				if(Link->HP==Link->MaxHP){
+					Game->PlaySound(SFX_ERROR);
+				}
+				else{
+					BottleState[BSI_BOTTLEUSED] = bottle;
+					BottleState[BSI_BOTTLETIMER] = FREQ_HEARTREFILL*FAIRY_HEARTS;
+					BottleState[BSI_FAIRYTIMER] = 0;
+					BottleState[BSI_FAIRYREVIVE] = 0;
+					Game->PlaySound(SFX_FAIRY);
+					Screen_Freeze(2);
+					isBottleFrozen=true;
+				}//end
+			} else if(BottleState[bottle]==BS_MILK||BottleState[bottle]==BS_HALFMILK){
+				if(Link->HP==Link->MaxHP){
+					Game->PlaySound(SFX_ERROR);
+				} else {
+					BottleState[BSI_BOTTLEUSED] = bottle;
+					BottleState[BSI_BOTTLETIMER] = FREQ_HEARTREFILL*MILK_HEARTS;
+					Screen_Freeze(2);
+					isBottleFrozen=true;
+				}
+			} else if(BottleState[bottle]==BS_CHATEAU){
+				BottleState[BSI_BOTTLEUSED] = bottle;
+				BottleState[BSI_BOTTLETIMER] = Max(FREQ_HEARTREFILL*POTION_HEARTS, POTION_MP/2);
+				Screen_Freeze(2);
+				isBottleFrozen=true;
+				Link->Item[INF_MAGIC]=true;
+			} else if(BottleState[bottle]==BS_POE||BottleState[bottle]==BS_BPOE){
+				if(Link->HP==Link->MaxHP){
+					Game->PlaySound(SFX_ERROR);
+				} else {
+					int rand = Rand(0,10);
+					if(!rand){
+						Link->HP=1;
+					} else {
+						BottleState[BSI_BOTTLEUSED] = bottle;
+						BottleState[BSI_BOTTLETIMER] = FREQ_HEARTREFILL*(rand*2);
+						Screen_Freeze(2);
+						isBottleFrozen=true;
+					}
+				}
+			} else if(BottleState[bottle]==BS_BUG){
+				usingBugs = 30;
+				BottleState[bottle]=BS_EMPTY;
+			} else if(BottleState[bottle]==BS_HOTWATER){
+				springTimers[bottle]=0;
+				Link->Action = LA_ATTACKING;
+				lweapon l = CreateLWeaponAt(LW_HOTWATER, Link->X+InFrontX(Link->Dir, 0), Link->Y+InFrontY(Link->Dir, 0));
+				l->UseSprite(SPR_BOTTLEWATERHOT);
+				l->DeadState = (l->ASpeed*l->NumFrames)-2;
+				l->CollDetection = false;
+				Game->PlaySound(SFX_BOTTLEWATER);
+				BottleState[bottle] = BS_EMPTY;
+			} else if(BottleState[bottle]==BS_MUSHROOM){
+				//Nothing
+			} else if(BottleState[bottle]==BS_GOLDDUST){
+				//Nothing
+			} else if(BottleState[bottle]==BS_FISH){
+				//Nothing
+			} else if(BottleState[bottle]==BS_DEKUPRINCESS){
+				//Nothing
+			} else if(BottleState[bottle]==BS_SEAHORSE){
+				//Nothing
+			}
+			if(refresh)
+				RefreshBottles();
+		}
+		int fairy = HasFairy();//start fairyRevive
+		if(Link->HP<=0&&fairy>-1){
+			Link->HP = 1;
+			BottleState[BSI_BOTTLEUSED] = fairy;
+			BottleState[BSI_BOTTLETIMER] = FREQ_HEARTREFILL*FAIRY_HEARTS;
+			BottleState[BSI_FAIRYTIMER] = 0;
+			BottleState[BSI_FAIRYREVIVE] = 1;
+			Game->PlaySound(SFX_FAIRY);
+			Screen_Freeze(2);
+			isBottleFrozen=true;
+		}//end
+	}
+}
+
+
+//X-------------------------------X
+//|  Empty Bottle Action Scripts  |
+//X-------------------------------X
+
+ffc script Bottle_Empty{
+	void run(int bottleid){
+		int Angle = 0;
+		if(Link->Dir==DIR_UP)
+			Angle = -90;
+		else if(Link->Dir==DIR_DOWN)
+			Angle = 90;
+		else if(Link->Dir==DIR_LEFT)
+			Angle = 180;
+		Game->PlaySound(SFX_BOTTLESWING);
+		Link->Action = LA_ATTACKING;
+		int Collected = 0;
+		for(int i=-45; i<45; i+=10){
+			int X = Link->X+VectorX(12, Angle+i);
+			int Y = Link->Y+VectorY(12, Angle+i);
+			Screen->DrawTile(2, X, Y, TIL_BOTTLESWING, 1, 1, CS_BOTTLESWING, -1, -1, X, Y, Angle+i+90, 0, true, 128);
+			if(!Collected||Collected==BS_WATER||Collected==BS_HOTWATER){
+				if(OnWater(X+8, Y+8)&&!Collected&&!BOTTLE_SETTING_NO_WATER){
+					if(ScreenFlag(SF_MISC,SFM_SCRIPT2)>0){
+						Collected = BS_HOTWATER;
+					} else {
+						Collected = BS_WATER;
+					}
+				}
+				for(int j=1; j<=Screen->NumItems(); j++){
+					item itm = Screen->LoadItem(j);
+					if(itm->ID==I_FAIRY||itm->ID==I_FAIRYSTILL){
+						if(RectCollision(itm->X+itm->HitXOffset, itm->Y+itm->HitYOffset, itm->X+itm->HitXOffset+itm->HitWidth, itm->Y+itm->HitYOffset+itm->HitHeight, X+4, Y+4, X+11, Y+11)){
+							Collected = BS_FAIRY;
+							Remove(itm);
+							break;
+						}
+					}
+				}
+			}
+			WaitNoAction();
+		}
+		if(Collected==BS_WATER){
+			BottleState[bottleid] = BS_WATER;
+			RefreshBottles();
+			item itm = CreateItemAt(I_WATERBOTTLE, Link->X, Link->Y);
+			itm->Pickup = IP_HOLDUP;
+		}
+		else if(Collected==BS_HOTWATER){
+			BottleState[bottleid] = BS_HOTWATER;
+			springTimers[bottleid] = trueTime + TIME_HOTWATER;
+			RefreshBottles();
+			item itm = CreateItemAt(I_HOTWATERBOTTLE, Link->X, Link->Y);
+			itm->Pickup = IP_HOLDUP;
+		}
+		else if(Collected==BS_FAIRY){
+			BottleState[bottleid] = BS_FAIRY;
+			RefreshBottles();
+			item itm = CreateItemAt(I_FAIRYBOTTLE, Link->X, Link->Y);
+			itm->Pickup = IP_HOLDUP;
+		}
+		WaitNoAction(10);
+	}
+	bool OnWater(int x, int y){
+		int ct = Screen->ComboT[ComboAt(x, y)];
+		if(ct==CT_WATER||ct==CT_SHALLOWWATER)
+			return true;
+		return false;
+	}
+}
+
+//end
+//X----------------------------X
+//|  Other Associated Scripts  |
+//X----------------------------X
+
+item script ShopBottleFill{
+	void run(int state){
+		FillBottle(state);
+	}
+}
+
+item script BottleFill{
+	void run(int str, int state){
+		if(!CanFillBottle())str = STR_NOBOTTLE;
+		BottleStateForTango = state;
+		remchr(shopString,0);
+		getBottleStateName(state,shopString);
+		int args[8] = {str};
+		RunFFCScript(FFC_SHOWSTRING,args);
+	}
+}
+
+ffc script ItemShop{//start
+	void run(int id, int strdescription, int price, int potion){
+		itemdata ic = Game->LoadItemData(id);
+		while(true){
+			if(Link->X>this->X-8&&Link->X<this->X+8&&Link->Y>this->Y&&Link->Y<this->Y+10&&Link->Dir==DIR_UP){
+				if(Link->PressR){
+					if(fullCounter(CR_RUPEES)>=price){
+						if(potion>0&&!CanFillBottle()){
+							ShowMessageAndWait(STR_NOBOTTLE);
+							NoAction();
+						}
+						else{
+							item itm = CreateItemAt(id, Link->X, Link->Y);
+							itm->Pickup = IP_HOLDUP;
+							Game->DCounter[CR_RUPEES] -= price;
+							for(int i=0; i<10; i++){
+								WaitNoAction();
+							}
+						}
+					}
+					else{
+						ShowMessageAndWait(STR_CANTAFFORD);
+						NoAction();
+					}
+				}
+			}
+			DrawPrice(this, price);
+			Waitframe();
+		}
+	}
+	void DrawPrice(ffc this, int price){
+		int xoff = -2;
+		if(price>999)
+			xoff = -8;
+		else if(price>99)
+			xoff = -6;
+		else if(price>9)
+			xoff = -4;
+		Screen->DrawInteger(5, this->X+8+xoff+1, this->Y+18+1, FONT_Z3SMALL, C_BLACK, -1, -1, -1, price, 0, 128);
+		Screen->DrawInteger(5, this->X+8+xoff, this->Y+18, FONT_Z3SMALL, C_WHITE, -1, -1, -1, price, 0, 128);
+	}
+}//end
+//custom emptybottles functions
+bool ClearBottle(int state){
+	int bottles[6] = {I_BOTTLE1, I_BOTTLE2, I_BOTTLE3, I_BOTTLE4, I_BOTTLE5, I_BOTTLE6};
+	for(int i=5; i>=0; i--){
+		if(Link->Item[bottles[i]]&&BottleState[i]==state){
+			BottleState[i] = 0;
+			RefreshBottles();
+			return true;
+		}
+	}
+	return false;
+}
+//start bottleStateNames
+void getBottleStateName(int state, int deststr){//start
+	if(!state){
+		int str[] = "Empty Bottle";
+		strcpy(deststr,str);
+	} else if(state==1){
+		int str[] = "Red Potion";
+		strcpy(deststr,str);
+	} else if(state==2){
+		int str[] = "Green Potion";
+		strcpy(deststr,str);
+	} else if(state==3){
+		int str[] = "Blue Potion";
+		strcpy(deststr,str);
+	} else if(state==4){
+		int str[] = "Water";
+		strcpy(deststr,str);
+	} else if(state==5){
+		int str[] = "Fairy";
+		strcpy(deststr,str);
+	} else if(state==6){
+		int str[] = "Milk (2/2)";
+		strcpy(deststr,str);
+	} else if(state==7){
+		int str[] = "Milk (1/2)";
+		strcpy(deststr,str);
+	} else if(state==8){
+		int str[] = "Bugs";
+		strcpy(deststr,str);
+	} else if(state==9){
+		int str[] = "Chateau Romani";
+		strcpy(deststr,str);
+	} else if(state==10){
+		int str[] = "Poe";
+		strcpy(deststr,str);
+	} else if(state==11){
+		int str[] = "Big Poe";
+		strcpy(deststr,str);
+	} else if(state==12){
+		int str[] = "Hot Spring Water";
+		strcpy(deststr,str);
+	} else if(state==13){
+		int str[] = "Mushroom";
+		strcpy(deststr,str);
+	} else if(state==14){
+		int str[] = "Gold Dust";
+		strcpy(deststr,str);
+	} else if(state==15){
+		int str[] = "Fish";
+		strcpy(deststr,str);
+	} else if(state==16){
+		int str[] = "Deku Princess";
+		strcpy(deststr,str);
+	} else if(state==17){
+		int str[] = "Seahorse";
+		strcpy(deststr,str);
+	}
+}//end
+
+int getBottleState(int bottle){
+	bottle = Clamp(bottle,1,6);
+	return BottleState[bottle-1];
+}
+
+
+//end
+//end EmptyBottles
+//start Bombchus
+item script Bombchu
+{
+	//d0 is the ffc script slot that has the
+	//d1 is the step speed. 100 is one pixel.
+	//d2 is the sprite. Sprite to use for the bombchu. Sprites are organized UP DOWN LEFT RIGHT.
+	//Power is the damage done by the bombchu's explosion
+	//The Counter reference in the pickup tab is what counter it will use.
+	void run(int ffcScriptNum, int step, int sprite)
+	{
+		if(!Link->PressA && !Link->PressB) Quit();
+		if(CountFFCsRunning(ffcScriptNum) == 0 && Game->Counter[this->Counter] > 0)
+		{
+			Game->Counter[this->Counter]--;
+			Game->PlaySound(SFX_PLACE);
+			int args[8] = {step, sprite, this->Power};
+			RunFFCScript(ffcScriptNum, args);
+		}
+	}
+}
+
+ffc script Bombchu_FFC
+{
+	void run(int step, int sprite, int damage)
+	{
+		this->Data=COMBO_INVIS;
+		//Create the bombchu infront of link.
+		lweapon bombchu = NextToLink(LW_BOMBCHU, 0);
+		bombchu->CollDetection = false;
+		bombchu->Dir = Link->Dir;
+		bombchu->Step = step;
+		bombchu->HitZHeight = 2;
+		bombchu->UseSprite(sprite);
+		int frames = bombchu->NumFrames;
+		if(!frames)frames=1;
+		bombchu->OriginalTile += bombchu->Dir*frames;
+		bombchu->Tile = bombchu->OriginalTile;
+		//Loop until it becomes invalid.
+		while(bombchu->isValid())
+		{
+			if(!(gameframe%6))Game->PlaySound(SFX_BOMBCHU);
+			//Update the sprite based off direction.
+			//Declare variables to be used to detect collisions.
+			bool contact;
+			int dir = bombchu->Dir;
+			//If the bombchu is about to go off screen expode.
+			if(dir == DIR_UP) contact = (bombchu->Y - Ceiling(step/100) <= 2);
+			else if(dir == DIR_DOWN) contact = (bombchu->Y + Ceiling(step/100) >= 150);
+			else if(dir == DIR_LEFT) contact = (bombchu->X - Ceiling(step/100) <= 4);
+			else if(dir == DIR_RIGHT) contact = (bombchu->X + Ceiling(step/100) >= 236);
+			//If the bombchu collided with a npc expode.
+			for(int i = Screen->NumNPCs(); i > 0 && !contact; i--)
+			{
+				npc n = Screen->LoadNPC(i);
+				if(!n->CollDetection) continue;
+				if(n->ID == NPC_ITEMFAIRY) continue;
+				if(n->Type == NPCT_PEAHAT && n->Step != 0 && n->Z == 0) continue;
+				if(n->Defense[NPCD_SCRIPT] == NPCDT_IGNORE) continue;
+				if(Collision(n, bombchu)) contact = true;
+			}
+			//If the bombchu is about to hit something solid according to bombchu solidity explode.
+			if(!contact)
+			{
+				int x = bombchu->X + AtFrontX(bombchu->Dir);
+				int y = bombchu->Y + AtFrontY(bombchu->Dir);
+				int combo = ComboAt(x,y);
+				if(!contact)
+				{
+					if(Screen->ComboT[combo]==CT_BOMBCHU&&Screen->ComboI[combo]==CF_BOMBCHU1&&Screen->ComboF[combo]==CF_BOMBCHU2) contact = !Screen->isSolid(x, y);
+					else contact = Screen->isSolid(x, y);
+				}
+				if(IsWater(combo) || IsPit(combo) || Screen->ComboT[combo] == CT_PITFALL) contact = true;
+			}
+			//If contact was set to true explode.
+			if(contact)
+			{
+				lweapon blast = CreateLWeaponAt(LW_BOMBBLAST, bombchu->X, bombchu->Y);
+				blast->Damage = damage;
+				bombchu->DeadState = 0;
+			}
+			Waitframe();
+		}
+	}
+}
+//end Bombchus

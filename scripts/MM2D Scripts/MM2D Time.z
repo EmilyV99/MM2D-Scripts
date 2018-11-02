@@ -1,0 +1,99 @@
+////////////////////////////////////////
+//                                    //
+//         MM2D Script: Time          //
+//                                    //
+////////////////////////////////////////
+
+//start OnTimeReset
+void resetTime()
+{
+	time=0;
+	trueTime=0;
+	hour=6;
+	day=1;
+	slowTime = false;
+	Game->Counter[CR_LIFE] = Game->MCounter[CR_LIFE];
+	Game->Counter[CR_MAGIC] = Game->MCounter[CR_MAGIC];
+	Game->Counter[CR_BOMBS]=0;
+	Game->Counter[CR_RUPEES]=0;
+	Game->Counter[CR_ARROWS]=0;
+	Game->Counter[CR_SBOMBS]=0;
+	Game->Counter[CR_BOMBCHUS]=0;
+	Game->Counter[CR_DEKUNUTS]=0;
+	Game->Counter[CR_MAGICBEANS]=0;
+	swordCounter = 0;
+	Link->Item[RAZSWORD_ID]=false;
+	Link->Item[INF_MAGIC]=false;
+	for(int i=0;i<6;i++)
+	{
+		BottleState[i]=BS_EMPTY;
+	}
+	RefreshBottles();
+	for(int i = GVAR_START_RESET;i<GVAR_END_RESET;i++)
+	{
+		setGlobalVar(i,0,0);
+	}
+}//end
+
+//start Difficulty Settings
+void updateDifficulty(int dif){
+	switch(dif){
+		case 0:{
+			FRAMES_MINUTE=90*FRAMES_SECOND;
+			setGlobalVar(GVAR_DIFFICULTY,GV_MISC,0);
+			updateTimes();
+			break;}
+		case 1:{
+			FRAMES_MINUTE=60*FRAMES_SECOND;
+			setGlobalVar(GVAR_DIFFICULTY,GV_MISC,1);
+			updateTimes();
+			break;}
+		case 2:{
+			FRAMES_MINUTE=45*FRAMES_SECOND;
+			setGlobalVar(GVAR_DIFFICULTY,GV_MISC,2);
+			updateTimes();
+			break;}
+	}
+}
+
+void updateTimes(){
+	FRAMES_HOUR = 60*FRAMES_MINUTE;
+	TIME_MINUTE = FRAMES_MINUTE*FRAME;
+	TIME_HOUR = FRAMES_HOUR*FRAME;
+	TIME_HOTWATER = TIME_HOUR*4;
+}
+//end
+bool isAfter(int aday, int anhour, bool equal)
+{
+	return (day>aday)||(aday==day&&(hourconv(hour)>hourconv(anhour)||(equal&&hourconv(anhour)==hourconv(hour))));
+}
+
+bool isBefore(int aday, int anhour, bool equal)
+{
+	return (day<aday)||(aday==day&&(hourconv(hour)<hourconv(anhour)||(equal&&hourconv(anhour)==hourconv(hour))));
+}
+
+bool isBetween(int startHour, int endHour, bool eqStart, bool eqEnd)
+{
+	int trueHour = hourconv(hour);
+	int trueStart = hourconv(startHour);
+	int trueEnd = hourconv(endHour);
+	return (trueHour>trueStart&&trueHour<trueEnd)||(eqStart&&trueHour==trueStart)||(eqEnd&&trueHour==trueEnd);
+}
+
+bool isBetween(int startHour, int endHour)
+{
+	isBetween(startHour,endHour,true,false);
+}
+
+int hourconv(int hr)
+{
+	hr-=6;
+	if(hr<0)hr+=24;
+	return hr;
+}
+
+bool isDay()
+{
+	return (hour>=6&&hour<18);
+}

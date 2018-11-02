@@ -1,0 +1,564 @@
+////////////////////////////////////////
+//                                    //
+//    MM2D Script: Masks and Forms    //
+//                                    //
+////////////////////////////////////////
+
+void handleMasks(){
+	switch(mask){
+		case 7:{
+			if(!getGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC)){
+				if(Link->PressL){
+					lweapon blast = CreateLWeaponAt(LW_BOMBBLAST,Link->X+dirX(Link->Dir)*16,Link->Y+dirY(Link->Dir)*16);
+					blast->Damage=2;
+					setGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC,360);
+					if(Link->Item[8]||Link->Item[37]){Link->InvFrames=40;freezeFrames=30;NoAction();}
+				}
+			} else {
+				incGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC,-1);
+			}
+			break;}
+		case 12:{
+			if(Link->Action==LA_SWIMMING)
+				LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_BUNNY_WATER);
+			else LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_BUNNY_LAND);
+			break;}
+	}
+}
+
+item script Mask{//start
+	//0 is no mask, 1-4 are transformation masks.
+	void run(int maskID){
+		if(mask>0&&mask<=4||maskID>0&&maskID<=4){
+			if(maskID>0&&maskID<=4){
+				if(form==maskID){
+					form = 0;
+					mask = 0;
+					currMaskTile = FIRST_MASK_TILE;
+					NOTESOUND_A = 200;
+					NOTESOUND_DOWN = 201;
+					NOTESOUND_RIGHT = 202;
+					NOTESOUND_LEFT = 203;
+					NOTESOUND_UP = 204;
+				} else {
+					mask = maskID;
+					form = maskID;
+					currMaskTile = FIRST_MASK_TILE + maskID;
+					NOTESOUND_A = 200 + (5*maskID);
+					NOTESOUND_DOWN = 201 + (5*maskID);
+					NOTESOUND_RIGHT = 202 + (5*maskID);
+					NOTESOUND_LEFT = 203 + (5*maskID);
+					NOTESOUND_UP = 204 + (5*maskID);
+				}
+			}
+		} else {
+			if(mask==maskID){
+				mask = 0;
+				currMaskTile = FIRST_MASK_TILE;
+			} else {
+				mask = maskID;
+				currMaskTile = FIRST_MASK_TILE + maskID;
+			}
+		}
+		/*switch(mask){
+			
+		}*/
+	}
+}//end
+
+void handleTransformations(lweapon zoraBoom1, lweapon zoraBoom2){//start
+	//start Form setup
+	Link->Item[FORM1] = (form==1);
+	Link->Item[FORM2] = (form==2&&!curled);
+	Link->Item[FORM2CURLED] = (form==2&&curled&&!spikedRolling);
+	Link->Item[FORM2SPIKED] = (form==2&&spikedRolling);
+	Link->Item[FORM3] = (form==3);
+	Link->Item[FORM4] = (form==4);
+	//end Form setup
+	if(Link->InputB){//start ItemJinxing
+		if(!itemAllowed(form,B_item)){
+			Link->ItemJinx = 3;
+		}
+	} else if(Link->InputEx1){
+		if(!itemAllowed(form,EX1_item)){
+			Link->ItemJinx = 3;
+		}
+	} else if(Link->InputEx2){
+		if(!itemAllowed(form,EX2_item)){
+			Link->ItemJinx = 3;
+		}
+	}//end
+	if(!isFrozen){//start Form notPaused
+		//start handlers
+		zoraBoomMovement(zoraBoom1,zoraBoom2);
+		//end handlers
+		if(!form){//start human
+			if(Link->PressR&&Link->Action!=LA_SWIMMING&&!Link->Item[210]){
+				Game->PlaySound(SFX_SHIELD);
+			}
+			if(Link->InputR&&Link->Action!=LA_SWIMMING&&!Link->InputA&&!Link->InputB&&!Link->InputEx1&&!Link->InputEx2&&!Link->Item[210]){
+				Link->Item[8]=true;
+				Link->Item[37]=hasMirrorShield;
+				Link->Item[FORM_SHIELD] = !hasMirrorShield;
+				Link->Item[FORM_M_SHIELD] = hasMirrorShield;
+			} else {
+				Link->Item[8]=false;
+				Link->Item[37]=false;
+				Link->Item[FORM_SHIELD] = false;
+				Link->Item[FORM_M_SHIELD] = false;
+			}
+			//end human
+		} else if(form==1){//start deku
+			if(!Deku_flying){
+				if(Link->PressR){
+					useItem = ITEM_BUBBLE;
+					Link->PressR=false;
+					Link->InputR=false;
+				}
+			} else {
+				dekuFly();
+			}
+			int linkcombot = Screen->ComboT[ComboAt(Link->X+8,Link->Y+12)];
+			if(!Deku_flying&&(linkcombot==CT_WATER||linkcombot==CT_SHALLOWWATER)){
+				Deku_floating--;
+				if(isTouchingComboBy(COMBO_LILYPAD,8)){
+					Deku_floating=60;
+				} else if(Deku_floating>0&&Link->Action!=LA_DROWNING&&!(Deku_floating%20)){//Play every 20 frames
+					Game->PlaySound(SFX_DEKUHOP);
+				}
+			} else {
+				Deku_floating = 60;
+				Link->Item[51] = true;
+			}
+			if(!Deku_floating){
+				Link->Item[51]=false;
+				Link->Action=LA_DROWNING;
+			}
+			//end deku
+		} else if(form==2){//start Goron
+			if(Link->PressR){
+				if(curled)Game->PlaySound(SFX_GORONUNCURL);
+				else Game->PlaySound(SFX_GORONCURL);
+				curled=!curled;
+				Link->ItemJinx=3;
+			}
+			if(curled){
+				Link->SwordJinx = 10;
+				if(Link->PressA){
+					useItem = ITEM_POUND;
+					Link->PressA=false;
+					Link->InputA=false;
+				}
+				Link->Item[36]=false;
+				Link->Item[54]=true;
+				if((Link->InputDown||Link->InputRight||Link->InputLeft||Link->InputUp)&&(Link->Action==LA_NONE||Link->Action==LA_WALKING||Link->Action==LA_GOTHURTLAND)){
+					if(timeRolling<84){
+						LinkMovement_SetLinkSpeedBoost(-1.5);
+						if(!timeRolling){
+							Game->PlaySound(SFX_GORONROLL_BEGIN);
+						}
+						spikedRolling=false;
+					} else if(timeRolling<100){
+						if(!((timeRolling-84)%14)){
+							Game->PlaySound(SFX_GORONROLL_LOOP);
+						}
+						LinkMovement_SetLinkSpeedBoost(-0.5);
+						spikedRolling=false;
+					} else if(timeRolling<200||Game->Counter[CR_MAGIC]<MAGICCOST_SPIKEROLL){
+						if(!((timeRolling-84)%16)){
+							Game->PlaySound(SFX_GORONROLL_LOOP);
+						}
+						LinkMovement_SetLinkSpeedBoost(1);
+						spikedRolling=false;
+					} else {
+						if(!spikedRolling){
+							spikeStartTime=timeRolling;
+							Game->PlaySound(SFX_GORONROLL_SPEEDUP);
+						} else {
+							int time = timeRolling-(spikeStartTime+60);
+							if(time>=0&&!(time%23)){
+								Game->PlaySound(SFX_GORONROLL_SPEEDLOOP);
+							}
+						}
+						LinkMovement_SetLinkSpeedBoost(2.5);
+						if(!(gameframe%EVERYXFRAMES_SPIKEROLL))
+							Game->DCounter[CR_MAGIC]-=MAGICCOST_SPIKEROLL;
+						spikedRolling=true;
+					}
+					timeRolling++;
+				} else {
+					Audio->EndSound(SFX_GORONROLL_BEGIN);
+					Audio->EndSound(SFX_GORONROLL_LOOP);
+					Audio->EndSound(SFX_GORONROLL_SPEEDLOOP);
+					Audio->EndSound(SFX_GORONROLL_SPEEDUP);
+					timeRolling = 0;
+					spikedRolling=false;
+				}
+			} else {
+				Audio->EndSound(SFX_GORONROLL_BEGIN);
+				Audio->EndSound(SFX_GORONROLL_LOOP);
+				Audio->EndSound(SFX_GORONROLL_SPEEDLOOP);
+				Audio->EndSound(SFX_GORONROLL_SPEEDUP);
+				Audio->EndSound(SFX_GORONPOUND);
+				Link->Item[36]=true;
+				Link->Item[54]=false;
+				timeRolling = 0;
+				spikedRolling=false;
+			}
+			if(spikedRolling){
+				goronSpikeRoll();
+			}//end Goron
+		} else if(form==3){//start zora
+			if(Link->PressR){
+				fireZoraBoomerang();
+				Link->PressR=false;
+				Link->InputR=false;
+			}
+			//end
+		} else if(form==4){//start Deity
+			if(Link->PressR&&Link->Action!=LA_SWIMMING){
+				Game->PlaySound(SFX_SHIELD);
+			}
+			if(Link->InputR&&Link->Action!=LA_SWIMMING&&!Link->InputA){
+				Link->Item[8]=true;
+				Link->Item[37]=hasMirrorShield;
+				NoActionButMoveAndEx4AndA();
+			} else {
+				Link->Item[8]=false;
+				Link->Item[37]=false;
+			}
+		}//end
+	}//end Form notonsubscreen	
+	if(form){//start Not-form-x
+		Link->Item[FORM_SHIELD] = false;
+		Link->Item[FORM_M_SHIELD] = false;
+		Link->Item[210] = false;
+		if(form!=4){
+			Link->Item[8]=false;
+			Link->Item[37]=false;
+		}
+	}
+	if(form!=1){
+		Link->Item[133] = false;
+		Link->Item[134] = false;
+		Link->Item[135] = false;
+		Link->Item[ITEM_BUBBLE] = false;
+	}
+	if(form!=2){
+		curled=false;
+		spikedRolling=false;
+		Link->Item[36]=false;
+		Link->Item[54]=false;
+	}
+	if(form!=3){
+		Link->Item[136] = false;
+	}
+	if(form!=4){
+		Link->Item[208]=false;
+		Link->Item[209]=false;
+	}
+	//end Not-form-x
+	if(!form){//start HUMAN
+		Link->Item[51] = true;
+		Link->Item[214]=false;
+		//end HUMAN
+	} else if(form==1){//start DEKU
+		Link->Item[51] = true;
+		Link->Item[214]=false;
+		Link->Item[133] = true;
+		Link->Item[134] = true;
+		Link->Item[135] = true;
+		Link->Item[ITEM_BUBBLE] = true;
+		Link->Item[8]=false;
+		Link->Item[37]=false;
+		//end DEKU
+	} else if(form==2){//start GORON
+		Link->Item[51]=false;
+		Link->Item[214]=false;
+		Link->Item[8]=false;
+		Link->Item[37]=false;
+		//end GORON
+	} else if(form==3){//start ZORA
+		Link->Item[214]=true;
+		Link->Item[8]=false;
+		Link->Item[37]=false;
+		Link->Item[136] = true;
+		if(Link->Action==LA_SWIMMING)LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_ZORA_WATER);
+		handleZoraScreenChange();
+		//end ZORA
+	} else if(form==4){//start DEITY
+		Link->Item[208]=true;
+		Link->Item[209]=true;
+		//end DEITY
+	}
+}//end
+//start formFunctions
+//For default form, check if item is not on blacklist, else check if item is on whitelist
+bool itemAllowed(int form, int itemID){
+	if(!form){
+		int F0_items[] = {48};//This is blacklist, others below are whitelist
+		for(int i = 0;i<SizeOfArray(F0_items);i++){
+			if(F0_items[i]==itemID)return false;
+		}
+		return true;
+	} else if(form==1){
+		int F1_items[] = {31,144,127,131,25,207,53};
+		for(int i = 0;i<SizeOfArray(F1_items);i++){
+			if(F1_items[i]==itemID)return true;
+		}
+		return false;
+	} else if(form==2){
+		if(curled)return false;
+		int F2_items[] = {31,144,127,131,207,53,48};
+		//if(itemID==48)return true;//PATCHWORK//
+		for(int i = 0;i<SizeOfArray(F2_items);i++){
+			if(F2_items[i]==itemID)return true;
+		}
+		return false;
+	} else if(form==3){
+		int F3_items[] = {31,48,144,127,ITEM_POUND,131,207,53};	
+		for(int i = 0;i<SizeOfArray(F3_items);i++){
+			if(F3_items[i]==itemID)return true;
+		}
+		return false;
+	} else if(form==4){
+		int F4_items[] = {144,127,131,207,53};
+		for(int i = 0;i<SizeOfArray(F4_items);i++){
+			if(F4_items[i]==itemID)return true;
+		}
+		return false;
+	}
+}
+
+bool isTouchingComboBy(int comboID,int pixBy){
+	int x = Link->X;
+	int y = Link->Y;
+	if(Screen->ComboD[ComboAt(Link->X+pixBy,Link->Y+pixBy)]==comboID)return true;
+	if(Screen->ComboD[ComboAt(Link->X+15-pixBy,Link->Y+pixBy)]==comboID)return true;
+	if(Screen->ComboD[ComboAt(Link->X+pixBy,Link->Y+15-pixBy)]==comboID)return true;
+	if(Screen->ComboD[ComboAt(Link->X+15-pixBy,Link->Y+15-pixBy)]==comboID)return true;
+	return false;
+}
+//end formFunctions
+//start customFormFunctions
+//start FFC DekuFlower
+DEFINE maxDiveTime = 110;
+ffc script dekuFlower{
+	void run(int filledCombo, int flightlength, int floorsUp, float speedMod){
+		int combo = this->Data;
+		if(!speedMod)speedMod=-.5;
+		bool dived = false;
+		int diveTime = 20;
+		while(true){
+			if(form!=1){
+				Deku_flying=0;
+				diveTime = maxDiveTime;
+				dived=false;
+			}
+			if(Link->Invisible&&!dived&&!Deku_flying){Waitframe();continue;}
+			if(dived){
+				this->Data = filledCombo;
+				Link->Invisible = true;	
+			} else {
+				this->Data = combo;
+				Link->Invisible = false;
+			}
+			if(form==1&&Link->X>this->X-8&&Link->X<this->X+8&&Link->Y>this->Y-8&&Link->Y<this->Y+8){
+				if(dived){
+					diveTime = maxDiveTime;
+					if(!Link->InputA){
+						dived=false;
+						DekuFlightSpeedMod = speedMod;
+						Deku_flying = flightlength;
+						Game->PlaySound(68);
+						Link->Invisible = false;
+						warpNumFloors=floorsUp;
+					} else NoDirs();
+				} else if(!Deku_flying){
+					if(Link->InputA&&diveTime>0){
+						if(diveTime==maxDiveTime)Game->PlaySound(67);
+						diveTime--;
+						if(!diveTime){
+							dived=true;
+						}
+						NoDirs();
+					} else if(!Link->InputA){
+						diveTime = maxDiveTime;
+						Audio->EndSound(67);
+					}
+				}
+			} else diveTime = maxDiveTime;
+			Waitframe();
+		}
+	}
+}
+//end FFC DekuFlower
+void dekuFly(){//start DekuFly
+	Deku_flying--;
+	if(Link->PressR)Deku_flying=0;
+	if(!Deku_flying){
+		Game->PlaySound(78);
+		canFall=true;
+	} else if((!(gameframe%6)&&Deku_flying>180)||(!(gameframe%12)&&Deku_flying>91)||(!(gameframe%24)||gameframe%24==6))
+		Game->PlaySound(69);
+	if(Link->PressA)useItem=ITEM_DEKUNUT;
+	NoActionButMoveAndEx4();
+	LinkMovement_SetLinkSpeedBoost(DekuFlightSpeedMod);
+}//end
+void goronSpikeRoll(){//start GoronRoll
+	for(int i = 0;i<countNPCInRange(CenterLinkX(),CenterLinkY(),24);i++){
+		npc anNPC = getNthNPCInRange(CenterLinkX(),CenterLinkY(),24,i);
+		if(anNPC->isValid()){
+			if(anNPC->CollDetection&&!anNPC->InvFrames&&anNPC->Defense[NPCD_SCRIPT2]!=NPCDT_IGNORE){
+				lweapon hit = CreateLWeaponAt(LW_SCRIPT2,anNPC->X+(anNPC->HitXOffset)+(anNPC->HitWidth/2),anNPC->Y+(anNPC->HitYOffset)+(anNPC->HitHeight/2));
+				hit->Damage=2;
+				hit->HitWidth=1;
+				hit->HitHeight=1;
+				hit->UseSprite(SPRITE_NONE);
+				hit->Step=0;
+			} else if(anNPC->InvFrames){
+				anNPC->Stun=5;
+			}
+		}
+	}
+}//end GoronSpikeRoll
+void fireZoraBoomerang(){//start ZoraRang
+	if(!countLWeaponType(LW_BRANG)){
+		lweapon zoraBoom1 = Screen->CreateLWeapon(LW_BRANG);
+		zoraBoom1->X=CenterLinkX();
+		zoraBoom1->Y=CenterLinkY();
+		lweapon zoraBoom2 = Screen->CreateLWeapon(LW_BRANG);
+		zoraBoom2->X=CenterLinkX();
+		zoraBoom2->Y=CenterLinkY();
+		//
+		zoraBoom1->Angular=true;
+		zoraBoom2->Angular=true;
+		if(Link->Dir==DIR_DOWN){
+			zoraBoom1->Angle=DIR16_RADS_RIGHTDOWN;
+			zoraBoom2->Angle=DIR16_RADS_LEFTDOWN;
+		} else if(Link->Dir==DIR_LEFT){
+			zoraBoom1->Angle=DIR16_RADS_LEFTDOWN;
+			zoraBoom2->Angle=DIR16_RADS_UPLEFT;
+		} else if(Link->Dir==DIR_UP){
+			zoraBoom1->Angle=DIR16_RADS_UPLEFT;
+			zoraBoom2->Angle=DIR16_RADS_RIGHTUP;
+		} else {
+			zoraBoom1->Angle=DIR16_RADS_RIGHTUP;;
+			zoraBoom2->Angle=DIR16_RADS_RIGHTDOWN;
+		}
+		zoraBoom1->Step=5;
+		zoraBoom2->Step=5;
+		zoraBoom1->Damage=1;
+		zoraBoom2->Damage=1;
+		zoraBoom1->Misc[0]=0.035;
+		zoraBoom2->Misc[0]=0.035;
+		zoraBoom1->CollDetection=false;
+		zoraBoom2->CollDetection=false;
+		Game->Misc[0]=zoraBoom1;
+		Game->Misc[1]=zoraBoom2;
+	}
+}
+
+void zoraBoomMovement(lweapon zoraBoom1, lweapon zoraBoom2){
+	if(zoraBoom1->isValid()||zoraBoom2->isValid()){
+		if(!(gameframe%20))Game->PlaySound(4);
+	}
+	if(zoraBoom1->isValid()){
+		if(!zoraBoom2->isValid()){
+			zoraBoom1->Misc[2]=5;
+		}
+		handleBRang(zoraBoom1,1);
+	}
+	if(zoraBoom2->isValid()){
+		if(!zoraBoom1->isValid()){
+			zoraBoom2->Misc[2]=5;
+		}
+		handleBRang(zoraBoom2,-1);
+	}
+	if(zoraBoom1->Misc[0]>0.1&&Collision(zoraBoom1,zoraBoom2)){
+		zoraBoom1->Misc[2]=10;
+		zoraBoom2->Misc[2]=10;
+	}
+}
+
+void handleBRang(lweapon brang, int mult){
+	int DegAngle = RadtoDeg(brang->Angle);
+	if(DegAngle%90>=89||DegAngle%90<=1){
+		if(!brang->Misc[1]){
+			brang->Misc[0]*=3;
+			brang->Misc[1]=1;
+		}
+	}
+	if(brang->Misc[2]>0){
+		brang->Misc[2]--;
+		if(!brang->Misc[2]){
+			brang->DeadState=WDS_BOUNCE;
+		}
+	}
+	brang->Angle+=(brang->Misc[0]*mult);
+	//Collision:
+	for(int i = 1;i<=Screen->NumNPCs();i++){
+		npc n = Screen->LoadNPC(i);
+		if(n->isValid()&&Collision(n,brang)&&!n->InvFrames&&!n->Stun){
+			int damage = brang->Damage*2;
+			int def = n->Defense[NPCD_BRANG];
+			switch(def){
+				case NPCDT_HALFDAMAGE:{damage/=2;break;}
+				case NPCDT_QUARTERDAMAGE:{damage/=4;break;}
+				case NPCDT_STUN:{damage=0;break;}
+				case NPCDT_STUNORBLOCK:{damage=0;break;}
+				case NPCDT_STUNORIGNORE:{damage=0;break;}
+				case NPCDT_STUN:{damage=0;break;}
+				case NPCDT_BLOCK:{damage=0;break;}
+				case NPCDT_BLOCK2:{damage=0;break;}
+				case NPCDT_BLOCK4:{damage=0;break;}
+				case NPCDT_BLOCK6:{damage=0;break;}
+				case NPCDT_BLOCK8:{damage=0;break;}
+				case NPCDT_IGNORE:{damage=0;break;}
+				case NPCDT_ONEHITKILL:{damage=n->HP;break;}
+			}
+			n->HP-=damage;
+			n->InvFrames=10;
+			n->Stun=10;
+		}
+	}
+}
+//end ZoraRang
+
+void handleZoraScreenChange()//start ZoraSurfaceDive
+{
+	handleZoraSurfacing();
+	handleZoraDiving();
+}
+
+void handleZoraSurfacing()
+{
+	if(!Link->PressL)return;
+	if(getUpDMap()==-1)return;
+	mapdata m = Game->LoadMapData(GetCurMap()+1,GetCurScreen());// UNFINISHED
+	int combos[] = {ComboAt(Link->X,Link->Y),ComboAt(Link->X,Link->Y+15),ComboAt(Link->X+15,Link->Y),ComboAt(Link->X+15,Link->Y+15)};
+	for(int i = 0; i < 4; i++)
+	{
+		if(m->ComboT[combos[i]] != CT_DIVEWARP)
+		{
+			return;
+		}
+	}
+	warpUp();
+}
+
+void handleZoraDiving()
+{
+	if(Link->Action != LA_DIVING)return;
+	if(getDownDMap()==-1)return;
+	int combos[] = {ComboAt(Link->X,Link->Y),ComboAt(Link->X,Link->Y+15),ComboAt(Link->X+15,Link->Y),ComboAt(Link->X+15,Link->Y+15)};
+	for(int i = 0; i < 4; i++)
+	{
+		if(Screen->ComboT[combos[i]] != CT_DIVEWARP)
+		{
+			return;
+		}
+	}
+	warpDown();
+}//end
+//end customFormFunctions

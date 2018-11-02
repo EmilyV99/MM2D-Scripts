@@ -1,0 +1,413 @@
+////////////////////////////////////////
+//                                    //
+//        MM2D Script: Ocarina        //
+//                                    //
+////////////////////////////////////////
+void ocarina(){//start ocMode
+	if(Link->PressA){
+		currSong[ocIndex] = NOTE_A;
+		Game->PlaySound(NOTESOUND_A);
+		ocIndex++;
+	} else if(Link->PressDown) {
+		currSong[ocIndex] = NOTE_DOWN;
+		Game->PlaySound(NOTESOUND_DOWN);
+		ocIndex++;
+	} else if(Link->PressRight) {
+		currSong[ocIndex] = NOTE_RIGHT;
+		Game->PlaySound(NOTESOUND_RIGHT);
+		ocIndex++;
+	} else if(Link->PressLeft) {
+		currSong[ocIndex] = NOTE_LEFT;
+		Game->PlaySound(NOTESOUND_LEFT);
+		ocIndex++;
+	} else if(Link->PressUp) {
+		currSong[ocIndex] = NOTE_UP;
+		Game->PlaySound(NOTESOUND_UP);
+		ocIndex++;
+	} else if(Link->PressB){
+		playedSong = -1;
+		songFrames = 0;
+		ocarina_mode = false;
+		OC_doItemJinx = true;
+	}
+	
+	if(ocIndex!=8 && ocIndex>0 && playSong(currSong)){
+		for(;ocIndex<8;ocIndex++){}
+		NoAction();
+		ocarina_mode = false;
+	} else if (ocIndex==8){
+		if(playSong(currSong)){
+			ocarina_mode = false;
+		} else {
+			ocarina_mode = false;
+			Game->PlaySound(SFX_ERROR);
+			playedSong = -1;
+		}
+	}
+	drawNotes();
+	NoAction();
+}//end ocMode
+void drawNotes(){//start
+	//Border ripped from renameLink
+	DEFINE BORDERTILE = 11196;
+	DEFINE FIRSTX = 64;
+	DEFINE FIRSTY = 48;
+	Screen->FastTile(6,FIRSTX-16,FIRSTY-16,BORDERTILE,2,OP_OPAQUE);
+	Screen->FastTile(6,FIRSTX-16,FIRSTY,BORDERTILE+20,2,OP_OPAQUE);
+	Screen->FastTile(6,FIRSTX-16,FIRSTY+16,BORDERTILE+40,2,OP_OPAQUE);
+	for(int i = FIRSTX; i <= FIRSTX+(16*7); i+=16)
+	{
+		Screen->FastTile(6,i,FIRSTY-16,BORDERTILE+1,2,OP_OPAQUE);
+		Screen->FastTile(6,i,FIRSTY,BORDERTILE+1+20,2,OP_OPAQUE);
+		Screen->FastTile(6,i,FIRSTY+16,BORDERTILE+1+40,2,OP_OPAQUE);
+	}
+	Screen->FastTile(6,FIRSTX+(16*7)+16,FIRSTY-16,BORDERTILE+2,2,OP_OPAQUE);
+	Screen->FastTile(6,FIRSTX+(16*7)+16,FIRSTY,BORDERTILE+2+20,2,OP_OPAQUE);
+	Screen->FastTile(6,FIRSTX+(16*7)+16,FIRSTY+16,BORDERTILE+2+40,2,OP_OPAQUE);
+	//
+	for(int note=0;note<8;note++){
+		if(!currSong[note]){
+			Screen->FastCombo(6,FIRSTX+(16*note),FIRSTY,0,0,128); //Why draw an invisible combo?
+		} else if(currSong[note]==1){
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_A,NOTECSET_A,128);
+		} else if(currSong[note]==2){
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_DOWN,NOTECSET_DOWN,128);
+		} else if(currSong[note]==3){
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_RIGHT,NOTECSET_RIGHT,128);
+		} else if(currSong[note]==4){
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_LEFT,NOTECSET_LEFT,128);
+		} else if(currSong[note]==5){
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_UP,NOTECSET_UP,128);
+		}
+	}
+}//end
+bool playSong(int song){//start SongFrames
+	int midiAdd = Clamp(form,0,3);
+	if(LEARNED_SONGS[SONG_SongOfTime] && compareSongs(song,SONGNOTES_SongOfTime)){
+		Audio->PlayMIDI(midiAdd+SONGMIDI_SongOfTime);
+		playedSong=SONG_SongOfTime;
+		songFrames = 580;//
+		return true;
+	} else if(LEARNED_SONGS[SONG_EponasSong] && compareSongs(song,SONGNOTES_EponasSong)){
+		Audio->PlayMIDI(midiAdd+SONGMIDI_EponasSong);
+		playedSong=SONG_EponasSong;
+		songFrames = 435;//
+		return true;
+	} else if(LEARNED_SONGS[SONG_SongOfStorms] && compareSongs(song,SONGNOTES_SongOfStorms)){
+		Audio->PlayMIDI(midiAdd+SONGMIDI_SongOfStorms);
+		playedSong=SONG_SongOfStorms;
+		songFrames = 290;//
+		return true;
+	} else if(LEARNED_SONGS[SONG_GoronsLullaby] && compareSongs(song,SONGNOTES_GoronsLullaby)){
+		Audio->PlayMIDI(midiAdd+SONGMIDI_GoronsLullaby);
+		playedSong=SONG_GoronsLullaby;
+		songFrames = 430;//
+		return true;
+	} else if(LEARNED_SONGS[SONG_OathToOrder] && compareSongs(song,SONGNOTES_OathToOrder)){
+		Audio->PlayMIDI(midiAdd+SONGMIDI_OathToOrder);
+		playedSong=SONG_OathToOrder;
+		songFrames = 440;//
+		return true;
+	} else if(LEARNED_SONGS[SONG_SongOfSoaring] && compareSongs(song,SONGNOTES_SongOfSoaring)){
+		Audio->PlayMIDI(midiAdd+SONGMIDI_SongOfSoaring);
+		playedSong=SONG_SongOfSoaring;
+		songFrames = 200;//
+		return true;
+	} else if(LEARNED_SONGS[SONG_SongOfHealing] && compareSongs(song,SONGNOTES_SongOfHealing)){
+		Audio->PlayMIDI(midiAdd+SONGMIDI_SongOfHealing);
+		playedSong=SONG_SongOfHealing;
+		songFrames = 445;//
+		return true;
+	} else if(LEARNED_SONGS[SONG_ElegyOfEmptiness] && compareSongs(song,SONGNOTES_ElegyOfEmptiness)){
+		Audio->PlayMIDI(midiAdd+SONGMIDI_ElegyOfEmptiness);
+		playedSong=SONG_ElegyOfEmptiness;
+		songFrames = 395;//
+		return true;
+	} else if(LEARNED_SONGS[SONG_NewWaveBossaNova] && compareSongs(song,SONGNOTES_NewWaveBossaNova)){
+		Audio->PlayMIDI(midiAdd+SONGMIDI_NewWaveBossaNova);
+		playedSong=SONG_NewWaveBossaNova;
+		songFrames = 333;//
+		return true;
+	} else if(LEARNED_SONGS[SONG_SongOfDoubleTime] && compareSongs(song,SONGNOTES_SongOfDoubleTime)){
+		Audio->PlayMIDI(midiAdd+SONGMIDI_SongOfDoubleTime);
+		playedSong=SONG_SongOfDoubleTime;
+		songFrames = 427;//
+		return true;
+	} else if(LEARNED_SONGS[SONG_SongOfInvertedTime] && compareSongs(song,SONGNOTES_SongOfInvertedTime)){
+		Audio->PlayMIDI(midiAdd+SONGMIDI_SongOfInvertedTime);
+		playedSong=SONG_SongOfInvertedTime;
+		songFrames = 555;//
+		return true;
+	} else if(LEARNED_SONGS[SONG_SonataOfAwakening] && compareSongs(song,SONGNOTES_SonataOfAwakening)){
+		Audio->PlayMIDI(midiAdd+SONGMIDI_SonataOfAwakening);
+		playedSong=SONG_SonataOfAwakening;
+		songFrames = 335;//
+		return true;
+	} else if(LEARNED_SONGS[SONG_ScarecrowsSong] && compareSongs(song,SONGNOTES_ScarecrowsSong)){
+		for(int note = 0;note<8;note++){
+			if(!song[note]){
+				return false;
+			}
+		}
+		playedSong=SONG_ScarecrowsSong;
+		songFrames = 20;
+		return true;
+	}
+	return false;
+}//end
+void activateSong(int song){//start Song Functions
+	if(song==SONG_SongOfTime){
+		tangoTemp=false;
+		int args[8] = {44,1};
+		RunFFCScript(FFC_SHOWSTRING,args);
+	} else if(song==SONG_EponasSong){
+		//INSERT CODE/Do something here when Epona's Song is played!
+	} else if(song==SONG_SongOfStorms){
+		if(!(DUNGEONS[Game->GetCurDMap()]||ScreenFlag(SF_ROOMTYPE,SFR_INTERIOR)||ScreenFlag(SF_ROOMTYPE,SFR_DUNGEON))){
+			Audio->PlayMIDI(MIDI_THESTORM);
+			songOfStormsRain=true;
+		}
+	} else if(song==SONG_GoronsLullaby){
+		//INSERT CODE/Do something here when Goron's Lullaby is played!
+	} else if(song==SONG_OathToOrder){
+		//INSERT CODE/Do something here when Oath to Order is played!
+	} else if(song==SONG_SongOfSoaring){
+		if(owlStates==0){
+		
+		} else {
+		
+		}
+	} else if(song==SONG_SongOfHealing){
+		//INSERT CODE//Do something here when Song of Healing is played!
+	} else if(song==SONG_ElegyOfEmptiness){
+		//INSERT CODE//Do something here when Elegy of Emptiness is played!
+	} else if(song==SONG_NewWaveBossaNova){
+		//INSERT CODE//Do something here when New Wave Bossa Nova is played!
+	} else if(song==SONG_SongOfDoubleTime){
+		tangoTemp=false;
+		int args[8] = {47,2};
+		RunFFCScript(FFC_SHOWSTRING,args);
+	} else if(song==SONG_SongOfInvertedTime){
+		tangoTemp=false;
+		int args[8] = {46,3};
+		RunFFCScript(FFC_SHOWSTRING,args);
+	} else if(song==SONG_SonataOfAwakening){
+		//INSERT CODE//Do something here when Sonata of Awakening is played!
+	} else if(song==SONG_ScarecrowsSong){
+		//INSERT CODE//Do something here when Scarecrow's Song is played!
+	}
+}//end
+bool compareSongs(int song, int song2){//start
+	for(int note=0;note<8;note++){
+		if(song[note]!=song2[note]){
+			return false;
+		}
+	}
+	return true;
+}//end
+void scarecrow(){//start
+	if(Link->PressA){
+		currSong[ocIndex] = NOTE_A;
+		Game->PlaySound(NOTESOUND_A);
+		ocIndex++;
+	} else if(Link->PressDown) {
+		currSong[ocIndex] = NOTE_DOWN;
+		Game->PlaySound(NOTESOUND_DOWN);
+		ocIndex++;
+	} else if(Link->PressRight) {
+		currSong[ocIndex] = NOTE_RIGHT;
+		Game->PlaySound(NOTESOUND_RIGHT);
+		ocIndex++;
+	} else if(Link->PressLeft) {
+		currSong[ocIndex] = NOTE_LEFT;
+		Game->PlaySound(NOTESOUND_LEFT);
+		ocIndex++;
+	} else if(Link->PressUp) {
+		currSong[ocIndex] = NOTE_UP;
+		Game->PlaySound(NOTESOUND_UP);
+		ocIndex++;
+	} else if(Link->PressB){
+		playedSong = -1;
+		songFrames = 10;
+		scarecrowRecord = false;
+	}
+	if(ocIndex==8){
+		if(!isValidSong(currSong,false)){
+			for(int note=0;note<8;note++){
+				SONGNOTES_ScarecrowsSong[note]=currSong[note];
+			}
+		} else {
+			Game->PlaySound(SFX_ERROR);
+		}
+		scarecrowRecord = false;
+	}
+	drawNotes();
+	NoAction();
+}//end
+bool isValidSong(int song, bool reqLearned){//start
+	if(reqLearned){
+		if(LEARNED_SONGS[SONG_SongOfTime] && compareSongs(song,SONGNOTES_SongOfTime)){
+			return true;
+		} else if(LEARNED_SONGS[SONG_EponasSong] && compareSongs(song,SONGNOTES_EponasSong)){
+			return true;
+		} else if(LEARNED_SONGS[SONG_SongOfStorms] && compareSongs(song,SONGNOTES_SongOfStorms)){
+			return true;
+		} else if(LEARNED_SONGS[SONG_GoronsLullaby] && compareSongs(song,SONGNOTES_GoronsLullaby)){
+			return true;
+		} else if(LEARNED_SONGS[SONG_OathToOrder] && compareSongs(song,SONGNOTES_OathToOrder)){
+			return true;
+		} else if(LEARNED_SONGS[SONG_SongOfSoaring] && compareSongs(song,SONGNOTES_SongOfSoaring)){
+			return true;
+		} else if(LEARNED_SONGS[SONG_SongOfHealing] && compareSongs(song,SONGNOTES_SongOfHealing)){
+			return true;
+		} else if(LEARNED_SONGS[SONG_ElegyOfEmptiness] && compareSongs(song,SONGNOTES_ElegyOfEmptiness)){
+			return true;
+		} else if(LEARNED_SONGS[SONG_NewWaveBossaNova] && compareSongs(song,SONGNOTES_NewWaveBossaNova)){
+			return true;
+		} else if(LEARNED_SONGS[SONG_SongOfDoubleTime] && compareSongs(song,SONGNOTES_SongOfDoubleTime)){
+			return true;
+		} else if(LEARNED_SONGS[SONG_SongOfInvertedTime] && compareSongs(song,SONGNOTES_SongOfInvertedTime)){
+			return true;
+		} else if(LEARNED_SONGS[SONG_SonataOfAwakening] && compareSongs(song,SONGNOTES_SonataOfAwakening)){
+			return true;
+		}
+	} else {
+		if(compareSongs(song,SONGNOTES_SongOfTime)){
+			return true;
+		} else if(compareSongs(song,SONGNOTES_EponasSong)){
+			return true;
+		} else if(compareSongs(song,SONGNOTES_SongOfStorms)){
+			return true;
+		} else if(compareSongs(song,SONGNOTES_GoronsLullaby)){
+			return true;
+		} else if(compareSongs(song,SONGNOTES_OathToOrder)){
+			return true;
+		} else if(compareSongs(song,SONGNOTES_SongOfSoaring)){
+			return true;
+		} else if(compareSongs(song,SONGNOTES_SongOfHealing)){
+			return true;
+		} else if(compareSongs(song,SONGNOTES_ElegyOfEmptiness)){
+			return true;
+		} else if(compareSongs(song,SONGNOTES_NewWaveBossaNova)){
+			return true;
+		} else if(compareSongs(song,SONGNOTES_SongOfDoubleTime)){
+			return true;
+		} else if(compareSongs(song,SONGNOTES_SongOfInvertedTime)){
+			return true;
+		} else if(compareSongs(song,SONGNOTES_SonataOfAwakening)){
+			return true;
+		}
+	}	
+	return false;
+}//end
+//start Ocarina Item
+item script Ocarina{
+	//
+	//Set this to the item you wish to activate song mode. This item should be a Custom Item Class.
+	//
+	void run(){
+		if(!songFrames&&!scarecrowMode){
+			for(int note = 0;note<8;note++){
+				currSong[note]=0;
+			}
+			ocIndex = 0;
+			playedSong=-1;
+			ocarina_mode = true;
+		} else if(!songFrames&&scarecrowMode){
+			for(int note = 0;note<8;note++){
+				currSong[note]=0;
+			}
+			ocIndex = 0;
+			playedSong=-1;
+			scarecrowRecord = true;
+		}
+	}
+}//end
+//start Songs Trigger Secrets
+ffc script SongTriggersSecrets{
+	//
+	//Var 0: Number of song to require for secret trigger
+	//Var 1: Set to 0 for temporary secrets, set to 1 for permanent secrets.
+	//Var 2: Set to 0 for play anywhere on screen, set to 1 for play while standing on FFC
+	//
+	void run(int song, bool perm, bool reqOnFFC){
+		bool waiting = true;
+		while(waiting){
+			if(playedSong==song){
+				if(!reqOnFFC||(Link->X>this->X-8&&Link->X<this->X+8&&Link->Y>this->Y-8&&Link->Y<this->Y+8)){
+					Screen->TriggerSecrets();
+					if(perm){
+						Screen->State[ST_SECRET] = true;
+					}
+					waiting=false;
+				}
+			}
+			Waitframe();
+		}
+	}
+}
+//end
+//start Learn Song
+ffc script LearnASong{
+	//
+	//Var 0: Number of song to learn when stepping on this tile
+	//Var 1: X-coordinate to display song learn message at. Leave blank for default (128).
+	//Var 2: Y-coordinate to display song learn message at. Leave blank for default (32).
+	//Var 3: Font color. Leave blank for default (black).
+	//Var 4: Background color. Leave blank for default (transparent). Use -1 for black.
+	//Var 5: Draw. If set to 0, song message will only be displayed when the song is learned. If set to 1, it will be displayed any time the screen is visited after it has been learned. If set to -1, it will not be displayed.
+	//Note that the combo for this FFC will be automatically set to Combo 0 once the song is learned!
+	//
+	void run(int song,int displayX,int displayY,int fontColor, int bgColor, int drawstate){
+		bool waiting = true;
+		bool draw = false;
+		if(!displayX){
+			displayX=128;
+		}
+		if(!displayY){
+			displayY=32;
+		}
+		if(!bgColor){
+			bgColor=-1;
+		} else if(bgColor==-1){
+			bgColor=0;
+		}
+		while(waiting){
+			if(Link->X>this->X-8&&Link->X<this->X+8&&Link->Y>this->Y-8&&Link->Y<this->Y+8){
+				LEARNED_SONGS[song]=true;
+				if(!drawstate){
+					draw=true;
+				}
+			}
+			if(LEARNED_SONGS[song]){
+				waiting=false;
+				this->Data=0;
+				if(drawstate==1){
+					draw=true;
+				}
+			}
+			Waitframe();
+		}
+	}
+}
+//end
+//start Scarecrow Song Create
+ffc script MakeScarecrowsSong{
+	//
+	//If Link is standing on this FFC and uses the Ocarina, he will not be able to play normal songs, but will instead play an 8-note song of his making which will be the scarecrow's song!
+	//NOTE: Link must still first LEARN the ScarecrowsSong using the LearnASong script, just as any other song. You can place that here as well, or place it elsewhere to simulate "activating" the song as is done in OOT!
+	//The player may come back to this spot any time to change the ScarecrowsSong.
+	//
+	void run(){
+		while(true){
+			if(Link->X>this->X-8&&Link->X<this->X+8&&Link->Y>this->Y-8&&Link->Y<this->Y+8){
+				scarecrowMode = true;
+			} else {
+				scarecrowMode = false;
+				scarecrowRecord = false;
+			}
+			Waitframe();
+		}
+	}
+}
+//end
