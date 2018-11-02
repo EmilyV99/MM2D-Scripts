@@ -1,5 +1,5 @@
 <NotepadPlus>
-    <UserLang name="ZScriptFinal" ext=".z" udlVersion="2.1">
+    <UserLang name="zscrf" ext=".z" udlVersion="2.1">
         <Settings>
             <Global caseIgnored="no" allowFoldOfComments="no" foldCompact="no" forcePureLC="0" decimalSeparator="0" />
             <Prefix Keywords1="no" Keywords2="no" Keywords3="no" Keywords4="no" Keywords5="no" Keywords6="no" Keywords7="no" Keywords8="no" />
@@ -25,7 +25,7 @@
             <Keywords name="Folders in comment, middle"></Keywords>
             <Keywords name="Folders in comment, close">end</Keywords>
             <Keywords name="Keywords1">int&#x000D;&#x000A;bool&#x000D;&#x000A;float&#x000D;&#x000A;lweapon&#x000D;&#x000A;eweapon&#x000D;&#x000A;npc&#x000D;&#x000A;ffc&#x000D;&#x000A;void&#x000D;&#x000A;global script&#x000D;&#x000A;ffc script&#x000D;&#x000A;item script</Keywords>
-            <Keywords name="Keywords2">const</Keywords>
+            <Keywords name="Keywords2">const&#x000D;&#x000A;DEFINE&#x000D;&#x000A;define&#x000D;&#x000A;GVAR</Keywords>
             <Keywords name="Keywords3">import&#x000D;&#x000A;typedef&#x000D;&#x000A;run&#x000D;&#x000A;while&#x000D;&#x000A;if&#x000D;&#x000A;switch&#x000D;&#x000A;case&#x000D;&#x000A;else</Keywords>
             <Keywords name="Keywords4">Link&#x000D;&#x000A;Screen&#x000D;&#x000A;Game</Keywords>
             <Keywords name="Keywords5">Waitframe&#x000D;&#x000A;Waitframes&#x000D;&#x000A;Waitdraw</Keywords>
