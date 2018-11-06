@@ -23,6 +23,7 @@ global script Init
 		setGlobalVar(TINT_SUNSETORANGE,GV_PAL,createTintPalette(-3,-9,-14));
 		setGlobalVar(TINT_NIGHT,GV_PAL,createTintPalette(-21,-23,-10));
 		setGlobalVar(TINT_LENS,GV_PAL,createTintPalette(-17,-48,5));
+		TIME_HOTWATER = TIME_HOUR*4;
 	}
 }
 //end

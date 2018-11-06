@@ -415,7 +415,7 @@ DEFINE STR_WATERCOOLED = 36; //Message for when hot spring water cools off
 DEFINE C_WHITE = 0x01; //The color white
 DEFINE C_BLACK = 0x0F; //The color black
 
-int TIME_HOTWATER = TIME_HOUR*4;
+int TIME_HOTWATER = TIME_HOUR*4; //Does not initialize properly, as TIME_HOUR reads as "0" on init! Re-init in "Init" script!
 
 //X--------------------------X
 //|  Empty Bottle Functions  |
@@ -529,7 +529,7 @@ int HasFairy(){
 //This function goes in the while loop of your global script before waitdraw
 void EmptyBottleGlobal(){//start defaultBottleCode
 	for(int i=0;i<6;i++){
-		if(springTimers[i]>-45000){
+		if(springTimers[i]>-1){
 			if(BottleState[i]==BS_HOTWATER){
 				if(trueTime>=springTimers[i]){
 					BottleState[i]=BS_WATER;
@@ -538,7 +538,7 @@ void EmptyBottleGlobal(){//start defaultBottleCode
 					RunFFCScript(FFC_SHOWSTRING,args);
 				}
 			} else {
-				springTimers[i]=-45001;
+				springTimers[i]=-1;
 			}
 		}
 	}
