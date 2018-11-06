@@ -609,6 +609,18 @@ global script Global
 	void testingMenu()//start
 	{
 		if(!dbsetup)debugSetup();
+		if(debug || dbdraw)
+		{
+			drawDebugString(256,6*0,"Time: 00.0000",true);//Display base time, with formatting
+			drawDebugInt(256-(4*4)-(2),6*0,trueTime,true);//Display integer time
+			drawDebugInt(256,6*0,(trueTime%1)*10000,true);//Display decimal time
+			drawDebugString(256,6*1,"R:   ",true);
+			drawDebugString(256,6*2,"G:   ",true);
+			drawDebugString(256,6*3,"B:   ",true);
+			drawDebugInt(256,6*1,getTintVar(DATA_R_SUM),true);
+			drawDebugInt(256,6*2,getTintVar(DATA_G_SUM),true);
+			drawDebugInt(256,6*3,getTintVar(DATA_B_SUM),true);
+		}
 		if(!isFrozen){
 			if(Input->ReadKey[KEY_TILDE])//Don't call ReadKey, it calls NoAction!
 			{
@@ -616,20 +628,6 @@ global script Global
 				//Game->TypingMode = !Game->TypingMode;
 				Link->CollDetection=!debug;
 				canFall=!debug;
-			}
-			if(debug || dbdraw)
-			{
-				//drawDebugInt(0,8,trueTime);
-				//drawDebugInfo(B_item);
-				drawDebugString(256,6*0,"Time: 00.0000",true);//Display base time, with formatting
-				drawDebugInt(256-(4*4)-(2),6*0,trueTime,true);//Display integer time
-				drawDebugInt(256,6*0,(trueTime%1)*10000,true);//Display decimal time
-				drawDebugString(256,6*1,"R:   ",true);
-				drawDebugString(256,6*2,"G:   ",true);
-				drawDebugString(256,6*3,"B:   ",true);
-				drawDebugInt(256,6*1,getTintVar(DATA_R_SUM),true);
-				drawDebugInt(256,6*2,getTintVar(DATA_G_SUM),true);
-				drawDebugInt(256,6*3,getTintVar(DATA_B_SUM),true);
 			}
 			if(debug)
 			{
