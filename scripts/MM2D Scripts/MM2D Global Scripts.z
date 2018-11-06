@@ -620,12 +620,15 @@ global script Global
 			{
 				//drawDebugInt(0,8,trueTime);
 				//drawDebugInfo(B_item);
-				drawDebugString(256,0,"R:   ",true);
-				drawDebugString(256,6,"G:   ",true);
-				drawDebugString(256,12,"B:   ",true);
-				drawDebugInt(256,0,getTintVar(DATA_R_SUM),true);
-				drawDebugInt(256,6,getTintVar(DATA_G_SUM),true);
-				drawDebugInt(256,12,getTintVar(DATA_B_SUM),true);
+				drawDebugString(256,6*0,"Time: 00.0000",true);//Display base time, with formatting
+				drawDebugInt(256-(4*4)-(2),6*0,trueTime,true);//Display integer time
+				drawDebugInt(256,6*0,(trueTime%1)*10000,true);//Display decimal time
+				drawDebugString(256,6*1,"R:   ",true);
+				drawDebugString(256,6*2,"G:   ",true);
+				drawDebugString(256,6*3,"B:   ",true);
+				drawDebugInt(256,6*1,getTintVar(DATA_R_SUM),true);
+				drawDebugInt(256,6*2,getTintVar(DATA_G_SUM),true);
+				drawDebugInt(256,6*3,getTintVar(DATA_B_SUM),true);
 			}
 			if(debug)
 			{
