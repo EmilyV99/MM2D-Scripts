@@ -42,7 +42,7 @@ void handleFreezableWater(){
 bool wasOnWaterLedge = false;
 void highLedgeFromWater(){
 	if(!wasOnWaterLedge){
-		if(Link->Action==LA_SWIMMING){
+		if(Link->Action==LA_SWIMMING || Link->Action==LA_DIVING){
 			if(LinkOnFlagMod(CF_NOWATERLEDGE2,0,LinkMovement[LM_STICKY]*3,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,0,LinkMovement[LM_STICKY]*3,0,true))){
 				if(LinkMovement[LM_STICKX]==0){
 					if(LinkMovement[LM_STICKY]==1){
