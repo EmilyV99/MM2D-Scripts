@@ -23,6 +23,7 @@ global script Init
 		setGlobalVar(TINT_SUNSETORANGE,GV_PAL,createTintPalette(-3,-9,-14));
 		setGlobalVar(TINT_NIGHT,GV_PAL,createTintPalette(-21,-23,-10));
 		setGlobalVar(TINT_LENS,GV_PAL,createTintPalette(-17,-48,5));
+		TIME_HOTWATER = TIME_HOUR*4;
 	}
 }
 //end
@@ -608,6 +609,18 @@ global script Global
 	void testingMenu()//start
 	{
 		if(!dbsetup)debugSetup();
+		if(debug || dbdraw)
+		{
+			drawDebugString(256,6*0,"Time: 00.0000",true);//Display base time, with formatting
+			drawDebugInt(256-(4*4)-(2),6*0,trueTime,true);//Display integer time
+			drawDebugInt(256,6*0,(trueTime%1)*10000,true);//Display decimal time
+			drawDebugString(256,6*1,"R:   ",true);
+			drawDebugString(256,6*2,"G:   ",true);
+			drawDebugString(256,6*3,"B:   ",true);
+			drawDebugInt(256,6*1,getTintVar(DATA_R_SUM),true);
+			drawDebugInt(256,6*2,getTintVar(DATA_G_SUM),true);
+			drawDebugInt(256,6*3,getTintVar(DATA_B_SUM),true);
+		}
 		if(!isFrozen){
 			if(Input->ReadKey[KEY_TILDE])//Don't call ReadKey, it calls NoAction!
 			{
@@ -615,17 +628,6 @@ global script Global
 				//Game->TypingMode = !Game->TypingMode;
 				Link->CollDetection=!debug;
 				canFall=!debug;
-			}
-			if(debug || dbdraw)
-			{
-				//drawDebugInt(0,8,trueTime);
-				//drawDebugInfo(B_item);
-				drawDebugString(256,0,"R:   ",true);
-				drawDebugString(256,6,"G:   ",true);
-				drawDebugString(256,12,"B:   ",true);
-				drawDebugInt(256,0,getTintVar(DATA_R_SUM),true);
-				drawDebugInt(256,6,getTintVar(DATA_G_SUM),true);
-				drawDebugInt(256,12,getTintVar(DATA_B_SUM),true);
 			}
 			if(debug)
 			{

@@ -707,8 +707,13 @@ void passiveSubscreen(){//start PassiveSubscreen
 	Screen->FastTile(7,RX,RY,R_tile,R_cset,OP_OPAQUE);
 	Screen->FastTile(7,LX,LY,L_tile,L_cset,OP_OPAQUE);
 	//Mask
-	Screen->FastTile(7,MASKX,MASKY,currMaskTile,6,OP_OPAQUE);
-	if(mask==24)Screen->FastTile(7,185,-22,currMaskTile+1,6,OP_OPAQUE);
+	int maskx = MASKX;
+	if(mask==24)
+	{
+		Screen->FastTile(7,MASKX+8,MASKY,currMaskTile+1,6,OP_OPAQUE);
+		maskx-=8;
+	}
+	Screen->FastTile(7,maskx,MASKY,currMaskTile,6,OP_OPAQUE);
 	//Rupee Marker
 	Screen->FastTile(7,26,-24,RUPEE_tile,RUPEE_cset,OP_OPAQUE);
 	//Tael
