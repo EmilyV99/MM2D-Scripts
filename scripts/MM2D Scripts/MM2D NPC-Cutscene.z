@@ -104,7 +104,7 @@ ffc script NPC
 	
 	bool AgainstFFCBase(int x, int y)
 	{
-		return Link->Z == 0 && ((Link->Dir == DIR_UP && Link->Y == y+8 && Abs(Link->X-x) < 8)||(Link->Dir == DIR_DOWN && Link->Y == y-16 && Abs(Link->X-x) < 8)||(Link->Dir == DIR_LEFT && Link->X == x+16 && Abs(Link->Y-y) < 8)||(Link->Dir == DIR_RIGHT && Link->X == x-16 && Abs(Link->Y-y) < 8));
+		return !isFrozen && Link->Z == 0 && ((Link->Dir == DIR_UP && Link->Y == y+8 && Abs(Link->X-x) < 8)||(Link->Dir == DIR_DOWN && Link->Y == y-16 && Abs(Link->X-x) < 8)||(Link->Dir == DIR_LEFT && Link->X == x+16 && Abs(Link->Y-y) < 8)||(Link->Dir == DIR_RIGHT && Link->X == x-16 && Abs(Link->Y-y) < 8));
     }//end NPC setup
 	
 	void interact(int NPCid)//start interact
@@ -499,6 +499,7 @@ ffc script Signpost
     }
     bool AgainstComboBase(int loc, bool largeHitbox, bool anySide)
 	{
+		if(isFrozen)return false;
 		if(largeHitbox && !anySide)
 		{
 			return Link->Z == 0 && (Link->Dir == DIR_UP && Link->Y == ComboY(loc)+16 && Abs(Link->X-ComboX(loc)) < 8);
