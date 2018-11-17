@@ -1,7 +1,7 @@
 /*
 	Script Header: TypeAString.zh
 	Author: Venrob
-	Version: 1.1
+	Version: 1.2
 */
 
 typedef const int DEFINE;
@@ -117,8 +117,17 @@ void handleTyping()
 			localIndex++;
 		}
 	}
-	strcpy(keyboardInput,__getTvar(TVAR_INDEX),localBuf,0);
-	__incTvar(TVAR_INDEX,localIndex);
+	int startindex = __getTvar(TVAR_INDEX)
+	for(int index = startindex; index < __getTvar(TVAR_MAXCHARS); index++)
+	{
+		if(localBuf[index-startindex]!=0)
+		{
+			keyboardInput[index] = localBuf[index-startindex];
+			__incTvar(TVAR_INDEX,1);
+		}
+	}
+	//strcpy(keyboardInput,__getTvar(TVAR_INDEX),localBuf,__getTvar(TVAR_MAXCHARS)-__getTvar(TVAR_INDEX));
+	//__incTvar(TVAR_INDEX,localIndex);
 }
 
 //Example of how it works. Load this into any .QST as Slot 2, then type stuff. Pressing ENTER will write what you typed to the console. Feel free to play around with the settings.

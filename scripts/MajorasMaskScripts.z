@@ -18,7 +18,7 @@ import "tango.zh"
 import "tango/font/GUI.zh"
 import "tango/font/MajoraFont.zh"
 import "ghost.zh"
-import "scripts/TypeAString v1-1.zh"
+import "scripts/TypeAString.zh"
 import "scripts/Tint.zh"
 //end
 //start MM Imports
