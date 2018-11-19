@@ -117,7 +117,7 @@ void handleTyping()
 			localIndex++;
 		}
 	}
-	int startindex = __getTvar(TVAR_INDEX)
+	int startindex = __getTvar(TVAR_INDEX);
 	for(int index = startindex; index < __getTvar(TVAR_MAXCHARS); index++)
 	{
 		if(localBuf[index-startindex]!=0)
