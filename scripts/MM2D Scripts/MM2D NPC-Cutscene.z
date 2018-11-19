@@ -5,7 +5,7 @@
 ////////////////////////////////////////
 
 //start NPC	
-int NPCNames[1000] = {"Tatl","Happy Mask Salesman","Banker","Bremor","Brac","ERROR","Tatl"};
+int NPCNames[1000] = {"Tatl","Happy Mask Salesman","Banker","Bremor","Brac","ERROR","Tatl","Guard","Guard","Guard","Guard"};
 
 ffc script NPC
 {
@@ -29,11 +29,11 @@ ffc script NPC
 		{
 			while(visible)
 			{
-				if(AgainstFFCBase(this->X,this->Y) && Link->PressA)
+				if(AgainstFFCBase(this) && Link->PressA)
 				{
 					Link->InputA = false;
 					Link->PressA = false;
-					interact(NPCid);
+					interact(this, NPCid);
 				}
 				if(isAfter(endday,endhour,true) || isBefore(startday,starthour,false))
 				{
@@ -71,11 +71,11 @@ ffc script NPC
 						Screen->ComboD[loc]=comboUnder;
 						while(visible)
 						{
-							if(AgainstFFCBase(this->X,this->Y) && Link->PressA)
+							if(AgainstFFCBase(this) && Link->PressA)
 							{
 								Link->InputA = false;
 								Link->PressA = false;
-								interact(NPCid);
+								interact(this, NPCid);
 							}
 							Waitframe();
 						}
@@ -88,12 +88,107 @@ ffc script NPC
 					this->Data=NPCcombo;
 					while(true)
 					{
-						if(AgainstFFCBase(this->X,this->Y) && Link->PressA)
+						if(AgainstFFCBase(this) && Link->PressA)
 						{
 							Link->InputA = false;
 							Link->PressA = false;
-							interact(NPCid);
+							interact(this, NPCid);
 						}
+						Waitframe();
+					}
+				}
+				case 7:
+				case 8:
+				case 9:
+				case 10:
+				{
+					int xoff = Cond(NPCid>8,8,0);
+					int yoff = Cond(NPCid>8,0,-8);
+					int lastform = form;
+					this->Data = NPCcombo;
+					if(getGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE) && form != 1)
+					{
+						this->X += xoff;
+						this->Y += yoff;
+					}
+					else
+					{
+						if(NPCid<9)
+						{
+							Screen->ComboD[loc+32] = 38410;
+						}
+						else
+						{
+							Screen->ComboD[loc+16] = 38410;
+						}
+					}
+					if(NPCid<9)
+					{
+						Screen->ComboD[loc+16] = 38410;
+					}
+					else
+					{
+						Screen->ComboD[loc+17] = 38410;
+					}
+					while(true)
+					{
+						if(lastform == 1 && form != 1 && getGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE))
+						{
+							this->X += xoff;
+							this->Y += yoff;
+							if(NPCid<9)
+							{
+								Screen->ComboD[loc+32] = 38406;
+							}
+							else
+							{
+								Screen->ComboD[loc+16] = 38406;
+							}
+						}
+						else if(lastform != 1 && form == 1 && getGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE))
+						{
+							this->X -= xoff;
+							this->Y -= yoff;
+							switch(NPCid)
+							{
+								case 7:
+									Screen->ComboD[loc+32] = 38410;
+									if(Link->X>=this->X-16)Link->X=this->X-16;
+									break;
+								case 8:
+									Screen->ComboD[loc+32] = 38410;
+									if(Link->X<this->X+16)Link->X=this->X+16;
+									break;
+								case 9:
+									Screen->ComboD[loc+16] = 38410;
+									if(Link->Y<this->Y+24)Link->Y=this->Y+24;
+									break;
+								case 10:
+									Screen->ComboD[loc+16] = 38410;
+									if(Link->Y>this->Y)Link->Y=this->Y;
+									break;
+							}
+						}
+						if(AgainstFFCBase(this) && Link->PressA)
+						{
+							Link->InputA = false;
+							Link->PressA = false;
+							if(form != 1 && !getGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE))
+							{
+								this->X += Cond(NPCid>8,8,0);
+								this->Y += Cond(NPCid>8,0,-8);
+								if(NPCid<9)
+								{
+									Screen->ComboD[loc+32] = 38406;
+								}
+								else
+								{
+									Screen->ComboD[loc+16] = 38406;
+								}
+							}
+							interact(this, NPCid);
+						}
+						lastform = form;
 						Waitframe();
 					}
 				}
@@ -102,22 +197,22 @@ ffc script NPC
 		}//end
 	}
 	
-	bool AgainstFFCBase(int x, int y)
+	bool AgainstFFCBase(ffc f)
 	{
-		return !isFrozen && Link->Z == 0 && ((Link->Dir == DIR_UP && Link->Y == y+8 && Abs(Link->X-x) < 8)||(Link->Dir == DIR_DOWN && Link->Y == y-16 && Abs(Link->X-x) < 8)||(Link->Dir == DIR_LEFT && Link->X == x+16 && Abs(Link->Y-y) < 8)||(Link->Dir == DIR_RIGHT && Link->X == x-16 && Abs(Link->Y-y) < 8));
+		return !isFrozen && Link->Z == 0 && ((Link->Dir == DIR_UP && Link->Y == f->Y+8+(16*(f->TileHeight-1)) && Abs(Link->X-f->X) < 8)||(Link->Dir == DIR_DOWN && Link->Y == f->Y-16 + (16*(f->TileHeight-1)) && Abs(Link->X-f->X) < 8)||(Link->Dir == DIR_LEFT && Link->X == f->X+(16*f->TileWidth) && Link->Y <= f->Y+8+(16*(f->TileHeight-1)) && Link->Y >= f->Y-8+(16*(f->TileHeight-1)))||(Link->Dir == DIR_RIGHT && Link->X == f->X-16 && Link->Y <= f->Y+8+(16*(f->TileHeight-1)) && Link->Y >= f->Y-8+(16*(f->TileHeight-1))));
     }//end NPC setup
 	
-	void interact(int NPCid)//start interact
+	void interact(ffc person, int NPCid)//start interact
 	{
-		interact(NPCid,0);
+		interact(person,NPCid,0);
 	}
 	
-	void interact(int NPCid,int NPCsound)
+	void interact(ffc person, int NPCid,int NPCsound)
 	{
 		Game->PlaySound(NPCsound);
 		switch(NPCid)
 		{
-			case 1://Happy Mask Salesman
+			case 1://Happy Mask Salesman start
 			{
 				if(!CS1_seen)
 				{
@@ -130,8 +225,8 @@ ffc script NPC
 				}
 				break;
 			}
-			
-			case 2://Banker
+			//end
+			case 2://Banker start
 			{
 				if(fullCounter(CR_BANKBAL))
 				{
@@ -168,8 +263,8 @@ ffc script NPC
 				}
 				break;
 			}
-			
-			case 3://Bremor, Carpenter (Red Pants)
+			//end
+			case 3://Bremor, Carpenter (Red Pants) start
 			{
 				if(isBefore(2,6,false))
 				{
@@ -185,8 +280,8 @@ ffc script NPC
 				}
 				break;
 			}
-			
-			case 4://Brac, Carpenter (Green Pants)
+			//end
+			case 4://Brac, Carpenter (Green Pants) start
 			{
 				if(isBefore(2,6,false))
 				{
@@ -202,8 +297,8 @@ ffc script NPC
 				}
 				break;
 			}
-			
-			case 5://Name-Changing Tablet
+			//end
+			case 5://Name-Changing Tablet start
 			{
 				tangoTemp=false;
 				ShowStringAndWait("{{@savename()}}, would you like to change your name?@26<<@choice(1)Yes@choice(2)No>>@domenu()@append(45)");
@@ -213,8 +308,8 @@ ffc script NPC
 				RunFFCScript(FFC_CHANGENAME,{0});
 				break;
 			}
-			
-			case 6://Difficulty-Changing Tablet
+			//end
+			case 6://Difficulty-Changing Tablet start
 			{
 				if(!Link->Item[I_OCARINA])
 				{
@@ -256,13 +351,96 @@ ffc script NPC
 				}
 				break;
 			}
-			
-			case -1:
+			//end
+			case 7:  //Guard East
+			case 8:  //Guard West
+			case 9:  //Guard North 
+			case 10: //Guard South start
+			{
+				if(form==1)
+				{
+					switch(NPCid)
+					{
+						case 7:
+						{
+							ShowNPCStringAndWait("Wait a moment, Deku Scrub! Have you some errand in the ((canyon))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to go out alone.@pressa()@26 Until you are old enough to carry a ((weapon)), you cannot pass through here without being accompanies by an adult.",NPCid);
+							return;
+						}
+						case 8:
+						{
+							ShowNPCStringAndWait("Wait a moment, Deku Scrub! Have you some errand in the ((ocean))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to go out alone.@pressa()@26 Until you are old enough to carry a ((weapon)), you cannot pass through here without being accompanied by an adult.",NPCid);
+							return;
+						}
+						case 9:
+						{
+							ShowNPCStringAndWait("Wait a moment, Deku Scrub! Have you some errand in the ((mountains))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to go out alone.@pressa()@26 Until you are old enough to carry a ((weapon)), you cannot pass through here without being accompanied by an adult.",NPCid);
+							return;
+						}
+						case 10:
+						{
+							ShowNPCStringAndWait("Stop right there, Deku Scrub! Do you intend to return to the ((swamp)) alone?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to leave unaccompanied.@pressa()@26 You are not allowed to pass through here without an adult or until you are old enough to carry a ((weapon)).",NPCid);
+							return;
+						}
+					}
+				}
+				else if(!getGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE))
+				{
+					setGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE,1);
+					switch(NPCid)
+					{
+						case 7:
+						{
+							ShowNPCStringAndWait("Stop right there! Have you some errand in the ((canyon))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to...@pressa()@26@26...A ((sword))?@26@pressa()@26My apologies, sir. It was wrong of me to treat you like a child.",NPCid);
+							break;
+						}
+						case 8:
+						{
+							ShowNPCStringAndWait("Stop right there! Have you some errand in the ((ocean))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to...@pressa()@26@26...A ((sword))?@26@pressa()@26My apologies, sir. It was wrong of me to treat you like a child.",NPCid);
+							break;
+						}
+						case 9:
+						{
+							ShowNPCStringAndWait("Stop right there! Have you some errand in the ((mountains))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to...@pressa()@26@26...A ((sword))?@26@pressa()@26My apologies, sir. It was wrong of me to treat you like a child.",NPCid);
+							break;
+						}
+						case 10:
+						{
+							ShowNPCStringAndWait("Stop right there! Have you some errand in the ((swamp))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to...@pressa()@26@26...A ((sword))?@26@pressa()@26My apologies, sir. It was wrong of me to treat you like a child.",NPCid);
+							break;
+						}
+					}
+				}
+				switch(NPCid)
+				{
+					case 7:
+					{
+						ShowNPCStringAndWait("The canyon at ((Stone Tower)) lies this way. Be careful.",NPCid);
+						return;
+					}
+					case 8:
+					{
+						ShowNPCStringAndWait("From ((Great Bay)) you can see clear to the ((ocean)). It lies in this direction. Be careful.",NPCid);
+						return;
+					}
+					case 9:
+					{
+						ShowNPCStringAndWait("The mountains of ((Snowhead)) lies in this direction. Be careful.",NPCid);
+						return;
+					}
+					case 10:
+					{
+						ShowNPCStringAndWait("The southern swamp at ((Woodfall)) lies in this direction. Be careful.",NPCid);
+						return;
+					}
+				}
+			}
+			//end
+			case -1://  start
 			{
 				
 				break;
 			}
-			
+			//end
 			default:
 			{
 				TraceS("[NPC][void interact()] NPC id is not assigned! Something is wrong!");TraceNL();
@@ -538,8 +716,6 @@ void SetInput(int input, bool state)
 }
 //end Signpost
 //start Shop
-int shopString[1024];
-int shopPrice = 0;
 ffc script Shop{
 	void run(int itemID, int price, int shopSpecial, bool reqBottle){
 		if(shopSpecial!=0){
