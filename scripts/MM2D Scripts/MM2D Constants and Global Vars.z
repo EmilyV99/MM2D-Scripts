@@ -370,7 +370,6 @@ DEFINE TANGO_MENU_CURSOR_COMBO = 14085;
 DEFINE MAXNAMELENGTH = 75; //This must be >= the longest NPC name, + the length of the tango commands
 //Misc
 DEFINE RAZSWORD_USES = 100;
-DEFINE RAZSWORD_ID = 6;
 DEFINE INF_MAGIC = 152;
 DEFINE DEKU_MAX_TIMER = 240;
 DEFINE ARRTYPE_FIRE = 1;
@@ -414,6 +413,8 @@ bool pressA = false;
 //Tango Vars
 bool tangoTemp = false;
 int tangoTempI = 0;
+int shopString[1024];
+int shopPrice = 0;
 //Location Trackers
 int lastScreen = -1;
 int lastMap = -1;
@@ -458,7 +459,10 @@ DEFINE NUM_PAL = 4;
 //
 GVAR GV_CHEST = GV_PAL + NUM_PAL;
 GVAR GVAR_START_RESET = GV_CHEST;
-GVAR GVAR_END_RESET = GV_CHEST+1000;
+//
+GVAR GV_MISCRESETTABLE = GV_CHEST + 1000;
+GVAR GVAR_GUARDSMOVED = 0;
+GVAR GVAR_END_RESET = GV_MISCRESETTABLE+1000;
 ////
 int getGlobalVar(int index, int add)
 {

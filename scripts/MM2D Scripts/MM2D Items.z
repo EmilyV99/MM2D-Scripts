@@ -350,7 +350,7 @@ item script DekuNuts{
 //start RazorSword
 void razorSwordCheck(){
 	if(swordCounter>=RAZSWORD_USES){
-		Link->Item[RAZSWORD_ID]=false;
+		Link->Item[I_SWORD_RAZOR]=false;
 		swordCounter=0;
 	}
 }
