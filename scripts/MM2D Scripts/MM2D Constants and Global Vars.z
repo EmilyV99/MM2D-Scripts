@@ -376,6 +376,8 @@ DEFINE ARRTYPE_FIRE = 1;
 DEFINE ARRTYPE_ICE = 2;
 DEFINE ARRTYPE_LIGHT = 3;
 DEFINE SPRITE_FIREARROW = 90;
+//
+DEFINE MAX_LEVEL = 10; //Max DMap "Level" used
 //FFC Scripts
 DEFINE FFC_SIGN = 1;
 DEFINE FFC_LEARNSONG = 3;
@@ -404,11 +406,10 @@ DEFINE SSSTATE_PLANTED = 2;
 DEFINE SSSTATE_GROWN = 3;
 DEFINE SSSTATE_ACTIVE = 4;
 //Torch puzzle vars
-bool torchPuzzleStates[8];
+bool torchPuzzleStates[4 * MAX_LEVEL];
+int torchPuzzle[4 * MAX_LEVEL];
 int torchPuzzleTimer = 0;
 int dekuStickLitTimer = 0;
-int torchPuzzle[8];
-int torchPuzzles = 0000000000000000b;
 int swordCounter = 0;
 //Time vars
 int time = 0;
