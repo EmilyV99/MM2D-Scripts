@@ -495,7 +495,8 @@ ffc script TorchPuzzle{
 
 int getTorchCombo(int torchnum, int unlitCombo, int litCombo, int puzzleNum)
 {
-	return Cond(torchPuzzleStates[puzzleNum] & torchnum > 0,litCombo,unlitCombo);
+	if(torchPuzzleStates[puzzleNum]) return litCombo;
+	return Cond((torchPuzzle[puzzleNum] & torchnum) > 0,litCombo,unlitCombo);
 }
 
 ffc script LitTorch

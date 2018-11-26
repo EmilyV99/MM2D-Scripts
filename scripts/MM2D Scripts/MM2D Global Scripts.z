@@ -446,7 +446,17 @@ global script Global
 	{
 		if(usingBugs>0)usingBugs--;
 		if(beanCounter>0)beanCounter--;
-		if(torchPuzzleTimer>0)torchPuzzleTimer--;
+		if(torchPuzzleTimer>0)
+		{
+			torchPuzzleTimer--;
+			if(torchPuzzleTimer==0)
+			{
+				for(int i = 0; i < 8; i++)
+				{
+					torchPuzzle[i]=0;
+				}
+			}
+		}
 		if(dekuStickLitTimer>0)dekuStickLitTimer--;
 	}
 	
