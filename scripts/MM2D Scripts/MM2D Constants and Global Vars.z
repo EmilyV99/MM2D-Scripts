@@ -453,6 +453,7 @@ bool debug = false;
 bool dbsetup = false;
 bool dbdraw = false;
 bool debugEnabled = false;
+bool noSave = false;
 //end MISC
 
 //start Global Vars Array
