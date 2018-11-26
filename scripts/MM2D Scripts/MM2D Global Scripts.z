@@ -394,6 +394,12 @@ global script Global
 				case FFC_NPC:
 					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getNPCCombo(m->FFCData[i], m->GetFFCInitD(i, 0)+0, m->GetFFCInitD(i, 1)+0, m->GetFFCInitD(i, 2)+0, m->GetFFCInitD(i, 3)+0, m->GetFFCInitD(i, 4)+0, m->GetFFCInitD(i, 5)+0, (m->GetFFCInitD(i, 7))>0),m->FFCCSet[i],OP_OPAQUE);
 					break;
+				case FFC_SOFTSOIL:
+					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getSoilCombo(m->GetFFCInitD(i,4)),m->FFCCSet[i],OP_OPAQUE);
+					break;
+				case FFC_TORCH:
+					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getTorchCombo(m->GetFFCInitD(i,0),m->GetFFCInitD(i,2),m->GetFFCInitD(i,3),m->GetFFCInitD(i,5)),m->FFCCSet[i],OP_OPAQUE);
+					break;
 				default:
 					if(data==0)break;
 					if(data==COMBO_INVIS)break;
@@ -420,8 +426,15 @@ global script Global
 	
 	void changedLevel()
 	{
-		torchPuzzleState=0;
+		for(int i = 0; i < 8; i++)
+		{
+			torchPuzzle[i]=0;
+		}
 		torchPuzzleTimer=0;
+		for(int soilindex = 0; soilindex < 10; soilindex++)
+		{
+			setSoilState(soilindex,SSSTATE_UNDEFINED); //Reset soft soil to default state
+		}
 	}
 	
 	void changedDMap()
