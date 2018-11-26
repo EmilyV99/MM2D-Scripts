@@ -215,6 +215,7 @@ ffc script ShowString
 //start Misc Functions
 void saveTheGame()//start
 {
+	if(noSave)return;
 	Screen->DrawScreen(7,LAYERSMAP1,LAYERSCREEN_SAVING,0,0,0);
 	Waitframe();
 	Game->Save();

@@ -394,6 +394,12 @@ global script Global
 				case FFC_NPC:
 					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getNPCCombo(m->FFCData[i], m->GetFFCInitD(i, 0)+0, m->GetFFCInitD(i, 1)+0, m->GetFFCInitD(i, 2)+0, m->GetFFCInitD(i, 3)+0, m->GetFFCInitD(i, 4)+0, m->GetFFCInitD(i, 5)+0, (m->GetFFCInitD(i, 7))>0),m->FFCCSet[i],OP_OPAQUE);
 					break;
+				case FFC_SOFTSOIL:
+					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getSoilCombo(m->GetFFCInitD(i,4)),m->FFCCSet[i],OP_OPAQUE);
+					break;
+				case FFC_TORCH:
+					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getTorchCombo(m->GetFFCInitD(i,0),m->GetFFCInitD(i,2),m->GetFFCInitD(i,3),m->GetFFCInitD(i,5)),m->FFCCSet[i],OP_OPAQUE);
+					break;
 				default:
 					if(data==0)break;
 					if(data==COMBO_INVIS)break;
@@ -420,8 +426,15 @@ global script Global
 	
 	void changedLevel()
 	{
-		torchPuzzleState=0;
+		for(int i = 4 * MAX_LEVEL - 1; i >= 0; i--)
+		{
+			torchPuzzle[i]=0;
+		}
 		torchPuzzleTimer=0;
+		for(int soilindex = 0; soilindex < 10; soilindex++)
+		{
+			setSoilState(soilindex,SSSTATE_UNDEFINED); //Reset soft soil to default state
+		}
 	}
 	
 	void changedDMap()
@@ -433,7 +446,17 @@ global script Global
 	{
 		if(usingBugs>0)usingBugs--;
 		if(beanCounter>0)beanCounter--;
-		if(torchPuzzleTimer>0)torchPuzzleTimer--;
+		if(torchPuzzleTimer>0)
+		{
+			torchPuzzleTimer--;
+			if(torchPuzzleTimer==0)
+			{
+				for(int i = 4 * MAX_LEVEL - 1; i >= 0; i--)
+				{
+					torchPuzzle[i]=0;
+				}
+			}
+		}
 		if(dekuStickLitTimer>0)dekuStickLitTimer--;
 	}
 	
@@ -620,6 +643,8 @@ global script Global
 			drawDebugInt(256,6*1,getTintVar(DATA_R_SUM),true);
 			drawDebugInt(256,6*2,getTintVar(DATA_G_SUM),true);
 			drawDebugInt(256,6*3,getTintVar(DATA_B_SUM),true);
+			drawDebugString(256,6*4,"NoSav:  ",true);
+			drawDebugInt(256,6*4,Cond(noSave,1,0),true);
 		}
 		if(!isFrozen){
 			if(Input->ReadKey[KEY_TILDE])//Don't call ReadKey, it calls NoAction!
@@ -633,7 +658,7 @@ global script Global
 			{
 				drawDebugString(0,0,"DEBUG MODE",false);
 				drawDebugString(0,156,"   TDBG: ~ | TIME: UDLR | REF: = | FRZ: ENTER | WARP: NUMS             ",false);
-				drawDebugString(0,162,"       REFRESH: R | DBDRAW: \\ | CANFALL: F | UPDOWN: []               ",false);
+				drawDebugString(0,162," REFRESH: R | DBDRAW: \\ | CANFALL: F | UPDOWN: [] | NOSAV: N-         ",false);
 				canFall=false;
 				//Hour manipulation
 				if(Input->ReadKey[KEY_UP])
@@ -723,6 +748,10 @@ global script Global
 					freezeTime=!freezeTime;
 					slowTime=freezeTime;
 				}
+				if(Input->ReadKey[KEY_MINUS_PAD])
+				{
+					noSave = !noSave;
+				}
 				if(Input->ReadKey[KEY_0])Link->Warp(0,0x24);//Warp to test area
 				if(Input->ReadKey[KEY_R])Link->PitWarp(Game->GetCurDMap(),Game->GetCurDMapScreen());//Reset the screen by pitwarping to it
 				if(Input->ReadKey[KEY_BACKSLASH])dbdraw = !dbdraw;
@@ -737,6 +766,7 @@ global script Global
 	
 	void debugSetup(){//start
 		dbsetup=true;
+		noSave=true;
 		Game->Cheat=4;
 		for(int i = 0;i<22;i++)
 		{

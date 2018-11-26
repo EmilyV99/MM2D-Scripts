@@ -376,21 +376,40 @@ DEFINE ARRTYPE_FIRE = 1;
 DEFINE ARRTYPE_ICE = 2;
 DEFINE ARRTYPE_LIGHT = 3;
 DEFINE SPRITE_FIREARROW = 90;
+//
+DEFINE MAX_LEVEL = 10; //Max DMap "Level" used
 //FFC Scripts
-DEFINE FFC_SHOWSTRING = 16;
+DEFINE FFC_SIGN = 1;
+DEFINE FFC_LEARNSONG = 3;
+DEFINE FFC_MAKESCARECROWSONG = 4;
+DEFINE FFC_SONGSECRETS = 5;
+DEFINE FFC_NPC = 6;
+DEFINE FFC_CUTSCENE = 7;
+DEFINE FFC_DEKUFLOWER = 8;
+DEFINE FFC_BOMBCHU = 9;
+DEFINE FFC_SOFTSOIL = 10;
+DEFINE FFC_AMMOREFILL = 11;
 DEFINE FFC_CHEST = 12;
+DEFINE FFC_TORCH = 13;
+DEFINE FFC_LITTORCH = 14;
+DEFINE FFC_STATE = 15;
+DEFINE FFC_SHOWSTRING = 16;
+DEFINE FFC_SHOP = 18;
 DEFINE FFC_OWL = 22;
 DEFINE FFC_CHANGENAME = 24;
-DEFINE FFC_NPC = 6;
-DEFINE FFC_STATE = 15;
-DEFINE FFC_SOFTSOIL = 10;
+//z
 DEFINE MAX_NONRESERVED_FFC = 26;
+//Soft Soil States
+DEFINE SSSTATE_UNDEFINED = 0;
+DEFINE SSSTATE_WAITING = 1;
+DEFINE SSSTATE_PLANTED = 2;
+DEFINE SSSTATE_GROWN = 3;
+DEFINE SSSTATE_ACTIVE = 4;
 //Torch puzzle vars
-bool torchPuzzleStates[8];
+bool torchPuzzleStates[4 * MAX_LEVEL];
+int torchPuzzle[4 * MAX_LEVEL];
 int torchPuzzleTimer = 0;
 int dekuStickLitTimer = 0;
-int torchPuzzleState = 0000000000000000b;
-int torchPuzzles = 0000000000000000b;
 int swordCounter = 0;
 //Time vars
 int time = 0;
@@ -435,6 +454,7 @@ bool debug = false;
 bool dbsetup = false;
 bool dbdraw = false;
 bool debugEnabled = false;
+bool noSave = false;
 //end MISC
 
 //start Global Vars Array
@@ -457,12 +477,14 @@ GVAR TINT_NIGHT = 2;
 GVAR TINT_LENS = 3;
 DEFINE NUM_PAL = 4;
 //
-GVAR GV_CHEST = GV_PAL + NUM_PAL;
-GVAR GVAR_START_RESET = GV_CHEST;
+GVAR GVAR_START_RESET = GV_PAL + NUM_PAL;
+GVAR GV_CHEST = GVAR_START_RESET;
 //
 GVAR GV_MISCRESETTABLE = GV_CHEST + 1000;
 GVAR GVAR_GUARDSMOVED = 0;
-GVAR GVAR_END_RESET = GV_MISCRESETTABLE+1000;
+//
+GVAR GV_SOFTSOIL = GV_MISCRESETTABLE + 1000;
+GVAR GVAR_END_RESET = GV_SOFTSOIL + 10;
 ////
 int getGlobalVar(int index, int add)
 {
@@ -488,5 +510,15 @@ void setChestState(int index, bool state)
 {
 	if(state)setGlobalVar(index,GV_CHEST,1);
 	else setGlobalVar(index,GV_CHEST,0);
+}
+
+int getSoilState(int index)
+{
+	return getGlobalVar(index,GV_SOFTSOIL);
+}
+
+void setSoilState(int index, int state)
+{
+	setGlobalVar(index,GV_SOFTSOIL,state);
 }
 //end Global Vars Array
