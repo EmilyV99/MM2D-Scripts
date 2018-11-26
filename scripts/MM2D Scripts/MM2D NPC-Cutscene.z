@@ -175,6 +175,7 @@ ffc script NPC
 							Link->PressA = false;
 							if(form != 1 && !getGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE))
 							{
+								interact(this, NPCid, 0, {1});
 								this->X += Cond(NPCid>8,8,0);
 								this->Y += Cond(NPCid>8,0,-8);
 								if(NPCid<9)
@@ -186,7 +187,7 @@ ffc script NPC
 									Screen->ComboD[loc+16] = 38406;
 								}
 							}
-							interact(this, NPCid);
+							interact(this, NPCid, 0, {0});
 						}
 						lastform = form;
 						Waitframe();
@@ -208,6 +209,11 @@ ffc script NPC
 	}
 	
 	void interact(ffc person, int NPCid,int NPCsound)
+	{
+		interact(person,NPCid,0,-1);
+	}
+
+	void interact(ffc person, int NPCid,int NPCsound,int args) //args is int[], misc size
 	{
 		Game->PlaySound(NPCsound);
 		switch(NPCid)
@@ -357,6 +363,33 @@ ffc script NPC
 			case 9:  //Guard North 
 			case 10: //Guard South start
 			{
+				if(args[0])
+				{
+					setGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE,1);
+					switch(NPCid)
+					{
+						case 7:
+						{
+							ShowNPCStringAndWait("Stop right there! Have you some errand in the ((canyon))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to...@pressa()@26@26...A ((sword))?@26@pressa()@26My apologies, sir. It was wrong of me to treat you like a child.",NPCid);
+							return;
+						}
+						case 8:
+						{
+							ShowNPCStringAndWait("Stop right there! Have you some errand in the ((ocean))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to...@pressa()@26@26...A ((sword))?@26@pressa()@26My apologies, sir. It was wrong of me to treat you like a child.",NPCid);
+							return;
+						}
+						case 9:
+						{
+							ShowNPCStringAndWait("Stop right there! Have you some errand in the ((mountains))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to...@pressa()@26@26...A ((sword))?@26@pressa()@26My apologies, sir. It was wrong of me to treat you like a child.",NPCid);
+							return;
+						}
+						case 10:
+						{
+							ShowNPCStringAndWait("Stop right there! Have you some errand in the ((swamp))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to...@pressa()@26@26...A ((sword))?@26@pressa()@26My apologies, sir. It was wrong of me to treat you like a child.",NPCid);
+							return;
+						}
+					}
+				}
 				if(form==1)
 				{
 					switch(NPCid)
@@ -380,33 +413,6 @@ ffc script NPC
 						{
 							ShowNPCStringAndWait("Stop right there, Deku Scrub! Do you intend to return to the ((swamp)) alone?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to leave unaccompanied.@pressa()@26 You are not allowed to pass through here without an adult or until you are old enough to carry a ((weapon)).",NPCid);
 							return;
-						}
-					}
-				}
-				else if(!getGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE))
-				{
-					setGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE,1);
-					switch(NPCid)
-					{
-						case 7:
-						{
-							ShowNPCStringAndWait("Stop right there! Have you some errand in the ((canyon))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to...@pressa()@26@26...A ((sword))?@26@pressa()@26My apologies, sir. It was wrong of me to treat you like a child.",NPCid);
-							break;
-						}
-						case 8:
-						{
-							ShowNPCStringAndWait("Stop right there! Have you some errand in the ((ocean))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to...@pressa()@26@26...A ((sword))?@26@pressa()@26My apologies, sir. It was wrong of me to treat you like a child.",NPCid);
-							break;
-						}
-						case 9:
-						{
-							ShowNPCStringAndWait("Stop right there! Have you some errand in the ((mountains))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to...@pressa()@26@26...A ((sword))?@26@pressa()@26My apologies, sir. It was wrong of me to treat you like a child.",NPCid);
-							break;
-						}
-						case 10:
-						{
-							ShowNPCStringAndWait("Stop right there! Have you some errand in the ((swamp))?@pressa()@26{{}}It is dangerous outside the town walls, so I cannot allow a child like you to...@pressa()@26@26...A ((sword))?@26@pressa()@26My apologies, sir. It was wrong of me to treat you like a child.",NPCid);
-							break;
 						}
 					}
 				}
