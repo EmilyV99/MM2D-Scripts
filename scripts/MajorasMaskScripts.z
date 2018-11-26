@@ -179,7 +179,9 @@ ffc script ShowString
 				if(tangoTemp)
 				{
 					saveTheGame();
-					Link->Warp(0,0x10);
+					Link->PitWarp(0,0x10);
+					Link->X = 120;
+					Link->Y = 32;
 					resetTime();
 				}
 				break;
