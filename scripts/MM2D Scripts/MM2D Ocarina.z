@@ -3,45 +3,65 @@
 //        MM2D Script: Ocarina        //
 //                                    //
 ////////////////////////////////////////
-void ocarina(){//start ocMode
-	if(Link->PressA){
+void ocarina()//start ocMode
+{
+	if(Link->PressA)
+	{
 		currSong[ocIndex] = NOTE_A;
 		Game->PlaySound(NOTESOUND_A);
 		ocIndex++;
-	} else if(Link->PressDown) {
+	}
+	else if(Link->PressDown)
+	{
 		currSong[ocIndex] = NOTE_DOWN;
 		Game->PlaySound(NOTESOUND_DOWN);
 		ocIndex++;
-	} else if(Link->PressRight) {
+	}
+	else if(Link->PressRight)
+	{
 		currSong[ocIndex] = NOTE_RIGHT;
 		Game->PlaySound(NOTESOUND_RIGHT);
 		ocIndex++;
-	} else if(Link->PressLeft) {
+	}
+	else if(Link->PressLeft)
+	{
 		currSong[ocIndex] = NOTE_LEFT;
 		Game->PlaySound(NOTESOUND_LEFT);
 		ocIndex++;
-	} else if(Link->PressUp) {
+	}
+	else if(Link->PressUp)
+	{
 		currSong[ocIndex] = NOTE_UP;
 		Game->PlaySound(NOTESOUND_UP);
 		ocIndex++;
-	} else if(Link->PressB){
+	}
+	else if(Link->PressB)
+	{
 		playedSong = -1;
 		songFrames = 0;
 		ocarina_mode = false;
 		OC_doItemJinx = true;
+		if(!subscreen)Screen_Freeze(0);
 	}
 	
-	if(ocIndex!=8 && ocIndex>0 && playSong(currSong)){
+	if(ocIndex!=8 && ocIndex>0 && playSong(currSong))
+	{
 		for(;ocIndex<8;ocIndex++){}
 		NoAction();
 		ocarina_mode = false;
-	} else if (ocIndex==8){
-		if(playSong(currSong)){
+	}
+	else if (ocIndex==8)
+	{
+		if(playSong(currSong))
+		{
 			ocarina_mode = false;
-		} else {
+		}
+		else
+		{
 			ocarina_mode = false;
 			Game->PlaySound(SFX_ERROR);
 			playedSong = -1;
+			if(!subscreen)Screen_Freeze(0);
 		}
 	}
 	drawNotes();
@@ -52,32 +72,45 @@ void drawNotes(){//start
 	DEFINE BORDERTILE = 11196;
 	DEFINE FIRSTX = 64;
 	DEFINE FIRSTY = 48;
-	Screen->FastTile(6,FIRSTX-16,FIRSTY-16,BORDERTILE,2,OP_OPAQUE);
-	Screen->FastTile(6,FIRSTX-16,FIRSTY,BORDERTILE+20,2,OP_OPAQUE);
-	Screen->FastTile(6,FIRSTX-16,FIRSTY+16,BORDERTILE+40,2,OP_OPAQUE);
+	DEFINE FIRSTY_NOTE = FIRSTY - 9;
+	Screen->FastTile(6,FIRSTX-16,FIRSTY-16,BORDERTILE,0,OP_OPAQUE);
+	Screen->FastTile(6,FIRSTX-16,FIRSTY,BORDERTILE+20,0,OP_OPAQUE);
+	Screen->FastTile(6,FIRSTX-16,FIRSTY+16,BORDERTILE+40,0,OP_OPAQUE);
 	for(int i = FIRSTX; i <= FIRSTX+(16*7); i+=16)
 	{
-		Screen->FastTile(6,i,FIRSTY-16,BORDERTILE+1,2,OP_OPAQUE);
-		Screen->FastTile(6,i,FIRSTY,BORDERTILE+1+20,2,OP_OPAQUE);
-		Screen->FastTile(6,i,FIRSTY+16,BORDERTILE+1+40,2,OP_OPAQUE);
+		Screen->FastTile(6,i,FIRSTY-16,BORDERTILE+1,0,OP_OPAQUE);
+		Screen->FastTile(6,i,FIRSTY,BORDERTILE+1+20,0,OP_OPAQUE);
+		Screen->FastTile(6,i,FIRSTY+16,BORDERTILE+1+40,0,OP_OPAQUE);
 	}
-	Screen->FastTile(6,FIRSTX+(16*7)+16,FIRSTY-16,BORDERTILE+2,2,OP_OPAQUE);
-	Screen->FastTile(6,FIRSTX+(16*7)+16,FIRSTY,BORDERTILE+2+20,2,OP_OPAQUE);
-	Screen->FastTile(6,FIRSTX+(16*7)+16,FIRSTY+16,BORDERTILE+2+40,2,OP_OPAQUE);
+	Screen->FastTile(6,FIRSTX+(16*7)+16,FIRSTY-16,BORDERTILE+2,0,OP_OPAQUE);
+	Screen->FastTile(6,FIRSTX+(16*7)+16,FIRSTY,BORDERTILE+2+20,0,OP_OPAQUE);
+	Screen->FastTile(6,FIRSTX+(16*7)+16,FIRSTY+16,BORDERTILE+2+40,0,OP_OPAQUE);
 	//
-	for(int note=0;note<8;note++){
-		if(!currSong[note]){
-			Screen->FastCombo(6,FIRSTX+(16*note),FIRSTY,0,0,128); //Why draw an invisible combo?
-		} else if(currSong[note]==1){
-			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_A,NOTECSET_A,128);
-		} else if(currSong[note]==2){
-			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_DOWN,NOTECSET_DOWN,128);
-		} else if(currSong[note]==3){
-			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_RIGHT,NOTECSET_RIGHT,128);
-		} else if(currSong[note]==4){
-			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_LEFT,NOTECSET_LEFT,128);
-		} else if(currSong[note]==5){
-			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY,NOTETILE_UP,NOTECSET_UP,128);
+	for(int note=0;note<8;note++)
+	{
+		if(!currSong[note])
+		{
+			continue;
+		}
+		else if(currSong[note]==1)
+		{
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY_NOTE+20,NOTETILE_A,NOTECSET_A,128);
+		}
+		else if(currSong[note]==2)
+		{
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY_NOTE+15,NOTETILE_DOWN,NOTECSET_DOWN,128);
+		}
+		else if(currSong[note]==3)
+		{
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY_NOTE+10,NOTETILE_RIGHT,NOTECSET_RIGHT,128);
+		}
+		else if(currSong[note]==4)
+		{
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY_NOTE+5,NOTETILE_LEFT,NOTECSET_LEFT,128);
+		}
+		else if(currSong[note]==5)
+		{
+			Screen->FastTile(6,FIRSTX+(16*note),FIRSTY_NOTE,NOTETILE_UP,NOTECSET_UP,128);
 		}
 	}
 }//end

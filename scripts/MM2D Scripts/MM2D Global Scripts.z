@@ -153,7 +153,6 @@ global script Global
 				}*/
 				TotalNoAction();
 				ocarina_mode = false;
-				Screen_Freeze(2);
 				if(!fakeSong)
 					drawNotes();
 				songFrames--;
@@ -187,6 +186,7 @@ global script Global
 			}
 			if(ocarina_mode)
 			{
+				Screen_Freeze(2);
 				ocarina();
 				Link->PressStart=false;
 				Link->InputStart=false;
