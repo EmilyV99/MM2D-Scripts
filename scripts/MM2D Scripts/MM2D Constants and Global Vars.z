@@ -328,6 +328,10 @@ DEFINE TILE_DEKUSTICK_UNLIT = 64180;
 DEFINE TILE_DEKUSTICK_LIT = 64200;
 DEFINE TILE_NOTE_DEFAULT = 12614;
 DEFINE TILE_DROP = 12590;
+DEFINE TILE_CURL = 12591;
+DEFINE TILE_QUIT = 12592;
+DEFINE TILE_AIM = 12593;
+DEFINE TILE_AIMARROW = 139;
 //WIP TILES
 DEFINE TILE_REMAINS1UL = 0;
 DEFINE TILE_REMAINS2UL = 0;
@@ -439,6 +443,7 @@ int lastScreen = -1;
 int lastMap = -1;
 int lastLevel = -1;
 int lastDMap = -1;
+int lastHP = Link->HP;
 //Misc
 int LinkActionOld = 0;
 int floatPix = 2;
@@ -448,6 +453,7 @@ bool hideLayer4 = false;
 bool songOfStormsRain = false;
 bool owlSaved = false;
 int warpNumFloors = 0;
+bool arrowAimMode = false;
 //Debug Vars
 bool freezeTime = false;
 bool debug = false;
@@ -469,6 +475,7 @@ GVAR GVAR_MAINTANGOSLOT = 4;
 GVAR GVAR_ACTIVENPCID = 5;
 GVAR GVAR_NPCTANGOSLOT = 6;
 GVAR GVAR_DIFFICULTY = 7;
+GVAR GVAR_ARROWANGLE = 8;
 //
 GVAR GV_PAL = 1000;
 GVAR TINT_DAY = 0;
