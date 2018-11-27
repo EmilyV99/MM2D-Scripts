@@ -380,7 +380,7 @@ void runOmniArrows()
 	int angle = getGlobalVar(GVAR_ARROWANGLE,GV_MISC);
 	if((Link->PressB && isArrow(B_item)) || (Link->PressEx1 && isArrow(EX1_item)) || (Link->PressEx2 && isArrow(EX2_item)))
 	{ //Fire arrow!
-		Game->PlaySound(SFX_ERROR);
+		Game->PlaySound(SFX_ARROW);
 		arrowAimMode = false;
 		Link->ItemJinx = 3;
 		freezeFrames = 10;
@@ -410,7 +410,8 @@ void runOmniArrows()
 		arr->Angular = true;
 		arr->Angle = DegtoRad(angle);
 		arr->Dir = AngleDir4(WrapDegrees(angle));
-		arr->Step = 175;
+		arr->Step = 250;
+		arr->Damage = parentItem->Power;
 		//Ensure proper direction:
 		if(arr->Dir==DIR_RIGHT)
 		{
