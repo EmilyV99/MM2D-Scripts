@@ -221,3 +221,16 @@ void Overhead_Update() {
 	}
 }
 //end LayerOverhead
+//start Misc
+
+//Moosh function for drawing centered (AKA better) rotated and scaled tile blocks
+void MooshDrawTile(int layer, int cx, int cy, int tile, int blockw, int blockh, int cset, int xscale, int yscale, int rx, int ry, int rangle, int flip, bool transparency, int opacity){
+    int w = xscale;
+    if(xscale==-1)
+        w = blockw*16;
+    int h = yscale;
+    if(yscale==-1)
+        h = blockh*16;
+    Screen->DrawTile(layer, cx-w/2, cy-h/2, tile, blockw, blockh, cset, xscale, yscale, rx-w/2, ry-h/2, rangle, flip, transparency, opacity);
+}
+//end Misc
