@@ -278,6 +278,8 @@ global script Global
 			Link->PressL=false;Link->InputL=false;
 			Overhead_Update();
 			drawExtraLayerEffects();
+			lwLoop();
+			ewLoop();
 			UpdateGhostZH1();
 			//end
 			if(UsingItem(53)&&fullCounter(CR_MAGIC)>2)
@@ -432,6 +434,8 @@ global script Global
 	{
 		songOfStormsRain = false;
 		if(!floating)Link->Invisible=false;
+		if(lwArr[0]||ewArr[0])loadWeapons();
+		clearWeapons();
 	}
 	
 	void changedLevel()
@@ -856,6 +860,78 @@ global script Global
 		drawDebugInt(x,y,num,false);
 	}//end
 	//end TestingMenu
+	//start loops
+	void lwLoop()
+	{
+		int curDMap = Game->GetCurDMap();
+		for(int i = Screen->NumLWeapons(); i > 0; i--)
+		{
+			lweapon weap = Screen->LoadLWeapon(i);
+			if(weap->ID!=LW_ARROW)
+			{
+				if(weap->Misc[LWMISC_LAYERDMAP])
+				{
+					if((weap->Misc[LWMISC_LAYERDMAP]-1)>curDMap)
+					{
+						HeightFastTile(4,weap->X,weap->Y,weap->OriginalTile + weap->Frame,weap->CSet,OP_OPAQUE);
+						weap->Tile=TILE_INVIS;
+					}
+					else if((weap->Misc[LWMISC_LAYERDMAP]-1)<curDMap)
+					{
+						HeightFastTile(3,weap->X,weap->Y,weap->OriginalTile + weap->Frame,weap->CSet,OP_OPAQUE);
+						weap->Tile=TILE_INVIS;
+					}
+				}
+			}
+			else
+			{
+				bool didDraw = false;
+				if(weap->Misc[LWMISC_LAYERDMAP])
+				{
+					if((weap->Misc[LWMISC_LAYERDMAP]-1)>curDMap)
+					{
+						HeightAngularTile(4,weap->X+8,weap->Y+8,weap->OriginalTile + 1,weap->TileWidth,weap->TileHeight,weap->CSet,-1,-1,weap->X+8,weap->Y+8,RadtoDeg(weap->Angle),0,true,OP_OPAQUE);
+						weap->Tile=TILE_INVIS;
+						didDraw=true;
+					}
+					else if((weap->Misc[LWMISC_LAYERDMAP]-1)<curDMap)
+					{
+						HeightAngularTile(3,weap->X+8,weap->Y+8,weap->OriginalTile + 1,weap->TileWidth,weap->TileHeight,weap->CSet,-1,-1,weap->X+8,weap->Y+8,RadtoDeg(weap->Angle),0,true,OP_OPAQUE);
+						weap->Tile=TILE_INVIS;
+						didDraw=true;
+					}
+				}
+				if(!didDraw)
+				{
+					MooshDrawTile(6,weap->X+8,weap->Y+8,weap->OriginalTile + 1,1,1,weap->CSet,16,16,weap->X+8,weap->Y+8,RadtoDeg(weap->Angle),0,true,OP_OPAQUE);
+					weap->Tile = TILE_INVIS;
+				}
+			}
+		}
+	}
+	
+	void ewLoop()
+	{
+		int curDMap = Game->GetCurDMap();
+		for(int i = Screen->NumEWeapons(); i > 0; i--)
+		{
+			eweapon weap = Screen->LoadEWeapon(i);
+			if(weap->Misc[EWMISC_LAYERDMAP])
+			{
+				if((weap->Misc[EWMISC_LAYERDMAP]-1)>curDMap)
+				{
+					HeightFastTile(4,weap->X,weap->Y,weap->Tile,weap->CSet,OP_OPAQUE);
+					weap->Tile=TILE_INVIS;
+				}
+				else if((weap->Misc[EWMISC_LAYERDMAP]-1)<curDMap)
+				{
+					HeightFastTile(3,weap->X,weap->Y,weap->Tile,weap->CSet,OP_OPAQUE);
+					weap->Tile=TILE_INVIS;
+				}
+			}
+		}
+	}
+	//end loops
 }
 //end Global Script
 //start OnContinue Script
