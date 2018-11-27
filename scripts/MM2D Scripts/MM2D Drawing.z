@@ -43,6 +43,26 @@ void HeightFastComboScreen(int layer, int x, int y, int combo, int cset, int opa
 	Screen->SetRenderTarget(RT_SCREEN);
 }
 
+void HeightAngularTile(int layer, int cx, int cy, int tile, int blockw, int blockh, int cset, int xscale, int yscale, int rx, int ry, int rangle, int flip, bool transparency, int opacity){
+	if(tile==TILE_INVIS)return;
+	if(hideLayer4 && layer>=4)return;
+    int w = xscale;
+    if(xscale==-1)
+        w = blockw*16;
+    int h = yscale;
+    if(yscale==-1)
+        h = blockh*16;
+	if(layer>=4){cx+=256;rx+=256;}
+	if(opacity!=OP_OPAQUE){cy+=176;ry+=176;}
+	int nx = cx-w/2;
+	int ny = cy-h/2;
+	int nrx = rx-w/2;
+	int nry = ry-h/2;
+	Screen->SetRenderTarget(RT_BITMAP0);
+    Screen->DrawTile(layer, nx, ny, tile, blockw, blockh, cset, xscale, yscale, nrx, nry, rangle, flip, transparency, OP_OPAQUE);
+	Screen->SetRenderTarget(RT_SCREEN);
+}
+
 void runHeightBitmap()
 {
 	//Draw bitmaps to the screen
