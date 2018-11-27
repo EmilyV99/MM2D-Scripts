@@ -31,6 +31,7 @@ bool warpUp(){
 	int dmap = getUpDMap();
 	if(dmap!=-1){
 		int scr = getUpScreen(true);
+		storeWeapons();
 		Link->PitWarp(dmap,scr);
 		return true;
 	}
@@ -41,6 +42,7 @@ bool warpDown(){
 	int dmap = getDownDMap();
 	if(dmap!=-1){
 		int scr = getDownScreen(true);
+		storeWeapons();
 		Link->PitWarp(dmap,scr);
 		return true;
 	}
