@@ -91,6 +91,14 @@ global script Global
 					lastLevel = Game->GetCurLevel();
 				}
 			}
+			if(Link->HP!=lastHP)
+			{
+				if(Link->HP < lastHP)
+				{
+					onLinkHurt();
+				}
+				lastHP = Link->HP;
+			}
 			layer4Toggle();
 			if(subscreen)
 			{
@@ -98,6 +106,7 @@ global script Global
 				Link->PressA=false;
 				Link->InputA=false;
 			}
+			
 			varIntegrity();
 			//end
 			//start FrameCounters
@@ -142,6 +151,7 @@ global script Global
 			}
 			//end Time Passing
 			bombCheck();
+			runOmniArrows();
 			Tango_Update1();
 			//start Ocarina loop
 			if(songFrames>0)
@@ -442,6 +452,11 @@ global script Global
 		
 	}
 	
+	void onLinkHurt()
+	{
+		arrowAimMode=false;
+	}
+	
 	void varDecrements()
 	{
 		if(usingBugs>0)usingBugs--;
@@ -645,6 +660,8 @@ global script Global
 			drawDebugInt(256,6*3,getTintVar(DATA_B_SUM),true);
 			drawDebugString(256,6*4,"NoSav:  ",true);
 			drawDebugInt(256,6*4,Cond(noSave,1,0),true);
+			drawDebugString(256,6*5,"Arrow Angle:    ",true);
+			drawDebugInt(256,6*5,getGlobalVar(GVAR_ARROWANGLE,GV_MISC),true);
 		}
 		if(!isFrozen){
 			if(Input->ReadKey[KEY_TILDE])//Don't call ReadKey, it calls NoAction!
