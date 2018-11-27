@@ -412,7 +412,7 @@ void runOmniArrows()
 		arr->Dir = AngleDir4(WrapDegrees(angle));
 		arr->Step = 250;
 		arr->Damage = parentItem->Power;
-		//Ensure proper direction:
+		/*//Ensure proper direction:
 		if(arr->Dir==DIR_RIGHT)
 		{
 			arr->Tile+=1;
@@ -426,7 +426,8 @@ void runOmniArrows()
 		else if(arr->Dir==DIR_DOWN)
 		{
 			arr->Flip=2;
-		}
+		}*/
+		arr->OriginalTile = arr->Tile;
 		Game->Counter[CR_ARROWS]--;//Charge the arrow cost
 		if(mcost)Game->Counter[CR_MAGIC]-=mcost;//Charge the magic cost
 	}
@@ -1244,3 +1245,12 @@ ffc script Bombchu_FFC
 	}
 }
 //end Bombchus
+//start Pictograph
+item script Pictograph
+{
+	void run()
+	{
+		
+	}
+}
+//end Pictograph
