@@ -658,8 +658,8 @@ ffc script cutscene
 					}
 					if(day==3)
 					{
-						HeightFastCombo(4,this->X+16,this->Y,getChestCombo(COMBO_CHEST,1),0,OP_OPAQUE);//Draw the chest on the third layer
-						HeightFastCombo(4,this->X+32,this->Y,31761,0,OP_OPAQUE);//Draw Bremor from the third layer
+						HeightFastCombo(4,this->X+16,this->Y,getChestCombo(COMBO_CHEST,1),0,OP_OPAQUE); //Draw the chest on the third layer
+						if(isBefore(3,18,false))HeightFastCombo(4,this->X+32,this->Y,31761,0,OP_OPAQUE);//Draw Bremor from the third layer
 					}
 				}
 			}
