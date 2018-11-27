@@ -654,7 +654,7 @@ void passiveSubscreen(){//start PassiveSubscreen
 			A_tile = loadItemTile(Link->ItemA);
 			A_cset = loadItemCSet(Link->ItemA);
 		}
-		R_tile = 12591;
+		R_tile = TILE_CURL;
 		R_cset = 0;
 	} else if(form==3){
 		A_tile = loadItemTile(Link->ItemA);
@@ -699,6 +699,17 @@ void passiveSubscreen(){//start PassiveSubscreen
 		A_cset=loadItemCSet(ITEM_DEKUNUT);
 		R_tile=TILE_DROP;
 		R_cset=CSET_DROP;
+	}
+	if(arrowAimMode)
+	{
+		L_tile = TILE_QUIT;
+		L_cset=0;
+		R_tile = TILE_AIM;
+		R_cset=0;
+		if(!isArrow(B_item))B_tile = TILE_INVIS;
+		if(!isArrow(EX1_item))EX1_tile = TILE_INVIS;
+		if(!isArrow(EX2_item))EX2_tile = TILE_INVIS;
+		A_tile = TILE_INVIS;
 	}
 	Screen->FastTile(7,BX,BY,B_tile,B_cset,OP_OPAQUE);
 	Screen->FastTile(7,EX1X,EX1Y,EX1_tile,EX1_cset,OP_OPAQUE);
