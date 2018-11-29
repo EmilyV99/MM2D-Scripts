@@ -33,6 +33,7 @@ global script Global
 	void run()//start mainGlobal
 	{
 		bool isLensTinted = false;
+		arrowAimMode = false;
 		setEnterEndsTyping(true);
 		setAllowBackspaceDelete(true);
 		setOverflowWraps(false);
@@ -151,7 +152,7 @@ global script Global
 			}
 			//end Time Passing
 			bombCheck();
-			runOmniArrows();
+			if(!getGlobalVar(GVAR_MGSTATE,GV_MISC))runOmniArrows();
 			Tango_Update1();
 			//start Ocarina loop
 			if(songFrames>0)
@@ -436,6 +437,7 @@ global script Global
 		if(!floating)Link->Invisible=false;
 		if(lwArr[0]||ewArr[0])loadWeapons();
 		clearWeapons();
+		setGlobalVar(GVAR_MGSTATE,GV_MISC,0);
 	}
 	
 	void changedLevel()
