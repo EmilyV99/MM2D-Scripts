@@ -1,0 +1,543 @@
+////////////////////////////////////////
+//                                    //
+//       MM2D Script: Minigames       //
+//                                    //
+////////////////////////////////////////
+
+//start Octorok Shooting Game
+ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when you pay the fee
+{
+	void run()
+	{
+		setGlobalVar(GVAR_MGSTATE,GV_MISC,1);
+		DEFINE LEFT = 48;
+		DEFINE MID_X = 120;
+		DEFINE RIGHT = 192;
+		DEFINE TOP = 8;
+		DEFINE MID_Y = 40;
+		DEFINE BOTTOM = 72;
+		DEFINE COOLDOWN = 20;
+		DEFINE FRAMES_ROUND = 6 * FRAMES_MINUTE;
+		int startArrows = Game->Counter[CR_ARROWS];
+		int items[] = {B_item, EX1_item, EX2_item};
+		B_item = I_BOWARROW;
+		EX1_item = 0;
+		EX2_item = 0;
+		int timer = 15 * FRAMES_ROUND;
+		int phaseTimer = FRAMES_ROUND;
+		npc r1 = CreateNPCAt(TARGET_OCTO_RED, MID_X, BOTTOM);
+		npc r2 = CreateNPCAt(TARGET_OCTO_RED, LEFT, TOP);
+		npc r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, TOP);
+		npc r4;
+		npc r5;
+		npc b1;
+		npc b2;
+		npc b3;
+		npc b4;
+		int phase = 1;
+		int kills = 0;
+		bool initPhase = false;
+		setGlobalVar(GVAR_ARROWANGLE,GV_MISC,270);
+		int cooldown = -1;
+		while(true)
+		{
+			switch(phase)
+			{
+				case 1://r1, r2, r3
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=2;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 2:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, LEFT, BOTTOM);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, BOTTOM);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, MID_Y);
+						b1 = CreateNPCAt(TARGET_OCTO_BLUE, MID_X, BOTTOM);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=3;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 3:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, LEFT, TOP);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, MID_X, TOP);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, MID_Y);
+						b1 = CreateNPCAt(TARGET_OCTO_BLUE, RIGHT, TOP);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=4;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 4:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, LEFT, TOP);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, TOP);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, LEFT, BOTTOM);
+						r4 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, BOTTOM);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(r4->isValid())if(r4->HP<1){++kills;r4=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=5;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(r4->isValid()){r4->HP = 0;r4=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 5:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, MID_X, TOP);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, MID_X, MID_Y);
+						b1 = CreateNPCAt(TARGET_OCTO_BLUE, LEFT, MID_Y);
+						b2 = CreateNPCAt(TARGET_OCTO_BLUE, RIGHT, MID_Y);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=6;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 6:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, MID_X, BOTTOM);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, LEFT, MID_Y);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, TOP);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=7;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 7:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, LEFT, TOP);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, TOP);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, BOTTOM);
+						b1 = CreateNPCAt(TARGET_OCTO_BLUE, MID_X, MID_Y);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=8;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 8:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, LEFT, TOP);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, TOP);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, MID_X, TOP);
+						b1 = CreateNPCAt(TARGET_OCTO_BLUE, LEFT, BOTTOM);
+						b2 = CreateNPCAt(TARGET_OCTO_BLUE, RIGHT, BOTTOM);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=9;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 9:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, MID_X, TOP);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, MID_X, MID_Y);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, MID_X, BOTTOM);
+						b1 = CreateNPCAt(TARGET_OCTO_BLUE, LEFT, BOTTOM);
+						b2 = CreateNPCAt(TARGET_OCTO_BLUE, RIGHT, BOTTOM);
+						b3 = CreateNPCAt(TARGET_OCTO_BLUE, LEFT, MID_Y);
+						b4 = CreateNPCAt(TARGET_OCTO_BLUE, RIGHT, MID_Y);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(b3->isValid())if(b3->HP<1){timer-=FRAMES_ROUND/2;b3=Debug->Null();}
+					if(b4->isValid())if(b4->HP<1){timer-=FRAMES_ROUND/2;b4=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=10;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
+						if(b4->isValid()){b4->HP = 0;b4=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 10:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, LEFT, MID_Y);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, TOP);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, BOTTOM);
+						b1 = CreateNPCAt(TARGET_OCTO_BLUE, LEFT, BOTTOM);
+						b2 = CreateNPCAt(TARGET_OCTO_BLUE, RIGHT, MID_Y);
+						b3 = CreateNPCAt(TARGET_OCTO_BLUE, LEFT, TOP);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(b3->isValid())if(b3->HP<1){timer-=FRAMES_ROUND/2;b3=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=11;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 11:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, MID_X, MID_Y);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, TOP);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, BOTTOM);
+						r4 = CreateNPCAt(TARGET_OCTO_RED, LEFT, TOP);
+						r5 = CreateNPCAt(TARGET_OCTO_RED, LEFT, BOTTOM);
+						b1 = CreateNPCAt(TARGET_OCTO_BLUE, LEFT, MID_Y);
+						b2 = CreateNPCAt(TARGET_OCTO_BLUE, RIGHT, MID_Y);
+						b3 = CreateNPCAt(TARGET_OCTO_BLUE, MID_X, TOP);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(r4->isValid())if(r4->HP<1){++kills;r4=Debug->Null();}
+					if(r5->isValid())if(r5->HP<1){++kills;r5=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(b3->isValid())if(b3->HP<1){timer-=FRAMES_ROUND/2;b3=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=12;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(r4->isValid()){r4->HP = 0;r4=Debug->Null();}
+						if(r5->isValid()){r5->HP = 0;r5=Debug->Null();}
+						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 12:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, LEFT, TOP);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, MID_X, TOP);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, TOP);
+						b1 = CreateNPCAt(TARGET_OCTO_BLUE, LEFT, BOTTOM);
+						b2 = CreateNPCAt(TARGET_OCTO_BLUE, RIGHT, BOTTOM);
+						b3 = CreateNPCAt(TARGET_OCTO_BLUE, LEFT, MID_Y);
+						b4 = CreateNPCAt(TARGET_OCTO_BLUE, RIGHT, MID_Y);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(b3->isValid())if(b3->HP<1){timer-=FRAMES_ROUND/2;b3=Debug->Null();}
+					if(b4->isValid())if(b4->HP<1){timer-=FRAMES_ROUND/2;b4=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=13;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
+						if(b4->isValid()){b4->HP = 0;b4=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 13:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, LEFT, MID_Y);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, MID_X, MID_Y);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, MID_Y);
+						b1 = CreateNPCAt(TARGET_OCTO_BLUE, LEFT, TOP);
+						b2 = CreateNPCAt(TARGET_OCTO_BLUE, MID_X, TOP);
+						b3 = CreateNPCAt(TARGET_OCTO_BLUE, RIGHT, TOP);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(b3->isValid())if(b3->HP<1){timer-=FRAMES_ROUND/2;b3=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=14;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 14:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, LEFT, TOP);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, LEFT, MID_Y);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, MID_Y);
+						r4 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, TOP);
+						b1 = CreateNPCAt(TARGET_OCTO_BLUE, LEFT, BOTTOM);
+						b2 = CreateNPCAt(TARGET_OCTO_BLUE, MID_X, BOTTOM);
+						b3 = CreateNPCAt(TARGET_OCTO_BLUE, RIGHT, BOTTOM);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(r4->isValid())if(r4->HP<1){++kills;r4=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(b3->isValid())if(b3->HP<1){timer-=FRAMES_ROUND/2;b3=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=15;
+						initPhase=true;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(r4->isValid()){r4->HP = 0;r4=Debug->Null();}
+						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
+						Waitframe();
+						continue;
+					}
+					break;
+				case 15:
+					if(initPhase)
+					{
+						r1 = CreateNPCAt(TARGET_OCTO_RED, LEFT, TOP);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, TOP);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, MID_X, TOP);
+						r4 = CreateNPCAt(TARGET_OCTO_RED, MID_X, MID_Y);
+						r5 = CreateNPCAt(TARGET_OCTO_RED, MID_X, BOTTOM);
+						phaseTimer = FRAMES_ROUND;
+						initPhase = false;
+					}
+					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(r4->isValid())if(r4->HP<1){++kills;r4=Debug->Null();}
+					if(r5->isValid())if(r5->HP<1){++kills;r5=Debug->Null();}
+					if(phaseTimer==0)
+					{
+						phase=0;
+						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(r4->isValid()){r4->HP = 0;r4=Debug->Null();}
+						if(r5->isValid()){r5->HP = 0;r5=Debug->Null();}
+						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
+						if(b4->isValid()){b4->HP = 0;b4=Debug->Null();}
+						arrowAimMode = false;
+						break;
+					}
+					break;
+			}
+			Game->Counter[CR_ARROWS] = 99;
+			if(!arrowAimMode)
+			{
+				if(cooldown==-1)
+				{
+					cooldown = COOLDOWN;
+					B_item = 0;
+				}
+				arrowAimMode = true;
+			}
+			else
+			{
+				if(cooldown==0)
+				{
+					B_item = I_BOWARROW;
+					cooldown = -1;
+				}
+				else if(cooldown>0)cooldown--;
+			}
+			Link->X = 120;
+			Link->Y = 112;
+			timer--;
+			phaseTimer--;
+			Screen->FastTile(6,0,136,loadItemTile(I_BOWARROW),loadItemCSet(I_BOWARROW),OP_OPAQUE);
+			Screen->FastTile(6,0,152,loadItemTile(I_CLOCK),loadItemCSet(I_CLOCK),OP_OPAQUE);
+			int buf[] = "  :  :  ";
+			buf[0] = Div(Div(timer,FRAMES_HOUR),10) + 48;
+			buf[1] = Div(timer,FRAMES_HOUR)%10 + 48;
+			buf[3] = Div(Div((timer%FRAMES_HOUR),FRAMES_MINUTE),10) + 48;
+			buf[4] = Div((timer%FRAMES_HOUR),FRAMES_MINUTE)%10 + 48;
+			buf[6] = Div((timer%FRAMES_MINUTE),10) + 48;
+			buf[7] = (timer%FRAMES_MINUTE)%10 + 48;
+			Screen->DrawString(6,16,152,FONT_DSPHANTOMP,0x0F,0x01,TF_NORMAL,buf,OP_OPAQUE);
+			//
+			Screen->DrawInteger(6,16,136,FONT_DSPHANTOMP,0x0F,0x01,0,0,kills,0,OP_OPAQUE);
+			setGlobalVar(10,GV_MISC,kills);
+			setGlobalVar(11,GV_MISC,timer);
+			Link->PressL=false;Link->InputL=false;
+			runOmniArrows(2);
+			if(timer<=0)break;
+			Waitframe();
+		}
+		if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
+		if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
+		if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+		if(r4->isValid()){r4->HP = 0;r4=Debug->Null();}
+		if(r5->isValid()){r5->HP = 0;r5=Debug->Null();}
+		if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+		if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
+		if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
+		if(b4->isValid()){b4->HP = 0;b4=Debug->Null();}
+		arrowAimMode = false;
+		Game->Counter[CR_ARROWS] = startArrows;
+		B_item = items[0];
+		EX1_item = items[1];
+		EX2_item = items[2];
+		setGlobalVar(GVAR_MGSTATE,GV_MISC,0);
+		tangoTempI = kills;
+	}
+}
+//end
