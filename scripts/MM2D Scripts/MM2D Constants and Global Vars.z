@@ -461,6 +461,8 @@ bool dbsetup = false;
 bool dbdraw = false;
 bool debugEnabled = false;
 bool noSave = false;
+//Version Vars
+int version[] = {1};//{Global array}
 //end MISC
 
 //start Global Vars Array
@@ -477,14 +479,16 @@ GVAR GVAR_NPCTANGOSLOT = 6;
 GVAR GVAR_DIFFICULTY = 7;
 GVAR GVAR_ARROWANGLE = 8;
 //
-GVAR GV_PAL = 1000;
+GVAR GV_PAL = GV_MISC + 1000;
 GVAR TINT_DAY = 0;
 GVAR TINT_SUNSETORANGE = 1;
 GVAR TINT_NIGHT = 2;
 GVAR TINT_LENS = 3;
 DEFINE NUM_PAL = 4;
 //
-GVAR GVAR_START_RESET = GV_PAL + NUM_PAL;
+GVAR GV_BNOTEBOOK = GV_PAL + NUM_PAL;
+//
+GVAR GVAR_START_RESET = GV_BNOTEBOOK + 20;
 GVAR GV_CHEST = GVAR_START_RESET;
 //
 GVAR GV_MISCRESETTABLE = GV_CHEST + 1000;
@@ -528,4 +532,290 @@ void setSoilState(int index, int state)
 {
 	setGlobalVar(index,GV_SOFTSOIL,state);
 }
+
+bool getBNstate(int index)
+{
+	return getGlobalVar(index, GV_BNOTEBOOK) > 0;
+}
+
+void setBNstate(int index)
+{
+	setGlobalVar(index, GV_BNOTEBOOK, 1);
+}
 //end Global Vars Array
+//start Global Weapons Arrays
+int lwArr[214747];
+int ewArr[214747];
+DEFINE LWMISC_LAYERDMAP = 31;
+DEFINE EWMISC_LAYERDMAP = 31;
+
+void storeWeapons()
+{
+	int numlw = Screen->NumLWeapons();
+	int numew = Screen->NumEWeapons();
+	int thisdmap = Game->GetCurDMap();
+	int globalIndex = 1;
+	for(int i = 1; i<=numlw; i++)
+	{
+		lweapon weap = Screen->LoadLWeapon(i);
+		if(!weap->Misc[LWMISC_LAYERDMAP])weap->Misc[LWMISC_LAYERDMAP] = thisdmap+1;
+		lwArr[globalIndex++] = weap->ID;
+		lwArr[globalIndex++] = weap->X;
+		lwArr[globalIndex++] = weap->Y;
+		lwArr[globalIndex++] = weap->Z;
+		lwArr[globalIndex++] = Cond(weap->Behind,1,0);
+		lwArr[globalIndex++] = weap->Jump;
+		lwArr[globalIndex++] = weap->DrawStyle;
+		lwArr[globalIndex++] = weap->Dir;
+		lwArr[globalIndex++] = weap->OriginalTile;
+		lwArr[globalIndex++] = weap->Tile;
+		lwArr[globalIndex++] = weap->OriginalCSet;
+		lwArr[globalIndex++] = weap->CSet;
+		lwArr[globalIndex++] = weap->FlashCSet;
+		lwArr[globalIndex++] = weap->NumFrames;
+		lwArr[globalIndex++] = weap->Frame;
+		lwArr[globalIndex++] = weap->ASpeed;
+		lwArr[globalIndex++] = weap->Damage;
+		lwArr[globalIndex++] = weap->Step;
+		lwArr[globalIndex++] = weap->Angle;
+		lwArr[globalIndex++] = Cond(weap->Angular,1,0);
+		lwArr[globalIndex++] = Cond(weap->CollDetection,1,0);
+		lwArr[globalIndex++] = weap->DeadState;
+		lwArr[globalIndex++] = Cond(weap->Flash,1,0);
+		lwArr[globalIndex++] = weap->Flip;
+		lwArr[globalIndex++] = weap->Extend;
+		lwArr[globalIndex++] = weap->TileWidth;
+		lwArr[globalIndex++] = weap->TileHeight;
+		lwArr[globalIndex++] = weap->HitWidth;
+		lwArr[globalIndex++] = weap->HitHeight;
+		lwArr[globalIndex++] = weap->HitZHeight;
+		lwArr[globalIndex++] = weap->HitXOffset;
+		lwArr[globalIndex++] = weap->HitYOffset;
+		lwArr[globalIndex++] = weap->DrawXOffset;
+		lwArr[globalIndex++] = weap->DrawYOffset;
+		lwArr[globalIndex++] = weap->DrawZOffset;
+		for(int q = 0; q < 32; q++)lwArr[globalIndex++] = weap->Misc[q];
+		lwArr[globalIndex++] = weap->Parent;
+	}
+	lwArr[0] = globalIndex;
+	globalIndex = 1;
+	for(int i = 1; i<=numew; i++)
+	{
+		eweapon weap = Screen->LoadEWeapon(i);
+		if(!weap->Misc[EWMISC_LAYERDMAP])weap->Misc[EWMISC_LAYERDMAP] = thisdmap+1;
+		ewArr[globalIndex++] = weap->ID;
+		ewArr[globalIndex++] = weap->X;
+		ewArr[globalIndex++] = weap->Y;
+		ewArr[globalIndex++] = weap->Z;
+		ewArr[globalIndex++] = Cond(weap->Behind,1,0);
+		ewArr[globalIndex++] = weap->Jump;
+		ewArr[globalIndex++] = weap->DrawStyle;
+		ewArr[globalIndex++] = weap->Dir;
+		ewArr[globalIndex++] = weap->OriginalTile;
+		ewArr[globalIndex++] = weap->Tile;
+		ewArr[globalIndex++] = weap->OriginalCSet;
+		ewArr[globalIndex++] = weap->CSet;
+		ewArr[globalIndex++] = weap->FlashCSet;
+		ewArr[globalIndex++] = weap->NumFrames;
+		ewArr[globalIndex++] = weap->Frame;
+		ewArr[globalIndex++] = weap->ASpeed;
+		ewArr[globalIndex++] = weap->Damage;
+		ewArr[globalIndex++] = weap->Step;
+		ewArr[globalIndex++] = weap->Angle;
+		ewArr[globalIndex++] = Cond(weap->Angular,1,0);
+		ewArr[globalIndex++] = Cond(weap->CollDetection,1,0);
+		ewArr[globalIndex++] = weap->DeadState;
+		ewArr[globalIndex++] = Cond(weap->Flash,1,0);
+		ewArr[globalIndex++] = weap->Flip;
+		ewArr[globalIndex++] = weap->Extend;
+		ewArr[globalIndex++] = weap->TileWidth;
+		ewArr[globalIndex++] = weap->TileHeight;
+		ewArr[globalIndex++] = weap->HitWidth;
+		ewArr[globalIndex++] = weap->HitHeight;
+		ewArr[globalIndex++] = weap->HitZHeight;
+		ewArr[globalIndex++] = weap->HitXOffset;
+		ewArr[globalIndex++] = weap->HitYOffset;
+		ewArr[globalIndex++] = weap->DrawXOffset;
+		ewArr[globalIndex++] = weap->DrawYOffset;
+		ewArr[globalIndex++] = weap->DrawZOffset;
+		for(int q = 0; q < 32; q++)ewArr[globalIndex++] = weap->Misc[q];
+		ewArr[globalIndex++] = weap->Parent;
+	}
+	ewArr[0] = globalIndex;
+}
+
+void loadWeapons()
+{
+	int thisdmap = Game->GetCurDMap();
+	int globalIndex = 1;
+	while(globalIndex<lwArr[0])
+	{
+		lweapon weap = Screen->CreateLWeapon(lwArr[globalIndex++]);
+		weap->X = lwArr[globalIndex++];
+		weap->Y = lwArr[globalIndex++];
+		weap->Z = lwArr[globalIndex++];
+		weap->Behind = lwArr[globalIndex++]>0;
+		weap->Jump = lwArr[globalIndex++];
+		weap->DrawStyle = lwArr[globalIndex++];
+		weap->Dir = lwArr[globalIndex++];
+		weap->OriginalTile = lwArr[globalIndex++];
+		weap->Tile = lwArr[globalIndex++];
+		weap->OriginalCSet = lwArr[globalIndex++];
+		weap->CSet = lwArr[globalIndex++];
+		weap->FlashCSet = lwArr[globalIndex++];
+		weap->NumFrames = lwArr[globalIndex++];
+		weap->Frame = lwArr[globalIndex++];
+		weap->ASpeed = lwArr[globalIndex++];
+		weap->Damage = lwArr[globalIndex++];
+		weap->Step = lwArr[globalIndex++];
+		weap->Angle = lwArr[globalIndex++];
+		weap->Angular = lwArr[globalIndex++]>0;
+		weap->CollDetection = lwArr[globalIndex++]>0;
+		weap->DeadState = lwArr[globalIndex++];
+		weap->Flash = lwArr[globalIndex++]>0;
+		weap->Flip = lwArr[globalIndex++];
+		weap->Extend = lwArr[globalIndex++];
+		weap->TileWidth = lwArr[globalIndex++];
+		weap->TileHeight = lwArr[globalIndex++];
+		weap->HitWidth = lwArr[globalIndex++];
+		weap->HitHeight = lwArr[globalIndex++];
+		weap->HitZHeight = lwArr[globalIndex++];
+		weap->HitXOffset = lwArr[globalIndex++];
+		weap->HitYOffset = lwArr[globalIndex++];
+		weap->DrawXOffset = lwArr[globalIndex++];
+		weap->DrawYOffset = lwArr[globalIndex++];
+		weap->DrawZOffset = lwArr[globalIndex++];
+		for(int q = 0; q < 32; q++)weap->Misc[q] = lwArr[globalIndex++];
+		weap->Parent = lwArr[globalIndex++];
+	}
+	globalIndex = 1;
+	while(globalIndex<ewArr[0])
+	{
+		eweapon weap = Screen->CreateEWeapon(ewArr[globalIndex++]);
+		weap->X = ewArr[globalIndex++];
+		weap->Y = ewArr[globalIndex++];
+		weap->Z = ewArr[globalIndex++];
+		weap->Behind = ewArr[globalIndex++]>0;
+		weap->Jump = ewArr[globalIndex++];
+		weap->DrawStyle = ewArr[globalIndex++];
+		weap->Dir = ewArr[globalIndex++];
+		weap->OriginalTile = ewArr[globalIndex++];
+		weap->Tile = ewArr[globalIndex++];
+		weap->OriginalCSet = ewArr[globalIndex++];
+		weap->CSet = ewArr[globalIndex++];
+		weap->FlashCSet = ewArr[globalIndex++];
+		weap->NumFrames = ewArr[globalIndex++];
+		weap->Frame = ewArr[globalIndex++];
+		weap->ASpeed = ewArr[globalIndex++];
+		weap->Damage = ewArr[globalIndex++];
+		weap->Step = ewArr[globalIndex++];
+		weap->Angle = ewArr[globalIndex++];
+		weap->Angular = ewArr[globalIndex++]>0;
+		weap->CollDetection = ewArr[globalIndex++]>0;
+		weap->DeadState = ewArr[globalIndex++];
+		weap->Flash = ewArr[globalIndex++]>0;
+		weap->Flip = ewArr[globalIndex++];
+		weap->Extend = ewArr[globalIndex++];
+		weap->TileWidth = ewArr[globalIndex++];
+		weap->TileHeight = ewArr[globalIndex++];
+		weap->HitWidth = ewArr[globalIndex++];
+		weap->HitHeight = ewArr[globalIndex++];
+		weap->HitZHeight = ewArr[globalIndex++];
+		weap->HitXOffset = ewArr[globalIndex++];
+		weap->HitYOffset = ewArr[globalIndex++];
+		weap->DrawXOffset = ewArr[globalIndex++];
+		weap->DrawYOffset = ewArr[globalIndex++];
+		weap->DrawZOffset = ewArr[globalIndex++];
+		for(int q = 0; q < 32; q++)weap->Misc[q] = ewArr[globalIndex++];
+		weap->Parent = ewArr[globalIndex++];
+	}
+}
+
+void clearWeapons()
+{
+	remchr(lwArr,0);
+	remchr(ewArr,0);
+}
+
+void TraceWeap(lweapon weap)
+{
+	TraceS("ID: ");Trace(weap->ID);
+	TraceS("X: ");Trace(weap->X);
+	TraceS("Y: ");Trace(weap->Y);
+	TraceS("Z: ");Trace(weap->Z);
+	TraceS("Behind: ");TraceB(weap->Behind);
+	TraceS("Jump: ");Trace(weap->Jump);
+	TraceS("DrawStyle: ");Trace(weap->DrawStyle);
+	TraceS("Dir: ");Trace(weap->Dir);
+	TraceS("OriginalTile: ");Trace(weap->OriginalTile);
+	TraceS("Tile: ");Trace(weap->Tile);
+	TraceS("OriginalCSet: ");Trace(weap->OriginalCSet);
+	TraceS("CSet: ");Trace(weap->CSet);
+	TraceS("FlashCSet: ");Trace(weap->FlashCSet);
+	TraceS("NumFrames: ");Trace(weap->NumFrames);
+	TraceS("Frame: ");Trace(weap->Frame);
+	TraceS("ASpeed: ");Trace(weap->ASpeed);
+	TraceS("Damage: ");Trace(weap->Damage);
+	TraceS("Step: ");Trace(weap->Step);
+	TraceS("Angle: ");Trace(weap->Angle);
+	TraceS("Angular: ");TraceB(weap->Angular);
+	TraceS("CollDetection: ");TraceB(weap->CollDetection);
+	TraceS("DeadState: ");Trace(weap->DeadState);
+	TraceS("Flash: ");TraceB(weap->Flash);
+	TraceS("Flip: ");Trace(weap->Flip);
+	TraceS("Extend: ");Trace(weap->Extend);
+	TraceS("TileWidth: ");Trace(weap->TileWidth);
+	TraceS("TileHeight: ");Trace(weap->TileHeight);
+	TraceS("HitWidth: ");Trace(weap->HitWidth);
+	TraceS("HitHeight: ");Trace(weap->HitHeight);
+	TraceS("HitZHeight: ");Trace(weap->HitZHeight);
+	TraceS("HitXOffset: ");Trace(weap->HitXOffset);
+	TraceS("HitYOffset: ");Trace(weap->HitYOffset);
+	TraceS("DrawXOffset: ");Trace(weap->DrawXOffset);
+	TraceS("DrawYOffset: ");Trace(weap->DrawYOffset);
+	TraceS("DrawZOffset: ");Trace(weap->DrawZOffset);
+	TraceS("Misc:\n");for(int q = 0; q < 32; q++)Trace(weap->Misc[q]);
+	TraceS("Parent: ");Trace(weap->Parent);
+}
+
+void TraceWeap(eweapon weap)
+{
+	TraceS("ID: ");Trace(weap->ID);
+	TraceS("X: ");Trace(weap->X);
+	TraceS("Y: ");Trace(weap->Y);
+	TraceS("Z: ");Trace(weap->Z);
+	TraceS("Behind: ");TraceB(weap->Behind);
+	TraceS("Jump: ");Trace(weap->Jump);
+	TraceS("DrawStyle: ");Trace(weap->DrawStyle);
+	TraceS("Dir: ");Trace(weap->Dir);
+	TraceS("OriginalTile: ");Trace(weap->OriginalTile);
+	TraceS("Tile: ");Trace(weap->Tile);
+	TraceS("OriginalCSet: ");Trace(weap->OriginalCSet);
+	TraceS("CSet: ");Trace(weap->CSet);
+	TraceS("FlashCSet: ");Trace(weap->FlashCSet);
+	TraceS("NumFrames: ");Trace(weap->NumFrames);
+	TraceS("Frame: ");Trace(weap->Frame);
+	TraceS("ASpeed: ");Trace(weap->ASpeed);
+	TraceS("Damage: ");Trace(weap->Damage);
+	TraceS("Step: ");Trace(weap->Step);
+	TraceS("Angle: ");Trace(weap->Angle);
+	TraceS("Angular: ");TraceB(weap->Angular);
+	TraceS("CollDetection: ");TraceB(weap->CollDetection);
+	TraceS("DeadState: ");Trace(weap->DeadState);
+	TraceS("Flash: ");TraceB(weap->Flash);
+	TraceS("Flip: ");Trace(weap->Flip);
+	TraceS("Extend: ");Trace(weap->Extend);
+	TraceS("TileWidth: ");Trace(weap->TileWidth);
+	TraceS("TileHeight: ");Trace(weap->TileHeight);
+	TraceS("HitWidth: ");Trace(weap->HitWidth);
+	TraceS("HitHeight: ");Trace(weap->HitHeight);
+	TraceS("HitZHeight: ");Trace(weap->HitZHeight);
+	TraceS("HitXOffset: ");Trace(weap->HitXOffset);
+	TraceS("HitYOffset: ");Trace(weap->HitYOffset);
+	TraceS("DrawXOffset: ");Trace(weap->DrawXOffset);
+	TraceS("DrawYOffset: ");Trace(weap->DrawYOffset);
+	TraceS("DrawZOffset: ");Trace(weap->DrawZOffset);
+	TraceS("Misc:\n");for(int q = 0; q < 32; q++)Trace(weap->Misc[q]);
+	TraceS("Parent: ");Trace(weap->Parent);
+}
+//end
