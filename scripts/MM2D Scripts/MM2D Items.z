@@ -376,9 +376,14 @@ item script omniArrows
 
 void runOmniArrows()
 {
+	runOmniArrows(1);
+}
+
+void runOmniArrows(int mult)
+{
 	if(!arrowAimMode)return;//Not aiming arrows
 	int angle = getGlobalVar(GVAR_ARROWANGLE,GV_MISC);
-	if((Link->PressB && isArrow(B_item)) || (Link->PressEx1 && isArrow(EX1_item)) || (Link->PressEx2 && isArrow(EX2_item)))
+	if(/*canShootArrow() && */((Link->PressB && isArrow(B_item)) || (Link->PressEx1 && isArrow(EX1_item)) || (Link->PressEx2 && isArrow(EX2_item))))
 	{ //Fire arrow!
 		Game->PlaySound(SFX_ARROW);
 		arrowAimMode = false;
@@ -452,68 +457,69 @@ void runOmniArrows()
 			{
 				if(startAngle!=45)
 				{
-					if(startAngle>45&&startAngle<225)angle--;
-					else angle++;
+					if(startAngle>45&&startAngle<225)angle-= mult;
+					else angle+= mult;
 				}
 			}
 			else if(Link->InputLeft && Link->InputDown)
 			{
 				if(startAngle!=135)
 				{
-					if(startAngle>135&&startAngle<315)angle--;
-					else angle++;
+					if(startAngle>135&&startAngle<315)angle-= mult;
+					else angle+= mult;
 				}
 			}
 			else if(Link->InputLeft && Link->InputUp)
 			{
 				if(startAngle!=225)
 				{
-					if(startAngle>45&&startAngle<225)angle++;
-					else angle--;
+					if(startAngle>45&&startAngle<225)angle+= mult;
+					else angle-= mult;
 				}
 			}
 			else if(Link->InputRight && Link->InputUp)
 			{
 				if(startAngle!=315)
 				{
-					if(startAngle>135&&startAngle<315)angle++;
-					else angle--;
+					if(startAngle>135&&startAngle<315)angle+= mult;
+					else angle-= mult;
 				}
 			}
 			else if(Link->InputUp)
 			{
 				if(startAngle!=270)
 				{
-					if(startAngle>90&&startAngle<270)angle++;
-					else angle--;
+					if(startAngle>90&&startAngle<270)angle+= mult;
+					else angle-= mult;
 				}
 			}
 			else if(Link->InputDown)
 			{
 				if(startAngle!=90)
 				{
-					if(startAngle>90&&startAngle<270)angle--;
-					else angle++;
+					if(startAngle>90&&startAngle<270)angle-= mult;
+					else angle+= mult;
 				}
 			}
 			else if(Link->InputLeft)
 			{
 				if(startAngle!=180)
 				{
-					if(startAngle<180)angle++;
-					else angle--;
+					if(startAngle<180)angle+= mult;
+					else angle-= mult;
 				}
 			}
 			else if(Link->InputRight)
 			{
 				if(startAngle!=0)
 				{
-					if(startAngle<180)angle--;
-					else angle++;
+					if(startAngle<180)angle-= mult;
+					else angle+= mult;
 				}
 			}
 			if(angle<0)angle+=360;
 			else if(angle>=360)angle-=360;
+			if(angle%mult)angle -= (angle%mult);
 		}
 		setGlobalVar(GVAR_ARROWANGLE,GV_MISC,angle);
 		int x = Link->X+8 + VectorX(16,angle);
