@@ -34,6 +34,7 @@ import "scripts/MM2D Scripts/MM2D Ocarina.z"
 import "scripts/MM2D Scripts/MM2D Subscreen.z"
 import "scripts/MM2D Scripts/MM2D Tango.z"
 import "scripts/MM2D Scripts/MM2D Time.z"
+import "scripts/MM2D Scripts/MM2D Minigames.z"
 //end
 //start ghost imports
 import "scripts/ghost/Skulltula.z"
