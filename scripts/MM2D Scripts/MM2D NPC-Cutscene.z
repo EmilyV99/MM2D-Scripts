@@ -5,7 +5,7 @@
 ////////////////////////////////////////
 
 //start NPC	
-int NPCNames[1000] = {"Tatl","Happy Mask Salesman","Banker","Bremor","Brac","ERROR","Tatl","Guard","Guard","Guard","Guard"};
+int NPCNames[1000] = {"Tatl","Happy Mask Salesman","Banker","Bremor","Brac","ERROR","Tatl","Guard","Guard","Guard","Guard","ERROR"};
 
 ffc script NPC
 {
@@ -440,6 +440,13 @@ ffc script NPC
 					}
 				}
 			}
+			
+			case 11:
+			{
+				ShowStringAndWait("");
+				break;
+			}
+			
 			//end
 			case -1://  start
 			{
