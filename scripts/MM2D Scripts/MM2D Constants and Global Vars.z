@@ -401,6 +401,7 @@ DEFINE FFC_SHOWSTRING = 16;
 DEFINE FFC_SHOP = 18;
 DEFINE FFC_OWL = 22;
 DEFINE FFC_CHANGENAME = 24;
+DEFINE FFC_MINIGAME_OCTO = 25;
 //z
 DEFINE MAX_NONRESERVED_FFC = 26;
 //Soft Soil States
@@ -464,6 +465,10 @@ bool noSave = false;
 //Version Vars
 int version[] = {1};//{Global array}
 //end MISC
+//start Minigames
+DEFINE TARGET_OCTO_RED = 20;
+DEFINE TARGET_OCTO_BLUE = 21;
+//end Minigames
 
 //start Global Vars Array
 int gvars[214747];
@@ -478,6 +483,7 @@ GVAR GVAR_ACTIVENPCID = 5;
 GVAR GVAR_NPCTANGOSLOT = 6;
 GVAR GVAR_DIFFICULTY = 7;
 GVAR GVAR_ARROWANGLE = 8;
+GVAR GVAR_MGSTATE = 9;
 //
 GVAR GV_PAL = GV_MISC + 1000;
 GVAR TINT_DAY = 0;
