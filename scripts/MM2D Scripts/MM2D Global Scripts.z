@@ -277,6 +277,7 @@ global script Global
 				highLedgeFromWater();
 			Link->PressR=false;Link->InputR=false;
 			Link->PressL=false;Link->InputL=false;
+			Link->PressMap=false;Link->InputMap=false;
 			Overhead_Update();
 			drawExtraLayerEffects();
 			lwLoop();
