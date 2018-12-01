@@ -193,15 +193,28 @@ ffc script NPC
 						Waitframe();
 					}
 				}
+				case 11:
+				{
+					while(true)
+					{
+						if(hour>22||hour<6)
+						{
+							ShowStringAndWait("OK, it's closing time.@char(26)See ya!");
+							Link->PitWarp(1,0x7C);
+							Link->X = 160;
+							Link->Y = 96;
+						}
+						if(AgainstFFCBase(this) && Link->PressA)
+						{
+							interact(this, NPCid);
+						}
+						Waitframe();
+					}
+				}
 			}
 			Waitframe();
 		}//end
-	}
-	
-	bool AgainstFFCBase(ffc f)
-	{
-		return !isFrozen && Link->Z == 0 && ((Link->Dir == DIR_UP && Link->Y == f->Y+8+(16*(f->TileHeight-1)) && Abs(Link->X-f->X) < 8)||(Link->Dir == DIR_DOWN && Link->Y == f->Y-16 + (16*(f->TileHeight-1)) && Abs(Link->X-f->X) < 8)||(Link->Dir == DIR_LEFT && Link->X == f->X+(16*f->TileWidth) && Link->Y <= f->Y+8+(16*(f->TileHeight-1)) && Link->Y >= f->Y-8+(16*(f->TileHeight-1)))||(Link->Dir == DIR_RIGHT && Link->X == f->X-16 && Link->Y <= f->Y+8+(16*(f->TileHeight-1)) && Link->Y >= f->Y-8+(16*(f->TileHeight-1))));
-    }//end NPC setup
+	}//end NPC setup
 	
 	void interact(ffc person, int NPCid)//start interact
 	{
@@ -440,13 +453,120 @@ ffc script NPC
 					}
 				}
 			}
-			
-			case 11:
+			//end
+			case 11://start Town Shooting Gallery Guy
 			{
-				ShowStringAndWait("");
+				if(!form)
+				{
+					if(getNPCflag(11, FLAG2))
+					{
+						if(day<3)ShowStringAndWait("Wanna try?");
+						else ShowStringAndWait("How about it?@char(26)Wanna try?");
+					}
+					else
+					{
+						if(day<3)ShowStringAndWait("If you think you can do it, why don'tcha give it a try, sonny?");
+						else ShowStringAndWait("If you still have time, why don'tcha try it, sonny?");
+						setNPCflag(11, FLAG2);
+					}
+					ShowStringAndWait("One game is 20 rupees.@char(26)<<@choice(1)OK@choice(2)No thanks>>@domenu()@set(@ttempi @chosen)@close()");
+					if(tangoTempI==2)
+					{
+						if(day<3)ShowStringAndWait("...Well, then, be that way!");
+						else ShowStringAndWait("Usually, this place is packed during the festival...@char(26)But not this year.");
+						return;
+					}
+					else
+					{
+						while(true)
+						{
+							if(!Link->Item[I_BOWARROW])
+							{
+								if(day<3)ShowStringAndWait("Huh? You don't have a bow?@char(26)Then I guess you can't play.");
+								else ShowStringAndWait("Huh? You don't have a bow?@char(26)Well, that's too bad...");
+								return;
+							}
+							else if(fullCounter(CR_RUPEES)<20)
+							{
+								if(day<3)ShowStringAndWait("Oy! Oy! You don't have enough Rupees, sonny!");
+								else ShowStringAndWait("You don't have enough ((Rupees))?@char(26)... That's too bad.");
+								return;
+							}
+							else
+							{
+								Game->DCounter[CR_RUPEES] -= 20;
+								if(!getNPCflag(11,FLAG1))
+								{
+									ShowStringAndWait("All right, sonny!@char(26)The rules are simple...");
+									ShowStringAndWait("Hit as many ((red ones)) as you can within the time limit.");
+									ShowStringAndWait("If you hit a [[blue one]], you lose time, so watch out!");
+									ShowStringAndWait("You can use as many arrows as you'd like. Press {{B}} to shoot them.");
+									ShowStringAndWait("Score at least 40 points to get a fabulous prize! Good luck!");
+									setNPCflag(11,FLAG1);
+								}
+								else
+								{
+									ShowStringAndWait("All right, sonny!@char(26)Aim for the ((red ones)).@char(26)Don't mess up and hit one of them [[blue ones]] by mistake!");
+									ShowStringAndWait("Good luck!");
+								}
+								tangoTempI = -1;
+								RunFFCScript(FFC_MINIGAME_OCTO,{0});
+								while(tangoTempI==-1)Waitframe();
+								if(tangoTempI<40)
+								{
+									if(day<3)ShowStringAndWait("You hit @number(@ttempi), did ya?@char(26)Oh, that's too bad...");
+									else ShowStringAndWait("So, you hit @number(@ttempi), did ya?@char(26)Too bad...");
+									if(day<3)ShowStringAndWait("So? You can't stop, can ya? You can play as often as you'd like as long as you have enough ((Rupees)).");
+									else ShowStringAndWait("Frustrating, ain't it?@char(26)Wanna try again?");
+								}
+								else if(tangoTempI<50)
+								{
+									ShowStringAndWait("Well look at that! You hit @number(@ttempi)! Well, here ya go!");
+									if(getFlagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG1))
+									{
+										item itm = CreateItemAt(I_RUPEE50,Link->X,Link->Y);
+										itm->Pickup = IP_HOLDUP;
+									}
+									else
+									{
+										item itm = CreateItemAt(I_QUIVER_BIG,Link->X,Link->Y);
+										itm->Pickup = IP_HOLDUP;
+										flagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG1);
+									}
+									if(day==3)ShowStringAndWait("This may be our last day in buisiness, and you shot pretty well...");
+									return;
+								}
+								else
+								{
+									ShowStringAndWait("Huh? No way!@char(26)That was perfect!");
+									ShowStringAndWait("Well, here ya go!");
+									if(getFlagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG2))
+									{
+										item itm = CreateItemAt(I_RUPEE200,Link->X,Link->Y);
+										itm->Pickup = IP_HOLDUP;
+									}
+									else
+									{
+										item itm = CreateItemAt(I_HCPIECE,Link->X,Link->Y);
+										itm->Pickup = IP_HOLDUP;
+										flagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG2);
+									}
+									if(day==3)ShowStringAndWait("This may be our last day in buisiness, and you shot pretty well...");
+									return;
+								}
+								ShowStringAndWait("One game is ((20 rupees)).@char(26)<<@choice(1)OK@choice(2)No thanks>>@domenu()@set(@ttempi @chosen)@close()");
+								if(tangoTempI==2)
+								{
+									if(day<3)ShowStringAndWait("...Well, then, be that way!");
+									else ShowStringAndWait("Usually, this place is packed during the festival...@char(26)But not this year.");
+									return;
+								}
+							}
+						}
+					}
+				}
 				break;
 			}
-			
 			//end
 			case -1://  start
 			{
@@ -895,3 +1015,55 @@ int chooseTripleDigitNum(int max, int sfx)
     return num;
 }
 //end bank
+//start Locked Door
+ffc script lockedDoor
+{
+	void run(int id, int undercombo)
+	{
+		int loc = ComboAt(this->X,this->Y);
+		int basecombo = Screen->ComboD[loc];
+		switch(id)
+		{
+			case 0:
+			{
+				while(true)
+				{
+					while(hour>=22||hour<6)
+					{
+						Screen->ComboD[loc] = undercombo;
+						if(Link->PressA)
+						{
+							if(AgainstFFCBase(this))
+							{
+								Link->PressA=false;Link->InputA=false;
+								ShowStringAndWait("Shooting Gallery@char(26)((6 a.m. to 10 p.m.))");
+								
+							}
+						}
+						Waitframe();
+					}
+					Screen->ComboD[loc] = basecombo;
+					while(hour<22&&hour>=6)Waitframe();
+				}
+				break;
+			}
+			
+			case 1:
+			{
+				break;
+			}
+			
+			default:
+			{
+				TraceS("ERROR: UNDEFINED LOCKED DOOR");
+				ShowStringAndWait("ERROR: UNDEFINED LOCKED DOOR");
+				break;
+			}
+		}
+	}
+}
+//end Locked Door
+bool AgainstFFCBase(ffc f)
+{
+	return !isFrozen && Link->Z == 0 && ((Link->Dir == DIR_UP && Link->Y == f->Y+8+(16*(f->TileHeight-1)) && Abs(Link->X-f->X) < 8)||(Link->Dir == DIR_DOWN && Link->Y == f->Y-16 + (16*(f->TileHeight-1)) && Abs(Link->X-f->X) < 8)||(Link->Dir == DIR_LEFT && Link->X == f->X+(16*f->TileWidth) && Link->Y <= f->Y+8+(16*(f->TileHeight-1)) && Link->Y >= f->Y-8+(16*(f->TileHeight-1)))||(Link->Dir == DIR_RIGHT && Link->X == f->X-16 && Link->Y <= f->Y+8+(16*(f->TileHeight-1)) && Link->Y >= f->Y-8+(16*(f->TileHeight-1))));
+}
