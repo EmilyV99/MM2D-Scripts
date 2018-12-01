@@ -320,7 +320,7 @@ void setupStyles()//start styles
 		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_Y,3);
 		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_WIDTH,176);
 		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_HEIGHT,42);
-		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_SPEED,5);
+		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_SPEED,3);
 		Tango_SetStyleAttribute(i,TANGO_STYLE_TEXT_SFX,18);
 		
 		//Alt (()) [[]] {{}} <<>>
