@@ -39,6 +39,11 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 		bool initPhase = false;
 		setGlobalVar(GVAR_ARROWANGLE,GV_MISC,270);
 		int cooldown = -1;
+		for(int q = Screen->NumLWeapons(); q > 0; --q)
+		{
+			lweapon weap = Screen->LoadLWeapon(q);
+			weap->DeadState = 0;
+		}
 		while(true)
 		{
 			switch(phase)
@@ -61,10 +66,10 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 				case 2:
 					if(initPhase)
 					{
-						r1 = CreateNPCAt(TARGET_OCTO_RED, LEFT, BOTTOM);
-						r2 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, BOTTOM);
-						r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, MID_Y);
-						b1 = CreateNPCAt(TARGET_OCTO_BLUE, MID_X, BOTTOM);
+						r1 = CreateNPCAt(TARGET_OCTO_RED, LEFT, MID_Y);
+						r2 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, MID_Y);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, TOP);
+						b1 = CreateNPCAt(TARGET_OCTO_BLUE, MID_X, MID_Y);
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
@@ -89,7 +94,7 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 					{
 						r1 = CreateNPCAt(TARGET_OCTO_RED, LEFT, TOP);
 						r2 = CreateNPCAt(TARGET_OCTO_RED, MID_X, TOP);
-						r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, MID_Y);
+						r3 = CreateNPCAt(TARGET_OCTO_RED, RIGHT, BOTTOM);
 						b1 = CreateNPCAt(TARGET_OCTO_BLUE, RIGHT, TOP);
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
