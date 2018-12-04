@@ -61,11 +61,30 @@ global script Global
 		//start Global Script Scope Vars
 		lweapon zoraBoom1;
 		lweapon zoraBoom2;
+		//
+		int subskin = 1;
+		int lastskin = -1;
 		//end
 		//Tango_ConvertVariableName("anpc");
 		//Tango_ConvertFunctionName("npcend");
 		while(true)
 		{
+			if(!(gameframe%60))//Refresh time-based events every 60 frames
+			{
+				int month = GetSystemTime(RTC_MONTH);
+				int day = GetSystemTime(RTC_DAYOFMONTH);
+				subskin = 1;
+				if(month == 12)
+				{
+					subskin = 2;
+					if(day>23&&day<26)subskin = 3;
+				}
+			}
+			if(subskin != lastskin)
+			{
+				lastskin = subskin;
+				reskinSubscreen(subskin);
+			}
 			clearBitmap(RT_BITMAP0);
 			handleTyping();
 			if(debugEnabled)testingMenu();

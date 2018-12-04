@@ -735,20 +735,20 @@ void passiveSubscreen(){//start PassiveSubscreen
 	//Time
 	if(day<4){
 		if(slowTime){
-			Screen->FastTile(7,DAYSTART_X-8,DAYSTART_Y,12613,0,OP_OPAQUE);
+			Screen->FastTile(7,DAYSTART_X-8,DAYSTART_Y,SLOWTIME_TILE,0,OP_OPAQUE);
 		}
-		Screen->FastTile(7,DAYSTART_X,DAYSTART_Y,12610,0,OP_OPAQUE);
-		Screen->FastTile(7,DAYSTART_X+16,DAYSTART_Y,12611,0,OP_OPAQUE);
-		Screen->FastTile(7,DAYNUM_X,DAYNUM_Y,NumberTiles[day],0,OP_OPAQUE);
-		Screen->FastTile(7,TIMESTART_X,TIMESTART_Y,NumberTiles[Floor(hour/10)],0,OP_OPAQUE);
-		Screen->FastTile(7,TIMESTART_X+7,TIMESTART_Y,NumberTiles[hour%10],0,OP_OPAQUE);
+		Screen->FastTile(7,DAYSTART_X,DAYSTART_Y,DAYTILE,0,OP_OPAQUE);
+		Screen->FastTile(7,DAYSTART_X+16,DAYSTART_Y,DAYTILE+1,0,OP_OPAQUE);
+		Screen->FastTile(7,DAYNUM_X,DAYNUM_Y,NUMBERTILE + day,0,OP_OPAQUE);
+		Screen->FastTile(7,TIMESTART_X,TIMESTART_Y,NUMBERTILE + Floor(hour/10),0,OP_OPAQUE);
+		Screen->FastTile(7,TIMESTART_X+7,TIMESTART_Y,NUMBERTILE + hour%10,0,OP_OPAQUE);
 		Screen->FastTile(7,TIMESTART_X+12,TIMESTART_Y,SEMICOLON,0,OP_OPAQUE);
 		int minute = Floor(time/FRAMES_MINUTE);
-		Screen->FastTile(7,TIMESTART_X+17,TIMESTART_Y,NumberTiles[Floor(minute/10)],0,OP_OPAQUE);
-		Screen->FastTile(7,TIMESTART_X+24,TIMESTART_Y,NumberTiles[minute%10],0,OP_OPAQUE);
+		Screen->FastTile(7,TIMESTART_X+17,TIMESTART_Y,NUMBERTILE + Floor(minute/10),0,OP_OPAQUE);
+		Screen->FastTile(7,TIMESTART_X+24,TIMESTART_Y,NUMBERTILE + minute%10,0,OP_OPAQUE);
 	} else {
-		Screen->FastTile(7,DAYSTART_X-4,DAYSTART_Y,12608,0,OP_OPAQUE);
-		Screen->FastTile(7,DAYSTART_X+12,DAYSTART_Y,12609,0,OP_OPAQUE);
+		Screen->FastTile(7,DAYSTART_X-4,DAYSTART_Y,DOOMTILE,0,OP_OPAQUE);
+		Screen->FastTile(7,DAYSTART_X+12,DAYSTART_Y,DOOMTILE + 1,0,OP_OPAQUE);
 	}
 }//end PassiveSubscreen
 
@@ -801,3 +801,11 @@ int locToCol(int loc){
 void drawBase(int baseScreen){
 	Screen->DrawScreen(6,MAP_SUBSCREEN,baseScreen,0,0,0);
 }//end subscreenFunctions
+
+//start subscreenSkin
+void reskinSubscreen(int skin)
+{
+	int source = 67600 + (120 * skin) + (Floor(skin/2)*20);
+	CopyTileBlock(source, source + 119,67600);
+}
+//end subscreenSkin
