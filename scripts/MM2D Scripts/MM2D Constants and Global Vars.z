@@ -489,17 +489,19 @@ int gvars[214747];
 //
 GVAR GV_MISC = 0;
 GVAR GVAR_BLASTMASKCOOLDOWN = 0;
-GVAR GVAR_BANK_REW1 = 1;
-GVAR GVAR_BANK_REW2 = 2;
-GVAR GVAR_BANK_REW3 = 3;
-GVAR GVAR_MAINTANGOSLOT = 4;
-GVAR GVAR_ACTIVENPCID = 5;
-GVAR GVAR_NPCTANGOSLOT = 6;
-GVAR GVAR_DIFFICULTY = 7;
-GVAR GVAR_ARROWANGLE = 8;
-GVAR GVAR_MGSTATE = 9;
+GVAR GVAR_MAINTANGOSLOT = 1;
+GVAR GVAR_ACTIVENPCID = 2;
+GVAR GVAR_NPCTANGOSLOT = 3;
+GVAR GVAR_DIFFICULTY = 4;
+GVAR GVAR_ARROWANGLE = 5;
+GVAR GVAR_MGSTATE = 6;
 //
-GVAR GV_PAL = GV_MISC + 1000;
+GVAR GV_MISC_BOOL = GV_MISC + 1000;
+GVAR GVAR_BANK_REW1 = 0;
+GVAR GVAR_BANK_REW2 = 1;
+GVAR GVAR_BANK_REW3 = 2;
+//
+GVAR GV_PAL = GV_MISC_BOOL + 1000;
 GVAR TINT_DAY = 0;
 GVAR TINT_SUNSETORANGE = 1;
 GVAR TINT_NIGHT = 2;
@@ -586,6 +588,28 @@ bool getNPCflag(int index, int flag)
 void setNPCflag(int index, int flag)
 {
 	flagGlobalVar(index, GV_NPCDIA, flag);
+}
+
+void setGlobalBool(int index, int add, int flag)
+{
+	setGlobalBool(index,add,flag>0);
+}
+
+void setGlobalBool(int index, int add, bool flag)
+{
+	if(flag)
+	{
+		gvars[Div(index,8) + add] |= 1 << (index % 8);
+	}
+	else
+	{
+		gvars[Div(index,8) + add] &= ~(1 << (index % 8));
+	}
+}
+
+bool getGlobalBool(int index, int add)
+{
+	return (gvars[Div(index,8) + add] >> (index % 8)) == 1;
 }
 //end Global Vars Array
 //start Global Weapons Arrays
