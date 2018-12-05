@@ -424,6 +424,8 @@ DEFINE SSSTATE_WAITING = 1;
 DEFINE SSSTATE_PLANTED = 2;
 DEFINE SSSTATE_GROWN = 3;
 DEFINE SSSTATE_ACTIVE = 4;
+//
+DEFINE BITS_INT = 16;
 //Torch puzzle vars
 bool torchPuzzleStates[4 * MAX_LEVEL];
 int torchPuzzle[4 * MAX_LEVEL];
@@ -477,7 +479,7 @@ bool dbdraw = false;
 bool debugEnabled = false;
 bool noSave = false;
 //Version Vars
-int version[] = {1};//{Global array}
+int version[] = {2};//{Global array}
 //end MISC
 //start Minigames
 DEFINE TARGET_OCTO_RED = 20;
@@ -599,11 +601,11 @@ void setGlobalBool(int index, int add, bool flag)
 {
 	if(flag)
 	{
-		gvars[Div(index,8) + add] |= 1 << (index % 8);
+		gvars[Div(index,BITS_INT) + add] |= 1 << (index % BITS_INT);
 	}
 	else
 	{
-		gvars[Div(index,8) + add] &= ~(1 << (index % 8));
+		gvars[Div(index,BITS_INT) + add] &= ~(1 << (index % BITS_INT));
 	}
 }
 
