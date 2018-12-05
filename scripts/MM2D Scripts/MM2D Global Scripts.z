@@ -18,7 +18,8 @@ global script Init
 		setGlobalVar(GVAR_DIFFICULTY,GV_MISC,1);
 		int saveName[16];
 		Game->GetSaveName(saveName);
-		if(!strcmp(saveName,"Venrob"))debugEnabled=true;
+		if(!strcmp(saveName,"Link"))debugEnabled=false;
+		else debugEnabled=true;
 		setGlobalVar(TINT_DAY,GV_PAL,createTintPalette(0,0,0));
 		setGlobalVar(TINT_SUNSETORANGE,GV_PAL,createTintPalette(-3,-9,-14));
 		setGlobalVar(TINT_NIGHT,GV_PAL,createTintPalette(-21,-23,-10));
@@ -296,6 +297,7 @@ global script Global
 				highLedgeFromWater();
 			Link->PressR=false;Link->InputR=false;
 			Link->PressL=false;Link->InputL=false;
+			Link->PressMap=false;Link->InputMap=false;
 			Overhead_Update();
 			drawExtraLayerEffects();
 			lwLoop();

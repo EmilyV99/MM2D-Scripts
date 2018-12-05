@@ -313,6 +313,16 @@ DEFINE I_DEKUSTICK = 138;
 //start Palette
 DEFINE MULT_SUNRISE = 2;
 //end Palette
+//start Flags
+DEFINE FLAG1 = 00000001b;
+DEFINE FLAG2 = 00000010b;
+DEFINE FLAG3 = 00000100b;
+DEFINE FLAG4 = 00001000b;
+DEFINE FLAG5 = 00010000b;
+DEFINE FLAG6 = 00100000b;
+DEFINE FLAG7 = 01000000b;
+DEFINE FLAG8 = 10000000b;
+//end Flags
 //start MISC
 //Combos
 DEFINE COMBO_INVIS = 4;
@@ -405,6 +415,7 @@ DEFINE FFC_SHOP = 18;
 DEFINE FFC_OWL = 22;
 DEFINE FFC_CHANGENAME = 24;
 DEFINE FFC_MINIGAME_OCTO = 25;
+DEFINE FFC_LOCKEDDOOR = 26;
 //z
 DEFINE MAX_NONRESERVED_FFC = 26;
 //Soft Soil States
@@ -504,7 +515,12 @@ GVAR GV_MISCRESETTABLE = GV_CHEST + 1000;
 GVAR GVAR_GUARDSMOVED = 0;
 //
 GVAR GV_SOFTSOIL = GV_MISCRESETTABLE + 1000;
-GVAR GVAR_END_RESET = GV_SOFTSOIL + 10;
+//
+GVAR GV_NPCDIA = GV_SOFTSOIL + 10;
+GVAR GVAR_END_RESET = GV_NPCDIA + 1000;
+//
+GVAR GV_MINIGAME = GVAR_END_RESET;
+GVAR GVAR_MGOCTO = 0;
 ////
 int getGlobalVar(int index, int add)
 {
@@ -519,6 +535,16 @@ void setGlobalVar(int index, int add, int state)
 void incGlobalVar(int index, int add, int inc)
 {
 	gvars[index+add]+=inc;
+}
+
+void flagGlobalVar(int index, int add, int flag)
+{
+	gvars[index+add]|=flag;
+}
+
+bool getFlagGlobalVar(int index, int add, int flag)
+{
+	return (gvars[index+add] & flag) > 0;
 }
 
 bool getChestState(int index)
@@ -550,6 +576,16 @@ bool getBNstate(int index)
 void setBNstate(int index)
 {
 	setGlobalVar(index, GV_BNOTEBOOK, 1);
+}
+
+bool getNPCflag(int index, int flag)
+{
+	return getFlagGlobalVar(index, GV_NPCDIA, flag);
+}
+
+void setNPCflag(int index, int flag)
+{
+	flagGlobalVar(index, GV_NPCDIA, flag);
 }
 //end Global Vars Array
 //start Global Weapons Arrays
