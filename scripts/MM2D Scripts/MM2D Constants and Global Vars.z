@@ -426,6 +426,7 @@ DEFINE SSSTATE_GROWN = 3;
 DEFINE SSSTATE_ACTIVE = 4;
 //
 DEFINE BITS_INT = 16;
+DEFINE DAYS_TO_HINT_RESET = 7;
 //Torch puzzle vars
 bool torchPuzzleStates[4 * MAX_LEVEL];
 int torchPuzzle[4 * MAX_LEVEL];
@@ -498,6 +499,8 @@ GVAR GVAR_NPCTANGOSLOT = 3;
 GVAR GVAR_DIFFICULTY = 4;
 GVAR GVAR_ARROWANGLE = 5;
 GVAR GVAR_MGSTATE = 6;
+GVAR GVAR_EXITYEAR = 7;
+GVAR GVAR_EXITDAY = 8;
 //
 GVAR GV_MISC_BOOL = GV_MISC + 1000;
 GVAR GVAR_BANK_REW1 = 0;
@@ -622,6 +625,26 @@ bool toggleGlobalBool(int index, int add)
 	bool old = getGlobalBool(index,add);
 	setGlobalBool(index,add,!old);
 	return !old;
+}
+
+void storeTime()
+{
+	setGlobalVar(GVAR_EXITYEAR,GV_MISC,GetSystemTime(RTC_YEAR));
+	setGlobalVar(GVAR_EXITDAY,GV_MISC,GetSystemTime(RTC_DAYOFYEAR));
+}
+
+int daysAgo()
+{
+	int lastyear = getGlobalVar(GVAR_EXITYEAR,GV_MISC) - 2018;
+	int thisyear = GetSystemTime(RTC_YEAR) - 2018;
+	int lastday = getGlobalVar(GVAR_EXITDAY,GV_MISC);
+	int thisday = GetSystemTime(RTC_DAYOFYEAR);
+	return (((thisyear * 365) + thisday) - ((lastyear * 365) + lastday));
+}
+
+void resetHintBools()
+{
+	setGlobalBool(GVAR_B_SPECTHEME,GV_MISC_BOOL,false);
 }
 //end Global Vars Array
 //start Global Weapons Arrays
