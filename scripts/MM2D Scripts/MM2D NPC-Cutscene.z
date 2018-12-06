@@ -565,6 +565,41 @@ ffc script NPC
 						}
 					}
 				}
+				else 
+				{
+					switch(form)
+					{
+						case 1:
+							if(!getNPCflag(11,FLAG3))
+							{
+								ShowStringAndWait("Oh! When I saw that fairy, I thought you were that troublemakin' brat with the mask.");
+								setNPCflag(11,FLAG3);
+							}
+							if(Link->Item[I_BOWARROW])ShowStringAndWait("Sorry, but you can't play if you can't shoot a bow.");
+							else ShowStringAndWait("Sorry, but you can't play if you don't have a bow.");
+							break;
+						case 2:
+							if(!getNPCflag(11,FLAG4))
+							{
+								ShowStringAndWait("Well, look at you! You've got quite a build! I betcha can lift anything!");
+								ShowStringAndWait("But...");
+								setNPCflag(11,FLAG4);
+							}
+							if(Link->Item[I_BOWARROW])ShowStringAndWait("Sorry...If you can't shoot a bow, you can't play.");
+							else ShowStringAndWait("Sorry...If you don't have a bow, you can't play.");
+							break;
+						case 3:
+							if(!getNPCflag(11,FLAG5))
+							{
+								ShowStringAndWait("I swear I've seen you somewhere before...");
+								ShowStringAndWait("Well, let me tell ya");
+								setNPCflag(11,FLAG5);
+							}
+							if(Link->Item[I_BOWARROW])ShowStringAndWait("If you can't shoot a bow, you can't play. Sorry.");
+							else ShowStringAndWait("If you don't have a bow, you can't play. Sorry.");
+							break;
+					}
+				}
 				break;
 			}
 			//end
