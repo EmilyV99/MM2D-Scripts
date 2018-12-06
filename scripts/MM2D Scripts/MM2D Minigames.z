@@ -546,3 +546,152 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 	}
 }
 //end
+//start Invisible Maze Game
+int invisMazeLayout[88];
+ffc script invisMazeGame
+{
+	void run(int chestFFC)
+	{
+		int timer = 30 * FRAMES_MINUTE;
+		for(int x = 0; x < 11; ++x)
+			for(int y = 0; y < 8; ++y)
+			{
+				Screen->ComboD[(x+1) + (16*(2+y))] += invisMazeLayout[x + (11*y)];
+			}
+		while(timer > 0)
+		{
+			Waitframe();
+			if(getChestState(3))break;
+			--timer;
+		}
+		ffc chest = Screen->LoadFFC(chestFFC);
+		Screen->ComboD[32] = Screen->ComboD[48];
+		chest->Script = 0;
+		chest->Data = COMBO_INVIS;
+		for(int x = 0; x < 11; ++x)
+			for(int y = 0; y < 8; ++y)
+			{
+				Screen->ComboD[(x+1) + (16*(2+y))] -= invisMazeLayout[x + (11*y)];
+			}
+	}
+}
+
+bool startMazeGame(int cost, int prize)
+{
+	if(fullCounter(CR_RUPEES) < cost)return false;
+	invisMazeLayout[88]=0;
+	setChestState(3, false);
+	int chestFFC = RunFFCScript(FFC_CHEST,{prize,3});
+	ffc chest = Screen->LoadFFC[chestFFC];
+	chest->X = 0;
+	chest->Y = 32;
+	RunFFCScript(FFC_INVISMAZE,{chestFFC});
+	return true;
+}
+
+void generateMazeLayout()
+{
+	int mazeLayout[88];
+	int active[88];
+	while(true)
+	{
+		active[0] = (11*1)+10;
+		active[1] = (11*2)+10;
+		active[2] = (11*3)+10;
+		active[3] = (11*4)+10;
+		active[4] = (11*5)+10;
+		active[5] = (11*6)+10;
+		active[6] = -1;
+		bool success = false;
+		int activeLeft = 6;
+		while(active[0] != -1)
+		{
+			/*for(int i = 0; i < 1; ++i)
+			{
+				for(int q = 0; q < 88; ++q)
+				{
+					Screen->FastTile(6,16*(q%11),16*(Div(q,11)),TILE_COLOR+15+Cond(mazeLayout[q]>0,-1*(mazeLayout[q]-1),-5),0,OP_OPAQUE);
+				}
+				if(success)Screen->FastTile(6,TILE_COLOR+6,0,16*11,0,OP_OPAQUE);
+				Waitframe();
+			}*/
+			for(int q = 0; active[q] != -1; ++q)
+			{
+				if(mazeLayout[active[q]]!=0)
+				{
+					active[q] = -2;
+					--activeLeft;
+					continue;
+				}
+				if(active[q]==0)
+				{
+					success = true;
+					mazeLayout[active[q]] = 1;
+				}
+				else
+				{
+					if(activeLeft==1) mazeLayout[active[q]] = 1;
+					else mazeLayout[active[q]] = Choose(1,2);
+					if(mazeLayout[active[q]] == 2)
+					{
+						active[q] = -2;
+						--activeLeft;
+					}
+				}
+			}
+			int new[88];
+			int index = 0;
+			for(int q = 0; active[q] != -1; ++q)
+			{
+				if(active[q]<-1)continue;
+				if(active[q]+1<88)if((active[q] % 11) != 10)if(mazeLayout[active[q]+1]==0)
+				{
+					new[index] = active[q]+1;
+					++index;
+				}
+				if(active[q]-1>=0)if((active[q] % 11) != 0)if(mazeLayout[active[q]-1]==0)
+				{
+					new[index] = active[q]-1;
+					++index;
+				}
+				if(active[q]+11<88)if(mazeLayout[active[q]+11]==0)
+				{
+					new[index] = active[q]+11;
+					++index;
+				}
+				if(active[q]-11>=0)if(mazeLayout[active[q]-11]==0)
+				{
+					new[index] = active[q]-11;
+					++index;
+				}
+			}
+			new[index] = -1;
+			activeLeft = index;
+			for(int q = 0; q < 88; ++q)
+			{
+				active[q] = new[q];
+			}
+		}
+		if(success)
+		{
+			for(int q = 0; q < 88; ++q)
+			{
+				if(mazeLayout[q]==0)mazeLayout[q]=2;
+			}
+			break;
+		}
+		//TraceS("Maze generation failed! Regenerating!\n");
+		for(int q = 0; q < 88; ++q)
+		{
+			mazeLayout[q] = 0;
+			active[q] = 0;
+		}
+		continue;
+		/*TraceS("Maze generation failed! Quitting!\n");
+		invisMazeLayout[0] = -1;
+		return;*/
+	}
+	//TraceS("Maze generated!\n");
+	for(int q = 0; q < 88; ++q)invisMazeLayout[q]=Clamp(mazeLayout[q]-1,0,1);
+}
+//end
