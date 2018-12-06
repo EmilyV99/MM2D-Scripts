@@ -488,6 +488,7 @@ DEFINE TARGET_OCTO_BLUE = 21;
 
 //start Global Vars Array
 int gvars[214747];
+int gbuf[214747];
 //
 GVAR GV_MISC = 0;
 GVAR GVAR_BLASTMASKCOOLDOWN = 0;
@@ -502,6 +503,8 @@ GVAR GV_MISC_BOOL = GV_MISC + 1000;
 GVAR GVAR_BANK_REW1 = 0;
 GVAR GVAR_BANK_REW2 = 1;
 GVAR GVAR_BANK_REW3 = 2;
+GVAR GVAR_B_SPECTHEME = 3;
+GVAR GVAR_B_SPECTHEME_ACTIVE = 4;
 //
 GVAR GV_PAL = GV_MISC_BOOL + 1000;
 GVAR TINT_DAY = 0;
@@ -611,7 +614,14 @@ void setGlobalBool(int index, int add, bool flag)
 
 bool getGlobalBool(int index, int add)
 {
-	return (gvars[Div(index,8) + add] >> (index % 8)) == 1;
+	return ((gvars[Div(index,BITS_INT) + add] >> (index % BITS_INT))&1)== 1;
+}
+
+bool toggleGlobalBool(int index, int add)
+{
+	bool old = getGlobalBool(index,add);
+	setGlobalBool(index,add,!old);
+	return !old;
 }
 //end Global Vars Array
 //start Global Weapons Arrays
