@@ -171,7 +171,11 @@ ffc script ShowString
 {
 	void run(int str, int doAfter, bool string)
 	{
-		if(string)ShowStringAndWait(str);
+		if(string)
+		{
+			ShowStringAndWait(str);
+			if(str==gbuf)remchr(gbuf,0);
+		}
 		else ShowMessageAndWait(str);
 		if(!doAfter)Quit();
 		switch(doAfter)
