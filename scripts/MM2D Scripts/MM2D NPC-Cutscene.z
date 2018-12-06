@@ -5,7 +5,7 @@
 ////////////////////////////////////////
 
 //start NPC	
-int NPCNames[1000] = {"Tatl","Happy Mask Salesman","Banker","Bremor","Brac","ERROR","Tatl","Guard","Guard","Guard","Guard","ERROR"};
+int NPCNames[1000] = {"Tatl","Happy Mask Salesman","Banker","Bremor","Brac","ERROR","Tatl","Guard","Guard","Guard","Guard","ERROR","ERROR"};
 
 ffc script NPC
 {
@@ -203,6 +203,24 @@ ffc script NPC
 							Link->PitWarp(1,0x7C);
 							Link->X = 160;
 							Link->Y = 96;
+						}
+						if(AgainstFFCBase(this) && Link->PressA)
+						{
+							interact(this, NPCid);
+						}
+						Waitframe();
+					}
+				}
+				case 12:
+				{
+					while(true)
+					{
+						if(hour<6||hour>22)
+						{
+							ShowStringAndWait("Oh, I'm sorry. It's already time to close up shop. Come again.");
+							Link->PitWarp(1,0x7C);
+							Link->X = 80;
+							Link->Y = 16;
 						}
 						if(AgainstFFCBase(this) && Link->PressA)
 						{
@@ -603,6 +621,12 @@ ffc script NPC
 				break;
 			}
 			//end
+			case 12://start invis chest maze lady
+			{
+				
+				break;
+			}
+			//end
 			case -1://  start
 			{
 				
@@ -693,6 +717,7 @@ int getNPCCombo(int data, int id, int NPCcombo, int startday, int starthour, int
 		case 9:
 		case 10:
 		case 11:
+		case 12:
 			return NPCcombo;
 		default:
 			return 0;
