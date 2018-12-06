@@ -695,3 +695,119 @@ void generateMazeLayout()
 	for(int q = 0; q < 88; ++q)invisMazeLayout[q]=Clamp(mazeLayout[q]-1,0,1);
 }
 //end
+//start Deku Flying Game
+ffc script movingPlatform
+{
+	void run(int id)
+	{
+		int phase = 1;
+		bool linkTouching = !deku_flying && linkCollision(this->X,this->Y,16*this->TileWidth,16*this->TileHeight,4);
+		switch(id)
+		{
+			case 1:
+			{
+				this->Y = 112;
+				this->X = 48;
+				while(true)
+				{
+					switch(phase)
+					{
+						case 1:
+							++this->X;
+							if(linkTouching)++Link->X;
+							if(this->X==208)phase=2;
+							break;
+						case 2:
+							--this->Y;
+							if(linkTouching)--Link->Y;
+							if(this->Y==32)phase=3;
+							break;
+						case 3:
+							--this->X;
+							if(linkTouching)--Link->X;
+							if(this->X==48)phase=4;
+							break;
+						case 4:
+							++this->Y;
+							if(linkTouching)++Link->Y;
+							if(this->Y==112)phase = 1; 
+					}
+					
+					Waitframe();
+					linkTouching = !deku_flying && linkCollision(this->X,this->Y,16*this->TileWidth,16*this->TileHeight,4);
+				}
+			}
+			
+			case 2:
+			{
+				while(true)
+				{
+					switch(phase)
+					{
+						case 1:
+							
+							break;
+					}
+					
+					Waitframe();
+					linkTouching = !deku_flying && linkCollision(this->X,this->Y,16*this->TileWidth,16*this->TileHeight,4);
+				}
+			}
+			
+			case 3:
+			{
+				while(true)
+				{
+					switch(phase)
+					{
+						case 1:
+							
+							break;
+					}
+					
+					Waitframe();
+					linkTouching = !deku_flying && linkCollision(this->X,this->Y,16*this->TileWidth,16*this->TileHeight,4);
+				}
+			}
+			
+			case 4:
+			{
+				while(true)
+				{
+					switch(phase)
+					{
+						case 1:
+							
+							break;
+					}
+					
+					Waitframe();
+					linkTouching = !deku_flying && linkCollision(this->X,this->Y,16*this->TileWidth,16*this->TileHeight,4);
+				}
+			}
+		}
+	}
+	
+	bool linkCollision(int x, int y, int wid, int hei, int fuzz)
+	{
+		if(fuzz == 1)
+		{
+			return ((Link->X+8 > x && Link->X+8 < x+wid) && (Link->Y+8 > y && Link->Y+8 < y+hei))
+		}
+		else if(fuzz%2)
+		{
+			int LX = Link->X+8;
+			int LY = Link->Y+8;
+			int off = Floor(fuzz/2);
+			return (((LX+off > x && LX+off < x+wid) && (LY+off > y && LY+off < y+hei)) && ((LX-off > x && LX-off < x+wid) && (LY-off > y && LY-off < y+hei)));
+		}
+		else
+		{
+			int LX = Link->X+8;
+			int LY = Link->Y+8;
+			int off = fuzz/2;
+			return (((LX+off-1 > x && LX+off-1 < x+wid) && (LY+off-1 > y && LY+off-1 < y+hei)) && ((LX-off > x && LX-off < x+wid) && (LY-off > y && LY-off < y+hei)));
+		}
+	}
+}
+//end
