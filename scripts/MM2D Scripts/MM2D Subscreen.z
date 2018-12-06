@@ -805,6 +805,15 @@ void drawBase(int baseScreen){
 //start subscreenSkin
 void reskinSubscreen(int skin)
 {
+	if(skin!=1)
+	{
+		if(!getGlobalBool(GVAR_B_SPECTHEME,GV_MISC_BOOL))
+		{
+			setGlobalBool(GVAR_B_SPECTHEME,GV_MISC_BOOL,true);
+			strcpy(gbuf,"A special subscreen theme is active!@char(26)Press CTRL+1 to toggle this theme.");
+			RunFFCScript(FFC_SHOWSTRING,{gbuf,0,1});
+		}
+	}
 	int source = 67600 + (120 * skin) + (Floor(skin/2)*20);
 	CopyTileBlock(source, source + 119,67600);
 }
