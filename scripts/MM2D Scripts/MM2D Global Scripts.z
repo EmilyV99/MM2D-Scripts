@@ -1005,6 +1005,11 @@ global script onFileLoad
 {
 	void run()
 	{
+		if(daysAgo() >= DAYS_TO_HINT_RESET)
+		{
+			resetHintBools();
+			storeTime();
+		}
 		if(owlSaved)
 		{
 			owlSaved=false;
@@ -1028,7 +1033,7 @@ global script onExit
 {
 	void run()
 	{
-	
+		storeTime();
 	}
 }
 //end OnExit Script
