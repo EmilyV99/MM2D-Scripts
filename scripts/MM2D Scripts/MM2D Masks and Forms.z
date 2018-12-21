@@ -467,6 +467,10 @@ void fireZoraBoomerang()//start ZoraRang
 		zoraBoom2->Misc[BRANG_MISC_MULT] = -1;
 		zoraBoom1->Misc[BRANG_MISC_OTHER] = zoraBoom2;
 		zoraBoom2->Misc[BRANG_MISC_OTHER] = zoraBoom1;
+		zoraBoom1->Misc[BRANG_MISC_DEADTIMER] = -10;
+		zoraBoom2->Misc[BRANG_MISC_DEADTIMER] = -10;
+		zoraBoom1->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+		zoraBoom2->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
 	}
 }
 
@@ -475,7 +479,6 @@ lweapon script zoraBrang
 	void run()
 	{
 		lweapon other = this->Misc[BRANG_MISC_OTHER];
-		int timer = 10;
 		while(this->isValid())
 		{
 			if(!(gameframe%20))Game->PlaySound(SFX_BRANG);
@@ -484,7 +487,7 @@ lweapon script zoraBrang
 				if(!this->Misc[BRANG_MISC_DEADTIMER])
 					this->Misc[BRANG_MISC_DEADTIMER] = 5;
 			}
-			else if(timer)--timer;
+			else if(this->Misc[BRANG_MISC_DEADTIMER]<0)++this->Misc[BRANG_MISC_DEADTIMER];
 			else if(Collision(this,other))
 			{
 				if(!this->Misc[BRANG_MISC_DEADTIMER])this->Misc[BRANG_MISC_DEADTIMER] = 10;
@@ -511,7 +514,7 @@ lweapon script zoraBrang
 			for(int i = Screen->NumNPCs(); i > 0; --i)
 			{
 				npc n = Screen->LoadNPC(i);
-				if(n->isValid()&&Collision(n,this)&&!n->InvFrames&&!n->Stun)
+				if(n->isValid()&&Collision(n,this)&&!n->InvFrames&&!n->Stun&&!getRelativeHeight(this,n))
 				{
 					int damage = this->Damage*2;
 					int def = n->Defense[NPCD_BRANG];
