@@ -62,9 +62,6 @@ global script Global
 		clearBitmap(RT_BITMAP0);
 		//end init bitmaps
 		//start Global Script Scope Vars
-		lweapon zoraBoom1;
-		lweapon zoraBoom2;
-		//
 		int subskin = 1;
 		int lastskin = -1;
 		//end
@@ -277,19 +274,7 @@ global script Global
 			Link->PressStart=false;
 			Link->InputStart=false;
 			razorSwordCheck();
-			//transformaitons
-			handleTransformations(zoraBoom1,zoraBoom2);
-			if(Game->Misc[0]!=Debug->Null())
-			{
-				zoraBoom1=Game->Misc[0];
-				Game->Misc[0]=Debug->Null();
-			}
-			if(Game->Misc[1]!=Debug->Null())
-			{
-				zoraBoom2=Game->Misc[1];
-				Game->Misc[1]=Debug->Null();
-			}
-			//
+			handleTransformations();
 			handleEXItems();
 			handleMasks();
 			//end

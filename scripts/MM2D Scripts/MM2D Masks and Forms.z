@@ -66,7 +66,7 @@ item script Mask{//start
 	}
 }//end
 
-void handleTransformations(lweapon zoraBoom1, lweapon zoraBoom2){//start
+void handleTransformations(){//start
 	//start Form setup
 	Link->Item[FORM1] = (form==1);
 	Link->Item[FORM2] = (form==2&&!curled);
@@ -89,9 +89,6 @@ void handleTransformations(lweapon zoraBoom1, lweapon zoraBoom2){//start
 		}
 	}//end
 	if(!isFrozen){//start Form notPaused
-		//start handlers
-		zoraBoomMovement(zoraBoom1,zoraBoom2);
-		//end handlers
 		if(!form){//start human
 			if(Link->PressR&&Link->Action!=LA_SWIMMING&&!Link->Item[210]){
 				Game->PlaySound(SFX_SHIELD);
@@ -422,8 +419,10 @@ void goronSpikeRoll(){//start GoronRoll
 		}
 	}
 }//end GoronSpikeRoll
-void fireZoraBoomerang(){//start ZoraRang
-	if(!countLWeaponType(LW_BRANG)){
+void fireZoraBoomerang()//start ZoraRang
+{
+	if(!countLWeaponType(LW_BRANG))
+	{
 		lweapon zoraBoom1 = Screen->CreateLWeapon(LW_BRANG);
 		zoraBoom1->X=CenterLinkX();
 		zoraBoom1->Y=CenterLinkY();
@@ -433,93 +432,110 @@ void fireZoraBoomerang(){//start ZoraRang
 		//
 		zoraBoom1->Angular=true;
 		zoraBoom2->Angular=true;
-		if(Link->Dir==DIR_DOWN){
-			zoraBoom1->Angle=DIR16_RADS_RIGHTDOWN;
-			zoraBoom2->Angle=DIR16_RADS_LEFTDOWN;
-		} else if(Link->Dir==DIR_LEFT){
-			zoraBoom1->Angle=DIR16_RADS_LEFTDOWN;
-			zoraBoom2->Angle=DIR16_RADS_UPLEFT;
-		} else if(Link->Dir==DIR_UP){
-			zoraBoom1->Angle=DIR16_RADS_UPLEFT;
-			zoraBoom2->Angle=DIR16_RADS_RIGHTUP;
-		} else {
-			zoraBoom1->Angle=DIR16_RADS_RIGHTUP;;
-			zoraBoom2->Angle=DIR16_RADS_RIGHTDOWN;
+		switch(Link->Dir)
+		{
+			case DIR_DOWN:
+				zoraBoom1->Angle=DIR16_RADS_RIGHTDOWN;
+				zoraBoom2->Angle=DIR16_RADS_LEFTDOWN;
+				break;
+			
+			case DIR_LEFT:
+				zoraBoom1->Angle=DIR16_RADS_LEFTDOWN;
+				zoraBoom2->Angle=DIR16_RADS_UPLEFT;
+				break;
+		
+			case DIR_UP:
+				zoraBoom1->Angle=DIR16_RADS_UPLEFT;
+				zoraBoom2->Angle=DIR16_RADS_RIGHTUP;
+				break;
+		
+			default:
+				zoraBoom1->Angle=DIR16_RADS_RIGHTUP;
+				zoraBoom2->Angle=DIR16_RADS_RIGHTDOWN;
 		}
 		zoraBoom1->Step=5;
 		zoraBoom2->Step=5;
 		zoraBoom1->Damage=1;
 		zoraBoom2->Damage=1;
-		zoraBoom1->Misc[0]=0.035;
-		zoraBoom2->Misc[0]=0.035;
+		zoraBoom1->Misc[BRANG_MISC_ANGLEACC]=0.035;
+		zoraBoom2->Misc[BRANG_MISC_ANGLEACC]=0.035;
 		zoraBoom1->CollDetection=false;
 		zoraBoom2->CollDetection=false;
-		Game->Misc[0]=zoraBoom1;
-		Game->Misc[1]=zoraBoom2;
+		zoraBoom1->Script = LWSCR_ZORABRANG;
+		zoraBoom2->Script = LWSCR_ZORABRANG;
+		zoraBoom1->Misc[BRANG_MISC_MULT] = 1;
+		zoraBoom2->Misc[BRANG_MISC_MULT] = -1;
+		zoraBoom1->Misc[BRANG_MISC_OTHER] = zoraBoom2;
+		zoraBoom2->Misc[BRANG_MISC_OTHER] = zoraBoom1;
 	}
 }
 
-void zoraBoomMovement(lweapon zoraBoom1, lweapon zoraBoom2){
-	if(zoraBoom1->isValid()||zoraBoom2->isValid()){
-		if(!(gameframe%20))Game->PlaySound(4);
-	}
-	if(zoraBoom1->isValid()){
-		if(!zoraBoom2->isValid()){
-			zoraBoom1->Misc[2]=5;
-		}
-		handleBRang(zoraBoom1,1);
-	}
-	if(zoraBoom2->isValid()){
-		if(!zoraBoom1->isValid()){
-			zoraBoom2->Misc[2]=5;
-		}
-		handleBRang(zoraBoom2,-1);
-	}
-	if(zoraBoom1->Misc[0]>0.1&&Collision(zoraBoom1,zoraBoom2)){
-		zoraBoom1->Misc[2]=10;
-		zoraBoom2->Misc[2]=10;
-	}
-}
-
-void handleBRang(lweapon brang, int mult){
-	int DegAngle = RadtoDeg(brang->Angle);
-	if(DegAngle%90>=89||DegAngle%90<=1){
-		if(!brang->Misc[1]){
-			brang->Misc[0]*=3;
-			brang->Misc[1]=1;
-		}
-	}
-	if(brang->Misc[2]>0){
-		brang->Misc[2]--;
-		if(!brang->Misc[2]){
-			brang->DeadState=WDS_BOUNCE;
-		}
-	}
-	brang->Angle+=(brang->Misc[0]*mult);
-	//Collision:
-	for(int i = 1;i<=Screen->NumNPCs();i++){
-		npc n = Screen->LoadNPC(i);
-		if(n->isValid()&&Collision(n,brang)&&!n->InvFrames&&!n->Stun){
-			int damage = brang->Damage*2;
-			int def = n->Defense[NPCD_BRANG];
-			switch(def){
-				case NPCDT_HALFDAMAGE:{damage/=2;break;}
-				case NPCDT_QUARTERDAMAGE:{damage/=4;break;}
-				case NPCDT_STUN:{damage=0;break;}
-				case NPCDT_STUNORBLOCK:{damage=0;break;}
-				case NPCDT_STUNORIGNORE:{damage=0;break;}
-				case NPCDT_STUN:{damage=0;break;}
-				case NPCDT_BLOCK:{damage=0;break;}
-				case NPCDT_BLOCK2:{damage=0;break;}
-				case NPCDT_BLOCK4:{damage=0;break;}
-				case NPCDT_BLOCK6:{damage=0;break;}
-				case NPCDT_BLOCK8:{damage=0;break;}
-				case NPCDT_IGNORE:{damage=0;break;}
-				case NPCDT_ONEHITKILL:{damage=n->HP;break;}
+lweapon script zoraBrang
+{
+	void run()
+	{
+		lweapon other = this->Misc[BRANG_MISC_OTHER];
+		int timer = 10;
+		while(this->isValid())
+		{
+			if(!(gameframe%20))Game->PlaySound(SFX_BRANG);
+			if(!other->isValid())
+			{
+				if(!this->Misc[BRANG_MISC_DEADTIMER])
+					this->Misc[BRANG_MISC_DEADTIMER] = 5;
 			}
-			n->HP-=damage;
-			n->InvFrames=10;
-			n->Stun=10;
+			else if(timer)--timer;
+			else if(Collision(this,other))
+			{
+				if(!this->Misc[BRANG_MISC_DEADTIMER])this->Misc[BRANG_MISC_DEADTIMER] = 10;
+				if(!other->Misc[BRANG_MISC_DEADTIMER])other->Misc[BRANG_MISC_DEADTIMER] = 10;
+			}
+			int DegAngle = RadtoDeg(this->Angle);
+			if(DegAngle%90>=89||DegAngle%90<=1)
+			{
+				if(!this->Misc[BRANG_MISC_HASTURNED])
+				{
+					this->Misc[BRANG_MISC_ANGLEACC]*=3;
+					this->Misc[BRANG_MISC_HASTURNED]=1;
+				}
+			}
+			if(this->Misc[BRANG_MISC_DEADTIMER]>0)
+			{
+				--this->Misc[BRANG_MISC_DEADTIMER];
+				if(!this->Misc[BRANG_MISC_DEADTIMER])
+				{
+					this->DeadState=WDS_BOUNCE;
+				}
+			}
+			this->Angle+=(this->Misc[BRANG_MISC_ANGLEACC]*this->Misc[BRANG_MISC_MULT]);
+			for(int i = Screen->NumNPCs(); i > 0; --i)
+			{
+				npc n = Screen->LoadNPC(i);
+				if(n->isValid()&&Collision(n,this)&&!n->InvFrames&&!n->Stun)
+				{
+					int damage = this->Damage*2;
+					int def = n->Defense[NPCD_BRANG];
+					switch(def)
+					{
+						case NPCDT_HALFDAMAGE:{damage/=2;break;}
+						case NPCDT_QUARTERDAMAGE:{damage/=4;break;}
+						case NPCDT_STUN:{damage=0;break;}
+						case NPCDT_STUNORBLOCK:{if(damage < 1){Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}damage=0;break;}
+						case NPCDT_STUNORIGNORE:{if(damage < 1){continue;}damage=0;break;}
+						case NPCDT_BLOCK:{this->DeadState = WDS_BOUNCE;continue;}
+						case NPCDT_BLOCK2:{if(damage < 2){Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}break;}
+						case NPCDT_BLOCK4:{if(damage < 4){Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}break;}
+						case NPCDT_BLOCK6:{if(damage < 6){Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}break;}
+						case NPCDT_BLOCK8:{if(damage < 8){Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}break;}
+						case NPCDT_IGNORE:{continue;}
+						case NPCDT_ONEHITKILL:{damage=n->HP;break;}
+					}
+					n->HP-=damage;
+					n->InvFrames=10;
+					n->Stun=10;
+				}
+			}
+			Waitframe();
 		}
 	}
 }
