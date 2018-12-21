@@ -944,17 +944,17 @@ void TraceWeap(eweapon weap)
 
 int getRelativeHeight(lweapon weap)
 {
-	return Game->GetCurDMap() + 1 - weap->Misc[LWMISC_LAYERDMAP];
+	return weap->Misc[LWMISC_LAYERDMAP] - (Game->GetCurDMap() + 1);
 }
 
 int getRelativeHeight(eweapon weap)
 {
-	return Game->GetCurDMap() + 1 - weap->Misc[EWMISC_LAYERDMAP];
+	return weap->Misc[EWMISC_LAYERDMAP] - (Game->GetCurDMap() + 1);
 }
 
 int getRelativeHeight(npc n)
 {
-	return Game->GetCurDMap() + 1 - n->Misc[NPCMISC_LAYERDMAP];
+	return n->Misc[NPCMISC_LAYERDMAP] - (Game->GetCurDMap() + 1);
 }
 
 int getRelativeHeight(lweapon o1, lweapon o2)
