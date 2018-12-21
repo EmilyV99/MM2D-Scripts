@@ -662,6 +662,7 @@ int lwArr[214747];
 int ewArr[214747];
 DEFINE LWMISC_LAYERDMAP = 31;
 DEFINE EWMISC_LAYERDMAP = 31;
+DEFINE NPCMISC_LAYERDMAP = 31;
 
 void storeWeapons()
 {
@@ -710,6 +711,8 @@ void storeWeapons()
 		lwArr[globalIndex++] = weap->DrawZOffset;
 		for(int q = 0; q < 32; q++)lwArr[globalIndex++] = weap->Misc[q];
 		lwArr[globalIndex++] = weap->Parent;
+		lwArr[globalIndex++] = weap->Script;
+		for(int q = 0; q < 8; q++)lwArr[globalIndex++] = weap->InitD[q];
 	}
 	lwArr[0] = globalIndex;
 	globalIndex = 1;
@@ -754,6 +757,8 @@ void storeWeapons()
 		ewArr[globalIndex++] = weap->DrawZOffset;
 		for(int q = 0; q < 32; q++)ewArr[globalIndex++] = weap->Misc[q];
 		ewArr[globalIndex++] = weap->Parent;
+		lwArr[globalIndex++] = weap->Script;
+		for(int q = 0; q < 8; q++)lwArr[globalIndex++] = weap->InitD[q];
 	}
 	ewArr[0] = globalIndex;
 }
@@ -801,6 +806,8 @@ void loadWeapons()
 		weap->DrawZOffset = lwArr[globalIndex++];
 		for(int q = 0; q < 32; q++)weap->Misc[q] = lwArr[globalIndex++];
 		weap->Parent = lwArr[globalIndex++];
+		weap->Script = lwArr[globalIndex++];
+		for(int q = 0; q < 8; q++)weap->InitD[q] = lwArr[globalIndex++];
 	}
 	globalIndex = 1;
 	while(globalIndex<ewArr[0])
@@ -842,6 +849,8 @@ void loadWeapons()
 		weap->DrawZOffset = ewArr[globalIndex++];
 		for(int q = 0; q < 32; q++)weap->Misc[q] = ewArr[globalIndex++];
 		weap->Parent = ewArr[globalIndex++];
+		weap->Script = lwArr[globalIndex++];
+		for(int q = 0; q < 8; q++)weap->InitD[q] = lwArr[globalIndex++];
 	}
 }
 
@@ -931,5 +940,83 @@ void TraceWeap(eweapon weap)
 	TraceS("DrawZOffset: ");Trace(weap->DrawZOffset);
 	TraceS("Misc:\n");for(int q = 0; q < 32; q++)Trace(weap->Misc[q]);
 	TraceS("Parent: ");Trace(weap->Parent);
+}
+
+int getRelativeHeight(lweapon weap)
+{
+	return Game->GetCurDMap() + 1 - weap->Misc[LWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(eweapon weap)
+{
+	return Game->GetCurDMap() + 1 - weap->Misc[EWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(npc n)
+{
+	return Game->GetCurDMap() + 1 - n->Misc[NPCMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(lweapon o1, lweapon o2)
+{
+	if(!o1->Misc[LWMISC_LAYERDMAP])o1->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[LWMISC_LAYERDMAP])o2->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[LWMISC_LAYERDMAP] - o2->Misc[LWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(lweapon o1, eweapon o2)
+{
+	if(!o1->Misc[LWMISC_LAYERDMAP])o1->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[EWMISC_LAYERDMAP])o2->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[LWMISC_LAYERDMAP] - o2->Misc[EWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(eweapon o1, lweapon o2)
+{
+	if(!o1->Misc[EWMISC_LAYERDMAP])o1->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[LWMISC_LAYERDMAP])o2->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[EWMISC_LAYERDMAP] - o2->Misc[LWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(eweapon o1, eweapon o2)
+{
+	if(!o1->Misc[EWMISC_LAYERDMAP])o1->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[EWMISC_LAYERDMAP])o2->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[EWMISC_LAYERDMAP] - o2->Misc[EWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(npc o1, lweapon o2)
+{
+	if(!o1->Misc[NPCMISC_LAYERDMAP])o1->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[LWMISC_LAYERDMAP])o2->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[NPCMISC_LAYERDMAP] - o2->Misc[LWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(lweapon o1, npc o2)
+{
+	if(!o1->Misc[LWMISC_LAYERDMAP])o1->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[NPCMISC_LAYERDMAP])o2->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[LWMISC_LAYERDMAP] - o2->Misc[NPCMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(npc o1, npc o2)
+{
+	if(!o1->Misc[NPCMISC_LAYERDMAP])o1->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[NPCMISC_LAYERDMAP])o2->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[NPCMISC_LAYERDMAP] - o2->Misc[NPCMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(npc o1, eweapon o2)
+{
+	if(!o1->Misc[NPCMISC_LAYERDMAP])o1->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[EWMISC_LAYERDMAP])o2->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[NPCMISC_LAYERDMAP] - o2->Misc[EWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(eweapon o1, npc o2)
+{
+	if(!o1->Misc[EWMISC_LAYERDMAP])o1->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[NPCMISC_LAYERDMAP])o2->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[EWMISC_LAYERDMAP] - o2->Misc[NPCMISC_LAYERDMAP];
 }
 //end
