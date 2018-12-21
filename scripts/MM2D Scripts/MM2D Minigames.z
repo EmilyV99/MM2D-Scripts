@@ -582,7 +582,7 @@ bool startMazeGame(int cost, int prize)
 	invisMazeLayout[88]=0;
 	setChestState(3, false);
 	int chestFFC = RunFFCScript(FFC_CHEST,{prize,3});
-	ffc chest = Screen->LoadFFC[chestFFC];
+	ffc chest = Screen->LoadFFC(chestFFC);
 	chest->X = 0;
 	chest->Y = 32;
 	RunFFCScript(FFC_INVISMAZE,{chestFFC});
