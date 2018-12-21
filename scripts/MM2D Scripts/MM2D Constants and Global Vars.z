@@ -899,6 +899,8 @@ void TraceWeap(lweapon weap)
 	TraceS("DrawZOffset: ");Trace(weap->DrawZOffset);
 	TraceS("Misc:\n");for(int q = 0; q < 32; q++)Trace(weap->Misc[q]);
 	TraceS("Parent: ");Trace(weap->Parent);
+	TraceS("Script: ");Trace(weap->Script);
+	TraceS("InitD:\n");for(int q = 0; q < 8; q++)Trace(weap->InitD[q]);
 }
 
 void TraceWeap(eweapon weap)
@@ -940,6 +942,8 @@ void TraceWeap(eweapon weap)
 	TraceS("DrawZOffset: ");Trace(weap->DrawZOffset);
 	TraceS("Misc:\n");for(int q = 0; q < 32; q++)Trace(weap->Misc[q]);
 	TraceS("Parent: ");Trace(weap->Parent);
+	TraceS("Script: ");Trace(weap->Script);
+	TraceS("InitD:\n");for(int q = 0; q < 8; q++)Trace(weap->InitD[q]);
 }
 
 int getRelativeHeight(lweapon weap)
