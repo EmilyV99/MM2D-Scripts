@@ -181,7 +181,6 @@ DEFINE ITEM_POUND = 54;
 DEFINE ITEM_BUBBLE = 25;
 DEFINE ITEM_DEKUNUT = 140;
 DEFINE COMBO_LILYPAD = 7372;
-DEFINE SPRITE_NONE = 89;
 DEFINE MAGICCOST_SPIKEROLL = 1;
 DEFINE EVERYXFRAMES_SPIKEROLL = 10;
 DEFINE NPCMISC_LASTSPIKEHIT = 0;
@@ -359,6 +358,9 @@ DEFINE CR_BOMBCHUS = 7;
 DEFINE CR_DEKUNUTS = 8;
 DEFINE CR_BANKBAL = 10;
 //Combo Flags
+DEFINE CI_RAMP = CF_SCRIPT1;
+DEFINE CF_RAMP_UP = CF_SCRIPT9;
+DEFINE CF_RAMP_DOWN = CF_SCRIPT10;
 DEFINE CF_NOWATERLEDGE = CF_SCRIPT11; //Can only get out by using deku or freezing water
 DEFINE CF_NOWATERLEDGE2 = CF_SCRIPT12; //Can only get out by freezing water
 DEFINE CF_BOMBCHU1 = 98; //Combo solidity on combos locations with this flag will be treated opposite by the bombchu.
@@ -371,6 +373,10 @@ DEFINE CT_BOMBCHU = 143;
 DEFINE LW_DEKUSTICK = 34;
 DEFINE LW_BOMBCHU = 40; //The weapon ID of the bombchu, must be unique and between 31 and 40.
 //EW Types
+//Sprites
+DEFINE SPRITE_FIREARROW = 90;
+DEFINE SPRITE_NONE = 255;
+DEFINE SPRITE_BRANG = 4;
 //SFX/MIDI
 DEFINE SFX_BANKMENU = 18;
 DEFINE SFX_CHEST_APPEAR = SFX_SECRET;
@@ -393,7 +399,6 @@ DEFINE DEKU_MAX_TIMER = 240;
 DEFINE ARRTYPE_FIRE = 1;
 DEFINE ARRTYPE_ICE = 2;
 DEFINE ARRTYPE_LIGHT = 3;
-DEFINE SPRITE_FIREARROW = 90;
 //
 DEFINE MAX_LEVEL = 10; //Max DMap "Level" used
 DEFINE MAX_NONRESERVED_FFC = 26;
@@ -757,8 +762,8 @@ void storeWeapons()
 		ewArr[globalIndex++] = weap->DrawZOffset;
 		for(int q = 0; q < 32; q++)ewArr[globalIndex++] = weap->Misc[q];
 		ewArr[globalIndex++] = weap->Parent;
-		lwArr[globalIndex++] = weap->Script;
-		for(int q = 0; q < 8; q++)lwArr[globalIndex++] = weap->InitD[q];
+		ewArr[globalIndex++] = weap->Script;
+		for(int q = 0; q < 8; q++)ewArr[globalIndex++] = weap->InitD[q];
 	}
 	ewArr[0] = globalIndex;
 }
@@ -849,8 +854,8 @@ void loadWeapons()
 		weap->DrawZOffset = ewArr[globalIndex++];
 		for(int q = 0; q < 32; q++)weap->Misc[q] = ewArr[globalIndex++];
 		weap->Parent = ewArr[globalIndex++];
-		weap->Script = lwArr[globalIndex++];
-		for(int q = 0; q < 8; q++)weap->InitD[q] = lwArr[globalIndex++];
+		weap->Script = ewArr[globalIndex++];
+		for(int q = 0; q < 8; q++)weap->InitD[q] = ewArr[globalIndex++];
 	}
 }
 
@@ -948,16 +953,19 @@ void TraceWeap(eweapon weap)
 
 int getRelativeHeight(lweapon weap)
 {
+	if(!weap->Misc[LWMISC_LAYERDMAP])weap->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
 	return weap->Misc[LWMISC_LAYERDMAP] - (Game->GetCurDMap() + 1);
 }
 
 int getRelativeHeight(eweapon weap)
 {
+	if(!weap->Misc[LWMISC_LAYERDMAP])weap->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
 	return weap->Misc[EWMISC_LAYERDMAP] - (Game->GetCurDMap() + 1);
 }
 
 int getRelativeHeight(npc n)
 {
+	if(!n->Misc[LWMISC_LAYERDMAP])n->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
 	return n->Misc[NPCMISC_LAYERDMAP] - (Game->GetCurDMap() + 1);
 }
 
@@ -1022,5 +1030,11 @@ int getRelativeHeight(eweapon o1, npc o2)
 	if(!o1->Misc[EWMISC_LAYERDMAP])o1->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
 	if(!o2->Misc[NPCMISC_LAYERDMAP])o2->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
 	return o1->Misc[EWMISC_LAYERDMAP] - o2->Misc[NPCMISC_LAYERDMAP];
+}
+
+mapdata getLayerMapdata(int relativeHeight)
+{
+	dmapdata dmap = Game->LoadDMapData(Game->GetCurDMap() + relativeHeight);
+	return Game->LoadMapData(dmap->Map,Game->GetCurScreen());
 }
 //end
