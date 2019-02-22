@@ -334,27 +334,19 @@ item script omniArrows
 	void run(int type)
 	{
 		arrowType = type;
-		switch(type) //Restore the spent magic cost; it should not be charged yet, though it has been already!
-		{
-			case ARRTYPE_FIRE:
-				Game->Counter[CR_MAGIC]+=8;
-				break;
-			case ARRTYPE_ICE:
-				Game->Counter[CR_MAGIC]+=8;
-				break;
-			case ARRTYPE_LIGHT:
-				Game->Counter[CR_MAGIC]+=16;
-				break;
-		}
-		if(!Game->Counter[CR_ARROWS])return;//Do not proceed without the arrow cost being payable!
+		//Restore the spent magic cost; it should not be charged yet, though it has been already!
+		Game->DCounter[CR_MAGIC] += this->MagicCost * 2;
+		Audio->EndSound(this->UseSound);
+		if(!Game->Counter[CR_ARROWS]) return; //Do not proceed without the arrow cost being payable!
 		arrowAimMode = !arrowAimMode;
+		
 		if(arrowAimMode)
 		{
 			int angle;
-			if(Link->InputRight && Link->InputDown) angle = 45;
+			if(Link->InputRight && Link->InputDown)     angle = 45;
 			else if(Link->InputLeft && Link->InputDown) angle = 135;
-			else if(Link->InputLeft && Link->InputUp) angle = 225;
-			else if(Link->InputRight && Link->InputUp) angle = 315;
+			else if(Link->InputLeft && Link->InputUp)   angle = 225;
+			else if(Link->InputRight && Link->InputUp)  angle = 315;
 			else switch(Link->Dir)
 			{
 				case DIR_RIGHT:
@@ -369,7 +361,7 @@ item script omniArrows
 				case DIR_UP:
 					angle = 270;
 			}
-			setGlobalVar(GVAR_ARROWANGLE,GV_MISC,angle);
+			setGlobalVar(GVAR_ARROWANGLE, GV_MISC, angle);
 		}
 	}
 }
@@ -381,42 +373,38 @@ void runOmniArrows()
 
 void runOmniArrows(int mult)
 {
-	if(!arrowAimMode)return;//Not aiming arrows
-	int angle = getGlobalVar(GVAR_ARROWANGLE,GV_MISC);
+	if(!arrowAimMode) return; //Not aiming arrows
+	int angle = getGlobalVar(GVAR_ARROWANGLE, GV_MISC);
 	if(/*canShootArrow() && */((Link->PressB && isArrow(B_item)) || (Link->PressEx1 && isArrow(EX1_item)) || (Link->PressEx2 && isArrow(EX2_item))))
 	{ //Fire arrow!
-		Game->PlaySound(SFX_ARROW);
 		arrowAimMode = false;
 		Link->ItemJinx = 3;
 		freezeFrames = 10;
 		lweapon arr = CreateLWeaponAt(LW_ARROW, Link->X, Link->Y);
-		int mcost;
-		switch(arrowType)//Find proper parent item, and magic cost, based on type
+		switch(arrowType) //Find proper parent item, and magic cost, based on type
 		{
 			case ARRTYPE_FIRE:
-				arr->Parent = 14;
-				mcost = 8;
+				arr->Parent = I_FIREARROWS;
 				break;
 			case ARRTYPE_ICE:
-				arr->Parent = 57;
-				mcost = 8;
+				arr->Parent = I_ICEARROWS;
 				break;
 			case ARRTYPE_LIGHT:
-				arr->Parent = 137;
-				mcost = 16;
+				arr->Parent = I_LIGHTARROWS;
 				break;
 			default:
-				arr->Parent = 13;
-				mcost = 0;
+				arr->Parent = I_BOWARROW;
 		}
 		itemdata parentItem = Game->LoadItemData(arr->Parent);
-		arr->UseSprite(parentItem->Sprites[0]);//Set proper sprite
+		Game->PlaySound(parentItem->UseSound);
+		int mcost = parentItem->MagicCost * 2;
+		arr->UseSprite(parentItem->Sprites[0]); //Set proper sprite
 		//Set Angle/Speed of projectile:
 		arr->Angular = true;
-		arr->Angle = DegtoRad(angle);
-		arr->Dir = AngleDir4(WrapDegrees(angle));
-		arr->Step = 250;
-		arr->Damage = parentItem->Power;
+		arr->Angle   = DegtoRad(angle);
+		arr->Dir     = AngleDir4(WrapDegrees(angle));
+		arr->Step    = 250;
+		arr->Damage  = parentItem->Power;
 		/*//Ensure proper direction:
 		if(arr->Dir==DIR_RIGHT)
 		{
@@ -433,12 +421,12 @@ void runOmniArrows(int mult)
 			arr->Flip=2;
 		}*/
 		arr->OriginalTile = arr->Tile;
-		Game->Counter[CR_ARROWS]--;//Charge the arrow cost
-		if(mcost)Game->Counter[CR_MAGIC]-=mcost;//Charge the magic cost
+		--Game->DCounter[CR_ARROWS]; //Charge the arrow cost
+		if(mcost) Game->DCounter[CR_MAGIC] -= mcost; //Charge the magic cost
 	}
 	else
 	{ //Aiming arrows
-		if(Link->PressL){arrowAimMode=false;return;}
+		if(Link->PressL){arrowAimMode = false; return;}
 		if(Link->InputR)
 		{
 			if(Link->InputRight && Link->InputDown) angle = 45;
@@ -455,75 +443,69 @@ void runOmniArrows(int mult)
 			int startAngle = angle;
 			if(Link->InputRight && Link->InputDown)
 			{
-				if(startAngle!=45)
+				if(startAngle != 45)
 				{
-					if(startAngle>45&&startAngle<225)angle-= mult;
-					else angle+= mult;
+					angle += (startAngle > 45 && startAngle < 225) ? -mult : mult;
 				}
 			}
 			else if(Link->InputLeft && Link->InputDown)
 			{
-				if(startAngle!=135)
+				if(startAngle != 135)
 				{
-					if(startAngle>135&&startAngle<315)angle-= mult;
-					else angle+= mult;
+					angle += (startAngle > 135 && startAngle < 315) ? -mult : mult;
 				}
 			}
 			else if(Link->InputLeft && Link->InputUp)
 			{
-				if(startAngle!=225)
+				if(startAngle != 225)
 				{
-					if(startAngle>45&&startAngle<225)angle+= mult;
-					else angle-= mult;
+					angle += (startAngle > 45 && startAngle < 225) ? mult : -mult;
 				}
 			}
 			else if(Link->InputRight && Link->InputUp)
 			{
-				if(startAngle!=315)
+				if(startAngle != 315)
 				{
-					if(startAngle>135&&startAngle<315)angle+= mult;
-					else angle-= mult;
+					angle += (startAngle > 135 && startAngle < 315) ? mult : -mult;
 				}
 			}
 			else if(Link->InputUp)
 			{
-				if(startAngle!=270)
+				if(startAngle != 270)
 				{
-					if(startAngle>90&&startAngle<270)angle+= mult;
-					else angle-= mult;
+					angle += (startAngle > 90 && startAngle < 270) ? mult : -mult;
 				}
 			}
 			else if(Link->InputDown)
 			{
-				if(startAngle!=90)
+				if(startAngle != 90)
 				{
-					if(startAngle>90&&startAngle<270)angle-= mult;
-					else angle+= mult;
+					angle += (startAngle > 90 && startAngle < 270) ? -mult : mult;
 				}
 			}
 			else if(Link->InputLeft)
 			{
-				if(startAngle!=180)
+				if(startAngle != 180)
 				{
-					if(startAngle<180)angle+= mult;
-					else angle-= mult;
+					angle += (startAngle < 180) ? mult : -mult;
 				}
 			}
 			else if(Link->InputRight)
 			{
-				if(startAngle!=0)
+				if(startAngle != 0)
 				{
-					if(startAngle<180)angle-= mult;
-					else angle+= mult;
+					angle += (startAngle < 180) ? -mult : mult;
+					if(startAngle < 180) angle -= mult;
+					else angle += mult;
 				}
 			}
-			if(angle<0)angle+=360;
-			else if(angle>=360)angle-=360;
-			if(angle%mult)angle -= (angle%mult);
+			if(angle < 0) angle += 360;
+			else if(angle > = 360) angle -= 360;
+			if(angle % mult) angle -= (angle % mult);
 		}
-		setGlobalVar(GVAR_ARROWANGLE,GV_MISC,angle);
-		int x = Link->X+8 + VectorX(16,angle);
-		int y = Link->Y+8 + VectorY(16,angle);
+		setGlobalVar(GVAR_ARROWANGLE, GV_MISC, angle);
+		int x = Link->X+8 + VectorX(16, angle);
+		int y = Link->Y+8 + VectorY(16, angle);
 		MooshDrawTile(6, x, y, TILE_AIMARROW, 1, 1, 0, 16, 16, x, y, angle, 0, false, OP_OPAQUE);
 		Link->Dir = AngleDir4(WrapDegrees(angle));
 		TotalNoAction();
