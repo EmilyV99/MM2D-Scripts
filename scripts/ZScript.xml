@@ -24,10 +24,10 @@
             <Keywords name="Folders in comment, open">start</Keywords>
             <Keywords name="Folders in comment, middle"></Keywords>
             <Keywords name="Folders in comment, close">end</Keywords>
-            <Keywords name="Keywords1">int&#x000D;&#x000A;bool&#x000D;&#x000A;float&#x000D;&#x000A;lweapon&#x000D;&#x000A;eweapon&#x000D;&#x000A;npc&#x000D;&#x000A;ffc&#x000D;&#x000A;void&#x000D;&#x000A;global script&#x000D;&#x000A;ffc script&#x000D;&#x000A;item script</Keywords>
-            <Keywords name="Keywords2">const&#x000D;&#x000A;DEFINE&#x000D;&#x000A;define&#x000D;&#x000A;GVAR</Keywords>
+            <Keywords name="Keywords1">int&#x000D;&#x000A;bool&#x000D;&#x000A;float&#x000D;&#x000A;lweapon&#x000D;&#x000A;eweapon&#x000D;&#x000A;npc&#x000D;&#x000A;ffc&#x000D;&#x000A;void&#x000D;&#x000A;global script&#x000D;&#x000A;ffc script&#x000D;&#x000A;item script&#x000D;&#x000A;untyped&#x000D;&#x000A;u&#x000D;&#x000A;itemdata&#x000D;&#x000A;combodata&#x000D;&#x000A;mapdata&#x000D;&#x000A;shopdata&#x000D;&#x000A;dmapdata&#x000D;&#x000A;messagedata</Keywords>
+            <Keywords name="Keywords2">const&#x000D;&#x000A;DEFINE&#x000D;&#x000A;define&#x000D;&#x000A;GVAR&#x000D;&#x000A;CONFIG&#x000D;&#x000A;config&#x000D;&#x000A;PAL</Keywords>
             <Keywords name="Keywords3">import&#x000D;&#x000A;typedef&#x000D;&#x000A;run&#x000D;&#x000A;while&#x000D;&#x000A;if&#x000D;&#x000A;switch&#x000D;&#x000A;case&#x000D;&#x000A;else</Keywords>
-            <Keywords name="Keywords4">Link&#x000D;&#x000A;Screen&#x000D;&#x000A;Game</Keywords>
+            <Keywords name="Keywords4">Link&#x000D;&#x000A;Screen&#x000D;&#x000A;Game&#x000D;&#x000A;Audio&#x000D;&#x000A;Graphics&#x000D;&#x000A;Input&#x000D;&#x000A;Text</Keywords>
             <Keywords name="Keywords5">Waitframe&#x000D;&#x000A;Waitframes&#x000D;&#x000A;Waitdraw</Keywords>
             <Keywords name="Keywords6">true&#x000D;&#x000A;false</Keywords>
             <Keywords name="Keywords7">return&#x000D;&#x000A;break</Keywords>
