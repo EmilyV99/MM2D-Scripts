@@ -1,0 +1,115 @@
+////////////////////////////////////////
+//                                    //
+//       MM2D Script: Enemies         //
+//                                    //
+////////////////////////////////////////
+
+//start Skulltula
+DEFINE SFX_SKULLTULA_DROP = 87;
+DEFINE SFX_SKULLTULA_HIDE = 88;
+DEFINE SFX_SKULLTULA_SPIN = 54;
+DEFINE SFX_SKULLTULA_FLIP = 17;
+DEFINE TILE_SKULLTULA = 7660;
+DEFINE NPC_MISC_LASTHP = 30;
+
+npc script Skulltula
+{
+	void run()
+	{
+		int thisID = getNPCfromUID(this);
+		npcdata data = Game->LoadNPCData(this->ID);
+		for(int i = 0;i<41;i++)
+		{
+			if(i!=NPCD_HOOKSHOT)
+				this->Defense[i]=NPCDT_BLOCK;
+		}
+		bool visible = false;
+		this->DrawXOffset = 300;
+		int timer = 0;
+		bool flipped = false;
+		this->Misc[NPC_MISC_LASTHP] = this->HP;
+		while(this->isValid())
+		{
+			this->Dir = RadianAngleDir4(TurnTowards(this->X+8,this->Y+8,Link->X+8,Link->Y+8,0,1));
+			while(isFrozen)Waitframe();
+			if(LinkDist(this->X,this->Y,32)&&!visible)
+			{
+				for(int i = 4;i>0;--i)Waitframe();
+				Audio->PlaySound(SFX_SKULLTULA_DROP);
+				visible=true;
+				flipped=false;
+			}
+			else if(!LinkDist(this->X,this->Y,48)&&visible)
+			{
+				Audio->PlaySound(SFX_SKULLTULA_HIDE);
+				visible=false;
+				for(int i = 0;i<41;i++)
+				{
+					if(i!=NPCD_HOOKSHOT)
+						this->Defense[i]=NPCDT_BLOCK;
+				}
+			}
+			if(Link->HitBy[0]==thisID)Audio->PlaySound(SFX_SKULLTULA_SPIN);
+			if(visible)
+			{
+				this->DrawXOffset = 0;
+				Screen->Line(4, this->X+8, this->Y, this->X+8, 0, 0x01, 1,0,0,0,128);
+				this->CollDetection=true;
+				if(flipped||this->Stun)
+				{
+					this->OriginalTile = TILE_SKULLTULA + this->Dir;
+					if(Link->HitBy[0]==thisID||this->HitBy[2]>0)timer=119;
+					if(this->Stun)
+					{
+						timer=0;
+						for(int i = 0;i<41;i++)
+						{
+							this->Defense[i]=data->Defense[i];
+						}
+					}
+					else if(timer>60)if(timer==119||Rand(1,100)<=2)//31% chance to stay flipped for 2 seconds, 69% chance to flip back before that
+					{
+						flipped=false;
+						Audio->PlaySound(SFX_SKULLTULA_FLIP);
+						if(!this->Stun)
+							for(int i = 0;i<41;i++)
+							{
+								if(i!=NPCD_HOOKSHOT)
+									this->Defense[i]=NPCDT_BLOCK;
+							}
+						timer=0;
+					}
+				}
+				else
+				{
+					this->OriginalTile = TILE_SKULLTULA + OppositeDir(this->Dir);
+					if(Link->HitBy[0]==thisID)timer=1;
+					if(timer==0)
+					{
+						flipped=true;
+						Audio->PlaySound(SFX_SKULLTULA_FLIP);
+						for(int i = 0;i<41;i++)
+						{
+							this->Defense[i]=data->Defense[i];
+						}
+						timer=0;
+					}
+				}
+			}
+			else
+			{
+				this->CollDetection=false;
+				this->DrawXOffset = 300;
+			}
+			timer = (timer+1)%120;
+			this->Misc[NPC_MISC_LASTHP]=this->HP;
+			Waitframe();
+		}
+	}
+	
+	bool LinkDist(int x, int y, int radius)
+	{
+		return (Abs((Link->X+8)-(x+8))<radius&&Abs((Link->Y+8)-(y+8))<radius);
+	}
+}
+//end Skulltula
