@@ -538,6 +538,7 @@ lweapon script zoraBrang
 					n->Stun=10;
 				}
 			}
+			if(getRelativeHeight(this))this->Tile = TILE_INVIS;
 			Waitframe();
 		}
 	}

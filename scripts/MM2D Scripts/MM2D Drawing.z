@@ -30,6 +30,16 @@ void HeightFastTile(int layer, int x, int y, int tile, int cset, int opacity)
 	Screen->SetRenderTarget(RT_SCREEN);
 }
 
+void HeightLine(int layer, int x, int x2, int y, int y2, int color, int scale, int rx, int ry, int rangle, int opacity)
+{
+	if(hideLayer4 && layer>=4)return;
+	if(layer>=4){x+=256;x2+=256;}
+	if(opacity!=OP_OPAQUE){y+=176;y2+=176;}
+	Screen->SetRenderTarget(RT_BITMAP0);
+	Screen->Line(layer, x, x2, y, y2, color, scale, rx, ry, rangle, OP_OPAQUE);
+	Screen->SetRenderTarget(RT_SCREEN);
+}
+
 void HeightFastComboScreen(int layer, int x, int y, int combo, int cset, int opacity)
 {
 	if(combo==0)return;

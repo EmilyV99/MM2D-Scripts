@@ -157,62 +157,144 @@ bool canEquip(int itID){
 }
 //end EX Items
 //start throwableBombs
+item script throwableBombs
+{
+	void run(int fuse, int damage)
+	{
+		if(!countLWeaponType(LW_THRBOMBS))
+		{
+			lweapon bomb = CreateLWeaponAt(LW_THRBOMBS,Link->X,Link->Y);
+			bomb->UseSprite(this->Sprites[0]);
+			bomb->Behind = false;
+			bomb->CollDetection = false;
+			bomb->Misc[BOMB_MISC_FUSE] = fuse;
+			bomb->Misc[BOMB_MISC_DAMAGE] = damage;
+			bomb->Script = this->WeaponScript;
+			bomb->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+			bomb->Misc[BOMB_MISC_MODE] = BOMB_STATE_HELD;
+			NoAction();
+		}
+	}
+}
+
+lweapon script throwableBombs_LW
+{
+	void run()
+	{
+		while(this->isValid())
+		{
+			mapdata map = getLayerMapdata(getRelativeHeight(this));
+			holdingBomb = this->Misc[BOMB_MISC_MODE]==BOMB_STATE_HELD;
+			switch(this->Misc[BOMB_MISC_MODE])
+			{
+				case BOMB_STATE_HELD:
+				{
+					this->X = Link->X;
+					this->Y = Link->Y;
+					this->DrawYOffset = -8;
+					this->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1; //While held, lock to Link through transitions!
+					if(Link->PressA||Link->PressB||Link->PressEx1||Link->PressEx2)
+					{
+						this->DrawYOffset = 0;
+						this->Dir = Link->Dir;
+						this->Step = 150;
+						this->Misc[BOMB_MISC_MOVINGTIME] = 60;
+						this->Misc[BOMB_MISC_MODE] = BOMB_STATE_MOVING;
+						Link->SwordJinx=3;
+						Link->ItemJinx=3;
+					}
+					else if(Link->PressR)
+					{
+						this->DrawYOffset = 0;
+						switch(Link->Dir)
+						{
+							case DIR_DOWN:
+								this->X = Link->X;
+								this->Y = Link->Y + 16;
+								break;
+							case DIR_RIGHT:
+								this->X = Link->X + 16;
+								this->Y = Link->Y;
+								break;
+							case DIR_LEFT:
+								this->X = Link->X - 16;
+								this->Y = Link->Y;
+								break;
+							case DIR_UP:
+								this->X = Link->X;
+								this->Y = Link->Y - 16;
+						}
+						this->Dir = Link->Dir;
+						this->Misc[BOMB_MISC_MODE] = BOMB_STATE_STILL;
+						Link->PressR=false;
+						Link->InputR=false;
+					}
+					Link->PressStart=false;
+					Link->InputStart=false;
+					NoActionButMoveAndEx4AndA();
+					break;
+				}
+				
+				case BOMB_STATE_MOVING:
+				{
+					if(!CanWalkM(this, map, this->Dir, Ceiling(this->Step/100)))
+						this->Misc[BOMB_MISC_MOVINGTIME] = 0;
+					if(this->Misc[BOMB_MISC_MOVINGTIME])--this->Misc[BOMB_MISC_MOVINGTIME];
+					else
+					{
+						this->Misc[BOMB_MISC_MODE] = BOMB_STATE_STILL;
+						this->Step = 0;
+					}
+					break;
+				}
+				
+				case BOMB_STATE_STILL:
+				{
+					for(int x = this->X+3; x<this->X+13; x+=9)
+					{
+						for(int y = this->Y+9; y<this->Y+13; y+=3)
+						{
+							if(map->ComboT[ComboAt(x,y)] == CT_PITFALL)
+							{
+								--this->Misc[LWMISC_LAYERDMAP];
+								//Reset loop to re-check next layer:
+								x = this->X+3;
+								y = this->Y+9;
+								map = getLayerMapdata(getRelativeHeight(this));
+							}
+						}
+					}
+					break;
+				}
+			}
+			if(this->Misc[BOMB_MISC_FUSE])--this->Misc[BOMB_MISC_FUSE];
+			else
+			{
+				lweapon blast = CreateLWeaponAt(LW_BOMBBLAST,this->X,this->Y);
+				blast->Damage=this->Misc[BOMB_MISC_DAMAGE];
+				blast->Dir=this->Dir;
+				blast->UseSprite(9);
+				blast->Misc[LWMISC_LAYERDMAP] = this->Misc[LWMISC_LAYERDMAP];
+				this->DeadState=WDS_DEAD;
+				holdingBomb=false;
+				return;
+			}
+			Waitframe();
+		}
+	}
+}
+
+DEFINE BOMB_MISC_MOVINGTIME = 0;
+DEFINE BOMB_MISC_FUSE = 1;
+DEFINE BOMB_MISC_DAMAGE = 2;
+DEFINE BOMB_MISC_IDENTITY = 3;
+DEFINE BOMB_MISC_MODE = 4;
+DEFINE BOMB_STATE_HELD = 0;
+DEFINE BOMB_STATE_MOVING = 1;
+DEFINE BOMB_STATE_STILL = 2;
+
 bool holdingBomb = false;
-DEFINE LWMISC_MOVINGTIME = 0;
-DEFINE LWMISC_FUSE = 1;
-DEFINE LWMISC_EXPLOSIONDAMAGE = 2;
-DEFINE LWMISC_IDENTITY = 3;
 DEFINE LW_THRBOMBS = 31;
-
-void bombCheck(){
-	if(isThrowingBomb()){
-		lweapon bomb = loadLWeaponType(LW_THRBOMBS,0);
-		if(holdingBomb){
-			bomb->X=Link->X;
-			bomb->Y=Link->Y-8;
-			//if(!subscreen)stopScreenTransition(4,4,4,12);
-			if(Link->PressA||Link->PressB||Link->PressEx1||Link->PressEx2){
-				throwBomb();
-				Link->SwordJinx=3;
-				Link->ItemJinx=3;
-			} else if(Link->PressR){
-				placeBomb();
-				Link->PressR=false;
-				Link->InputR=false;
-			}
-			Link->PressStart=false;
-			Link->InputStart=false;
-			NoActionButMoveAndEx4AndA();
-		} else {
-			lweapCollDetect(bomb);
-		}
-		if(!bomb->Misc[LWMISC_MOVINGTIME]){
-			bomb->Step=0;
-		} else if(bomb->Misc[LWMISC_MOVINGTIME]>0){
-			bomb->Misc[LWMISC_MOVINGTIME]--;
-		}
-		if(!bomb->Misc[LWMISC_FUSE]){
-			explosion(bomb->X,bomb->Y,bomb->Misc[LWMISC_EXPLOSIONDAMAGE],bomb->Dir);
-			bomb->DeadState=WDS_DEAD;
-		} else {
-			bomb->Misc[LWMISC_FUSE]--;
-		}
-	} else {
-		holdingBomb=false;
-	}
-}
-
-bool isThrowingBomb(){
-	for(int i = 1;i<=Screen->NumLWeapons();i++){
-		lweapon weap = Screen->LoadLWeapon(i);
-		if(weap->isValid()){
-			if(weap->ID==LW_THRBOMBS){
-				return true;
-			}
-		}
-	}
-	return false;
-}
 
 lweapon loadLWeaponType(int type,int num){
 	int weapCount = 0;
@@ -243,82 +325,8 @@ int countLWeaponType(int type){
 	return weapCount;
 }
 
-lweapon spawnThrowingBomb(int x, int y, int fuse, int damage){
-	lweapon bomb = CreateLWeaponAt(LW_THRBOMBS,x,y);
-	bomb->UseSprite(7);
-	bomb->Behind = false;
-	bomb->CollDetection = false;
-	bomb->Misc[LWMISC_FUSE] = fuse;
-	bomb->Misc[LWMISC_EXPLOSIONDAMAGE] = damage;
-	bomb->Misc[LWMISC_IDENTITY] = 1;
-	return bomb;
-}
-
-void throwBomb(){
-	if(isThrowingBomb()){
-		lweapon bomb = loadLWeaponType(LW_THRBOMBS,0);
-		holdingBomb=false;
-		bomb->Y=Link->Y;
-		bomb->Dir=Link->Dir;
-		bomb->Step=150;
-		bomb->Misc[LWMISC_MOVINGTIME] = 60;
-	}
-}
-
-void placeBomb(){
-	if(isThrowingBomb()){
-		holdingBomb=false;
-		lweapon bomb = loadLWeaponType(LW_THRBOMBS,0);
-		if(Link->Dir==DIR_DOWN){
-			bomb->X=Link->X;
-			bomb->Y=Link->Y+16;
-		} else if(Link->Dir==DIR_RIGHT){
-			bomb->X=Link->X+16;
-			bomb->Y=Link->Y;
-		} else if(Link->Dir==DIR_LEFT){
-			bomb->X=Link->X-16;
-			bomb->Y=Link->Y;
-		} else if(Link->Dir==DIR_UP){
-			bomb->X=Link->X;
-			bomb->Y=Link->Y-16;
-		}
-	}
-}
-
-item script throwableBombs{
-	void run(int fuse, int damage){
-		if(Game->Counter[CR_BOMBS]>0&&!isThrowingBomb()&&Link->Y>=12){
-			spawnThrowingBomb(Link->X,Link->Y-8,fuse,damage);
-			holdingBomb = true;
-			Game->Counter[CR_BOMBS]--;
-		}
-	}
-}
-
 void stopScreenTransition(int pxAway){
 	stopScreenTransition(pxAway,pxAway,pxAway,pxAway);
-}
-
-void explosion(int x, int y, int damage, int dir){
-	lweapon blast = CreateLWeaponAt(LW_BOMBBLAST,x,y);
-	blast->Damage=damage;
-	blast->Dir=dir;
-	blast->UseSprite(9);
-}
-
-void lweapCollDetect(lweapon weap){
-	if(!CanWalk(weap->X,weap->Y,weap->Dir,weap->Step/100,true)){
-		weap->Step=0;
-	} else {
-		stopScreenTransitionLWeap(8,weap);
-	}
-}
-
-void stopScreenTransitionLWeap(int pixelsAway,lweapon weap){
-	if(weap->X<0+pixelsAway)weap->Step=0;
-	if(weap->X>240-pixelsAway)weap->Step=0;
-	if(weap->Y<0+pixelsAway)weap->Step=0;
-	if(weap->Y>160-pixelsAway)weap->Step=0;
 }
 //end throwableBombs
 //start ArrowChange
@@ -1167,6 +1175,8 @@ int getBottleState(int bottle){
 //end
 //end EmptyBottles
 //start Bombchus
+//start oldBombchus 
+/*
 item script Bombchu
 {
 	//d0 is the ffc script slot that has the
@@ -1249,6 +1259,111 @@ ffc script Bombchu_FFC
 			Waitframe();
 		}
 	}
+}//end oldBombchus
+*/
+
+item script Bombchu
+{
+	void run(int step, int sprite)
+	{
+		if(countLWeaponType(LW_BOMBCHU))return;
+		--Game->Counter[this->Counter];
+		Game->PlaySound(SFX_PLACE);
+		lweapon bombchu = NextToLink(LW_BOMBCHU, 0);
+		bombchu->CollDetection = false;
+		bombchu->Dir = Link->Dir;
+		bombchu->Step = step;
+		bombchu->HitZHeight = 2;
+		bombchu->UseSprite(sprite);
+		bombchu->OriginalTile += bombchu->Dir*Max(1,bombchu->NumFrames);
+		bombchu->InitD[0] = this->Power;
+		bombchu->Script = this->WeaponScript;
+	}
+}
+
+lweapon script Bombchu_LW
+{
+	void run(int damage)
+	{
+		while(this->isValid())
+		{
+			if(!(gameframe%6))Game->PlaySound(SFX_BOMBCHU);
+			bool contact;
+			switch(this->Dir)
+			{
+				case DIR_UP:
+					contact = (this->Y - Ceiling(this->Step/100) <= 2);
+					break;
+				case DIR_DOWN:
+					contact = (this->Y + Ceiling(this->Step/100) >= 150);
+					break;
+				case DIR_LEFT:
+					contact = (this->X - Ceiling(this->Step/100) <= 4);
+					break;
+				case DIR_RIGHT:
+					contact = (this->X + Ceiling(this->Step/100) >= 236);
+			}
+			//If the bombchu collided with a npc expode.
+			for(int q = Screen->NumNPCs(); q > 0 && !contact; q--)
+			{
+				npc n = Screen->LoadNPC(q);
+				if(!n->CollDetection) continue;
+				if(n->ID == NPC_ITEMFAIRY) continue;
+				if(n->Type == NPCT_PEAHAT && n->Step != 0 && n->Z == 0) continue;
+				if(n->Defense[NPCD_SCRIPT] == NPCDT_IGNORE) continue;
+				if(Collision(n, this)) contact = true;
+			}
+			//If the bombchu is about to hit something solid according to bombchu solidity explode.
+			int x = this->X + AtFrontX(this->Dir);
+			int y = this->Y + AtFrontY(this->Dir);
+			int combo = ComboAt(x,y);
+			while(true)
+			{
+				mapdata map = getLayerMapdata(getRelativeHeight(this));
+				if(!contact)
+				{
+					int ct = map->ComboT[combo];
+					if(ct==CT_BOMBCHU&&ct==CF_BOMBCHU1&&ct==CF_BOMBCHU2) contact = CanWalkM(this, map, this->Dir, Ceiling(this->Step/100));
+					else contact = !CanWalkM(this, map, this->Dir, Ceiling(this->Step/100));
+					if(ct==CT_PIT || ct == CT_PITR || ct == CT_PITB || ct == CT_PITD || ct == CT_WATER || ct ==CT_SWIMWARP || ct == CT_DIVEWARP  || (ct >= CT_SWIMWARPB && ct <= CT_DIVEWARPD))
+						contact = true;
+					else if(ct == CT_PITFALL)
+					{
+						--this->Misc[LWMISC_LAYERDMAP];
+						continue;
+					}
+					else
+					{
+						int centerCombo = ComboAt(this->X+8,this->Y+8);
+						int ci = map->ComboI[centerCombo];
+						int cf = map->ComboF[centerCombo];
+						if(ci == CI_RAMP)
+						{
+							if(cf == CF_RAMP_UP)
+							{
+								++this->Misc[LWMISC_LAYERDMAP];
+								continue;
+							}
+							else if(cf == CF_RAMP_DOWN)
+							{
+								--this->Misc[LWMISC_LAYERDMAP];
+								continue;
+							}
+						}
+					}
+				}
+				break;
+			}
+			//If contact was set to true explode.
+			if(contact)
+			{
+				lweapon blast = CreateLWeaponAt(LW_BOMBBLAST, this->X, this->Y);
+				blast->Damage = damage;
+				this->DeadState = WDS_DEAD;
+			}
+			Waitframe();
+		}
+	}
 }
 //end Bombchus
 //start Pictograph
@@ -1260,3 +1375,40 @@ item script Pictograph
 	}
 }
 //end Pictograph
+//start misc
+lweapon script obeyGravity
+{
+	void run(bool oneframe)
+	{
+		if(oneframe)
+		{
+			pitfall(this);
+			return;
+		}
+		while(this->isValid())
+		{
+			pitfall(this);
+			Waitframe();
+		}
+	}
+}
+
+void pitfall(lweapon weap)
+{
+	mapdata map = getLayerMapdata(getRelativeHeight(weap));
+	for(int x = weap->X+3; x<weap->X+13; x+=9)
+	{
+		for(int y = weap->Y+9; y<weap->Y+13; y+=3)
+		{
+			if(map->ComboT[ComboAt(x,y)] == CT_PITFALL)
+			{
+				--weap->Misc[LWMISC_LAYERDMAP];
+				//Reset loop to re-check next layer:
+				x = weap->X+3;
+				y = weap->Y+9;
+				map = getLayerMapdata(getRelativeHeight(weap));
+			}
+		}
+	}
+}
+//end misc

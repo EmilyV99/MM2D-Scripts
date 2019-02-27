@@ -752,3 +752,82 @@ int getChestCombo(int data, int index)
 	return data;
 }
 //end chests
+//start Mirror
+ffc script Mirror
+{
+	void run(int index, int clockdir, int relativeHeight)
+	{
+		DEFINE NUM_VARS = 9;
+		DEFINE INITIALIZED = index * NUM_VARS;
+		DEFINE DIR = INITIALIZED + 1;
+		DEFINE FLX = INITIALIZED + 2;
+		DEFINE FLY = INITIALIZED + 3;
+		DEFINE FRX = INITIALIZED + 4;
+		DEFINE FRY = INITIALIZED + 5;
+		DEFINE DIRX = INITIALIZED + 6;
+		DEFINE DIRY = INITIALIZED + 7;
+		DEFINE CHARGETIME = INITIALIZED + 8;
+		
+		if(!screenData[INITIALIZED])
+		{
+			screenData[DIR] = AngleDir8(WrapDegrees(-90 + (45*clockdir)));
+			switch(screenData[DIR])
+			{
+				case DIR_UP:
+					screenData[FLX] = this->X;
+					screenData[FRX] = this->X + 15;
+					screenData[FLY] = this->Y;
+					screenData[FRY] = this->Y;
+					break;
+				case DIR_DOWN:
+					screenData[FLX] = this->X + 15;
+					screenData[FRX] = this->X;
+					screenData[FLY] = this->Y + 15;
+					screenData[FRY] = this->Y + 15;
+					break;
+				case DIR_RIGHT:
+					screenData[FLX] = this->X + 15;
+					screenData[FRX] = this->X + 15;
+					screenData[FLY] = this->Y;
+					screenData[FRY] = this->Y + 15;
+					break;
+				case DIR_LEFT:
+					screenData[FLX] = this->X;
+					screenData[FRX] = this->X;
+					screenData[FLY] = this->Y + 15;
+					screenData[FRY] = this->Y;
+					break;
+				case DIR_RIGHTDOWN:
+					screenData[FLX] = this->X + 15 + 8;
+					screenData[FRX] = this->X + 8;
+					screenData[FLY] = this->Y + 8;
+					screenData[FRY] = this->Y + 15 + 8;
+					break;
+				case DIR_RIGHTUP:
+					screenData[FLX] = this->X + 8;
+					screenData[FRX] = this->X + 15 + 8;
+					screenData[FLY] = this->Y - 8;
+					screenData[FRY] = this->Y + 8;
+					break;
+				case DIR_LEFTDOWN:
+					screenData[FLX] = this->X + 8;
+					screenData[FRX] = this->X - 8;
+					screenData[FLY] = this->Y + 15 + 8;
+					screenData[FRY] = this->Y + 8;
+					break;
+				case DIR_LEFTUP:
+					screenData[FLX] = this->X - 8;
+					screenData[FRX] = this->X + 8;
+					screenData[FLY] = this->Y + 8;
+					screenData[FRY] = this->Y - 8;
+					break;
+			}
+			screenData[DIRX] = dirX(screenData[DIR]);
+			screenData[DIRY] = dirY(screenData[DIR]);
+			screenData[INITIALIZED] = 1;
+		}
+	}
+}
+
+int screenData[2048]; //cleared when screen changes, NOT for height change though!
+//end Mirror

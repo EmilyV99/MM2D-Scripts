@@ -47,7 +47,6 @@ global script Global
 		bool scrnChanged = false;
 		LinkMovement_Init();
 		TangoInit();
-		StartGhostZH();
 		//start Ocarina init
 		scarecrowMode = false;
 		scarecrowRecord = false;
@@ -186,7 +185,6 @@ global script Global
 				pauseGradient();
 			}
 			//end Time Passing
-			bombCheck();
 			if(!getGlobalVar(GVAR_MGSTATE,GV_MISC))runOmniArrows();
 			Tango_Update1();
 			//start Ocarina loop
@@ -305,7 +303,6 @@ global script Global
 			drawExtraLayerEffects();
 			lwLoop();
 			ewLoop();
-			UpdateGhostZH1();
 			//end
 			if(UsingItem(53)&&fullCounter(CR_MAGIC)>2)
 			{
@@ -336,7 +333,6 @@ global script Global
 				EmptyBottleGlobal();
 			}
 			Tango_Update2();
-			UpdateGhostZH2();
 			if(isFrozen)LinkMovement_SetLinkSpeedBoost(0);
 			LinkMovement_Update2();
 			Waitframe();
@@ -911,6 +907,7 @@ global script Global
 		for(int i = Screen->NumLWeapons(); i > 0; i--)
 		{
 			lweapon weap = Screen->LoadLWeapon(i);
+			if(weap->ID == LW_THRBOMBS && weap->DeadState != WDS_ALIVE)Trace(weap->DeadState);
 			if(weap->ID!=LW_ARROW)
 			{
 				if(weap->Misc[LWMISC_LAYERDMAP])

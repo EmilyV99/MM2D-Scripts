@@ -1,0 +1,429 @@
+////////////////////////////////////////
+//                                    //
+//     MM2D Script: Miscellaneous     //
+//                                    //
+////////////////////////////////////////
+
+
+//start CanWalkM
+//lweapon
+bool CanWalkM(lweapon weap, mapdata map, int dir, int step)
+{
+	return CanWalkM(weap, map, dir, step, false);
+}
+
+bool CanWalkM(lweapon weap, mapdata map, int dir, int step, bool useHit)
+{
+	if(!weap->isValid())return false;
+	return CanWalkM(weap->X, weap->Y, weap->X + Cond(useHit, weap->HitWidth, weap->TileWidth * 16) - 1, weap->Y + Cond(useHit, weap->HitHeight, weap->TileHeight * 16) - 1, map, dir, step);
+}
+//eweapon
+bool CanWalkM(eweapon weap, mapdata map, int dir, int step)
+{
+	return CanWalkM(weap, map, dir, step, false);
+}
+
+bool CanWalkM(eweapon weap, mapdata map, int dir, int step, bool useHit)
+{
+	if(!weap->isValid())return false;
+	return CanWalkM(weap->X, weap->Y, weap->X + Cond(useHit, weap->HitWidth, weap->TileWidth * 16) - 1, weap->Y + Cond(useHit, weap->HitHeight, weap->TileHeight * 16) - 1, map, dir, step);
+}
+//npc
+bool CanWalkM(npc n, mapdata map, int dir, int step)
+{
+	return CanWalkM(n, map, dir, step, false);
+}
+
+bool CanWalkM(npc n, mapdata map, int dir, int step, bool useHit)
+{
+	if(!n->isValid())return false;
+	return CanWalkM(n->X, n->Y, n->X + Cond(useHit, n->HitWidth, n->TileWidth * 16) - 1, n->Y + Cond(useHit, n->HitHeight, n->TileHeight * 16) - 1, map, dir, step);
+}
+//ffc
+bool CanWalkM(ffc f, mapdata map, int dir, int step)
+{
+	return CanWalkM(f, map, dir, step, false);
+}
+
+bool CanWalkM(ffc f, mapdata map, int dir, int step, bool useEffect)
+{
+	return CanWalkM(f->X, f->Y, f->X + Cond(useEffect, f->EffectWidth, f->TileWidth * 16) - 1, f->Y + Cond(useEffect, f->EffectHeight, f->TileHeight * 16) - 1, map, dir, step);
+}
+//Link
+bool CanWalkM(mapdata map, int dir, int step, bool largeHitbox)
+{
+	return CanWalkM(Link->X, Link->Y + Cond(largeHitbox, 0, 8), Link->X + 15, Link->Y + 15, map, dir, step);
+}
+//Main
+bool CanWalkM(int x, int y, int xx, int yy, mapdata map, int dir, int step)
+{
+	int width = xx - x + 1;
+	int height = yy - y + 1;
+    switch(dir)
+	{
+		case DIR_UP: return !(y-step<0||map->isSolid(x,y-step)||map->isSolid(x+Floor(width/2),y-step)||map->isSolid(xx,y-step));
+		case DIR_DOWN: return !(yy+step>=176||map->isSolid(x,yy+step)||map->isSolid(x+Floor(width/2),yy+step)||map->isSolid(xx,yy+step));
+		case DIR_LEFT: return !(x-step<0||map->isSolid(x-step,y)||map->isSolid(x-step,y+Floor(height/2))||map->isSolid(x-step,yy));
+		case DIR_RIGHT: return !(xx+step>=256||map->isSolid(xx+step,y)||map->isSolid(xx+step,y+Floor(height/2))||map->isSolid(xx+step,yy));
+		case DIR_LEFTUP: return (CanWalkM(x, y, xx, yy, map, DIR_LEFT, step) && CanWalkM(x, y, xx, yy, map, DIR_UP, step));
+		case DIR_LEFTDOWN: return (CanWalkM(x, y, xx, yy, map, DIR_LEFT, step) && CanWalkM(x, y, xx, yy, map, DIR_DOWN, step));
+		case DIR_RIGHTUP: return (CanWalkM(x, y, xx, yy, map, DIR_RIGHT, step) && CanWalkM(x, y, xx, yy, map, DIR_UP, step));
+		case DIR_RIGHTDOWN: return (CanWalkM(x, y, xx, yy, map, DIR_RIGHT, step) && CanWalkM(x, y, xx, yy, map, DIR_DOWN, step));
+	}
+	return false; //invalid direction
+}
+//end CanWalkM
+//start Misc Functions
+void saveTheGame()//start
+{
+	if(noSave)return;
+	Screen->DrawScreen(7,LAYERSMAP1,LAYERSCREEN_SAVING,0,0,0);
+	Waitframe();
+	Game->Save();
+}//end
+bool linkWalkingOntoFlag(int flag, int setting,bool fullTile)//start
+{
+	int lspeed = Ceiling(1.5+LinkMovement_GetLinkSpeedBoost());
+	return LinkOnFlagMod(flag,LinkMovement[LM_STICKX]*lspeed,LinkMovement[LM_STICKY]*lspeed,setting,fullTile);
+}//end
+bool LinkOnFlagMod(int flag, int x, int y, int setting, bool fullTile)//start
+{
+	int yCorrection = 0;
+	if(!fullTile)yCorrection=8;
+	int combos[4] = {ComboAt(Link->X+x,Link->Y+y+yCorrection),ComboAt(Link->X+x+15,Link->Y+y+yCorrection),ComboAt(Link->X+x+15,Link->Y+y+15),ComboAt(Link->X+x,Link->Y+y+15)};
+	for(int i=0;i<4;i++)
+	{
+		if(setting)
+			if(Screen->ComboI[combos[i]]==flag)return true;
+		if(setting!=1)
+			if(Screen->ComboF[combos[i]]==flag)return true;
+	}
+	return false;
+}//end
+bool LinkOnFlag(int flag)//start
+{
+	int combos[4] = {ComboAt(Link->X,Link->Y),ComboAt(Link->X+15,Link->Y),ComboAt(Link->X+15,Link->Y+15),ComboAt(Link->X,Link->Y+15)};
+	for(int i=0;i<4;i++)
+	{
+		if(Screen->ComboF[combos[i]]==flag)return true;
+	}
+	return false;
+}//end
+int dirX(int dir)//start
+{
+	switch(dir)
+	{
+		case DIR_RIGHT: case DIR_RIGHTUP: case DIR_RIGHTDOWN:
+			return 1;
+		case DIR_LEFT: case DIR_LEFTUP: case DIR_LEFTDOWN:
+			return -1;
+		default:
+			return 0;
+	}
+}//end
+int dirY(int dir)//start
+{
+	switch(dir)
+	{
+		case DIR_DOWN: case DIR_LEFTDOWN: case DIR_RIGHTDOWN:
+			return 1;
+		case DIR_UP: case DIR_LEFTUP: case DIR_RIGHTUP:
+			return -1;
+		default:
+			return 0;
+	}
+}//end
+void stopScreenTransition(int pxD,int pxR,int pxL, int pxU)//start
+{
+	if(Link->Y>160-pxD)Link->InputDown=false;
+	if(Link->X>240-pxR)Link->InputRight=false;
+	if(Link->X<0+pxL)Link->InputLeft=false;
+	if(Link->Y<0+pxU)Link->InputUp=false;
+}//end
+void NoActionButMoveAndEx4()//start
+{
+	Link->InputA=false;Link->PressA=false;
+	Link->InputB=false;Link->PressB=false;
+	Link->InputR=false;Link->PressR=false;
+	Link->InputL=false;Link->PressL=false;
+	Link->InputEx1=false;Link->PressEx1=false;
+	Link->InputEx2=false;Link->PressEx2=false;
+	Link->InputEx3=false;Link->PressEx3=false;
+}//end
+void TotalNoAction()//start
+{
+	NoAction();
+	Link->PressStart=false;
+	Link->InputStart=false;
+}//end
+void NoActionButA()//start
+{
+	Link->InputDown=false;Link->PressDown=false;
+	Link->InputRight=false;Link->PressRight=false;
+	Link->InputLeft=false;Link->PressLeft=false;
+	Link->InputUp=false;Link->PressUp=false;
+	Link->InputB=false;Link->PressB=false;
+	Link->InputR=false;Link->PressR=false;
+	Link->InputL=false;Link->PressL=false;
+	Link->InputEx1=false;Link->PressEx1=false;
+	Link->InputEx2=false;Link->PressEx2=false;
+	Link->InputEx3=false;Link->PressEx3=false;
+}//end
+void NoActionButMoveAndEx4AndA()//start
+{
+	Link->InputB=false;Link->PressB=false;
+	Link->InputR=false;Link->PressR=false;
+	Link->InputL=false;Link->PressL=false;
+	Link->InputEx1=false;Link->PressEx1=false;
+	Link->InputEx2=false;Link->PressEx2=false;
+	Link->InputEx3=false;Link->PressEx3=false;
+}//end
+bool isTouchingCombo(int comboID)//start
+{
+	int x = Link->X;
+	int y = Link->Y;
+	if(Screen->ComboD[ComboAt(Link->X,Link->Y+8)]==comboID)return true;
+	if(Screen->ComboD[ComboAt(Link->X+15,Link->Y+8)]==comboID)return true;
+	if(Screen->ComboD[ComboAt(Link->X,Link->Y+15)]==comboID)return true;
+	if(Screen->ComboD[ComboAt(Link->X+15,Link->Y+15)]==comboID)return true;
+	return false;
+}//end
+void NoDirs()//start
+{
+	Link->InputDown=false;Link->PressDown=false;
+	Link->InputRight=false;Link->PressRight=false;
+	Link->InputLeft=false;Link->PressLeft=false;
+	Link->InputUp=false;Link->PressUp=false;
+}//end
+int countNPCInRange(int x, int y, int radius)//start
+{
+	int npcCount = 0;
+	for(int i = 1;i<=Screen->NumNPCs();i++)
+	{
+		npc anNPC = Screen->LoadNPC(i);
+		if(anNPC->X>x-(radius+anNPC->HitWidth-1)&&anNPC->X<x+radius&&anNPC->Y>y-(radius+anNPC->HitHeight-1)&&anNPC->Y<y+radius)
+		{
+			npcCount++;
+		}
+	}
+	return npcCount;
+}//end
+npc getNthNPCInRange(int x, int y, int radius, int num)//start
+{
+	int npcCount = 0;
+	for(int i = 1;i<=Screen->NumNPCs();i++)
+	{
+		npc anNPC = Screen->LoadNPC(i);
+		if(anNPC->X>x-(radius+anNPC->HitWidth-1)&&anNPC->X<x+radius&&anNPC->Y>y-(radius+anNPC->HitHeight-1)&&anNPC->Y<y+radius)
+		{
+			if(npcCount==num)
+			{
+				return anNPC;
+			}
+			else
+			{
+				npcCount++;
+			}
+		}
+	}
+}//end
+void Screen_Freeze(int freeze)//start
+{
+	ffc f1 = Screen->LoadFFC(31);
+	ffc f2 = Screen->LoadFFC(32);
+	if(freeze==2)
+	{
+		f1->Data = COMBO_FRZ1;
+		f2->Data = COMBO_FRZ2;
+		isFrozen=true;
+	}
+	else if(freeze==1)
+	{
+		f1->Data = COMBO_FRZ1;
+		f2->Data = 0;
+		isFrozen=true;
+	}
+	else
+	{
+		f1->Data = 0;
+		f2->Data = 0;
+		isFrozen=false;
+	}
+}//end
+int getNPCfromUID(npc n)//start
+{
+	for(int i = 1;i<=Screen->NumNPCs();i++)
+	{
+		npc anNPC = Screen->LoadNPC(i);
+		if(anNPC->UID==n->UID)return i;
+	}
+	return -1;
+}//end
+void ffcSolid(ffc anFFC)//start
+{
+	int lspdboost = Ceiling(1.5+LinkMovement_GetLinkSpeedBoost());
+	int width = anFFC->EffectWidth;
+	int height = anFFC->EffectHeight;
+	int bottomheight=height;
+	if(!Link->BigHitbox	)bottomheight-=8;
+	if(bottomheight<=0)return;
+	if(Link->Y>=anFFC->Y-(16+lspdboost))//start inputdown
+	{
+		if(Link->Y<=anFFC->Y-16)
+		{
+			if(Link->X>=anFFC->X-15)
+			{
+				if(Link->X<=anFFC->X+(width-1))
+				{
+					if(Link->InputDown)
+					{
+						if(Link->Y!=anFFC->Y-16)Link->Y=anFFC->Y-16;
+						Link->Dir=DIR_DOWN;
+						if(Link->X>=anFFC->X+(width-4))
+						{
+							if(CanWalk(Link->X,Link->Y,DIR_RIGHT,Abs(Link->X-(anFFC->X+width)),false))Link->X=anFFC->X+width;
+						}
+						else if(Link->X<=anFFC->X-12)if(CanWalk(Link->X,Link->Y,DIR_LEFT,Abs(Link->X-anFFC->X-16),false))Link->X=anFFC->X-16;
+					}
+					Link->InputDown=false;
+					Link->PressDown=false;
+					return;
+				}
+			}
+		}//end
+	}
+	if(Link->Y<=anFFC->Y+(bottomheight+lspdboost))//start inputup
+	{
+		if(Link->Y>=anFFC->Y+bottomheight)
+		{
+			if(Link->X>=anFFC->X-15)
+			{
+				if(Link->X<=anFFC->X+(width-1))
+				{
+					if(Link->InputUp)
+					{
+						if(Link->Y!=anFFC->Y+bottomheight)Link->Y=anFFC->Y+bottomheight;
+						Link->Dir=DIR_UP;
+						if(Link->X>=anFFC->X+(width-4))
+						{
+							if(CanWalk(Link->X,Link->Y,DIR_RIGHT,Abs(Link->X-(anFFC->X+width)),false))Link->X=anFFC->X+width;
+						}
+						else if(Link->X<=anFFC->X-12)if(CanWalk(Link->X,Link->Y,DIR_LEFT,Abs(Link->X-anFFC->X-16),false))Link->X=anFFC->X-16;
+					}
+					Link->InputUp=false;
+					Link->PressUp=false;
+					return;
+				}
+			}
+		}//end
+	}
+	if(Link->X>=anFFC->X-(16+lspdboost))//start inputright
+	{
+		if(Link->X<=anFFC->X-16)
+		{
+			if(Link->Y<=anFFC->Y+(bottomheight-1))
+			{
+				if(Link->Y>=anFFC->Y-15)
+				{
+					if(Link->InputRight)
+					{
+						if(Link->X!=anFFC->X-16)Link->X=anFFC->X-16;
+						Link->Dir=DIR_RIGHT;
+						if(Link->Y>=anFFC->Y+(bottomheight-4))
+						{
+							if(CanWalk(Link->X,Link->Y,DIR_DOWN,Abs(Link->Y-(anFFC->Y+bottomheight)),false))Link->Y=anFFC->Y+bottomheight;
+						}
+						else if(Link->Y<=anFFC->Y-12)if(CanWalk(Link->X,Link->Y,DIR_UP,Abs(Link->Y-(anFFC->Y-16)),false))Link->Y=anFFC->Y-16;
+					}
+					Link->InputRight=false;
+					Link->PressRight=false;
+					return;
+				}
+			}
+		}//end
+	}
+	if(Link->X<=anFFC->X+(width+lspdboost))//start inputleft
+	{
+		if(Link->X>=anFFC->X+width)
+		{
+			if(Link->Y>=anFFC->Y-15)
+			{
+				if(Link->Y<=anFFC->Y+(bottomheight-1))
+				{
+					if(Link->InputLeft)
+					{
+						if(Link->X!=anFFC->X+width)Link->X=anFFC->X+width;
+						Link->Dir=DIR_LEFT;
+						if(Link->Y>=anFFC->Y+(bottomheight-4))
+						{
+							if(CanWalk(Link->X,Link->Y,DIR_DOWN,Abs(Link->Y-(anFFC->Y+bottomheight)),false))Link->Y=anFFC->Y+bottomheight;
+						}
+						else if(Link->Y<=anFFC->Y-12)if(CanWalk(Link->X,Link->Y,DIR_UP,Abs(Link->Y-(anFFC->Y-16)),false))Link->Y=anFFC->Y-16;
+					}
+					Link->InputLeft=false;
+					Link->PressLeft=false;
+					return;
+				}
+			}
+		}//end
+	}
+}//end
+int LimitFPSStateSave = 00b;//start
+void saveFPSstate()
+{
+	/*if(!(LimitFPSStateSave & 10b)){
+		if(Game->CappedFPS)LimitFPSStateSave |= 11b;
+		else LimitFPSStateSave |= 10b;
+	}*/
+}
+
+void loadFPSstate(){
+	/*if((LimitFPSStateSave & 10b) == 10b){
+		if((LimitFPSStateSave & 01b) == 01b)Game->CappedFPS = true;
+		else Game->CappedFPS = false;
+		LimitFPSStateSave = 0;
+	}*/
+}//end
+int fullCounter(int counter)//start
+{
+	return Game->Counter[counter]+Game->DCounter[counter];
+}//end
+bool isOverworldScreen()//start
+{
+	dmapdata dm = Game->LoadDMapData(Game->GetCurDMap());
+	if(IsDungeonFlag())return false;
+	if(IsInteriorFlag())return false;
+	if(dm->Type%2)return true;
+	return false;
+}//end
+int SpinDir8(int dir){return SpinDir8(dir,1);} //Spin a dir clockwise by 45°. start SpinDir8
+int SpinDir8(int dir, int repeat) //Spin a dir clockwise by 45° * repeat. A negative will spin counterclockwise, as expected.
+{
+	while(repeat<0)repeat+=8;
+	repeat %= 8;
+	for(int q = 0; q < repeat; ++q)
+	{
+		switch(dir)
+		{
+			case DIR_UP: dir = DIR_RIGHTUP;
+			case DIR_RIGHTUP: dir = DIR_RIGHT;
+			case DIR_RIGHT: dir = DIR_RIGHTDOWN;
+			case DIR_RIGHTDOWN: dir = DIR_DOWN;
+			case DIR_DOWN: dir = DIR_LEFTDOWN;
+			case DIR_LEFTDOWN: dir = DIR_LEFT;
+			case DIR_LEFT: dir = DIR_LEFTUP;
+			case DIR_LEFTUP: dir = DIR_UP;
+			default: return -1;
+		}
+	}
+	return dir;
+}//end SpinDir8
+void FastLine(int layer, int x, int y, int x2, int y2, int color, int opacity)
+{
+	Screen->Line(layer, x, y, x2, y2, color, 0, 0, 0, 0, opacity);
+}
+void HeightFastLine(int layer, int x, int y, int x2, int y2, int color, int opacity)
+{
+	HeightLine(layer, x, y, x2, y2, color, 0, 0, 0, 0, opacity);
+}
+//end Misc Functions
