@@ -247,7 +247,7 @@ void jump(){//start jump
 			if(!form){
 				NoActionButA();
 			} else {
-				NoAction();
+				MyNoAction();
 			}
 		}
 	}
@@ -285,21 +285,21 @@ int wouldJump(){//start
 	int linkCombo = ComboAt(Link->X+8,Link->Y+12);
 	int linkPlacedFlag = Screen->ComboF[linkCombo];
 	if(Screen->ComboI[linkCombo]==CF_SCRIPT1&&Screen->ComboT[linkCombo]!=CT_WATER){
-		if(Link->Dir==DIR_DOWN&&Link->InputDown&&linkPlacedFlag==CF_SCRIPT1&&linkCombo!=ComboAt(Link->X+8,Link->Y+16)){
+		if(Link->Dir==DIR_DOWN&&Input[CB_DOWN]&&linkPlacedFlag==CF_SCRIPT1&&linkCombo!=ComboAt(Link->X+8,Link->Y+16)){
 			return DIR_DOWN;
-		} else if(Link->Dir==DIR_RIGHT&&Link->InputRight&&linkPlacedFlag==CF_SCRIPT2&&linkCombo!=ComboAt(Link->X+16,Link->Y+12)){
+		} else if(Link->Dir==DIR_RIGHT&&Input[CB_RIGHT]&&linkPlacedFlag==CF_SCRIPT2&&linkCombo!=ComboAt(Link->X+16,Link->Y+12)){
 			return DIR_RIGHT;
-		} else if(Link->Dir==DIR_LEFT&&Link->InputLeft&&linkPlacedFlag==CF_SCRIPT3&&linkCombo!=ComboAt(Link->X-1,Link->Y+12)){
+		} else if(Link->Dir==DIR_LEFT&&Input[CB_LEFT]&&linkPlacedFlag==CF_SCRIPT3&&linkCombo!=ComboAt(Link->X-1,Link->Y+12)){
 			return DIR_LEFT;
-		} else if(Link->Dir==DIR_UP&&Link->InputUp&&linkPlacedFlag==CF_SCRIPT4&&linkCombo!=ComboAt(Link->X+8,Link->Y+7)){
+		} else if(Link->Dir==DIR_UP&&Input[CB_UP]&&linkPlacedFlag==CF_SCRIPT4&&linkCombo!=ComboAt(Link->X+8,Link->Y+7)){
 			return DIR_UP;
-		} else if(Link->Dir==DIR_DOWN&&Link->InputDown&&(Screen->ComboF[linkCombo]==CF_SCRIPT7||Screen->ComboF[linkCombo]==CF_SCRIPT5||Screen->ComboF[linkCombo]==CF_SCRIPT13)&&linkCombo!=ComboAt(Link->X+8,Link->Y+16)){
+		} else if(Link->Dir==DIR_DOWN&&Input[CB_DOWN]&&(Screen->ComboF[linkCombo]==CF_SCRIPT7||Screen->ComboF[linkCombo]==CF_SCRIPT5||Screen->ComboF[linkCombo]==CF_SCRIPT13)&&linkCombo!=ComboAt(Link->X+8,Link->Y+16)){
 			return DIR_DOWN;
-		} else if(Link->Dir==DIR_RIGHT&&Link->InputRight&&(Screen->ComboF[linkCombo]==CF_SCRIPT5||Screen->ComboF[linkCombo]==CF_SCRIPT6||Screen->ComboF[linkCombo]==CF_SCRIPT14)&&linkCombo!=ComboAt(Link->X+16,Link->Y+12)){
+		} else if(Link->Dir==DIR_RIGHT&&Input[CB_RIGHT]&&(Screen->ComboF[linkCombo]==CF_SCRIPT5||Screen->ComboF[linkCombo]==CF_SCRIPT6||Screen->ComboF[linkCombo]==CF_SCRIPT14)&&linkCombo!=ComboAt(Link->X+16,Link->Y+12)){
 			return DIR_RIGHT;
-		} else if(Link->Dir==DIR_LEFT&&Link->InputLeft&&(Screen->ComboF[linkCombo]==CF_SCRIPT8||Screen->ComboF[linkCombo]==CF_SCRIPT7||Screen->ComboF[linkCombo]==CF_SCRIPT14)&&linkCombo!=ComboAt(Link->X-1,Link->Y+12)){
+		} else if(Link->Dir==DIR_LEFT&&Input[CB_LEFT]&&(Screen->ComboF[linkCombo]==CF_SCRIPT8||Screen->ComboF[linkCombo]==CF_SCRIPT7||Screen->ComboF[linkCombo]==CF_SCRIPT14)&&linkCombo!=ComboAt(Link->X-1,Link->Y+12)){
 			return DIR_LEFT;
-		} else if(Link->Dir==DIR_UP&&Link->InputUp&&(Screen->ComboF[linkCombo]==CF_SCRIPT6||Screen->ComboF[linkCombo]==CF_SCRIPT8||Screen->ComboF[linkCombo]==CF_SCRIPT13)&&linkCombo!=ComboAt(Link->X+8,Link->Y+7)){
+		} else if(Link->Dir==DIR_UP&&Input[CB_UP]&&(Screen->ComboF[linkCombo]==CF_SCRIPT6||Screen->ComboF[linkCombo]==CF_SCRIPT8||Screen->ComboF[linkCombo]==CF_SCRIPT13)&&linkCombo!=ComboAt(Link->X+8,Link->Y+7)){
 			return DIR_UP;
 		}
 	}

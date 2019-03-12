@@ -5,37 +5,37 @@
 ////////////////////////////////////////
 void ocarina()//start ocMode
 {
-	if(Link->PressA)
+	if(Press[CB_A])
 	{
 		currSong[ocIndex] = NOTE_A;
 		Game->PlaySound(NOTESOUND_A);
 		ocIndex++;
 	}
-	else if(Link->PressDown)
+	else if(Press[CB_DOWN])
 	{
 		currSong[ocIndex] = NOTE_DOWN;
 		Game->PlaySound(NOTESOUND_DOWN);
 		ocIndex++;
 	}
-	else if(Link->PressRight)
+	else if(Press[CB_RIGHT])
 	{
 		currSong[ocIndex] = NOTE_RIGHT;
 		Game->PlaySound(NOTESOUND_RIGHT);
 		ocIndex++;
 	}
-	else if(Link->PressLeft)
+	else if(Press[CB_LEFT])
 	{
 		currSong[ocIndex] = NOTE_LEFT;
 		Game->PlaySound(NOTESOUND_LEFT);
 		ocIndex++;
 	}
-	else if(Link->PressUp)
+	else if(Press[CB_UP])
 	{
 		currSong[ocIndex] = NOTE_UP;
 		Game->PlaySound(NOTESOUND_UP);
 		ocIndex++;
 	}
-	else if(Link->PressB)
+	else if(Press[CB_B])
 	{
 		playedSong = -1;
 		songFrames = 0;
@@ -47,7 +47,7 @@ void ocarina()//start ocMode
 	if(ocIndex!=8 && ocIndex>0 && playSong(currSong))
 	{
 		for(;ocIndex<8;ocIndex++){}
-		NoAction();
+		MyNoAction();
 		ocarina_mode = false;
 	}
 	else if (ocIndex==8)
@@ -65,7 +65,7 @@ void ocarina()//start ocMode
 		}
 	}
 	drawNotes();
-	NoAction();
+	MyNoAction();
 }//end ocMode
 void drawNotes(){//start
 	//Border ripped from renameLink
@@ -239,27 +239,27 @@ bool compareSongs(int song, int song2){//start
 	return true;
 }//end
 void scarecrow(){//start
-	if(Link->PressA){
+	if(Press[CB_A]){
 		currSong[ocIndex] = NOTE_A;
 		Game->PlaySound(NOTESOUND_A);
 		ocIndex++;
-	} else if(Link->PressDown) {
+	} else if(Press[CB_DOWN]) {
 		currSong[ocIndex] = NOTE_DOWN;
 		Game->PlaySound(NOTESOUND_DOWN);
 		ocIndex++;
-	} else if(Link->PressRight) {
+	} else if(Press[CB_RIGHT]) {
 		currSong[ocIndex] = NOTE_RIGHT;
 		Game->PlaySound(NOTESOUND_RIGHT);
 		ocIndex++;
-	} else if(Link->PressLeft) {
+	} else if(Press[CB_LEFT]) {
 		currSong[ocIndex] = NOTE_LEFT;
 		Game->PlaySound(NOTESOUND_LEFT);
 		ocIndex++;
-	} else if(Link->PressUp) {
+	} else if(Press[CB_UP]) {
 		currSong[ocIndex] = NOTE_UP;
 		Game->PlaySound(NOTESOUND_UP);
 		ocIndex++;
-	} else if(Link->PressB){
+	} else if(Press[CB_B]){
 		playedSong = -1;
 		songFrames = 10;
 		scarecrowRecord = false;
@@ -275,7 +275,7 @@ void scarecrow(){//start
 		scarecrowRecord = false;
 	}
 	drawNotes();
-	NoAction();
+	MyNoAction();
 }//end
 bool isValidSong(int song, bool reqLearned){//start
 	if(reqLearned){

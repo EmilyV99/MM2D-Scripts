@@ -117,20 +117,20 @@ void handleMessageSlot(int slot, bool menu4way, bool isNPC)//start handleMessage
 			int scroll = Tango_GetSlotScrollPos(slot);
 			//Scrolling
 			float scrollSpeed = 1.5;
-			if(Link->InputA)scrollSpeed*=2;
-			if(Link->InputUp)
+			if(Input[CB_A])scrollSpeed*=2;
+			if(Input[CB_UP])
 				Tango_ScrollSlot(slot, -scrollSpeed);
-			else if(Link->InputDown)
+			else if(Input[CB_DOWN])
 				Tango_ScrollSlot(slot, scrollSpeed);
 			//Scroll arrows
 			if(scroll<maxScroll)
 			{
 				Screen->FastCombo(7,208,56+9,14084,0,OP_OPAQUE);
 				delay = __TANGO_AUTO_ADVANCE_TIME;
-				if(Link->PressB)
+				if(Press[CB_B])
 				{
-					Link->PressB=false;
-					Link->InputB=false;
+					Press[CB_B]=false;
+					Input[CB_B]=false;
 					Tango_ScrollSlot(slot,maxScroll);
 				}
 			}
@@ -153,28 +153,28 @@ void handleMessageSlot(int slot, bool menu4way, bool isNPC)//start handleMessage
 				Tango_SetMenuCursor(TANGO_MENU_CURSOR_COMBO,0);
 				if(menuActive&&!menu4way)
 				{
-					if(Link->PressRight)
+					if(Press[CB_RIGHT])
 					{
 						VTango_ChoiceShift(1);
 					}
-					else if(Link->PressLeft)
+					else if(Press[CB_LEFT])
 					{
 						VTango_ChoiceShift(-1);
 					}
 					NoDirs();
 				}
 			}
-			if(scroll!=maxScroll&&!waitingForA)NoAction();
+			if(scroll!=maxScroll&&!waitingForA)MyNoAction();
 			if(delay>0)
 			{
 				delay--;
-				Link->InputA=Link->PressA;
-				Link->InputB=Link->PressB;
+				Input[CB_A]=Press[CB_A];
+				Input[CB_B]=Press[CB_B];
 			}
-			if(Link->PressA)waitingForA=false;
+			if(Press[CB_A])waitingForA=false;
 		}
-		Link->PressStart=false;
-		Link->InputStart=false;
+		Press[CB_START]=false;
+		Input[CB_START]=false;
 		Waitframe();
 	}
 	if(isNPC)closeNPC();
@@ -268,8 +268,8 @@ void showItemCaption(int str)
 		Tango_SetSlotStyle(subscreenTangoSlot,TSTYLE_ICAPTION);
 		Tango_SetSlotPosition(subscreenTangoSlot,64,128);
 		Tango_ActivateSlot(subscreenTangoSlot);
-		Link->PressA=false;
-		Link->InputA=false;
+		Press[CB_A]=false;
+		Input[CB_A]=false;
 	}
 }
 

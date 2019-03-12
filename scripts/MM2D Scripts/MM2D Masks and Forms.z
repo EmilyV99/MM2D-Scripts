@@ -8,7 +8,7 @@ void handleMasks(){
 	switch(mask){
 		case 7:{
 			if(!getGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC)){
-				if(Link->PressL){
+				if(Press[CB_L]){
 					lweapon blast = CreateLWeaponAt(LW_BOMBBLAST,Link->X+dirX(Link->Dir)*16,Link->Y+dirY(Link->Dir)*16);
 					blast->Damage=2;
 					setGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC,360);
@@ -75,25 +75,25 @@ void handleTransformations(){//start
 	Link->Item[FORM3] = (form==3);
 	Link->Item[FORM4] = (form==4);
 	//end Form setup
-	if(Link->InputB){//start ItemJinxing
+	if(Input[CB_B]){//start ItemJinxing
 		if(!itemAllowed(form,B_item)){
 			Link->ItemJinx = 3;
 		}
-	} else if(Link->InputEx1){
+	} else if(Input[CB_EX1]){
 		if(!itemAllowed(form,EX1_item)){
 			Link->ItemJinx = 3;
 		}
-	} else if(Link->InputEx2){
+	} else if(Input[CB_EX2]){
 		if(!itemAllowed(form,EX2_item)){
 			Link->ItemJinx = 3;
 		}
 	}//end
 	if(!isFrozen){//start Form notPaused
 		if(!form){//start human
-			if(Link->PressR&&Link->Action!=LA_SWIMMING&&!Link->Item[210]){
+			if(Press[CB_R]&&Link->Action!=LA_SWIMMING&&!Link->Item[210]){
 				Game->PlaySound(SFX_SHIELD);
 			}
-			if(Link->InputR&&Link->Action!=LA_SWIMMING&&!Link->InputA&&!Link->InputB&&!Link->InputEx1&&!Link->InputEx2&&!Link->Item[210]){
+			if(Input[CB_R]&&Link->Action!=LA_SWIMMING&&!Input[CB_A]&&!Input[CB_B]&&!Input[CB_EX1]&&!Input[CB_EX2]&&!Link->Item[210]){
 				Link->Item[8]=true;
 				Link->Item[37]=hasMirrorShield;
 				Link->Item[FORM_SHIELD] = !hasMirrorShield;
@@ -107,10 +107,10 @@ void handleTransformations(){//start
 			//end human
 		} else if(form==1){//start deku
 			if(!Deku_flying){
-				if(Link->PressR){
+				if(Press[CB_R]){
 					useItem = ITEM_BUBBLE;
-					Link->PressR=false;
-					Link->InputR=false;
+					Press[CB_R]=false;
+					Input[CB_R]=false;
 				}
 			} else {
 				dekuFly();
@@ -133,7 +133,7 @@ void handleTransformations(){//start
 			}
 			//end deku
 		} else if(form==2){//start Goron
-			if(Link->PressR){
+			if(Press[CB_R]){
 				if(curled)Game->PlaySound(SFX_GORONUNCURL);
 				else Game->PlaySound(SFX_GORONCURL);
 				curled=!curled;
@@ -141,14 +141,14 @@ void handleTransformations(){//start
 			}
 			if(curled){
 				Link->SwordJinx = 10;
-				if(Link->PressA){
+				if(Press[CB_A]){
 					useItem = ITEM_POUND;
-					Link->PressA=false;
-					Link->InputA=false;
+					Press[CB_A]=false;
+					Input[CB_A]=false;
 				}
 				Link->Item[36]=false;
 				Link->Item[54]=true;
-				if((Link->InputDown||Link->InputRight||Link->InputLeft||Link->InputUp)&&(Link->Action==LA_NONE||Link->Action==LA_WALKING||Link->Action==LA_GOTHURTLAND)){
+				if((Input[CB_DOWN]||Input[CB_RIGHT]||Input[CB_LEFT]||Input[CB_UP])&&(Link->Action==LA_NONE||Link->Action==LA_WALKING||Link->Action==LA_GOTHURTLAND)){
 					if(timeRolling<84){
 						LinkMovement_SetLinkSpeedBoost(-1.5);
 						if(!timeRolling){
@@ -206,17 +206,17 @@ void handleTransformations(){//start
 				goronSpikeRoll();
 			}//end Goron
 		} else if(form==3){//start zora
-			if(Link->PressR){
+			if(Press[CB_R]){
 				fireZoraBoomerang();
-				Link->PressR=false;
-				Link->InputR=false;
+				Press[CB_R]=false;
+				Input[CB_R]=false;
 			}
 			//end
 		} else if(form==4){//start Deity
-			if(Link->PressR&&Link->Action!=LA_SWIMMING){
+			if(Press[CB_R]&&Link->Action!=LA_SWIMMING){
 				Game->PlaySound(SFX_SHIELD);
 			}
-			if(Link->InputR&&Link->Action!=LA_SWIMMING&&!Link->InputA){
+			if(Input[CB_R]&&Link->Action!=LA_SWIMMING&&!Input[CB_A]){
 				Link->Item[8]=true;
 				Link->Item[37]=hasMirrorShield;
 				NoActionButMoveAndEx4AndA();
@@ -363,7 +363,7 @@ ffc script dekuFlower{
 			if(form==1&&Link->X>this->X-8&&Link->X<this->X+8&&Link->Y>this->Y-8&&Link->Y<this->Y+8){
 				if(dived){
 					diveTime = maxDiveTime;
-					if(!Link->InputA){
+					if(!Input[CB_A]){
 						dived=false;
 						DekuFlightSpeedMod = speedMod;
 						Deku_flying = flightlength;
@@ -372,14 +372,14 @@ ffc script dekuFlower{
 						warpNumFloors=floorsUp;
 					} else NoDirs();
 				} else if(!Deku_flying){
-					if(Link->InputA&&diveTime>0){
+					if(Input[CB_A]&&diveTime>0){
 						if(diveTime==maxDiveTime)Game->PlaySound(67);
 						diveTime--;
 						if(!diveTime){
 							dived=true;
 						}
 						NoDirs();
-					} else if(!Link->InputA){
+					} else if(!Input[CB_A]){
 						diveTime = maxDiveTime;
 						Audio->EndSound(67);
 					}
@@ -392,13 +392,13 @@ ffc script dekuFlower{
 //end FFC DekuFlower
 void dekuFly(){//start DekuFly
 	Deku_flying--;
-	if(Link->PressR)Deku_flying=0;
+	if(Press[CB_R])Deku_flying=0;
 	if(!Deku_flying){
 		Game->PlaySound(78);
 		canFall=true;
 	} else if((!(gameframe%6)&&Deku_flying>180)||(!(gameframe%12)&&Deku_flying>91)||(!(gameframe%24)||gameframe%24==6))
 		Game->PlaySound(69);
-	if(Link->PressA)useItem=ITEM_DEKUNUT;
+	if(Press[CB_A])useItem=ITEM_DEKUNUT;
 	NoActionButMoveAndEx4();
 	LinkMovement_SetLinkSpeedBoost(DekuFlightSpeedMod);
 }//end
@@ -553,7 +553,7 @@ void handleZoraScreenChange()//start ZoraSurfaceDive
 
 void handleZoraSurfacing()
 {
-	if(!Link->PressL)return;
+	if(!Press[CB_L])return;
 	if(getUpDMap()==-1)return;
 	mapdata m = Game->LoadMapData(GetCurMap()+1,GetCurScreen());// UNFINISHED
 	int combos[] = {ComboAt(Link->X,Link->Y),ComboAt(Link->X,Link->Y+15),ComboAt(Link->X+15,Link->Y),ComboAt(Link->X+15,Link->Y+15)};

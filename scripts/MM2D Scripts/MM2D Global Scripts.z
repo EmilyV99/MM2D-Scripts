@@ -66,6 +66,7 @@ global script Global
 		//end
 		//Tango_ConvertVariableName("anpc");
 		//Tango_ConvertFunctionName("npcend");
+		PollInput();
 		while(true)
 		{
 			if(!(gameframe%60) || refreshTime)//Refresh time-based events every 60 frames
@@ -137,9 +138,9 @@ global script Global
 			layer4Toggle();
 			if(subscreen)
 			{
-				pressA=Link->PressA;
-				Link->PressA=false;
-				Link->InputA=false;
+				pressA=Press[CB_A];
+				Press[CB_A]=false;
+				Input[CB_A]=false;
 			}
 			
 			varIntegrity();
@@ -147,7 +148,7 @@ global script Global
 			//start FrameCounters
 			if(freezeFrames>0)
 			{
-				NoAction();
+				MyNoAction();
 				freezeFrames--;
 			}
 			gameframe++;
@@ -219,7 +220,7 @@ global script Global
 			}
 			if(OC_doItemJinx)
 			{
-				if(Link->InputB)
+				if(Input[CB_B])
 				{
 					Link->ItemJinx=2;
 				}
@@ -232,8 +233,8 @@ global script Global
 			{
 				Screen_Freeze(2);
 				ocarina();
-				Link->PressStart=false;
-				Link->InputStart=false;
+				Press[CB_START]=false;
+				Input[CB_START]=false;
 			}
 			if(scarecrowRecord)
 			{
@@ -249,7 +250,7 @@ global script Global
 			}
 			//end Ocarina loopz
 			//start Subscreen
-			if((!isFrozen||subscreen)&&Link->PressStart&&!ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN))
+			if((!isFrozen||subscreen)&&Press[CB_START]&&!ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN))
 			{
 				toggleSubscreen();
 			}
@@ -269,8 +270,8 @@ global script Global
 				Screen_Freeze(0);
 				slotWasDisplayed=false;
 			}
-			Link->PressStart=false;
-			Link->InputStart=false;
+			Press[CB_START]=false;
+			Input[CB_START]=false;
 			razorSwordCheck();
 			handleTransformations();
 			handleEXItems();
@@ -278,7 +279,7 @@ global script Global
 			//end
 			if(subscreen)//start
 			{
-				NoAction();
+				MyNoAction();
 			}
 			else if(!isFrozen)
 			{
@@ -296,9 +297,6 @@ global script Global
 			LinkMovement_Update1();
 			if(!isFrozen)
 				highLedgeFromWater();
-			Link->PressR=false;Link->InputR=false;
-			Link->PressL=false;Link->InputL=false;
-			Link->PressMap=false;Link->InputMap=false;
 			Overhead_Update();
 			drawExtraLayerEffects();
 			lwLoop();
@@ -326,7 +324,7 @@ global script Global
 			timePalette();
 			runTints();
 			runHeightBitmap();
-			Waitdraw();			
+			WaitdrawInput();			
 			passiveSubscreen();
 			if(!isFrozen||isBottleFrozen)
 			{
@@ -335,7 +333,7 @@ global script Global
 			Tango_Update2();
 			if(isFrozen)LinkMovement_SetLinkSpeedBoost(0);
 			LinkMovement_Update2();
-			Waitframe();
+			WaitframeInput();
 		}
 	}//end mainGlobal
 	//start destruction
@@ -366,7 +364,7 @@ global script Global
 	//start extra
 	void layer4Toggle()
 	{
-		if(Link->PressEx4)
+		if(Press[CB_EX4])
 		{
 			hideLayer4 = !hideLayer4;
 		}
@@ -542,22 +540,22 @@ global script Global
 		if(Link->Action==LA_RAFTING)
 		{
 			Rafting[RAFT_DIR]=-1;
-			if(Link->PressRight&&CanWalk(Link->X,Link->Y,DIR_RIGHT,16,false))
+			if(Press[CB_RIGHT]&&CanWalk(Link->X,Link->Y,DIR_RIGHT,16,false))
 			{
 				Link->X+=16;
 				Link->Action=LA_NONE;
 			}
-			else if(Link->PressLeft&&CanWalk(Link->X,Link->Y,DIR_LEFT,16,false))
+			else if(Press[CB_LEFT]&&CanWalk(Link->X,Link->Y,DIR_LEFT,16,false))
 			{
 				Link->X-=16;
 				Link->Action=LA_NONE;
 			}
-			else if(Link->PressUp&&CanWalk(Link->X,Link->Y,DIR_UP,16,false))
+			else if(Press[CB_UP]&&CanWalk(Link->X,Link->Y,DIR_UP,16,false))
 			{
 				Link->Y-=16;
 				Link->Action=LA_NONE;
 			}
-			else if(Link->PressDown&&CanWalk(Link->X,Link->Y,DIR_DOWN,16,false))
+			else if(Press[CB_DOWN]&&CanWalk(Link->X,Link->Y,DIR_DOWN,16,false))
 			{
 				Link->Y+=16;
 				Link->Action=LA_NONE;
@@ -565,7 +563,7 @@ global script Global
 		}
 		else if(Rafting[RAFT_DIR]!=-1)
 		{
-			NoAction();
+			MyNoAction();
 			if(Rafting[RAFT_UP]>0)
 			{
 				for(int i = 0;i<Rafting[RAFT_UP];Rafting[RAFT_UP]--)
@@ -590,23 +588,23 @@ global script Global
 				}
 				if(Rafting[RAFT_DIR]==DIR_DOWN)
 				{
-					Link->PressDown=true;
-					Link->InputDown=true;
+					Press[CB_DOWN]=true;
+					Input[CB_DOWN]=true;
 				}
 				else if(Rafting[RAFT_DIR]==DIR_RIGHT)
 				{
-					Link->PressRight=true;
-					Link->InputRight=true;
+					Press[CB_RIGHT]=true;
+					Input[CB_RIGHT]=true;
 				}
 				else if(Rafting[RAFT_DIR]==DIR_LEFT)
 				{
-					Link->PressLeft=true;
-					Link->InputLeft=true;
+					Press[CB_LEFT]=true;
+					Input[CB_LEFT]=true;
 				}
 				else if(Rafting[RAFT_DIR]==DIR_UP)
 				{
-					Link->PressUp=true;
-					Link->InputUp=true;
+					Press[CB_UP]=true;
+					Input[CB_UP]=true;
 				}
 			}
 		}
@@ -819,8 +817,8 @@ global script Global
 				if(Input->ReadKey[KEY_F])debugCanFall = !debugCanFall;
 				if(Input->ReadKey[KEY_OPENBRACE])warpDown();
 				if(Input->ReadKey[KEY_CLOSEBRACE])warpUp();
-				NoAction();
-				Link->PressStart=false;Link->InputStart=false;
+				MyNoAction();
+				Press[CB_START]=false;Input[CB_START]=false;
 			}
 		}
 	}//end

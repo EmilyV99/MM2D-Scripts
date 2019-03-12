@@ -25,13 +25,13 @@ void runSubscreen(){
 	}
 	//start SwapScreen
 	int lastSubState = subState;
-	if(Link->PressR){
+	if(Press[CB_R]){
 		subState++;
 		if(subState>2){
 			subState = 0;
 		}
 		cursorPos = 0;
-	} else if(Link->PressL){
+	} else if(Press[CB_L]){
 		subState--;
 		if(subState<0){
 			subState = 2;
@@ -62,13 +62,13 @@ void runSubscreen(){
 	//start MoveCursor
 	int lastIndex = cursorIndex;
 	if(!subState){
-		if(Link->PressDown){
+		if(Press[CB_DOWN]){
 			cursorIndex+=12;
-		} else if(Link->PressUp){
+		} else if(Press[CB_UP]){
 			cursorIndex-=12;
-		} else if(Link->PressRight){
+		} else if(Press[CB_RIGHT]){
 			cursorIndex++;
-		} else if(Link->PressLeft){
+		} else if(Press[CB_LEFT]){
 			cursorIndex--;
 		}
 		if(cursorIndex>=ITEM_MAX_INDEX){
@@ -78,7 +78,7 @@ void runSubscreen(){
 		}
 		cursorPos = ITEM_LOCS[cursorIndex];
 	} else if(subState==1){
-		if(Link->PressDown){
+		if(Press[CB_DOWN]){
 			if(!cursorIndex)cursorIndex=18;
 			else if(cursorIndex>=1&&cursorIndex<=5)cursorIndex+=7;
 			else if(cursorIndex==6)cursorIndex=17;
@@ -91,7 +91,7 @@ void runSubscreen(){
 			else if(cursorIndex==16)cursorIndex=5;
 			else if(cursorIndex==17)cursorIndex=6;
 			else if(cursorIndex==18)cursorIndex=0;
-		} else if(Link->PressUp){
+		} else if(Press[CB_UP]){
 			if(!cursorIndex)cursorIndex=18;
 			else if(cursorIndex>=8&&cursorIndex<=12)cursorIndex-=7;
 			else if(cursorIndex==6)cursorIndex=17;
@@ -105,7 +105,7 @@ void runSubscreen(){
 			else if(cursorIndex==16)cursorIndex=12;
 			else if(cursorIndex==17)cursorIndex=6;
 			else if(cursorIndex==18)cursorIndex=0;
-		} else if(Link->PressRight){
+		} else if(Press[CB_RIGHT]){
 			if(cursorIndex==12){
 				cursorIndex=6;
 			}else if(cursorIndex==7){
@@ -116,7 +116,7 @@ void runSubscreen(){
 			if(cursorIndex>=KEY_MAX_INDEX){
 				cursorIndex=0;
 			}
-		} else if(Link->PressLeft){
+		} else if(Press[CB_LEFT]){
 			if(cursorIndex==13){
 				cursorIndex=7;
 			} else {
