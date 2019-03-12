@@ -135,63 +135,63 @@ int dirY(int dir)//start
 }//end
 void stopScreenTransition(int pxD,int pxR,int pxL, int pxU)//start
 {
-	if(Link->Y>160-pxD)Input[CB_DOWN]=false;
-	if(Link->X>240-pxR)Input[CB_RIGHT]=false;
-	if(Link->X<0+pxL)Input[CB_LEFT]=false;
-	if(Link->Y<0+pxU)Input[CB_UP]=false;
+	if(Link->Y>160-pxD)Hold[CB_DOWN]=false;
+	if(Link->X>240-pxR)Hold[CB_RIGHT]=false;
+	if(Link->X<0+pxL)Hold[CB_LEFT]=false;
+	if(Link->Y<0+pxU)Hold[CB_UP]=false;
 }//end
 void MyNoAction()//start
 {
-	Input[CB_DOWN]=false;Press[CB_DOWN]=false;
-	Input[CB_RIGHT]=false;Press[CB_RIGHT]=false;
-	Input[CB_LEFT]=false;Press[CB_LEFT]=false;
-	Input[CB_UP]=false;Press[CB_UP]=false;
-	Input[CB_A]=false;Press[CB_A]=false;
-	Input[CB_B]=false;Press[CB_B]=false;
-	Input[CB_R]=false;Press[CB_R]=false;
-	Input[CB_L]=false;Press[CB_L]=false;
-	Input[CB_EX1]=false;Press[CB_EX1]=false;
-	Input[CB_EX2]=false;Press[CB_EX2]=false;
-	Input[CB_EX3]=false;Press[CB_EX3]=false;
-	Input[CB_EX4]=false; Press[CB_EX4]=false;
+	Hold[CB_DOWN]=false;Press[CB_DOWN]=false;
+	Hold[CB_RIGHT]=false;Press[CB_RIGHT]=false;
+	Hold[CB_LEFT]=false;Press[CB_LEFT]=false;
+	Hold[CB_UP]=false;Press[CB_UP]=false;
+	Hold[CB_A]=false;Press[CB_A]=false;
+	Hold[CB_B]=false;Press[CB_B]=false;
+	Hold[CB_R]=false;Press[CB_R]=false;
+	Hold[CB_L]=false;Press[CB_L]=false;
+	Hold[CB_EX1]=false;Press[CB_EX1]=false;
+	Hold[CB_EX2]=false;Press[CB_EX2]=false;
+	Hold[CB_EX3]=false;Press[CB_EX3]=false;
+	Hold[CB_EX4]=false; Press[CB_EX4]=false;
 }//end
 void NoActionButMoveAndEx4()//start
 {
-	Input[CB_A]=false;Press[CB_A]=false;
-	Input[CB_B]=false;Press[CB_B]=false;
-	Input[CB_R]=false;Press[CB_R]=false;
-	Input[CB_L]=false;Press[CB_L]=false;
-	Input[CB_EX1]=false;Press[CB_EX1]=false;
-	Input[CB_EX2]=false;Press[CB_EX2]=false;
-	Input[CB_EX3]=false;Press[CB_EX3]=false;
+	Hold[CB_A]=false;Press[CB_A]=false;
+	Hold[CB_B]=false;Press[CB_B]=false;
+	Hold[CB_R]=false;Press[CB_R]=false;
+	Hold[CB_L]=false;Press[CB_L]=false;
+	Hold[CB_EX1]=false;Press[CB_EX1]=false;
+	Hold[CB_EX2]=false;Press[CB_EX2]=false;
+	Hold[CB_EX3]=false;Press[CB_EX3]=false;
 }//end
 void TotalNoAction()//start
 {
 	MyNoAction();
 	Press[CB_START]=false;
-	Input[CB_START]=false;
+	Hold[CB_START]=false;
 }//end
 void NoActionButA()//start
 {
-	Input[CB_DOWN]=false;Press[CB_DOWN]=false;
-	Input[CB_RIGHT]=false;Press[CB_RIGHT]=false;
-	Input[CB_LEFT]=false;Press[CB_LEFT]=false;
-	Input[CB_UP]=false;Press[CB_UP]=false;
-	Input[CB_B]=false;Press[CB_B]=false;
-	Input[CB_R]=false;Press[CB_R]=false;
-	Input[CB_L]=false;Press[CB_L]=false;
-	Input[CB_EX1]=false;Press[CB_EX1]=false;
-	Input[CB_EX2]=false;Press[CB_EX2]=false;
-	Input[CB_EX3]=false;Press[CB_EX3]=false;
+	Hold[CB_DOWN]=false;Press[CB_DOWN]=false;
+	Hold[CB_RIGHT]=false;Press[CB_RIGHT]=false;
+	Hold[CB_LEFT]=false;Press[CB_LEFT]=false;
+	Hold[CB_UP]=false;Press[CB_UP]=false;
+	Hold[CB_B]=false;Press[CB_B]=false;
+	Hold[CB_R]=false;Press[CB_R]=false;
+	Hold[CB_L]=false;Press[CB_L]=false;
+	Hold[CB_EX1]=false;Press[CB_EX1]=false;
+	Hold[CB_EX2]=false;Press[CB_EX2]=false;
+	Hold[CB_EX3]=false;Press[CB_EX3]=false;
 }//end
 void NoActionButMoveAndEx4AndA()//start
 {
-	Input[CB_B]=false;Press[CB_B]=false;
-	Input[CB_R]=false;Press[CB_R]=false;
-	Input[CB_L]=false;Press[CB_L]=false;
-	Input[CB_EX1]=false;Press[CB_EX1]=false;
-	Input[CB_EX2]=false;Press[CB_EX2]=false;
-	Input[CB_EX3]=false;Press[CB_EX3]=false;
+	Hold[CB_B]=false;Press[CB_B]=false;
+	Hold[CB_R]=false;Press[CB_R]=false;
+	Hold[CB_L]=false;Press[CB_L]=false;
+	Hold[CB_EX1]=false;Press[CB_EX1]=false;
+	Hold[CB_EX2]=false;Press[CB_EX2]=false;
+	Hold[CB_EX3]=false;Press[CB_EX3]=false;
 }//end
 bool isTouchingCombo(int comboID)//start
 {
@@ -205,10 +205,10 @@ bool isTouchingCombo(int comboID)//start
 }//end
 void NoDirs()//start
 {
-	Input[CB_DOWN]=false;Press[CB_DOWN]=false;
-	Input[CB_RIGHT]=false;Press[CB_RIGHT]=false;
-	Input[CB_LEFT]=false;Press[CB_LEFT]=false;
-	Input[CB_UP]=false;Press[CB_UP]=false;
+	Hold[CB_DOWN]=false;Press[CB_DOWN]=false;
+	Hold[CB_RIGHT]=false;Press[CB_RIGHT]=false;
+	Hold[CB_LEFT]=false;Press[CB_LEFT]=false;
+	Hold[CB_UP]=false;Press[CB_UP]=false;
 }//end
 int countNPCInRange(int x, int y, int radius)//start
 {
@@ -290,7 +290,7 @@ void ffcSolid(ffc anFFC)//start
 			{
 				if(Link->X<=anFFC->X+(width-1))
 				{
-					if(Input[CB_DOWN])
+					if(Hold[CB_DOWN])
 					{
 						if(Link->Y!=anFFC->Y-16)Link->Y=anFFC->Y-16;
 						Link->Dir=DIR_DOWN;
@@ -300,7 +300,7 @@ void ffcSolid(ffc anFFC)//start
 						}
 						else if(Link->X<=anFFC->X-12)if(CanWalk(Link->X,Link->Y,DIR_LEFT,Abs(Link->X-anFFC->X-16),false))Link->X=anFFC->X-16;
 					}
-					Input[CB_DOWN]=false;
+					Hold[CB_DOWN]=false;
 					Press[CB_DOWN]=false;
 					return;
 				}
@@ -315,7 +315,7 @@ void ffcSolid(ffc anFFC)//start
 			{
 				if(Link->X<=anFFC->X+(width-1))
 				{
-					if(Input[CB_UP])
+					if(Hold[CB_UP])
 					{
 						if(Link->Y!=anFFC->Y+bottomheight)Link->Y=anFFC->Y+bottomheight;
 						Link->Dir=DIR_UP;
@@ -325,7 +325,7 @@ void ffcSolid(ffc anFFC)//start
 						}
 						else if(Link->X<=anFFC->X-12)if(CanWalk(Link->X,Link->Y,DIR_LEFT,Abs(Link->X-anFFC->X-16),false))Link->X=anFFC->X-16;
 					}
-					Input[CB_UP]=false;
+					Hold[CB_UP]=false;
 					Press[CB_UP]=false;
 					return;
 				}
@@ -340,7 +340,7 @@ void ffcSolid(ffc anFFC)//start
 			{
 				if(Link->Y>=anFFC->Y-15)
 				{
-					if(Input[CB_RIGHT])
+					if(Hold[CB_RIGHT])
 					{
 						if(Link->X!=anFFC->X-16)Link->X=anFFC->X-16;
 						Link->Dir=DIR_RIGHT;
@@ -350,7 +350,7 @@ void ffcSolid(ffc anFFC)//start
 						}
 						else if(Link->Y<=anFFC->Y-12)if(CanWalk(Link->X,Link->Y,DIR_UP,Abs(Link->Y-(anFFC->Y-16)),false))Link->Y=anFFC->Y-16;
 					}
-					Input[CB_RIGHT]=false;
+					Hold[CB_RIGHT]=false;
 					Press[CB_RIGHT]=false;
 					return;
 				}
@@ -365,7 +365,7 @@ void ffcSolid(ffc anFFC)//start
 			{
 				if(Link->Y<=anFFC->Y+(bottomheight-1))
 				{
-					if(Input[CB_LEFT])
+					if(Hold[CB_LEFT])
 					{
 						if(Link->X!=anFFC->X+width)Link->X=anFFC->X+width;
 						Link->Dir=DIR_LEFT;
@@ -375,7 +375,7 @@ void ffcSolid(ffc anFFC)//start
 						}
 						else if(Link->Y<=anFFC->Y-12)if(CanWalk(Link->X,Link->Y,DIR_UP,Abs(Link->Y-(anFFC->Y-16)),false))Link->Y=anFFC->Y-16;
 					}
-					Input[CB_LEFT]=false;
+					Hold[CB_LEFT]=false;
 					Press[CB_LEFT]=false;
 					return;
 				}
@@ -445,7 +445,7 @@ void PollInput()//start
 {
 	for(int j = 0; j < BTN_MAX; ++j)
 	{
-		Input[j] = Input->Input[j];
+		Hold[j] = Input->Hold[j];
 		Press[j] = Input->Press[j];
 	}
 }//end
@@ -453,16 +453,16 @@ void PushInput()//start
 {
 	for(int j = 0; j < BTN_MAX; ++j)
 	{
-		Input->Input[j] = Input[j];
+		Input->Hold[j] = Hold[j];
 		Input->Press[j] = Press[j];
 	}
 }//end
 void WaitframeInput()//start
 {
 	PushInput();	
-	Input->Press[CB_R]=false;Input->Input[CB_R]=false;
-	Input->Press[CB_L]=false;Input->Input[CB_L]=false;
-	Input->Press[CB_MAP]=false;Input->Input[CB_MAP]=false;
+	Input->Press[CB_R]=false;Input->Hold[CB_R]=false;
+	Input->Press[CB_L]=false;Input->Hold[CB_L]=false;
+	Input->Press[CB_MAP]=false;Input->Hold[CB_MAP]=false;
 	Waitframe();
 	PollInput();
 }//end

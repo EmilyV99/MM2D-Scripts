@@ -494,7 +494,7 @@ bool dbdraw = false;
 bool debugEnabled = false;
 bool noSave = false;
 //Input
-bool Input[BTN_MAX];
+bool Hold[BTN_MAX];
 bool Press[BTN_MAX];
 //Version Vars
 int version[] = {2};//{Global array}

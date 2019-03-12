@@ -140,7 +140,7 @@ global script Global
 			{
 				pressA=Press[CB_A];
 				Press[CB_A]=false;
-				Input[CB_A]=false;
+				Hold[CB_A]=false;
 			}
 			
 			varIntegrity();
@@ -220,7 +220,7 @@ global script Global
 			}
 			if(OC_doItemJinx)
 			{
-				if(Input[CB_B])
+				if(Hold[CB_B])
 				{
 					Link->ItemJinx=2;
 				}
@@ -234,7 +234,7 @@ global script Global
 				Screen_Freeze(2);
 				ocarina();
 				Press[CB_START]=false;
-				Input[CB_START]=false;
+				Hold[CB_START]=false;
 			}
 			if(scarecrowRecord)
 			{
@@ -271,7 +271,7 @@ global script Global
 				slotWasDisplayed=false;
 			}
 			Press[CB_START]=false;
-			Input[CB_START]=false;
+			Hold[CB_START]=false;
 			razorSwordCheck();
 			handleTransformations();
 			handleEXItems();
@@ -589,22 +589,22 @@ global script Global
 				if(Rafting[RAFT_DIR]==DIR_DOWN)
 				{
 					Press[CB_DOWN]=true;
-					Input[CB_DOWN]=true;
+					Hold[CB_DOWN]=true;
 				}
 				else if(Rafting[RAFT_DIR]==DIR_RIGHT)
 				{
 					Press[CB_RIGHT]=true;
-					Input[CB_RIGHT]=true;
+					Hold[CB_RIGHT]=true;
 				}
 				else if(Rafting[RAFT_DIR]==DIR_LEFT)
 				{
 					Press[CB_LEFT]=true;
-					Input[CB_LEFT]=true;
+					Hold[CB_LEFT]=true;
 				}
 				else if(Rafting[RAFT_DIR]==DIR_UP)
 				{
 					Press[CB_UP]=true;
-					Input[CB_UP]=true;
+					Hold[CB_UP]=true;
 				}
 			}
 		}
@@ -818,7 +818,7 @@ global script Global
 				if(Input->ReadKey[KEY_OPENBRACE])warpDown();
 				if(Input->ReadKey[KEY_CLOSEBRACE])warpUp();
 				MyNoAction();
-				Press[CB_START]=false;Input[CB_START]=false;
+				Press[CB_START]=false;Hold[CB_START]=false;
 			}
 		}
 	}//end

@@ -117,10 +117,10 @@ void handleMessageSlot(int slot, bool menu4way, bool isNPC)//start handleMessage
 			int scroll = Tango_GetSlotScrollPos(slot);
 			//Scrolling
 			float scrollSpeed = 1.5;
-			if(Input[CB_A])scrollSpeed*=2;
-			if(Input[CB_UP])
+			if(Hold[CB_A])scrollSpeed*=2;
+			if(Hold[CB_UP])
 				Tango_ScrollSlot(slot, -scrollSpeed);
-			else if(Input[CB_DOWN])
+			else if(Hold[CB_DOWN])
 				Tango_ScrollSlot(slot, scrollSpeed);
 			//Scroll arrows
 			if(scroll<maxScroll)
@@ -130,7 +130,7 @@ void handleMessageSlot(int slot, bool menu4way, bool isNPC)//start handleMessage
 				if(Press[CB_B])
 				{
 					Press[CB_B]=false;
-					Input[CB_B]=false;
+					Hold[CB_B]=false;
 					Tango_ScrollSlot(slot,maxScroll);
 				}
 			}
@@ -168,13 +168,13 @@ void handleMessageSlot(int slot, bool menu4way, bool isNPC)//start handleMessage
 			if(delay>0)
 			{
 				delay--;
-				Input[CB_A]=Press[CB_A];
-				Input[CB_B]=Press[CB_B];
+				Hold[CB_A]=Press[CB_A];
+				Hold[CB_B]=Press[CB_B];
 			}
 			if(Press[CB_A])waitingForA=false;
 		}
 		Press[CB_START]=false;
-		Input[CB_START]=false;
+		Hold[CB_START]=false;
 		Waitframe();
 	}
 	if(isNPC)closeNPC();
@@ -269,7 +269,7 @@ void showItemCaption(int str)
 		Tango_SetSlotPosition(subscreenTangoSlot,64,128);
 		Tango_ActivateSlot(subscreenTangoSlot);
 		Press[CB_A]=false;
-		Input[CB_A]=false;
+		Hold[CB_A]=false;
 	}
 }
 

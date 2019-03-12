@@ -51,8 +51,8 @@ void highLedgeFromWater(){
 						Link->Dir=DIR_UP;
 					}
 				}
-				Input[CB_DOWN]=false;
-				Input[CB_UP]=false;
+				Hold[CB_DOWN]=false;
+				Hold[CB_UP]=false;
 				LinkMovement_SetLinkSpeedBoost(0);
 			}
 			if(LinkOnFlagMod(CF_NOWATERLEDGE2,LinkMovement[LM_STICKX]*3,0,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,LinkMovement[LM_STICKX]*3,0,0,true))){
@@ -63,8 +63,8 @@ void highLedgeFromWater(){
 						Link->Dir=DIR_LEFT;
 					}
 				}
-				Input[CB_LEFT]=false;
-				Input[CB_RIGHT]=false;
+				Hold[CB_LEFT]=false;
+				Hold[CB_RIGHT]=false;
 				LinkMovement_SetLinkSpeedBoost(0);
 			}
 		} else {
@@ -91,14 +91,14 @@ ffc script climb{
 						if(Link->Y<=this->Y-16){
 							if(Link->X>=this->X-15){
 								if(Link->X<=this->X+(width-1)){
-									if(Input[CB_DOWN]){
+									if(Hold[CB_DOWN]){
 										if(Link->Y!=this->Y-16)Link->Y=this->Y-16;
 										Link->Dir=DIR_DOWN;
 										if(Link->X>=this->X+(width-4)){
 											if(CanWalk(Link->X,Link->Y,DIR_RIGHT,Abs(Link->X-(this->X+width)),false))Link->X=this->X+width;
 										} else if(Link->X<=this->X-12)if(CanWalk(Link->X,Link->Y,DIR_LEFT,Abs(Link->X-this->X-16),false))Link->X=this->X-16;
 									}
-									Input[CB_DOWN]=false;
+									Hold[CB_DOWN]=false;
 									Press[CB_DOWN]=false;
 								}
 							}
@@ -110,14 +110,14 @@ ffc script climb{
 						if(Link->Y>=this->Y+bottomheight){
 							if(Link->X>=this->X-15){
 								if(Link->X<=this->X+(width-1)){
-									if(Input[CB_UP]){
+									if(Hold[CB_UP]){
 										if(Link->Y!=this->Y+bottomheight)Link->Y=this->Y+bottomheight;
 										Link->Dir=DIR_UP;
 										if(Link->X>=this->X+(width-4)){
 											if(CanWalk(Link->X,Link->Y,DIR_RIGHT,Abs(Link->X-(this->X+width)),false))Link->X=this->X+width;
 										} else if(Link->X<=this->X-12)if(CanWalk(Link->X,Link->Y,DIR_LEFT,Abs(Link->X-this->X-16),false))Link->X=this->X-16;
 									}
-									Input[CB_UP]=false;
+									Hold[CB_UP]=false;
 									Press[CB_UP]=false;
 								}
 							}
@@ -129,14 +129,14 @@ ffc script climb{
 						if(Link->X<=this->X-16){
 							if(Link->Y<=this->Y+(bottomheight-1)){
 								if(Link->Y>=this->Y-15){
-									if(Input[CB_RIGHT]){
+									if(Hold[CB_RIGHT]){
 										if(Link->X!=this->X-16)Link->X=this->X-16;
 										Link->Dir=DIR_RIGHT;
 										if(Link->Y>=this->Y+(bottomheight-4)){
 											if(CanWalk(Link->X,Link->Y,DIR_DOWN,Abs(Link->Y-(this->Y+bottomheight)),false))Link->Y=this->Y+bottomheight;
 										} else if(Link->Y<=this->Y-12)if(CanWalk(Link->X,Link->Y,DIR_UP,Abs(Link->Y-(this->Y-16)),false))Link->Y=this->Y-16;
 									}
-									Input[CB_RIGHT]=false;
+									Hold[CB_RIGHT]=false;
 									Press[CB_RIGHT]=false;
 								}
 							}
@@ -148,14 +148,14 @@ ffc script climb{
 						if(Link->X>=this->X+width){
 							if(Link->Y>=this->Y-15){
 								if(Link->Y<=this->Y+(bottomheight-1)){
-									if(Input[CB_LEFT]){
+									if(Hold[CB_LEFT]){
 										if(Link->X!=this->X+width)Link->X=this->X+width;
 										Link->Dir=DIR_LEFT;
 										if(Link->Y>=this->Y+(bottomheight-4)){
 											if(CanWalk(Link->X,Link->Y,DIR_DOWN,Abs(Link->Y-(this->Y+bottomheight)),false))Link->Y=this->Y+bottomheight;
 										} else if(Link->Y<=this->Y-12)if(CanWalk(Link->X,Link->Y,DIR_UP,Abs(Link->Y-(this->Y-16)),false))Link->Y=this->Y-16;
 									}
-									Input[CB_LEFT]=false;
+									Hold[CB_LEFT]=false;
 									Press[CB_LEFT]=false;
 								}
 							}
@@ -176,7 +176,7 @@ ffc script warpCustomReturn{
 		switch(side){
 			case DIR_UP:{
 				while(true){
-					if(!isFrozen&&Link->Y<=1&&(Press[CB_UP]||Input[CB_UP])){
+					if(!isFrozen&&Link->Y<=1&&(Press[CB_UP]||Hold[CB_UP])){
 						Link->X=X;
 						Link->Y=Y;
 						Link->PitWarp(dmap,screen);
@@ -186,7 +186,7 @@ ffc script warpCustomReturn{
 			break;}
 			case DIR_DOWN:{
 				while(true){
-					if(!isFrozen&&Link->Y>=159&&(Press[CB_DOWN]||Input[CB_DOWN])){
+					if(!isFrozen&&Link->Y>=159&&(Press[CB_DOWN]||Hold[CB_DOWN])){
 						Link->X=X;
 						Link->Y=Y;
 						Link->PitWarp(dmap,screen);
@@ -196,7 +196,7 @@ ffc script warpCustomReturn{
 			break;}
 			case DIR_LEFT:{
 				while(true){
-					if(!isFrozen&&Link->X<=1&&(Press[CB_LEFT]||Input[CB_LEFT])){
+					if(!isFrozen&&Link->X<=1&&(Press[CB_LEFT]||Hold[CB_LEFT])){
 						Link->X=X;
 						Link->Y=Y;
 						Link->PitWarp(dmap,screen);
@@ -206,7 +206,7 @@ ffc script warpCustomReturn{
 			break;}
 			case DIR_RIGHT:{
 				while(true){
-					if(!isFrozen&&Link->X>=239&&(Press[CB_RIGHT]||Input[CB_RIGHT])){
+					if(!isFrozen&&Link->X>=239&&(Press[CB_RIGHT]||Hold[CB_RIGHT])){
 						Link->X=X;
 						Link->Y=Y;
 						Link->PitWarp(dmap,screen);
@@ -404,25 +404,25 @@ ffc script LadderClimb{
 			switch(dir){
 				case DIR_UP:{
 					if(Link->Y==this->Y){
-						if(Input[CB_UP])ctime++;
+						if(Hold[CB_UP])ctime++;
 						else ctime=0;
 					} else ctime=0;
 					break;}
 				case DIR_DOWN:{
 					if(Link->Y==this->Y){
-						if(Input[CB_DOWN])ctime++;
+						if(Hold[CB_DOWN])ctime++;
 						else ctime=0;
 					} else ctime=0;
 					break;}
 				case DIR_LEFT:{
 					if(Link->X==this->X){
-						if(Input[CB_LEFT])ctime++;
+						if(Hold[CB_LEFT])ctime++;
 						else ctime=0;
 					} else ctime=0;
 					break;}
 				case DIR_RIGHT:{
 					if(Link->X==this->X){
-						if(Input[CB_RIGHT])ctime++;
+						if(Hold[CB_RIGHT])ctime++;
 						else ctime=0;
 					} else ctime=0;
 					break;}
@@ -725,7 +725,7 @@ ffc script chest
 				if(!solid)ffcSolid(this);
 				if(Press[CB_A]&&AgainstComboBase(this->X,this->Y))
 				{
-					Press[CB_A]=false;Input[CB_A]=false;
+					Press[CB_A]=false;Hold[CB_A]=false;
 					if(Link->Item[itemID])
 					{
 						itemID=1;

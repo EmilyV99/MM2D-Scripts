@@ -31,7 +31,7 @@ ffc script NPC
 			{
 				if(AgainstFFCBase(this) && Press[CB_A])
 				{
-					Input[CB_A] = false;
+					Hold[CB_A] = false;
 					Press[CB_A] = false;
 					interact(this, NPCid);
 				}
@@ -73,7 +73,7 @@ ffc script NPC
 						{
 							if(AgainstFFCBase(this) && Press[CB_A])
 							{
-								Input[CB_A] = false;
+								Hold[CB_A] = false;
 								Press[CB_A] = false;
 								interact(this, NPCid);
 							}
@@ -90,7 +90,7 @@ ffc script NPC
 					{
 						if(AgainstFFCBase(this) && Press[CB_A])
 						{
-							Input[CB_A] = false;
+							Hold[CB_A] = false;
 							Press[CB_A] = false;
 							interact(this, NPCid);
 						}
@@ -171,7 +171,7 @@ ffc script NPC
 						}
 						if(AgainstFFCBase(this) && Press[CB_A])
 						{
-							Input[CB_A] = false;
+							Hold[CB_A] = false;
 							Press[CB_A] = false;
 							if(form != 1 && !getGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE))
 							{
@@ -907,10 +907,10 @@ bool SelectPressInput(int input)
 
 void SetInput(int input, bool state)
 {
-    if(input == 0) Input[CB_A] = state;
-    else if(input == 1) Input[CB_B] = state;
-    else if(input == 2) Input[CB_L] = state;
-    else if(input == 3) Input[CB_R] = state;
+    if(input == 0) Hold[CB_A] = state;
+    else if(input == 1) Hold[CB_B] = state;
+    else if(input == 2) Hold[CB_L] = state;
+    else if(input == 3) Hold[CB_R] = state;
 }
 //end Signpost
 //start Shop
@@ -1100,7 +1100,7 @@ ffc script lockedDoor
 						{
 							if(AgainstFFCBase(this))
 							{
-								Press[CB_A]=false;Input[CB_A]=false;
+								Press[CB_A]=false;Hold[CB_A]=false;
 								ShowStringAndWait("Shooting Gallery@char(26)((6 a.m. to 10 p.m.))");
 								
 							}

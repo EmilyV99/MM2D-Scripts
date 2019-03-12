@@ -75,15 +75,15 @@ void handleTransformations(){//start
 	Link->Item[FORM3] = (form==3);
 	Link->Item[FORM4] = (form==4);
 	//end Form setup
-	if(Input[CB_B]){//start ItemJinxing
+	if(Hold[CB_B]){//start ItemJinxing
 		if(!itemAllowed(form,B_item)){
 			Link->ItemJinx = 3;
 		}
-	} else if(Input[CB_EX1]){
+	} else if(Hold[CB_EX1]){
 		if(!itemAllowed(form,EX1_item)){
 			Link->ItemJinx = 3;
 		}
-	} else if(Input[CB_EX2]){
+	} else if(Hold[CB_EX2]){
 		if(!itemAllowed(form,EX2_item)){
 			Link->ItemJinx = 3;
 		}
@@ -93,7 +93,7 @@ void handleTransformations(){//start
 			if(Press[CB_R]&&Link->Action!=LA_SWIMMING&&!Link->Item[210]){
 				Game->PlaySound(SFX_SHIELD);
 			}
-			if(Input[CB_R]&&Link->Action!=LA_SWIMMING&&!Input[CB_A]&&!Input[CB_B]&&!Input[CB_EX1]&&!Input[CB_EX2]&&!Link->Item[210]){
+			if(Hold[CB_R]&&Link->Action!=LA_SWIMMING&&!Hold[CB_A]&&!Hold[CB_B]&&!Hold[CB_EX1]&&!Hold[CB_EX2]&&!Link->Item[210]){
 				Link->Item[8]=true;
 				Link->Item[37]=hasMirrorShield;
 				Link->Item[FORM_SHIELD] = !hasMirrorShield;
@@ -110,7 +110,7 @@ void handleTransformations(){//start
 				if(Press[CB_R]){
 					useItem = ITEM_BUBBLE;
 					Press[CB_R]=false;
-					Input[CB_R]=false;
+					Hold[CB_R]=false;
 				}
 			} else {
 				dekuFly();
@@ -144,11 +144,11 @@ void handleTransformations(){//start
 				if(Press[CB_A]){
 					useItem = ITEM_POUND;
 					Press[CB_A]=false;
-					Input[CB_A]=false;
+					Hold[CB_A]=false;
 				}
 				Link->Item[36]=false;
 				Link->Item[54]=true;
-				if((Input[CB_DOWN]||Input[CB_RIGHT]||Input[CB_LEFT]||Input[CB_UP])&&(Link->Action==LA_NONE||Link->Action==LA_WALKING||Link->Action==LA_GOTHURTLAND)){
+				if((Hold[CB_DOWN]||Hold[CB_RIGHT]||Hold[CB_LEFT]||Hold[CB_UP])&&(Link->Action==LA_NONE||Link->Action==LA_WALKING||Link->Action==LA_GOTHURTLAND)){
 					if(timeRolling<84){
 						LinkMovement_SetLinkSpeedBoost(-1.5);
 						if(!timeRolling){
@@ -209,14 +209,14 @@ void handleTransformations(){//start
 			if(Press[CB_R]){
 				fireZoraBoomerang();
 				Press[CB_R]=false;
-				Input[CB_R]=false;
+				Hold[CB_R]=false;
 			}
 			//end
 		} else if(form==4){//start Deity
 			if(Press[CB_R]&&Link->Action!=LA_SWIMMING){
 				Game->PlaySound(SFX_SHIELD);
 			}
-			if(Input[CB_R]&&Link->Action!=LA_SWIMMING&&!Input[CB_A]){
+			if(Hold[CB_R]&&Link->Action!=LA_SWIMMING&&!Hold[CB_A]){
 				Link->Item[8]=true;
 				Link->Item[37]=hasMirrorShield;
 				NoActionButMoveAndEx4AndA();
@@ -363,7 +363,7 @@ ffc script dekuFlower{
 			if(form==1&&Link->X>this->X-8&&Link->X<this->X+8&&Link->Y>this->Y-8&&Link->Y<this->Y+8){
 				if(dived){
 					diveTime = maxDiveTime;
-					if(!Input[CB_A]){
+					if(!Hold[CB_A]){
 						dived=false;
 						DekuFlightSpeedMod = speedMod;
 						Deku_flying = flightlength;
@@ -372,14 +372,14 @@ ffc script dekuFlower{
 						warpNumFloors=floorsUp;
 					} else NoDirs();
 				} else if(!Deku_flying){
-					if(Input[CB_A]&&diveTime>0){
+					if(Hold[CB_A]&&diveTime>0){
 						if(diveTime==maxDiveTime)Game->PlaySound(67);
 						diveTime--;
 						if(!diveTime){
 							dived=true;
 						}
 						NoDirs();
-					} else if(!Input[CB_A]){
+					} else if(!Hold[CB_A]){
 						diveTime = maxDiveTime;
 						Audio->EndSound(67);
 					}
