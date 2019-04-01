@@ -1028,7 +1028,7 @@ global script onExit
 untyped opt[256] = {false};
 DEFINE OPT_RFS = 0;
 
-link script OptionsMenu
+hero script OptionsMenu
 {
 	//start Menu constants
 	CONFIG NUM_MENU_OPTIONS = 3;
