@@ -1,9 +1,12 @@
 ///////////////////////////////////
 //         Tint.zh Header        //
 //             Venrob            //
-//         Version: 0.1          //
-//           10/25/18            //
+//         Version: 0.2          //
+//           31 Mar 19           //
 ///////////////////////////////////
+
+#option HEADER_GUARD on
+import "std.zh"
 
 //start typedefs
 typedef const int DEFINE;
