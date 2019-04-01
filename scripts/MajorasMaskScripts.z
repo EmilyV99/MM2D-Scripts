@@ -5,6 +5,9 @@
 ////////////////////////////////////////
 
 #option HEADER_GUARD on
+#option SHORT_CIRCUIT on
+#option TRUNCATE_DIVISION_BY_LITERAL_BUG off
+#option NO_LOGGING default
 import "std.zh"
 
 //start typedefs
