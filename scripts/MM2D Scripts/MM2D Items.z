@@ -508,7 +508,7 @@ void runOmniArrows(int mult)
 				}
 			}
 			if(angle < 0) angle += 360;
-			else if(angle > = 360) angle -= 360;
+			else if(angle >= 360) angle -= 360;
 			if(angle % mult) angle -= (angle % mult);
 		}
 		setGlobalVar(GVAR_ARROWANGLE, GV_MISC, angle);
