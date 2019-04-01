@@ -516,10 +516,6 @@ bool dbsetup = false;
 bool dbdraw = false;
 bool debugEnabled = false;
 bool noSave = false;
-//Input
-DEFINE BTN_MAX = 18; //Why is this not in std_zh?
-bool Hold[BTN_MAX];
-bool Press[BTN_MAX];
 //Version Vars
 int version[] = {2};//{Global array}
 //end MISC
