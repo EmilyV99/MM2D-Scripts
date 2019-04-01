@@ -145,9 +145,9 @@ global script Global
 			layer4Toggle();
 			if(subscreen)
 			{
-				pressA=Press[CB_A];
-				Press[CB_A]=false;
-				Hold[CB_A]=false;
+				pressA=Input->Press[CB_A];
+				Input->Press[CB_A]=false;
+				Input->Hold[CB_A]=false;
 			}
 			
 			varIntegrity();
@@ -227,7 +227,7 @@ global script Global
 			}
 			if(OC_doItemJinx)
 			{
-				if(Hold[CB_B])
+				if(Input->Hold[CB_B])
 				{
 					Hero->ItemJinx=2;
 				}
@@ -240,8 +240,8 @@ global script Global
 			{
 				Screen_Freeze(2);
 				ocarina();
-				Press[CB_START]=false;
-				Hold[CB_START]=false;
+				Input->Press[CB_START]=false;
+				Input->Hold[CB_START]=false;
 			}
 			if(scarecrowRecord)
 			{
@@ -257,7 +257,7 @@ global script Global
 			}
 			//end Ocarina loopz
 			//start Subscreen
-			if((!isFrozen||subscreen)&&Press[CB_START]&&!ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN))
+			if((!isFrozen||subscreen)&&Input->Press[CB_START]&&!ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN))
 			{
 				toggleSubscreen();
 			}
@@ -277,8 +277,8 @@ global script Global
 				Screen_Freeze(0);
 				slotWasDisplayed=false;
 			}
-			Press[CB_START]=false;
-			Hold[CB_START]=false;
+			Input->Press[CB_START]=false;
+			Input->Hold[CB_START]=false;
 			razorSwordCheck();
 			handleTransformations();
 			handleEXItems();
@@ -331,7 +331,7 @@ global script Global
 			timePalette();
 			runTints();
 			runHeightBitmap();
-			WaitdrawInput();			
+			Waitdraw();			
 			passiveSubscreen();
 			if(!isFrozen||isBottleFrozen)
 			{
@@ -340,7 +340,7 @@ global script Global
 			Tango_Update2();
 			if(isFrozen)LinkMovement_SetLinkSpeedBoost(0);
 			LinkMovement_Update2();
-			WaitframeInput();
+			Waitframe();
 		}
 	}//end mainGlobal
 	//start destruction
@@ -371,7 +371,7 @@ global script Global
 	//start extra
 	void layer4Toggle()
 	{
-		if(Press[CB_EX4])
+		if(Input->Press[CB_EX4])
 		{
 			hideLayer4 = !hideLayer4;
 		}
@@ -547,22 +547,22 @@ global script Global
 		if(Hero->Action==LA_RAFTING)
 		{
 			Rafting[RAFT_DIR]=-1;
-			if(Press[CB_RIGHT]&&CanWalk(Hero->X,Hero->Y,DIR_RIGHT,16,false))
+			if(Input->Press[CB_RIGHT]&&CanWalk(Hero->X,Hero->Y,DIR_RIGHT,16,false))
 			{
 				Hero->X+=16;
 				Hero->Action=LA_NONE;
 			}
-			else if(Press[CB_LEFT]&&CanWalk(Hero->X,Hero->Y,DIR_LEFT,16,false))
+			else if(Input->Press[CB_LEFT]&&CanWalk(Hero->X,Hero->Y,DIR_LEFT,16,false))
 			{
 				Hero->X-=16;
 				Hero->Action=LA_NONE;
 			}
-			else if(Press[CB_UP]&&CanWalk(Hero->X,Hero->Y,DIR_UP,16,false))
+			else if(Input->Press[CB_UP]&&CanWalk(Hero->X,Hero->Y,DIR_UP,16,false))
 			{
 				Hero->Y-=16;
 				Hero->Action=LA_NONE;
 			}
-			else if(Press[CB_DOWN]&&CanWalk(Hero->X,Hero->Y,DIR_DOWN,16,false))
+			else if(Input->Press[CB_DOWN]&&CanWalk(Hero->X,Hero->Y,DIR_DOWN,16,false))
 			{
 				Hero->Y+=16;
 				Hero->Action=LA_NONE;
@@ -595,23 +595,23 @@ global script Global
 				}
 				if(Rafting[RAFT_DIR]==DIR_DOWN)
 				{
-					Press[CB_DOWN]=true;
-					Hold[CB_DOWN]=true;
+					Input->Press[CB_DOWN]=true;
+					Input->Hold[CB_DOWN]=true;
 				}
 				else if(Rafting[RAFT_DIR]==DIR_RIGHT)
 				{
-					Press[CB_RIGHT]=true;
-					Hold[CB_RIGHT]=true;
+					Input->Press[CB_RIGHT]=true;
+					Input->Hold[CB_RIGHT]=true;
 				}
 				else if(Rafting[RAFT_DIR]==DIR_LEFT)
 				{
-					Press[CB_LEFT]=true;
-					Hold[CB_LEFT]=true;
+					Input->Press[CB_LEFT]=true;
+					Input->Hold[CB_LEFT]=true;
 				}
 				else if(Rafting[RAFT_DIR]==DIR_UP)
 				{
-					Press[CB_UP]=true;
-					Hold[CB_UP]=true;
+					Input->Press[CB_UP]=true;
+					Input->Hold[CB_UP]=true;
 				}
 			}
 		}
@@ -825,7 +825,7 @@ global script Global
 				if(Input->ReadKey[KEY_OPENBRACE])warpDown();
 				if(Input->ReadKey[KEY_CLOSEBRACE])warpUp();
 				MyNoAction();
-				Press[CB_START]=false;Hold[CB_START]=false;
+				Input->Press[CB_START]=false;Input->Hold[CB_START]=false;
 			}
 		}
 	}//end
@@ -1075,7 +1075,7 @@ hero script OptionsMenu
 		return 0;
 	}
 	
-	void run()
+	void run() //start
 	{
 		bitmap menu = Game->CreateBitmap(MENU_BITMAP_WIDTH * NUM_MENU_BITMAPS, OP_HEIGHT);
 		while(1)
@@ -1259,7 +1259,7 @@ hero script OptionsMenu
 				}
 			}
 		}
-	}
+	}//end
 
 	int menupos(int opt)
 	{

@@ -522,7 +522,7 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 			Screen->DrawInteger(6,16,136,FONT_DSPHANTOMP,0x0F,0x01,0,0,kills,0,OP_OPAQUE);
 			setGlobalVar(10,GV_MISC,kills);
 			setGlobalVar(11,GV_MISC,timer);
-			Press[CB_L]=false;Hold[CB_L]=false;
+			Input->Press[CB_L]=false;Input->Hold[CB_L]=false;
 			runOmniArrows(2);
 			if(timer<=0)break;
 			Waitframe();

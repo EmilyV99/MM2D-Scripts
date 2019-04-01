@@ -461,7 +461,7 @@ const int MB_RIGHTCLICK			= 0x2;
 const int MB_MIDDLECLICK		= 0x4; //Keep in in mind that not all mice/touchpads have a middle mouse button
 
 //Controller buttons
-const int CB_UP 	= 0; 
+/*const int CB_UP 	= 0; 
 const int CB_DOWN	= 1;
 const int CB_LEFT	= 2;
 const int CB_RIGHT	= 3;
@@ -478,7 +478,7 @@ const int CB_EX4	= 13;
 const int CB_STICKUP	= 14;
 const int CB_STICKDOWN	= 15;
 const int CB_STICKLEFT	= 16;
-const int CB_STICKRIGHT	= 17;
+const int CB_STICKRIGHT	= 17;*/
 
 
 
@@ -2303,7 +2303,7 @@ const int VOL_MUSIC	= 2;
 const int VOL_SFX	= 3;
 
 //Input->
-/* Defined earlier.
+// Defined earlier.
 const int CB_UP		= 0;
 const int CB_DOWN	= 1;
 const int CB_LEFT	= 2;
@@ -2323,7 +2323,7 @@ const int CB_AXIS_DOWN	= 15;
 const int CB_AXIS_LEFT	= 16;
 const int CB_AXIS_RIGHT	= 17;
 
-*/
+
 
 const float DIR16_DEG_INCREMENT = 22.5; //Number of degrees per 1/16 rotation
 

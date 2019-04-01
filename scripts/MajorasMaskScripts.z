@@ -16,6 +16,9 @@ typedef const int DEFINE;
 typedef const int CONFIG;
 typedef untyped u;
 //end typedefs
+//start bonus imports
+import "std_zh/idata.zh"
+//end
 //start header imports
 import "scripts/string.zh"
 import "scripts/ffcscript.zh"

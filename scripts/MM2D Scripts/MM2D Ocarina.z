@@ -5,37 +5,37 @@
 ////////////////////////////////////////
 void ocarina()//start ocMode
 {
-	if(Press[CB_A])
+	if(Input->Press[CB_A])
 	{
 		currSong[ocIndex] = NOTE_A;
 		Game->PlaySound(NOTESOUND_A);
 		ocIndex++;
 	}
-	else if(Press[CB_DOWN])
+	else if(Input->Press[CB_DOWN])
 	{
 		currSong[ocIndex] = NOTE_DOWN;
 		Game->PlaySound(NOTESOUND_DOWN);
 		ocIndex++;
 	}
-	else if(Press[CB_RIGHT])
+	else if(Input->Press[CB_RIGHT])
 	{
 		currSong[ocIndex] = NOTE_RIGHT;
 		Game->PlaySound(NOTESOUND_RIGHT);
 		ocIndex++;
 	}
-	else if(Press[CB_LEFT])
+	else if(Input->Press[CB_LEFT])
 	{
 		currSong[ocIndex] = NOTE_LEFT;
 		Game->PlaySound(NOTESOUND_LEFT);
 		ocIndex++;
 	}
-	else if(Press[CB_UP])
+	else if(Input->Press[CB_UP])
 	{
 		currSong[ocIndex] = NOTE_UP;
 		Game->PlaySound(NOTESOUND_UP);
 		ocIndex++;
 	}
-	else if(Press[CB_B])
+	else if(Input->Press[CB_B])
 	{
 		playedSong = -1;
 		songFrames = 0;
@@ -239,27 +239,27 @@ bool compareSongs(int song, int song2){//start
 	return true;
 }//end
 void scarecrow(){//start
-	if(Press[CB_A]){
+	if(Input->Press[CB_A]){
 		currSong[ocIndex] = NOTE_A;
 		Game->PlaySound(NOTESOUND_A);
 		ocIndex++;
-	} else if(Press[CB_DOWN]) {
+	} else if(Input->Press[CB_DOWN]) {
 		currSong[ocIndex] = NOTE_DOWN;
 		Game->PlaySound(NOTESOUND_DOWN);
 		ocIndex++;
-	} else if(Press[CB_RIGHT]) {
+	} else if(Input->Press[CB_RIGHT]) {
 		currSong[ocIndex] = NOTE_RIGHT;
 		Game->PlaySound(NOTESOUND_RIGHT);
 		ocIndex++;
-	} else if(Press[CB_LEFT]) {
+	} else if(Input->Press[CB_LEFT]) {
 		currSong[ocIndex] = NOTE_LEFT;
 		Game->PlaySound(NOTESOUND_LEFT);
 		ocIndex++;
-	} else if(Press[CB_UP]) {
+	} else if(Input->Press[CB_UP]) {
 		currSong[ocIndex] = NOTE_UP;
 		Game->PlaySound(NOTESOUND_UP);
 		ocIndex++;
-	} else if(Press[CB_B]){
+	} else if(Input->Press[CB_B]){
 		playedSong = -1;
 		songFrames = 10;
 		scarecrowRecord = false;

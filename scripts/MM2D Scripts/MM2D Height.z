@@ -270,14 +270,14 @@ void replaceLinkTile(int mod, int aframes, int aspeed,int xOffSet,int yOffSet,bo
 }
 
 int getLinkTileModifier(){
-	if(Hero->Item[FORM1])return GetLinkTileModifier(FORM1);
-	else if(Hero->Item[FORM2])return GetLinkTileModifier(FORM2);
-	else if(Hero->Item[FORM3])return GetLinkTileModifier(FORM3);
-	else if(Hero->Item[FORM4])return GetLinkTileModifier(FORM4);
-	else if(Hero->Item[FORM2CURLED])return GetLinkTileModifier(FORM2CURLED);
-	else if(Hero->Item[FORM_SHIELD])return GetLinkTileModifier(FORM_SHIELD);
-	else if(Hero->Item[FORM_M_SHIELD])return GetLinkTileModifier(FORM_M_SHIELD);
-	else if(Hero->Item[FORM2SPIKED])return GetLinkTileModifier(FORM2SPIKED);
+	if(Hero->Item[FORM1])return idata::GetLinkTileModifier(FORM1);
+	else if(Hero->Item[FORM2])return idata::GetLinkTileModifier(FORM2);
+	else if(Hero->Item[FORM3])return idata::GetLinkTileModifier(FORM3);
+	else if(Hero->Item[FORM4])return idata::GetLinkTileModifier(FORM4);
+	else if(Hero->Item[FORM2CURLED])return idata::GetLinkTileModifier(FORM2CURLED);
+	else if(Hero->Item[FORM_SHIELD])return idata::GetLinkTileModifier(FORM_SHIELD);
+	else if(Hero->Item[FORM_M_SHIELD])return idata::GetLinkTileModifier(FORM_M_SHIELD);
+	else if(Hero->Item[FORM2SPIKED])return idata::GetLinkTileModifier(FORM2SPIKED);
 	else return 0;
 }//end tilemods
 
@@ -285,21 +285,21 @@ int wouldJump(){//start
 	int linkCombo = ComboAt(Hero->X+8,Hero->Y+12);
 	int linkPlacedFlag = Screen->ComboF[linkCombo];
 	if(Screen->ComboI[linkCombo]==CF_SCRIPT1&&Screen->ComboT[linkCombo]!=CT_WATER){
-		if(Hero->Dir==DIR_DOWN&&Hold[CB_DOWN]&&linkPlacedFlag==CF_SCRIPT1&&linkCombo!=ComboAt(Hero->X+8,Hero->Y+16)){
+		if(Hero->Dir==DIR_DOWN&&Input->Hold[CB_DOWN]&&linkPlacedFlag==CF_SCRIPT1&&linkCombo!=ComboAt(Hero->X+8,Hero->Y+16)){
 			return DIR_DOWN;
-		} else if(Hero->Dir==DIR_RIGHT&&Hold[CB_RIGHT]&&linkPlacedFlag==CF_SCRIPT2&&linkCombo!=ComboAt(Hero->X+16,Hero->Y+12)){
+		} else if(Hero->Dir==DIR_RIGHT&&Input->Hold[CB_RIGHT]&&linkPlacedFlag==CF_SCRIPT2&&linkCombo!=ComboAt(Hero->X+16,Hero->Y+12)){
 			return DIR_RIGHT;
-		} else if(Hero->Dir==DIR_LEFT&&Hold[CB_LEFT]&&linkPlacedFlag==CF_SCRIPT3&&linkCombo!=ComboAt(Hero->X-1,Hero->Y+12)){
+		} else if(Hero->Dir==DIR_LEFT&&Input->Hold[CB_LEFT]&&linkPlacedFlag==CF_SCRIPT3&&linkCombo!=ComboAt(Hero->X-1,Hero->Y+12)){
 			return DIR_LEFT;
-		} else if(Hero->Dir==DIR_UP&&Hold[CB_UP]&&linkPlacedFlag==CF_SCRIPT4&&linkCombo!=ComboAt(Hero->X+8,Hero->Y+7)){
+		} else if(Hero->Dir==DIR_UP&&Input->Hold[CB_UP]&&linkPlacedFlag==CF_SCRIPT4&&linkCombo!=ComboAt(Hero->X+8,Hero->Y+7)){
 			return DIR_UP;
-		} else if(Hero->Dir==DIR_DOWN&&Hold[CB_DOWN]&&(Screen->ComboF[linkCombo]==CF_SCRIPT7||Screen->ComboF[linkCombo]==CF_SCRIPT5||Screen->ComboF[linkCombo]==CF_SCRIPT13)&&linkCombo!=ComboAt(Hero->X+8,Hero->Y+16)){
+		} else if(Hero->Dir==DIR_DOWN&&Input->Hold[CB_DOWN]&&(Screen->ComboF[linkCombo]==CF_SCRIPT7||Screen->ComboF[linkCombo]==CF_SCRIPT5||Screen->ComboF[linkCombo]==CF_SCRIPT13)&&linkCombo!=ComboAt(Hero->X+8,Hero->Y+16)){
 			return DIR_DOWN;
-		} else if(Hero->Dir==DIR_RIGHT&&Hold[CB_RIGHT]&&(Screen->ComboF[linkCombo]==CF_SCRIPT5||Screen->ComboF[linkCombo]==CF_SCRIPT6||Screen->ComboF[linkCombo]==CF_SCRIPT14)&&linkCombo!=ComboAt(Hero->X+16,Hero->Y+12)){
+		} else if(Hero->Dir==DIR_RIGHT&&Input->Hold[CB_RIGHT]&&(Screen->ComboF[linkCombo]==CF_SCRIPT5||Screen->ComboF[linkCombo]==CF_SCRIPT6||Screen->ComboF[linkCombo]==CF_SCRIPT14)&&linkCombo!=ComboAt(Hero->X+16,Hero->Y+12)){
 			return DIR_RIGHT;
-		} else if(Hero->Dir==DIR_LEFT&&Hold[CB_LEFT]&&(Screen->ComboF[linkCombo]==CF_SCRIPT8||Screen->ComboF[linkCombo]==CF_SCRIPT7||Screen->ComboF[linkCombo]==CF_SCRIPT14)&&linkCombo!=ComboAt(Hero->X-1,Hero->Y+12)){
+		} else if(Hero->Dir==DIR_LEFT&&Input->Hold[CB_LEFT]&&(Screen->ComboF[linkCombo]==CF_SCRIPT8||Screen->ComboF[linkCombo]==CF_SCRIPT7||Screen->ComboF[linkCombo]==CF_SCRIPT14)&&linkCombo!=ComboAt(Hero->X-1,Hero->Y+12)){
 			return DIR_LEFT;
-		} else if(Hero->Dir==DIR_UP&&Hold[CB_UP]&&(Screen->ComboF[linkCombo]==CF_SCRIPT6||Screen->ComboF[linkCombo]==CF_SCRIPT8||Screen->ComboF[linkCombo]==CF_SCRIPT13)&&linkCombo!=ComboAt(Hero->X+8,Hero->Y+7)){
+		} else if(Hero->Dir==DIR_UP&&Input->Hold[CB_UP]&&(Screen->ComboF[linkCombo]==CF_SCRIPT6||Screen->ComboF[linkCombo]==CF_SCRIPT8||Screen->ComboF[linkCombo]==CF_SCRIPT13)&&linkCombo!=ComboAt(Hero->X+8,Hero->Y+7)){
 			return DIR_UP;
 		}
 	}

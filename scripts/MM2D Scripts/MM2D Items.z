@@ -32,47 +32,47 @@ void handleEXItems(){
 		if(useItem>0){
 			Hero->ItemJinx=0;
 			if(SetBItem(useItem)){
-				Press[CB_B] = true;
-				Hold[CB_B] = true;
+				Input->Press[CB_B] = true;
+				Input->Hold[CB_B] = true;
 				useItem = 0;
 				usingItem = useItem;
 			} else {
-				Hold[CB_B]=false;Press[CB_B]=false;
+				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
 			}
-		} else if(Hold[CB_B]&&B_item!=0){
+		} else if(Input->Hold[CB_B]&&B_item!=0){
 			if(isArrow(B_item)&&!canShootArrow()){
-				Hold[CB_B]=false;Press[CB_B]=false;
+				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
 			} else if(SetBItem(B_item)){
-				Hold[CB_B] = true;
-				Hold[CB_EX1]=false;
-				Hold[CB_EX2]=false;
+				Input->Hold[CB_B] = true;
+				Input->Hold[CB_EX1]=false;
+				Input->Hold[CB_EX2]=false;
 			} else {
-				Hold[CB_B]=false;Press[CB_B]=false;
+				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
 			}
-		} else if(Hold[CB_EX1]&&EX1_item!=0){
+		} else if(Input->Hold[CB_EX1]&&EX1_item!=0){
 			if(isArrow(EX1_item)&&!canShootArrow()){
-				Hold[CB_B]=false;Press[CB_B]=false;
+				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
 			} else if(SetBItem(EX1_item)){
-				Hold[CB_B] = true;
-				if(Press[CB_EX1])Press[CB_B] = true;
-				Hold[CB_EX2]=false;
+				Input->Hold[CB_B] = true;
+				if(Input->Press[CB_EX1])Input->Press[CB_B] = true;
+				Input->Hold[CB_EX2]=false;
 			} else {
-				Hold[CB_B]=false;Press[CB_B]=false;
+				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
 			}
-		} else if(Hold[CB_EX2]&&EX2_item!=0){
+		} else if(Input->Hold[CB_EX2]&&EX2_item!=0){
 			if(isArrow(EX2_item)&&!canShootArrow()){
-				Hold[CB_B]=false;Press[CB_B]=false;
+				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
 			} else if(SetBItem(EX2_item)){
-				Hold[CB_B] = true;
-				if(Press[CB_EX2])Press[CB_B] = true;
+				Input->Hold[CB_B] = true;
+				if(Input->Press[CB_EX2])Input->Press[CB_B] = true;
 			} else {
-				Hold[CB_B]=false;Press[CB_B]=false;
+				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
 			}
-		} else if((Press[CB_B]||Hold[CB_B])&&!B_item){
-			Hold[CB_B]=false;Press[CB_B]=false;
+		} else if((Input->Press[CB_B]||Input->Hold[CB_B])&&!B_item){
+			Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
 		}
 		
-	} else if(subState == SUBSTATE_ITEMS && (!Hold[CB_EX3]&&(Press[CB_EX1]||Press[CB_EX2]||Press[CB_B]||pressA))){
+	} else if(subState == SUBSTATE_ITEMS && (!Input->Hold[CB_EX3]&&(Input->Press[CB_EX1]||Input->Press[CB_EX2]||Input->Press[CB_B]||pressA))){
 		int itID = ItemIDs[cursorIndex];
 		if(canEquip(itID)){
 			if(itID==211){
@@ -92,17 +92,17 @@ void handleEXItems(){
 				Audio->EndSound(84);
 				Audio->EndSound(85);
 				Audio->EndSound(86);
-				if(Press[CB_EX1]){
+				if(Input->Press[CB_EX1]){
 					Game->PlaySound(snd);
 					EX1_item = itID;
 					if(EX2_item==itID||(isArrow(EX2_item)&&arrow))EX2_item=0;
 					if(B_item==itID||(isArrow(B_item)&&arrow))B_item=0;
-				} else if(Press[CB_EX2]){
+				} else if(Input->Press[CB_EX2]){
 					Game->PlaySound(snd);
 					EX2_item = itID;
 					if(EX1_item==itID||(isArrow(EX1_item)&&arrow))EX1_item=0;
 					if(B_item==itID||(isArrow(B_item)&&arrow))B_item=0;
-				} else if(Press[CB_B]){
+				} else if(Input->Press[CB_B]){
 					Game->PlaySound(snd);
 					B_item = itID;
 					SetBItem(itID);
@@ -112,9 +112,9 @@ void handleEXItems(){
 			}
 		}
 	} else {
-		if(Press[CB_B])B_item=0;
-		if(Press[CB_EX1])EX1_item=0;
-		if(Press[CB_EX2])EX2_item=0;
+		if(Input->Press[CB_B])B_item=0;
+		if(Input->Press[CB_EX1])EX1_item=0;
+		if(Input->Press[CB_EX2])EX2_item=0;
 	}
 	
 }
@@ -193,7 +193,7 @@ lweapon script throwableBombs_LW
 					this->Y = Hero->Y;
 					this->DrawYOffset = -8;
 					this->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1; //While held, lock to Hero through transitions!
-					if(Press[CB_A]||Press[CB_B]||Press[CB_EX1]||Press[CB_EX2])
+					if(Input->Press[CB_A]||Input->Press[CB_B]||Input->Press[CB_EX1]||Input->Press[CB_EX2])
 					{
 						this->DrawYOffset = 0;
 						this->Dir = Hero->Dir;
@@ -203,7 +203,7 @@ lweapon script throwableBombs_LW
 						Hero->SwordJinx=3;
 						Hero->ItemJinx=3;
 					}
-					else if(Press[CB_R])
+					else if(Input->Press[CB_R])
 					{
 						this->DrawYOffset = 0;
 						switch(Hero->Dir)
@@ -226,11 +226,11 @@ lweapon script throwableBombs_LW
 						}
 						this->Dir = Hero->Dir;
 						this->Misc[BOMB_MISC_MODE] = BOMB_STATE_STILL;
-						Press[CB_R]=false;
-						Hold[CB_R]=false;
+						Input->Press[CB_R]=false;
+						Input->Hold[CB_R]=false;
 					}
-					Press[CB_START]=false;
-					Hold[CB_START]=false;
+					Input->Press[CB_START]=false;
+					Input->Hold[CB_START]=false;
 					NoActionButMoveAndEx4AndA();
 					break;
 				}
@@ -351,10 +351,10 @@ item script omniArrows
 		if(arrowAimMode)
 		{
 			int angle;
-			if(Hold[CB_RIGHT] && Hold[CB_DOWN])     angle = 45;
-			else if(Hold[CB_LEFT] && Hold[CB_DOWN]) angle = 135;
-			else if(Hold[CB_LEFT] && Hold[CB_UP])   angle = 225;
-			else if(Hold[CB_RIGHT] && Hold[CB_UP])  angle = 315;
+			if(Input->Hold[CB_RIGHT] && Input->Hold[CB_DOWN])     angle = 45;
+			else if(Input->Hold[CB_LEFT] && Input->Hold[CB_DOWN]) angle = 135;
+			else if(Input->Hold[CB_LEFT] && Input->Hold[CB_UP])   angle = 225;
+			else if(Input->Hold[CB_RIGHT] && Input->Hold[CB_UP])  angle = 315;
 			else switch(Hero->Dir)
 			{
 				case DIR_RIGHT:
@@ -383,7 +383,7 @@ void runOmniArrows(int mult)
 {
 	if(!arrowAimMode) return; //Not aiming arrows
 	int angle = getGlobalVar(GVAR_ARROWANGLE, GV_MISC);
-	if(/*canShootArrow() && */((Press[CB_B] && isArrow(B_item)) || (Press[CB_EX1] && isArrow(EX1_item)) || (Press[CB_EX2] && isArrow(EX2_item))))
+	if(/*canShootArrow() && */((Input->Press[CB_B] && isArrow(B_item)) || (Input->Press[CB_EX1] && isArrow(EX1_item)) || (Input->Press[CB_EX2] && isArrow(EX2_item))))
 	{ //Fire arrow!
 		arrowAimMode = false;
 		Hero->ItemJinx = 3;
@@ -434,71 +434,71 @@ void runOmniArrows(int mult)
 	}
 	else
 	{ //Aiming arrows
-		if(Press[CB_L]){arrowAimMode = false; return;}
-		if(Hold[CB_R])
+		if(Input->Press[CB_L]){arrowAimMode = false; return;}
+		if(Input->Hold[CB_R])
 		{
-			if(Hold[CB_RIGHT] && Hold[CB_DOWN]) angle = 45;
-			else if(Hold[CB_LEFT] && Hold[CB_DOWN]) angle = 135;
-			else if(Hold[CB_LEFT] && Hold[CB_UP]) angle = 225;
-			else if(Hold[CB_RIGHT] && Hold[CB_UP]) angle = 315;
-			else if(Hold[CB_RIGHT]) angle = 0;
-			else if(Hold[CB_DOWN]) angle = 90;
-			else if(Hold[CB_LEFT]) angle = 180;
-			else if(Hold[CB_UP]) angle = 270;
+			if(Input->Hold[CB_RIGHT] && Input->Hold[CB_DOWN]) angle = 45;
+			else if(Input->Hold[CB_LEFT] && Input->Hold[CB_DOWN]) angle = 135;
+			else if(Input->Hold[CB_LEFT] && Input->Hold[CB_UP]) angle = 225;
+			else if(Input->Hold[CB_RIGHT] && Input->Hold[CB_UP]) angle = 315;
+			else if(Input->Hold[CB_RIGHT]) angle = 0;
+			else if(Input->Hold[CB_DOWN]) angle = 90;
+			else if(Input->Hold[CB_LEFT]) angle = 180;
+			else if(Input->Hold[CB_UP]) angle = 270;
 		}
 		else
 		{
 			int startAngle = angle;
-			if(Hold[CB_RIGHT] && Hold[CB_DOWN])
+			if(Input->Hold[CB_RIGHT] && Input->Hold[CB_DOWN])
 			{
 				if(startAngle != 45)
 				{
 					angle += (startAngle > 45 && startAngle < 225) ? -mult : mult;
 				}
 			}
-			else if(Hold[CB_LEFT] && Hold[CB_DOWN])
+			else if(Input->Hold[CB_LEFT] && Input->Hold[CB_DOWN])
 			{
 				if(startAngle != 135)
 				{
 					angle += (startAngle > 135 && startAngle < 315) ? -mult : mult;
 				}
 			}
-			else if(Hold[CB_LEFT] && Hold[CB_UP])
+			else if(Input->Hold[CB_LEFT] && Input->Hold[CB_UP])
 			{
 				if(startAngle != 225)
 				{
 					angle += (startAngle > 45 && startAngle < 225) ? mult : -mult;
 				}
 			}
-			else if(Hold[CB_RIGHT] && Hold[CB_UP])
+			else if(Input->Hold[CB_RIGHT] && Input->Hold[CB_UP])
 			{
 				if(startAngle != 315)
 				{
 					angle += (startAngle > 135 && startAngle < 315) ? mult : -mult;
 				}
 			}
-			else if(Hold[CB_UP])
+			else if(Input->Hold[CB_UP])
 			{
 				if(startAngle != 270)
 				{
 					angle += (startAngle > 90 && startAngle < 270) ? mult : -mult;
 				}
 			}
-			else if(Hold[CB_DOWN])
+			else if(Input->Hold[CB_DOWN])
 			{
 				if(startAngle != 90)
 				{
 					angle += (startAngle > 90 && startAngle < 270) ? -mult : mult;
 				}
 			}
-			else if(Hold[CB_LEFT])
+			else if(Input->Hold[CB_LEFT])
 			{
 				if(startAngle != 180)
 				{
 					angle += (startAngle < 180) ? mult : -mult;
 				}
 			}
-			else if(Hold[CB_RIGHT])
+			else if(Input->Hold[CB_RIGHT])
 			{
 				if(startAngle != 0)
 				{
@@ -669,7 +669,7 @@ void RefreshBottles(){
 
 int UsingEmptyBottle(){
 	if(Hero->Action!=LA_WALKING&&Hero->Action!=LA_NONE)return -1;
-	if(Press[CB_A]){
+	if(Input->Press[CB_A]){
 		int id = GetEquipmentA();
 		if(id>0){
 			itemdata A = Game->LoadItemData(id);
@@ -677,7 +677,7 @@ int UsingEmptyBottle(){
 				return A->Level-1;
 		}
 	}
-	else if(Press[CB_B]){
+	else if(Input->Press[CB_B]){
 		int id = GetEquipmentB();
 		if(id>0){
 			itemdata B = Game->LoadItemData(id);
@@ -1040,7 +1040,7 @@ ffc script ItemShop{//start
 		itemdata ic = Game->LoadItemData(id);
 		while(true){
 			if(Hero->X>this->X-8&&Hero->X<this->X+8&&Hero->Y>this->Y&&Hero->Y<this->Y+10&&Hero->Dir==DIR_UP){
-				if(Press[CB_R]){
+				if(Input->Press[CB_R]){
 					if(fullCounter(CR_RUPEES)>=price){
 						if(potion>0&&!CanFillBottle()){
 							ShowMessageAndWait(STR_NOBOTTLE);
@@ -1168,7 +1168,7 @@ item script Bombchu
 	//The Counter reference in the pickup tab is what counter it will use.
 	void run(int ffcScriptNum, int step, int sprite)
 	{
-		if(!Press[CB_A] && !Press[CB_B]) Quit();
+		if(!Input->Press[CB_A] && !Input->Press[CB_B]) Quit();
 		if(CountFFCsRunning(ffcScriptNum) == 0 && Game->Counter[this->Counter] > 0)
 		{
 			Game->Counter[this->Counter]--;

@@ -135,41 +135,41 @@ int dirY(int dir)//start
 }//end
 void stopScreenTransition(int pxD,int pxR,int pxL, int pxU)//start
 {
-	if(Hero->Y>160-pxD)Hold[CB_DOWN]=false;
-	if(Hero->X>240-pxR)Hold[CB_RIGHT]=false;
-	if(Hero->X<0+pxL)Hold[CB_LEFT]=false;
-	if(Hero->Y<0+pxU)Hold[CB_UP]=false;
+	if(Hero->Y>160-pxD)Input->Hold[CB_DOWN]=false;
+	if(Hero->X>240-pxR)Input->Hold[CB_RIGHT]=false;
+	if(Hero->X<0+pxL)Input->Hold[CB_LEFT]=false;
+	if(Hero->Y<0+pxU)Input->Hold[CB_UP]=false;
 }//end
 void MyNoAction()//start
 {
-	Hold[CB_DOWN]=false;Press[CB_DOWN]=false;
-	Hold[CB_RIGHT]=false;Press[CB_RIGHT]=false;
-	Hold[CB_LEFT]=false;Press[CB_LEFT]=false;
-	Hold[CB_UP]=false;Press[CB_UP]=false;
-	Hold[CB_A]=false;Press[CB_A]=false;
-	Hold[CB_B]=false;Press[CB_B]=false;
-	Hold[CB_R]=false;Press[CB_R]=false;
-	Hold[CB_L]=false;Press[CB_L]=false;
-	Hold[CB_EX1]=false;Press[CB_EX1]=false;
-	Hold[CB_EX2]=false;Press[CB_EX2]=false;
-	Hold[CB_EX3]=false;Press[CB_EX3]=false;
-	Hold[CB_EX4]=false; Press[CB_EX4]=false;
+	Input->Hold[CB_DOWN]=false;Input->Press[CB_DOWN]=false;
+	Input->Hold[CB_RIGHT]=false;Input->Press[CB_RIGHT]=false;
+	Input->Hold[CB_LEFT]=false;Input->Press[CB_LEFT]=false;
+	Input->Hold[CB_UP]=false;Input->Press[CB_UP]=false;
+	Input->Hold[CB_A]=false;Input->Press[CB_A]=false;
+	Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
+	Input->Hold[CB_R]=false;Input->Press[CB_R]=false;
+	Input->Hold[CB_L]=false;Input->Press[CB_L]=false;
+	Input->Hold[CB_EX1]=false;Input->Press[CB_EX1]=false;
+	Input->Hold[CB_EX2]=false;Input->Press[CB_EX2]=false;
+	Input->Hold[CB_EX3]=false;Input->Press[CB_EX3]=false;
+	Input->Hold[CB_EX4]=false; Input->Press[CB_EX4]=false;
 }//end
 void NoActionButMoveAndEx4()//start
 {
-	Hold[CB_A]=false;Press[CB_A]=false;
-	Hold[CB_B]=false;Press[CB_B]=false;
-	Hold[CB_R]=false;Press[CB_R]=false;
-	Hold[CB_L]=false;Press[CB_L]=false;
-	Hold[CB_EX1]=false;Press[CB_EX1]=false;
-	Hold[CB_EX2]=false;Press[CB_EX2]=false;
-	Hold[CB_EX3]=false;Press[CB_EX3]=false;
+	Input->Hold[CB_A]=false;Input->Press[CB_A]=false;
+	Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
+	Input->Hold[CB_R]=false;Input->Press[CB_R]=false;
+	Input->Hold[CB_L]=false;Input->Press[CB_L]=false;
+	Input->Hold[CB_EX1]=false;Input->Press[CB_EX1]=false;
+	Input->Hold[CB_EX2]=false;Input->Press[CB_EX2]=false;
+	Input->Hold[CB_EX3]=false;Input->Press[CB_EX3]=false;
 }//end
 void TotalNoAction()//start
 {
 	MyNoAction();
-	Press[CB_START]=false;
-	Hold[CB_START]=false;
+	Input->Press[CB_START]=false;
+	Input->Hold[CB_START]=false;
 }//end
 void WaitTotalNoAction()//start
 {
@@ -185,25 +185,25 @@ void WaitTotalNoAction(int frames)//start
 }//end
 void NoActionButA()//start
 {
-	Hold[CB_DOWN]=false;Press[CB_DOWN]=false;
-	Hold[CB_RIGHT]=false;Press[CB_RIGHT]=false;
-	Hold[CB_LEFT]=false;Press[CB_LEFT]=false;
-	Hold[CB_UP]=false;Press[CB_UP]=false;
-	Hold[CB_B]=false;Press[CB_B]=false;
-	Hold[CB_R]=false;Press[CB_R]=false;
-	Hold[CB_L]=false;Press[CB_L]=false;
-	Hold[CB_EX1]=false;Press[CB_EX1]=false;
-	Hold[CB_EX2]=false;Press[CB_EX2]=false;
-	Hold[CB_EX3]=false;Press[CB_EX3]=false;
+	Input->Hold[CB_DOWN]=false;Input->Press[CB_DOWN]=false;
+	Input->Hold[CB_RIGHT]=false;Input->Press[CB_RIGHT]=false;
+	Input->Hold[CB_LEFT]=false;Input->Press[CB_LEFT]=false;
+	Input->Hold[CB_UP]=false;Input->Press[CB_UP]=false;
+	Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
+	Input->Hold[CB_R]=false;Input->Press[CB_R]=false;
+	Input->Hold[CB_L]=false;Input->Press[CB_L]=false;
+	Input->Hold[CB_EX1]=false;Input->Press[CB_EX1]=false;
+	Input->Hold[CB_EX2]=false;Input->Press[CB_EX2]=false;
+	Input->Hold[CB_EX3]=false;Input->Press[CB_EX3]=false;
 }//end
 void NoActionButMoveAndEx4AndA()//start
 {
-	Hold[CB_B]=false;Press[CB_B]=false;
-	Hold[CB_R]=false;Press[CB_R]=false;
-	Hold[CB_L]=false;Press[CB_L]=false;
-	Hold[CB_EX1]=false;Press[CB_EX1]=false;
-	Hold[CB_EX2]=false;Press[CB_EX2]=false;
-	Hold[CB_EX3]=false;Press[CB_EX3]=false;
+	Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
+	Input->Hold[CB_R]=false;Input->Press[CB_R]=false;
+	Input->Hold[CB_L]=false;Input->Press[CB_L]=false;
+	Input->Hold[CB_EX1]=false;Input->Press[CB_EX1]=false;
+	Input->Hold[CB_EX2]=false;Input->Press[CB_EX2]=false;
+	Input->Hold[CB_EX3]=false;Input->Press[CB_EX3]=false;
 }//end
 bool isTouchingCombo(int comboID)//start
 {
@@ -217,10 +217,10 @@ bool isTouchingCombo(int comboID)//start
 }//end
 void NoDirs()//start
 {
-	Hold[CB_DOWN]=false;Press[CB_DOWN]=false;
-	Hold[CB_RIGHT]=false;Press[CB_RIGHT]=false;
-	Hold[CB_LEFT]=false;Press[CB_LEFT]=false;
-	Hold[CB_UP]=false;Press[CB_UP]=false;
+	Input->Hold[CB_DOWN]=false;Input->Press[CB_DOWN]=false;
+	Input->Hold[CB_RIGHT]=false;Input->Press[CB_RIGHT]=false;
+	Input->Hold[CB_LEFT]=false;Input->Press[CB_LEFT]=false;
+	Input->Hold[CB_UP]=false;Input->Press[CB_UP]=false;
 }//end
 int countNPCInRange(int x, int y, int radius)//start
 {
@@ -302,7 +302,7 @@ void ffcSolid(ffc anFFC)//start
 			{
 				if(Hero->X<=anFFC->X+(width-1))
 				{
-					if(Hold[CB_DOWN])
+					if(Input->Hold[CB_DOWN])
 					{
 						if(Hero->Y!=anFFC->Y-16)Hero->Y=anFFC->Y-16;
 						Hero->Dir=DIR_DOWN;
@@ -312,8 +312,8 @@ void ffcSolid(ffc anFFC)//start
 						}
 						else if(Hero->X<=anFFC->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-anFFC->X-16),false))Hero->X=anFFC->X-16;
 					}
-					Hold[CB_DOWN]=false;
-					Press[CB_DOWN]=false;
+					Input->Hold[CB_DOWN]=false;
+					Input->Press[CB_DOWN]=false;
 					return;
 				}
 			}
@@ -327,7 +327,7 @@ void ffcSolid(ffc anFFC)//start
 			{
 				if(Hero->X<=anFFC->X+(width-1))
 				{
-					if(Hold[CB_UP])
+					if(Input->Hold[CB_UP])
 					{
 						if(Hero->Y!=anFFC->Y+bottomheight)Hero->Y=anFFC->Y+bottomheight;
 						Hero->Dir=DIR_UP;
@@ -337,8 +337,8 @@ void ffcSolid(ffc anFFC)//start
 						}
 						else if(Hero->X<=anFFC->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-anFFC->X-16),false))Hero->X=anFFC->X-16;
 					}
-					Hold[CB_UP]=false;
-					Press[CB_UP]=false;
+					Input->Hold[CB_UP]=false;
+					Input->Press[CB_UP]=false;
 					return;
 				}
 			}
@@ -352,7 +352,7 @@ void ffcSolid(ffc anFFC)//start
 			{
 				if(Hero->Y>=anFFC->Y-15)
 				{
-					if(Hold[CB_RIGHT])
+					if(Input->Hold[CB_RIGHT])
 					{
 						if(Hero->X!=anFFC->X-16)Hero->X=anFFC->X-16;
 						Hero->Dir=DIR_RIGHT;
@@ -362,8 +362,8 @@ void ffcSolid(ffc anFFC)//start
 						}
 						else if(Hero->Y<=anFFC->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(anFFC->Y-16)),false))Hero->Y=anFFC->Y-16;
 					}
-					Hold[CB_RIGHT]=false;
-					Press[CB_RIGHT]=false;
+					Input->Hold[CB_RIGHT]=false;
+					Input->Press[CB_RIGHT]=false;
 					return;
 				}
 			}
@@ -377,7 +377,7 @@ void ffcSolid(ffc anFFC)//start
 			{
 				if(Hero->Y<=anFFC->Y+(bottomheight-1))
 				{
-					if(Hold[CB_LEFT])
+					if(Input->Hold[CB_LEFT])
 					{
 						if(Hero->X!=anFFC->X+width)Hero->X=anFFC->X+width;
 						Hero->Dir=DIR_LEFT;
@@ -387,8 +387,8 @@ void ffcSolid(ffc anFFC)//start
 						}
 						else if(Hero->Y<=anFFC->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(anFFC->Y-16)),false))Hero->Y=anFFC->Y-16;
 					}
-					Hold[CB_LEFT]=false;
-					Press[CB_LEFT]=false;
+					Input->Hold[CB_LEFT]=false;
+					Input->Press[CB_LEFT]=false;
 					return;
 				}
 			}
@@ -452,37 +452,6 @@ void FastLine(int layer, int x, int y, int x2, int y2, int color, int opacity)//
 void HeightFastLine(int layer, int x, int y, int x2, int y2, int color, int opacity)//start
 {
 	HeightLine(layer, x, y, x2, y2, color, 0, 0, 0, 0, opacity);
-}//end
-void PollInput()//start
-{
-	for(int j = 0; j < BTN_MAX; ++j)
-	{
-		Hold[j] = Input->Hold[j];
-		Press[j] = Input->Press[j];
-	}
-}//end
-void PushInput()//start
-{
-	for(int j = 0; j < BTN_MAX; ++j)
-	{
-		Input->Hold[j] = Hold[j];
-		Input->Press[j] = Press[j];
-	}
-}//end
-void WaitframeInput()//start
-{
-	PushInput();	
-	Input->Press[CB_R]=false;Input->Hold[CB_R]=false;
-	Input->Press[CB_L]=false;Input->Hold[CB_L]=false;
-	Input->Press[CB_MAP]=false;Input->Hold[CB_MAP]=false;
-	Waitframe();
-	PollInput();
-}//end
-void WaitdrawInput()//start
-{
-	PushInput();
-	Waitdraw();
-	PollInput();
 }//end
 //end Misc Functions
 //start Keyboard
@@ -678,15 +647,5 @@ int getKeyPress()
 
 //start misc2
 //This WAS in `std_zh` at one point, but vanished?
-int GetLinkTileModifier(item i){
-	itemdata ii = Game->LoadItemData(i->ID);
-	return ii->Modifier;
-}
-
-int GetLinkTileModifier(int i){
-	itemdata ii = Game->LoadItemData(i);
-	return ii->Modifier;
-}
-
 
 //end

@@ -29,10 +29,10 @@ ffc script NPC
 		{
 			while(visible)
 			{
-				if(AgainstFFCBase(this) && Press[CB_A])
+				if(AgainstFFCBase(this) && Input->Press[CB_A])
 				{
-					Hold[CB_A] = false;
-					Press[CB_A] = false;
+					Input->Hold[CB_A] = false;
+					Input->Press[CB_A] = false;
 					interact(this, NPCid);
 				}
 				if(isAfter(endday,endhour,true) || isBefore(startday,starthour,false))
@@ -71,10 +71,10 @@ ffc script NPC
 						Screen->ComboD[loc]=comboUnder;
 						while(visible)
 						{
-							if(AgainstFFCBase(this) && Press[CB_A])
+							if(AgainstFFCBase(this) && Input->Press[CB_A])
 							{
-								Hold[CB_A] = false;
-								Press[CB_A] = false;
+								Input->Hold[CB_A] = false;
+								Input->Press[CB_A] = false;
 								interact(this, NPCid);
 							}
 							Waitframe();
@@ -88,10 +88,10 @@ ffc script NPC
 					this->Data=NPCcombo;
 					while(true)
 					{
-						if(AgainstFFCBase(this) && Press[CB_A])
+						if(AgainstFFCBase(this) && Input->Press[CB_A])
 						{
-							Hold[CB_A] = false;
-							Press[CB_A] = false;
+							Input->Hold[CB_A] = false;
+							Input->Press[CB_A] = false;
 							interact(this, NPCid);
 						}
 						Waitframe();
@@ -169,10 +169,10 @@ ffc script NPC
 									break;
 							}
 						}
-						if(AgainstFFCBase(this) && Press[CB_A])
+						if(AgainstFFCBase(this) && Input->Press[CB_A])
 						{
-							Hold[CB_A] = false;
-							Press[CB_A] = false;
+							Input->Hold[CB_A] = false;
+							Input->Press[CB_A] = false;
 							if(form != 1 && !getGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE))
 							{
 								interact(this, NPCid, 0, {1});
@@ -204,7 +204,7 @@ ffc script NPC
 							Hero->X = 160;
 							Hero->Y = 96;
 						}
-						if(AgainstFFCBase(this) && Press[CB_A])
+						if(AgainstFFCBase(this) && Input->Press[CB_A])
 						{
 							interact(this, NPCid);
 						}
@@ -222,7 +222,7 @@ ffc script NPC
 							Hero->X = 80;
 							Hero->Y = 16;
 						}
-						if(AgainstFFCBase(this) && Press[CB_A])
+						if(AgainstFFCBase(this) && Input->Press[CB_A])
 						{
 							interact(this, NPCid);
 						}
@@ -899,18 +899,18 @@ ffc script Signpost
 //!!These functions should only be included in your script file once!!
 bool SelectPressInput(int input)
 {
-    if(input == 0) return Press[CB_A];
-    else if(input == 1) return Press[CB_B];
-    else if(input == 2) return Press[CB_L];
-    else if(input == 3) return Press[CB_R];
+    if(input == 0) return Input->Press[CB_A];
+    else if(input == 1) return Input->Press[CB_B];
+    else if(input == 2) return Input->Press[CB_L];
+    else if(input == 3) return Input->Press[CB_R];
 }
 
 void SetInput(int input, bool state)
 {
-    if(input == 0) Hold[CB_A] = state;
-    else if(input == 1) Hold[CB_B] = state;
-    else if(input == 2) Hold[CB_L] = state;
-    else if(input == 3) Hold[CB_R] = state;
+    if(input == 0) Input->Hold[CB_A] = state;
+    else if(input == 1) Input->Hold[CB_B] = state;
+    else if(input == 2) Input->Hold[CB_L] = state;
+    else if(input == 3) Input->Hold[CB_R] = state;
 }
 //end Signpost
 //start Shop
@@ -1033,31 +1033,31 @@ int chooseTripleDigitNum(int max, int sfx)
         Screen->FastTile(6,FIRSTX,FIRSTY,NUMZERO+nums[0],2,OP_OPAQUE);
         Screen->FastTile(6,FIRSTX+16,FIRSTY,NUMZERO+nums[1],2,OP_OPAQUE);
         Screen->FastTile(6,FIRSTX+32,FIRSTY,NUMZERO+nums[2],2,OP_OPAQUE);
-        if(Press[CB_UP])
+        if(Input->Press[CB_UP])
 		{
             nums[cursor]++;
             if(nums[cursor]>9)nums[cursor]-=10;
 			Audio->PlaySound(sfx);
         }
-		else if(Press[CB_DOWN])
+		else if(Input->Press[CB_DOWN])
 		{
             nums[cursor]--;
             if(nums[cursor]<0)nums[cursor]+=10;
 			Audio->PlaySound(sfx);
         }
-        if(Press[CB_RIGHT])
+        if(Input->Press[CB_RIGHT])
 		{
             cursor++;
             if(cursor>2)cursor-=3;
 			Audio->PlaySound(sfx);
         }
-		else if(Press[CB_LEFT])
+		else if(Input->Press[CB_LEFT])
 		{
             cursor--;
             if(cursor<0)cursor+=3;
 			Audio->PlaySound(sfx);
         }
-        if(Press[CB_A])
+        if(Input->Press[CB_A])
 		{
             num = (nums[0]*100)+(nums[1]*10)+(nums[2]);
             if(num>max)
@@ -1096,11 +1096,11 @@ ffc script lockedDoor
 					while(hour>=22||hour<6)
 					{
 						Screen->ComboD[loc] = undercombo;
-						if(Press[CB_A])
+						if(Input->Press[CB_A])
 						{
 							if(AgainstFFCBase(this))
 							{
-								Press[CB_A]=false;Hold[CB_A]=false;
+								Input->Press[CB_A]=false;Input->Hold[CB_A]=false;
 								ShowStringAndWait("Shooting Gallery@char(26)((6 a.m. to 10 p.m.))");
 								
 							}
