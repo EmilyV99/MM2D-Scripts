@@ -174,7 +174,7 @@ global script typingBasic
 		//
 		while(true)
 		{
-			//handleTyping() should be the FIRST thing in your while(true), so that it can cancel Link's input if typing is active.
+			//handleTyping() should be the FIRST thing in your while(true), so that it can cancel Hero's input if typing is active.
 			handleTyping();
 			Waitdraw();
 			Waitframe();

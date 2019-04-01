@@ -153,19 +153,19 @@ ffc script NPC
 							{
 								case 7:
 									Screen->ComboD[loc+32] = 38410;
-									if(Link->X>=this->X-16)Link->X=this->X-16;
+									if(Hero->X>=this->X-16)Hero->X=this->X-16;
 									break;
 								case 8:
 									Screen->ComboD[loc+32] = 38410;
-									if(Link->X<this->X+16)Link->X=this->X+16;
+									if(Hero->X<this->X+16)Hero->X=this->X+16;
 									break;
 								case 9:
 									Screen->ComboD[loc+16] = 38410;
-									if(Link->Y<this->Y+24)Link->Y=this->Y+24;
+									if(Hero->Y<this->Y+24)Hero->Y=this->Y+24;
 									break;
 								case 10:
 									Screen->ComboD[loc+16] = 38410;
-									if(Link->Y>this->Y)Link->Y=this->Y;
+									if(Hero->Y>this->Y)Hero->Y=this->Y;
 									break;
 							}
 						}
@@ -200,9 +200,9 @@ ffc script NPC
 						if(hour>22||hour<6)
 						{
 							ShowStringAndWait("OK, it's closing time.@char(26)See ya!");
-							Link->PitWarp(1,0x7C);
-							Link->X = 160;
-							Link->Y = 96;
+							Hero->PitWarp(1,0x7C);
+							Hero->X = 160;
+							Hero->Y = 96;
 						}
 						if(AgainstFFCBase(this) && Press[CB_A])
 						{
@@ -218,9 +218,9 @@ ffc script NPC
 						if(hour<6||hour>22)
 						{
 							ShowStringAndWait("Oh, I'm sorry. It's already time to close up shop. Come again.");
-							Link->PitWarp(1,0x7C);
-							Link->X = 80;
-							Link->Y = 16;
+							Hero->PitWarp(1,0x7C);
+							Hero->X = 80;
+							Hero->Y = 16;
 						}
 						if(AgainstFFCBase(this) && Press[CB_A])
 						{
@@ -348,7 +348,7 @@ ffc script NPC
 			//end
 			case 6://Difficulty-Changing Tablet start
 			{
-				if(!Link->Item[I_OCARINA])
+				if(!Hero->Item[I_OCARINA])
 				{
 					ShowNPCStringAndWait("Huh, this tablet seems like it's magical, but it isn't working now.",6);
 				}
@@ -382,7 +382,7 @@ ffc script NPC
 					{
 						updateDifficulty(tangoTempI);
 						saveTheGame();
-						Link->Warp(0,0x10);
+						Hero->Warp(0,0x10);
 						resetTime();
 					}
 				}
@@ -498,7 +498,7 @@ ffc script NPC
 					{
 						while(true)
 						{
-							if(!Link->Item[I_BOWARROW])
+							if(!Hero->Item[I_BOWARROW])
 							{
 								if(day<3)ShowStringAndWait("Huh? You don't have a bow?@char(26)Then I guess you can't play.");
 								else ShowStringAndWait("Huh? You don't have a bow?@char(26)Well, that's too bad...");
@@ -542,12 +542,12 @@ ffc script NPC
 									ShowStringAndWait("Well look at that! You hit @number(@ttempi)! Well, here ya go!");
 									if(getFlagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG1))
 									{
-										item itm = CreateItemAt(I_RUPEE50,Link->X,Link->Y);
+										item itm = CreateItemAt(I_RUPEE50,Hero->X,Hero->Y);
 										itm->Pickup = IP_HOLDUP;
 									}
 									else
 									{
-										item itm = CreateItemAt(I_QUIVER_BIG,Link->X,Link->Y);
+										item itm = CreateItemAt(I_QUIVER_BIG,Hero->X,Hero->Y);
 										itm->Pickup = IP_HOLDUP;
 										flagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG1);
 									}
@@ -560,12 +560,12 @@ ffc script NPC
 									ShowStringAndWait("Well, here ya go!");
 									if(getFlagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG2))
 									{
-										item itm = CreateItemAt(I_RUPEE200,Link->X,Link->Y);
+										item itm = CreateItemAt(I_RUPEE200,Hero->X,Hero->Y);
 										itm->Pickup = IP_HOLDUP;
 									}
 									else
 									{
-										item itm = CreateItemAt(I_HCPIECE,Link->X,Link->Y);
+										item itm = CreateItemAt(I_HCPIECE,Hero->X,Hero->Y);
 										itm->Pickup = IP_HOLDUP;
 										flagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG2);
 									}
@@ -593,7 +593,7 @@ ffc script NPC
 								ShowStringAndWait("Oh! When I saw that fairy, I thought you were that troublemakin' brat with the mask.");
 								setNPCflag(11,FLAG3);
 							}
-							if(Link->Item[I_BOWARROW])ShowStringAndWait("Sorry, but you can't play if you can't shoot a bow.");
+							if(Hero->Item[I_BOWARROW])ShowStringAndWait("Sorry, but you can't play if you can't shoot a bow.");
 							else ShowStringAndWait("Sorry, but you can't play if you don't have a bow.");
 							break;
 						case 2:
@@ -603,7 +603,7 @@ ffc script NPC
 								ShowStringAndWait("But...");
 								setNPCflag(11,FLAG4);
 							}
-							if(Link->Item[I_BOWARROW])ShowStringAndWait("Sorry...If you can't shoot a bow, you can't play.");
+							if(Hero->Item[I_BOWARROW])ShowStringAndWait("Sorry...If you can't shoot a bow, you can't play.");
 							else ShowStringAndWait("Sorry...If you don't have a bow, you can't play.");
 							break;
 						case 3:
@@ -613,7 +613,7 @@ ffc script NPC
 								ShowStringAndWait("Well, let me tell ya");
 								setNPCflag(11,FLAG5);
 							}
-							if(Link->Item[I_BOWARROW])ShowStringAndWait("If you can't shoot a bow, you can't play. Sorry.");
+							if(Hero->Item[I_BOWARROW])ShowStringAndWait("If you can't shoot a bow, you can't play. Sorry.");
 							else ShowStringAndWait("If you don't have a bow, you can't play. Sorry.");
 							break;
 					}
@@ -746,7 +746,7 @@ ffc script cutscene
 			{
 				while(waiting)
 				{
-					if(Link->X>this->X-32&&Link->X<this->X+32&&Link->Y>this->Y-8)
+					if(Hero->X>this->X-32&&Hero->X<this->X+32&&Hero->Y>this->Y-8)
 					{
 						waiting=false;
 					}
@@ -761,7 +761,7 @@ ffc script cutscene
 				Waitframe();
 				Game->PlaySound(220);
 				ShowMessageAndWait(5);
-				Link->Y=this->Y-16;
+				Hero->Y=this->Y-16;
 				waiting=true;
 			}
 			//end 1
@@ -802,10 +802,10 @@ ffc script cutscene
 						{
 							Screen->ComboD[combos[i]]=38402;
 						}
-						if(Link->X>=this->X-8&&Link->X<this->X+48&&Link->Y>=this->Y-8&&Link->Y<this->Y+32)
+						if(Hero->X>=this->X-8&&Hero->X<this->X+48&&Hero->Y>=this->Y-8&&Hero->Y<this->Y+32)
 						{
-							Link->X=this->X+16;
-							Link->Y=this->Y+32;
+							Hero->X=this->X+16;
+							Hero->Y=this->Y+32;
 						}
 						while(true)
 						{
@@ -878,19 +878,19 @@ ffc script Signpost
 		if(isFrozen)return false;
 		if(largeHitbox && !anySide)
 		{
-			return Link->Z == 0 && (Link->Dir == DIR_UP && Link->Y == ComboY(loc)+16 && Abs(Link->X-ComboX(loc)) < 8);
+			return Hero->Z == 0 && (Hero->Dir == DIR_UP && Hero->Y == ComboY(loc)+16 && Abs(Hero->X-ComboX(loc)) < 8);
 		}
 		else if (!largeHitbox&&!anySide)
 		{
-			return Link->Z == 0 && (Link->Dir == DIR_UP && Link->Y == ComboY(loc)+8 && Abs(Link->X-ComboX(loc)) < 8);
+			return Hero->Z == 0 && (Hero->Dir == DIR_UP && Hero->Y == ComboY(loc)+8 && Abs(Hero->X-ComboX(loc)) < 8);
 		}
 		else if (largeHitbox && anySide)
 		{
-			return Link->Z == 0 && ((Link->Dir == DIR_UP && Link->Y == ComboY(loc)+16 && Abs(Link->X-ComboX(loc)) < 8)||(Link->Dir == DIR_DOWN && Link->Y == ComboY(loc)-16 && Abs(Link->X-ComboX(loc)) < 8)||(Link->Dir == DIR_LEFT && Link->X == ComboX(loc)+16 && Abs(Link->Y-ComboY(loc)) < 8)||(Link->Dir == DIR_RIGHT && Link->X == ComboX(loc)-16 && Abs(Link->Y-ComboY(loc)) < 8));
+			return Hero->Z == 0 && ((Hero->Dir == DIR_UP && Hero->Y == ComboY(loc)+16 && Abs(Hero->X-ComboX(loc)) < 8)||(Hero->Dir == DIR_DOWN && Hero->Y == ComboY(loc)-16 && Abs(Hero->X-ComboX(loc)) < 8)||(Hero->Dir == DIR_LEFT && Hero->X == ComboX(loc)+16 && Abs(Hero->Y-ComboY(loc)) < 8)||(Hero->Dir == DIR_RIGHT && Hero->X == ComboX(loc)-16 && Abs(Hero->Y-ComboY(loc)) < 8));
 		}
 		else if (!largeHitbox && anySide)
 		{
-			return Link->Z == 0 && ((Link->Dir == DIR_UP && Link->Y == ComboY(loc)+8 && Abs(Link->X-ComboX(loc)) < 8)||(Link->Dir == DIR_DOWN && Link->Y == ComboY(loc)-16 && Abs(Link->X-ComboX(loc)) < 8)||(Link->Dir == DIR_LEFT && Link->X == ComboX(loc)+16 && Abs(Link->Y-ComboY(loc)) < 8)||(Link->Dir == DIR_RIGHT && Link->X == ComboX(loc)-16 && Abs(Link->Y-ComboY(loc)) < 8));
+			return Hero->Z == 0 && ((Hero->Dir == DIR_UP && Hero->Y == ComboY(loc)+8 && Abs(Hero->X-ComboX(loc)) < 8)||(Hero->Dir == DIR_DOWN && Hero->Y == ComboY(loc)-16 && Abs(Hero->X-ComboX(loc)) < 8)||(Hero->Dir == DIR_LEFT && Hero->X == ComboX(loc)+16 && Abs(Hero->Y-ComboY(loc)) < 8)||(Hero->Dir == DIR_RIGHT && Hero->X == ComboX(loc)-16 && Abs(Hero->Y-ComboY(loc)) < 8));
 		}
 		else {return false;}
     }
@@ -944,7 +944,7 @@ ffc script Shop{
 			if((fullCounter(CR_RUPEES))>=price&&(!reqBottle||hasEmptyBottle)){
 				ShowMessageAndWait(MSG_SHOPS);
 				if(tangoTemp){
-					item itm = CreateItemAt(itemID, Link->X, Link->Y);
+					item itm = CreateItemAt(itemID, Hero->X, Hero->Y);
 					itm->Pickup = IP_HOLDUP;
 					Game->DCounter[CR_RUPEES] -= price;
 					WaitNoAction(10);
@@ -957,7 +957,7 @@ ffc script Shop{
         }
 	}
     bool AgainstComboBase(int loc){
-		return Link->Z == 0 && (Link->Dir == DIR_UP && (Link->Y >= ComboY(loc)+8&&Link->Y <ComboY(loc)+16) && Abs(Link->X-ComboX(loc)) < 8);
+		return Hero->Z == 0 && (Hero->Dir == DIR_UP && (Hero->Y >= ComboY(loc)+8&&Hero->Y <ComboY(loc)+16) && Abs(Hero->X-ComboX(loc)) < 8);
     }
 }
 //end Shop
@@ -978,14 +978,14 @@ void bankGiveRewards()
 {
 	if(fullCounter(CR_BANKBAL)>=200&&!getGlobalVar(GVAR_BANK_REW1,GV_MISC))
 	{
-		if(Link->Item[41])
+		if(Hero->Item[41])
 		{
-			item i = CreateItemAt(42,Link->X,Link->Y);
+			item i = CreateItemAt(42,Hero->X,Hero->Y);
 			i->Pickup = IP_HOLDUP;
 		}
 		else
 		{
-			item i = CreateItemAt(41,Link->X,Link->Y);
+			item i = CreateItemAt(41,Hero->X,Hero->Y);
 			i->Pickup = IP_HOLDUP;
 		}
 		ShowStringAndWait("Here, you've deposited enough rupees to earn a reward!");
@@ -993,14 +993,14 @@ void bankGiveRewards()
 	}
 	if(fullCounter(CR_BANKBAL)>=1000&&!getGlobalVar(GVAR_BANK_REW2,GV_MISC))
 	{
-		item i = CreateItemAt(1,Link->X,Link->Y);
+		item i = CreateItemAt(1,Hero->X,Hero->Y);
 		i->Pickup = IP_HOLDUP;
 		ShowStringAndWait("Here, you've deposited enough rupees to earn another reward!");
 		setGlobalVar(GVAR_BANK_REW2,GV_MISC,1);
 	}
 	if(fullCounter(CR_BANKBAL)>=5000&&!getGlobalVar(GVAR_BANK_REW3,GV_MISC))
 	{
-		item i = CreateItemAt(I_HCPIECE,Link->X,Link->Y);
+		item i = CreateItemAt(I_HCPIECE,Hero->X,Hero->Y);
 		i->Pickup = IP_HOLDUP;
 		ShowStringAndWait("Here, you've deposited enough rupees to earn the final reward!");
 		setGlobalVar(GVAR_BANK_REW3,GV_MISC,1);
@@ -1130,5 +1130,5 @@ ffc script lockedDoor
 //end Locked Door
 bool AgainstFFCBase(ffc f)
 {
-	return !isFrozen && Link->Z == 0 && ((Link->Dir == DIR_UP && Link->Y == f->Y+8+(16*(f->TileHeight-1)) && Abs(Link->X-f->X) < 8)||(Link->Dir == DIR_DOWN && Link->Y == f->Y-16 + (16*(f->TileHeight-1)) && Abs(Link->X-f->X) < 8)||(Link->Dir == DIR_LEFT && Link->X == f->X+(16*f->TileWidth) && Link->Y <= f->Y+8+(16*(f->TileHeight-1)) && Link->Y >= f->Y-8+(16*(f->TileHeight-1)))||(Link->Dir == DIR_RIGHT && Link->X == f->X-16 && Link->Y <= f->Y+8+(16*(f->TileHeight-1)) && Link->Y >= f->Y-8+(16*(f->TileHeight-1))));
+	return !isFrozen && Hero->Z == 0 && ((Hero->Dir == DIR_UP && Hero->Y == f->Y+8+(16*(f->TileHeight-1)) && Abs(Hero->X-f->X) < 8)||(Hero->Dir == DIR_DOWN && Hero->Y == f->Y-16 + (16*(f->TileHeight-1)) && Abs(Hero->X-f->X) < 8)||(Hero->Dir == DIR_LEFT && Hero->X == f->X+(16*f->TileWidth) && Hero->Y <= f->Y+8+(16*(f->TileHeight-1)) && Hero->Y >= f->Y-8+(16*(f->TileHeight-1)))||(Hero->Dir == DIR_RIGHT && Hero->X == f->X-16 && Hero->Y <= f->Y+8+(16*(f->TileHeight-1)) && Hero->Y >= f->Y-8+(16*(f->TileHeight-1))));
 }

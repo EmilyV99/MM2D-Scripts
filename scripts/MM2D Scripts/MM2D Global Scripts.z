@@ -43,7 +43,7 @@ global script Global
 		//start init
 		ClearTrace();
 		TraceS("Launching TLoZ: Majora's Mask 2D...");TraceNL();
-		if(Link->Item[81])Game->MCounter[CR_BOMBCHUS]=40;
+		if(Hero->Item[81])Game->MCounter[CR_BOMBCHUS]=40;
 		bool scrnChanged = false;
 		LinkMovement_Init();
 		TangoInit();
@@ -127,13 +127,13 @@ global script Global
 					lastLevel = Game->GetCurLevel();
 				}
 			}
-			if(Link->HP!=lastHP)
+			if(Hero->HP!=lastHP)
 			{
-				if(Link->HP < lastHP)
+				if(Hero->HP < lastHP)
 				{
 					onLinkHurt();
 				}
-				lastHP = Link->HP;
+				lastHP = Hero->HP;
 			}
 			layer4Toggle();
 			if(subscreen)
@@ -222,7 +222,7 @@ global script Global
 			{
 				if(Hold[CB_B])
 				{
-					Link->ItemJinx=2;
+					Hero->ItemJinx=2;
 				}
 				else
 				{
@@ -242,11 +242,11 @@ global script Global
 			}
 			if(ocarina_mode||scarecrowRecord||songFrames>0)
 			{
-				Link->CollDetection = false;
+				Hero->CollDetection = false;
 			}
 			else
 			{
-				Link->CollDetection = true;
+				Hero->CollDetection = true;
 			}
 			//end Ocarina loopz
 			//start Subscreen
@@ -292,7 +292,7 @@ global script Global
 				handleFreezableWater();
 			}//end
 			//start
-			LinkActionOld=Link->Action;
+			LinkActionOld=Hero->Action;
 			raftingCheck();
 			LinkMovement_Update1();
 			if(!isFrozen)
@@ -346,10 +346,10 @@ global script Global
 				toggleSubscreen();
 				Waitframe();
 			}
-			Link->Warp(0,32);
+			Hero->Warp(0,32);
 			Waitframes(2);
 			int args[8];
-			if(LEARNED_SONGS[SONG_SongOfTime]&&Link->Item[31])
+			if(LEARNED_SONGS[SONG_SongOfTime]&&Hero->Item[31])
 			{
 				args[0]=3;
 			}
@@ -470,7 +470,7 @@ global script Global
 	void changedScreens()
 	{
 		songOfStormsRain = false;
-		if(!floating)Link->Invisible=false;
+		if(!floating)Hero->Invisible=false;
 		if(lwArr[0]||ewArr[0])loadWeapons();
 		clearWeapons();
 		setGlobalVar(GVAR_MGSTATE,GV_MISC,0);
@@ -522,12 +522,12 @@ global script Global
 		if(floating<0)floating=0;
 		if(Deku_flying<0)Deku_flying=0;
 		if(Game->MCounter[CR_SBOMBS]>1)Game->MCounter[CR_SBOMBS]=1;//PATCHWORK//
-		if(rafting&&Link->Action!=LA_RAFTING)
+		if(rafting&&Hero->Action!=LA_RAFTING)
 		{
 			canFall=true;
 			rafting=false;
 		}
-		else if(!rafting&&Link->Action==LA_RAFTING)
+		else if(!rafting&&Hero->Action==LA_RAFTING)
 		{
 			canFall=false;
 			rafting=true;
@@ -537,28 +537,28 @@ global script Global
 	}//end
 	void raftingCheck()//start rafting
 	{
-		if(Link->Action==LA_RAFTING)
+		if(Hero->Action==LA_RAFTING)
 		{
 			Rafting[RAFT_DIR]=-1;
-			if(Press[CB_RIGHT]&&CanWalk(Link->X,Link->Y,DIR_RIGHT,16,false))
+			if(Press[CB_RIGHT]&&CanWalk(Hero->X,Hero->Y,DIR_RIGHT,16,false))
 			{
-				Link->X+=16;
-				Link->Action=LA_NONE;
+				Hero->X+=16;
+				Hero->Action=LA_NONE;
 			}
-			else if(Press[CB_LEFT]&&CanWalk(Link->X,Link->Y,DIR_LEFT,16,false))
+			else if(Press[CB_LEFT]&&CanWalk(Hero->X,Hero->Y,DIR_LEFT,16,false))
 			{
-				Link->X-=16;
-				Link->Action=LA_NONE;
+				Hero->X-=16;
+				Hero->Action=LA_NONE;
 			}
-			else if(Press[CB_UP]&&CanWalk(Link->X,Link->Y,DIR_UP,16,false))
+			else if(Press[CB_UP]&&CanWalk(Hero->X,Hero->Y,DIR_UP,16,false))
 			{
-				Link->Y-=16;
-				Link->Action=LA_NONE;
+				Hero->Y-=16;
+				Hero->Action=LA_NONE;
 			}
-			else if(Press[CB_DOWN]&&CanWalk(Link->X,Link->Y,DIR_DOWN,16,false))
+			else if(Press[CB_DOWN]&&CanWalk(Hero->X,Hero->Y,DIR_DOWN,16,false))
 			{
-				Link->Y+=16;
-				Link->Action=LA_NONE;
+				Hero->Y+=16;
+				Hero->Action=LA_NONE;
 			}
 		}
 		else if(Rafting[RAFT_DIR]!=-1)
@@ -580,11 +580,11 @@ global script Global
 			else
 			{
 				//
-				Link->Dir=Rafting[RAFT_DIR];
+				Hero->Dir=Rafting[RAFT_DIR];
 				if(Rafting[RAFT_X]!=-1&&Rafting[RAFT_Y]!=-1&&!(gameframe%10))
 				{
-					Link->X = Rafting[RAFT_X];
-					Link->Y = Rafting[RAFT_Y];
+					Hero->X = Rafting[RAFT_X];
+					Hero->Y = Rafting[RAFT_Y];
 				}
 				if(Rafting[RAFT_DIR]==DIR_DOWN)
 				{
@@ -710,7 +710,7 @@ global script Global
 			{
 				debug=!debug;
 				//Game->TypingMode = !Game->TypingMode;
-				Link->CollDetection=!debug;
+				Hero->CollDetection=!debug;
 				canFall=!debug;
 			}
 			if(debug)
@@ -811,8 +811,8 @@ global script Global
 				{
 					noSave = !noSave;
 				}
-				if(Input->ReadKey[KEY_0])Link->Warp(0,0x24);//Warp to test area
-				if(Input->ReadKey[KEY_R])Link->PitWarp(Game->GetCurDMap(),Game->GetCurDMapScreen());//Reset the screen by pitwarping to it
+				if(Input->ReadKey[KEY_0])Hero->Warp(0,0x24);//Warp to test area
+				if(Input->ReadKey[KEY_R])Hero->PitWarp(Game->GetCurDMap(),Game->GetCurDMapScreen());//Reset the screen by pitwarping to it
 				if(Input->ReadKey[KEY_BACKSLASH])dbdraw = !dbdraw;
 				if(Input->ReadKey[KEY_F])debugCanFall = !debugCanFall;
 				if(Input->ReadKey[KEY_OPENBRACE])warpDown();
@@ -833,17 +833,17 @@ global script Global
 		}
 		for(int i=0;i<48;i++)
 		{
-			if(ItemIDs[i]!=0)Link->Item[ItemIDs[i]]=true;
+			if(ItemIDs[i]!=0)Hero->Item[ItemIDs[i]]=true;
 		}
 		//bbags
-		Link->Item[81]=true;
-		Link->Item[82]=true;
-		Link->Item[83]=true;
-		Link->Item[106]=true;
+		Hero->Item[81]=true;
+		Hero->Item[82]=true;
+		Hero->Item[83]=true;
+		Hero->Item[106]=true;
 		//quivs
-		Link->Item[74]=true;
-		Link->Item[75]=true;
-		Link->Item[76]=true;
+		Hero->Item[74]=true;
+		Hero->Item[75]=true;
+		Hero->Item[76]=true;
 		Game->MCounter[CR_LIFE]=320;
 		Game->MCounter[CR_MAGIC]=256;
 		Game->Counter[CR_LIFE]=320;
@@ -999,7 +999,7 @@ global script onFileLoad
 		}
 		else
 		{
-			Link->Warp(0,0);
+			Hero->Warp(0,0);
 			resetTime();
 			Game->ContinueDMap=0;
 			Game->ContinueScreen=0;

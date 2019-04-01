@@ -30,7 +30,7 @@ npc script Skulltula
 		this->Misc[NPC_MISC_LASTHP] = this->HP;
 		while(this->isValid())
 		{
-			this->Dir = RadianAngleDir4(TurnTowards(this->X+8,this->Y+8,Link->X+8,Link->Y+8,0,1));
+			this->Dir = RadianAngleDir4(TurnTowards(this->X+8,this->Y+8,Hero->X+8,Hero->Y+8,0,1));
 			while(isFrozen)Waitframe();
 			if(LinkDist(this->X,this->Y,32)&&!visible)
 			{
@@ -49,7 +49,7 @@ npc script Skulltula
 						this->Defense[i]=NPCDT_BLOCK;
 				}
 			}
-			if(Link->HitBy[0]==thisID)Audio->PlaySound(SFX_SKULLTULA_SPIN);
+			if(Hero->HitBy[0]==thisID)Audio->PlaySound(SFX_SKULLTULA_SPIN);
 			if(visible)
 			{
 				this->DrawXOffset = 0;
@@ -58,7 +58,7 @@ npc script Skulltula
 				if(flipped||this->Stun)
 				{
 					this->OriginalTile = TILE_SKULLTULA + this->Dir;
-					if(Link->HitBy[0]==thisID||this->HitBy[2]>0)timer=119;
+					if(Hero->HitBy[0]==thisID||this->HitBy[2]>0)timer=119;
 					if(this->Stun)
 					{
 						timer=0;
@@ -83,7 +83,7 @@ npc script Skulltula
 				else
 				{
 					this->OriginalTile = TILE_SKULLTULA + OppositeDir(this->Dir);
-					if(Link->HitBy[0]==thisID)timer=1;
+					if(Hero->HitBy[0]==thisID)timer=1;
 					if(timer==0)
 					{
 						flipped=true;
@@ -109,7 +109,7 @@ npc script Skulltula
 	
 	bool LinkDist(int x, int y, int radius)
 	{
-		return (Abs((Link->X+8)-(x+8))<radius&&Abs((Link->Y+8)-(y+8))<radius);
+		return (Abs((Hero->X+8)-(x+8))<radius&&Abs((Hero->Y+8)-(y+8))<radius);
 	}
 }
 //end Skulltula

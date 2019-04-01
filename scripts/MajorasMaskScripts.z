@@ -4,6 +4,7 @@
 //                                    //
 ////////////////////////////////////////
 
+#option HEADER_GUARD on
 import "std.zh"
 //start typedefs
 typedef const int GVAR;
@@ -69,23 +70,23 @@ int hasQuestItem(int itemslot)
 {
 	if(itemslot==1)
 	{
-		if(Link->Item[182])return 5;
-		else if(Link->Item[181])return 4;
-		else if(Link->Item[180])return 3;
-		else if(Link->Item[179])return 2;
-		else if(Link->Item[178])return 1;
+		if(Hero->Item[182])return 5;
+		else if(Hero->Item[181])return 4;
+		else if(Hero->Item[180])return 3;
+		else if(Hero->Item[179])return 2;
+		else if(Hero->Item[178])return 1;
 		else return 0;
 	}
 	else if(itemslot==2)
 	{
-		if(Link->Item[186])return 1;
+		if(Hero->Item[186])return 1;
 		else return 0;
 	}
 	else if(itemslot==3)
 	{
-		if(Link->Item[184])return 3;
-		else if(Link->Item[185])return 2;
-		else if(Link->Item[183])return 1;
+		if(Hero->Item[184])return 3;
+		else if(Hero->Item[185])return 2;
+		else if(Hero->Item[183])return 1;
 		else return 0;
 	}
 }
@@ -186,9 +187,9 @@ ffc script ShowString
 				if(tangoTemp)
 				{
 					saveTheGame();
-					Link->PitWarp(0,0x10);
-					Link->X = 120;
-					Link->Y = 32;
+					Hero->PitWarp(0,0x10);
+					Hero->X = 120;
+					Hero->Y = 32;
 					resetTime();
 				}
 				break;

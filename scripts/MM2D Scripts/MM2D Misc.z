@@ -49,10 +49,10 @@ bool CanWalkM(ffc f, mapdata map, int dir, int step, bool useEffect)
 {
 	return CanWalkM(f->X, f->Y, f->X + Cond(useEffect, f->EffectWidth, f->TileWidth * 16) - 1, f->Y + Cond(useEffect, f->EffectHeight, f->TileHeight * 16) - 1, map, dir, step);
 }
-//Link
+//Hero
 bool CanWalkM(mapdata map, int dir, int step, bool largeHitbox)
 {
-	return CanWalkM(Link->X, Link->Y + Cond(largeHitbox, 0, 8), Link->X + 15, Link->Y + 15, map, dir, step);
+	return CanWalkM(Hero->X, Hero->Y + Cond(largeHitbox, 0, 8), Hero->X + 15, Hero->Y + 15, map, dir, step);
 }
 //Main
 bool CanWalkM(int x, int y, int xx, int yy, mapdata map, int dir, int step)
@@ -90,7 +90,7 @@ bool LinkOnFlagMod(int flag, int x, int y, int setting, bool fullTile)//start
 {
 	int yCorrection = 0;
 	if(!fullTile)yCorrection=8;
-	int combos[4] = {ComboAt(Link->X+x,Link->Y+y+yCorrection),ComboAt(Link->X+x+15,Link->Y+y+yCorrection),ComboAt(Link->X+x+15,Link->Y+y+15),ComboAt(Link->X+x,Link->Y+y+15)};
+	int combos[4] = {ComboAt(Hero->X+x,Hero->Y+y+yCorrection),ComboAt(Hero->X+x+15,Hero->Y+y+yCorrection),ComboAt(Hero->X+x+15,Hero->Y+y+15),ComboAt(Hero->X+x,Hero->Y+y+15)};
 	for(int i=0;i<4;i++)
 	{
 		if(setting)
@@ -102,7 +102,7 @@ bool LinkOnFlagMod(int flag, int x, int y, int setting, bool fullTile)//start
 }//end
 bool LinkOnFlag(int flag)//start
 {
-	int combos[4] = {ComboAt(Link->X,Link->Y),ComboAt(Link->X+15,Link->Y),ComboAt(Link->X+15,Link->Y+15),ComboAt(Link->X,Link->Y+15)};
+	int combos[4] = {ComboAt(Hero->X,Hero->Y),ComboAt(Hero->X+15,Hero->Y),ComboAt(Hero->X+15,Hero->Y+15),ComboAt(Hero->X,Hero->Y+15)};
 	for(int i=0;i<4;i++)
 	{
 		if(Screen->ComboF[combos[i]]==flag)return true;
@@ -135,10 +135,10 @@ int dirY(int dir)//start
 }//end
 void stopScreenTransition(int pxD,int pxR,int pxL, int pxU)//start
 {
-	if(Link->Y>160-pxD)Hold[CB_DOWN]=false;
-	if(Link->X>240-pxR)Hold[CB_RIGHT]=false;
-	if(Link->X<0+pxL)Hold[CB_LEFT]=false;
-	if(Link->Y<0+pxU)Hold[CB_UP]=false;
+	if(Hero->Y>160-pxD)Hold[CB_DOWN]=false;
+	if(Hero->X>240-pxR)Hold[CB_RIGHT]=false;
+	if(Hero->X<0+pxL)Hold[CB_LEFT]=false;
+	if(Hero->Y<0+pxU)Hold[CB_UP]=false;
 }//end
 void MyNoAction()//start
 {
@@ -195,12 +195,12 @@ void NoActionButMoveAndEx4AndA()//start
 }//end
 bool isTouchingCombo(int comboID)//start
 {
-	int x = Link->X;
-	int y = Link->Y;
-	if(Screen->ComboD[ComboAt(Link->X,Link->Y+8)]==comboID)return true;
-	if(Screen->ComboD[ComboAt(Link->X+15,Link->Y+8)]==comboID)return true;
-	if(Screen->ComboD[ComboAt(Link->X,Link->Y+15)]==comboID)return true;
-	if(Screen->ComboD[ComboAt(Link->X+15,Link->Y+15)]==comboID)return true;
+	int x = Hero->X;
+	int y = Hero->Y;
+	if(Screen->ComboD[ComboAt(Hero->X,Hero->Y+8)]==comboID)return true;
+	if(Screen->ComboD[ComboAt(Hero->X+15,Hero->Y+8)]==comboID)return true;
+	if(Screen->ComboD[ComboAt(Hero->X,Hero->Y+15)]==comboID)return true;
+	if(Screen->ComboD[ComboAt(Hero->X+15,Hero->Y+15)]==comboID)return true;
 	return false;
 }//end
 void NoDirs()//start
@@ -280,25 +280,25 @@ void ffcSolid(ffc anFFC)//start
 	int width = anFFC->EffectWidth;
 	int height = anFFC->EffectHeight;
 	int bottomheight=height;
-	if(!Link->BigHitbox	)bottomheight-=8;
+	if(!Hero->BigHitbox	)bottomheight-=8;
 	if(bottomheight<=0)return;
-	if(Link->Y>=anFFC->Y-(16+lspdboost))//start inputdown
+	if(Hero->Y>=anFFC->Y-(16+lspdboost))//start inputdown
 	{
-		if(Link->Y<=anFFC->Y-16)
+		if(Hero->Y<=anFFC->Y-16)
 		{
-			if(Link->X>=anFFC->X-15)
+			if(Hero->X>=anFFC->X-15)
 			{
-				if(Link->X<=anFFC->X+(width-1))
+				if(Hero->X<=anFFC->X+(width-1))
 				{
 					if(Hold[CB_DOWN])
 					{
-						if(Link->Y!=anFFC->Y-16)Link->Y=anFFC->Y-16;
-						Link->Dir=DIR_DOWN;
-						if(Link->X>=anFFC->X+(width-4))
+						if(Hero->Y!=anFFC->Y-16)Hero->Y=anFFC->Y-16;
+						Hero->Dir=DIR_DOWN;
+						if(Hero->X>=anFFC->X+(width-4))
 						{
-							if(CanWalk(Link->X,Link->Y,DIR_RIGHT,Abs(Link->X-(anFFC->X+width)),false))Link->X=anFFC->X+width;
+							if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(anFFC->X+width)),false))Hero->X=anFFC->X+width;
 						}
-						else if(Link->X<=anFFC->X-12)if(CanWalk(Link->X,Link->Y,DIR_LEFT,Abs(Link->X-anFFC->X-16),false))Link->X=anFFC->X-16;
+						else if(Hero->X<=anFFC->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-anFFC->X-16),false))Hero->X=anFFC->X-16;
 					}
 					Hold[CB_DOWN]=false;
 					Press[CB_DOWN]=false;
@@ -307,23 +307,23 @@ void ffcSolid(ffc anFFC)//start
 			}
 		}//end
 	}
-	if(Link->Y<=anFFC->Y+(bottomheight+lspdboost))//start inputup
+	if(Hero->Y<=anFFC->Y+(bottomheight+lspdboost))//start inputup
 	{
-		if(Link->Y>=anFFC->Y+bottomheight)
+		if(Hero->Y>=anFFC->Y+bottomheight)
 		{
-			if(Link->X>=anFFC->X-15)
+			if(Hero->X>=anFFC->X-15)
 			{
-				if(Link->X<=anFFC->X+(width-1))
+				if(Hero->X<=anFFC->X+(width-1))
 				{
 					if(Hold[CB_UP])
 					{
-						if(Link->Y!=anFFC->Y+bottomheight)Link->Y=anFFC->Y+bottomheight;
-						Link->Dir=DIR_UP;
-						if(Link->X>=anFFC->X+(width-4))
+						if(Hero->Y!=anFFC->Y+bottomheight)Hero->Y=anFFC->Y+bottomheight;
+						Hero->Dir=DIR_UP;
+						if(Hero->X>=anFFC->X+(width-4))
 						{
-							if(CanWalk(Link->X,Link->Y,DIR_RIGHT,Abs(Link->X-(anFFC->X+width)),false))Link->X=anFFC->X+width;
+							if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(anFFC->X+width)),false))Hero->X=anFFC->X+width;
 						}
-						else if(Link->X<=anFFC->X-12)if(CanWalk(Link->X,Link->Y,DIR_LEFT,Abs(Link->X-anFFC->X-16),false))Link->X=anFFC->X-16;
+						else if(Hero->X<=anFFC->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-anFFC->X-16),false))Hero->X=anFFC->X-16;
 					}
 					Hold[CB_UP]=false;
 					Press[CB_UP]=false;
@@ -332,23 +332,23 @@ void ffcSolid(ffc anFFC)//start
 			}
 		}//end
 	}
-	if(Link->X>=anFFC->X-(16+lspdboost))//start inputright
+	if(Hero->X>=anFFC->X-(16+lspdboost))//start inputright
 	{
-		if(Link->X<=anFFC->X-16)
+		if(Hero->X<=anFFC->X-16)
 		{
-			if(Link->Y<=anFFC->Y+(bottomheight-1))
+			if(Hero->Y<=anFFC->Y+(bottomheight-1))
 			{
-				if(Link->Y>=anFFC->Y-15)
+				if(Hero->Y>=anFFC->Y-15)
 				{
 					if(Hold[CB_RIGHT])
 					{
-						if(Link->X!=anFFC->X-16)Link->X=anFFC->X-16;
-						Link->Dir=DIR_RIGHT;
-						if(Link->Y>=anFFC->Y+(bottomheight-4))
+						if(Hero->X!=anFFC->X-16)Hero->X=anFFC->X-16;
+						Hero->Dir=DIR_RIGHT;
+						if(Hero->Y>=anFFC->Y+(bottomheight-4))
 						{
-							if(CanWalk(Link->X,Link->Y,DIR_DOWN,Abs(Link->Y-(anFFC->Y+bottomheight)),false))Link->Y=anFFC->Y+bottomheight;
+							if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(anFFC->Y+bottomheight)),false))Hero->Y=anFFC->Y+bottomheight;
 						}
-						else if(Link->Y<=anFFC->Y-12)if(CanWalk(Link->X,Link->Y,DIR_UP,Abs(Link->Y-(anFFC->Y-16)),false))Link->Y=anFFC->Y-16;
+						else if(Hero->Y<=anFFC->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(anFFC->Y-16)),false))Hero->Y=anFFC->Y-16;
 					}
 					Hold[CB_RIGHT]=false;
 					Press[CB_RIGHT]=false;
@@ -357,23 +357,23 @@ void ffcSolid(ffc anFFC)//start
 			}
 		}//end
 	}
-	if(Link->X<=anFFC->X+(width+lspdboost))//start inputleft
+	if(Hero->X<=anFFC->X+(width+lspdboost))//start inputleft
 	{
-		if(Link->X>=anFFC->X+width)
+		if(Hero->X>=anFFC->X+width)
 		{
-			if(Link->Y>=anFFC->Y-15)
+			if(Hero->Y>=anFFC->Y-15)
 			{
-				if(Link->Y<=anFFC->Y+(bottomheight-1))
+				if(Hero->Y<=anFFC->Y+(bottomheight-1))
 				{
 					if(Hold[CB_LEFT])
 					{
-						if(Link->X!=anFFC->X+width)Link->X=anFFC->X+width;
-						Link->Dir=DIR_LEFT;
-						if(Link->Y>=anFFC->Y+(bottomheight-4))
+						if(Hero->X!=anFFC->X+width)Hero->X=anFFC->X+width;
+						Hero->Dir=DIR_LEFT;
+						if(Hero->Y>=anFFC->Y+(bottomheight-4))
 						{
-							if(CanWalk(Link->X,Link->Y,DIR_DOWN,Abs(Link->Y-(anFFC->Y+bottomheight)),false))Link->Y=anFFC->Y+bottomheight;
+							if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(anFFC->Y+bottomheight)),false))Hero->Y=anFFC->Y+bottomheight;
 						}
-						else if(Link->Y<=anFFC->Y-12)if(CanWalk(Link->X,Link->Y,DIR_UP,Abs(Link->Y-(anFFC->Y-16)),false))Link->Y=anFFC->Y-16;
+						else if(Hero->Y<=anFFC->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(anFFC->Y-16)),false))Hero->Y=anFFC->Y-16;
 					}
 					Hold[CB_LEFT]=false;
 					Press[CB_LEFT]=false;
