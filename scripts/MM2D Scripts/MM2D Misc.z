@@ -675,3 +675,18 @@ int getKeyPress()
 	return 0;
 }
 //end
+
+//start misc2
+//This WAS in `std_zh` at one point, but vanished?
+int GetLinkTileModifier(item i){
+	itemdata ii = Game->LoadItemData(i->ID);
+	return ii->Modifier;
+}
+
+int GetLinkTileModifier(int i){
+	itemdata ii = Game->LoadItemData(i);
+	return ii->Modifier;
+}
+
+
+//end

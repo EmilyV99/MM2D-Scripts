@@ -1,5 +1,5 @@
-// std_constants.zh for ZC v2.53.0 and later.
-// 10th September, 2017
+// std_constants.zh for ZC v2.55.0 and later.
+// 26-Dec-2018
 // Contains required constants for std.zh and ZScript functions.
 
 typedef const int define;
@@ -1635,26 +1635,6 @@ const int SEF_SPAWN				= 0;
 const int SEF_LIST1				= 1; //left-hand list
 const int SEF_LIST2				= 2; //right-hand list
 
-//Screen Enemy Flags Spawn
-const int SEFS_ZORA				= 0; //0x0001; //Zora (1 x Zora)
-const int SEFS_CTRAP			= 1; //0x0002; //Corner Traps (4 x Trap (4-way))
-const int SEFS_MTRAP			= 2; //0x0004; //Middle Traps (2 x Trap (4-way))
-const int SEFS_ROCKS			= 3; //0x0008; //Falling Rocks (3 x Rock)
-const int SEFS_SHOOTER			= 4; //0x0010; //Shooting Statues (Shooter (Fireball) per combo)
-
-//Screen Enemy Flags List
-const int SEFL_RINGLEADER		= 0; //0x0001; //First Enemy is "Ring Leader"
-const int SEFL_ITEM				= 1; //0x0002; //First Enemy carries Item
-const int SEFL_INVIS			= 2; //0x0004; //All enemies are invisible
-const int SEFL_BOSS				= 3; //0x0008; //Dungeon Boss (Don't Return)
-const int SEFL_TRAPIGNORE		= 4; //0x0010; //Traps ignore walkability
-
-//Screen Enemy Flags List2
-const int SEFL2_ALWAYSRET		= 0; //0x0001; //Enemies Always Return
-const int SEFL2_EITEM			= 1; //0x0002; //Enemies -> Item
-const int SEFL2_ESECRET			= 2; //0x0004; //Enemies -> Secret
-const int SEFL2_ESECRETPERM		= 3; //0x0008; //Enemies -> Secret is Permanent
-
 //Room types (Screen => Room Type)
 //Use with Screen->RoomType
 const int RT_DOORREPAIR         = 5;
@@ -2452,3 +2432,78 @@ define WARP_FLAG_SETENTRANCESCREEN 	= 0x08;
 define WARP_FLAG_SETENTRANCEDMAP 	= 0x10;
 define WARP_FLAG_SETCONTINUESCREEN 	= 0x20;
 define WARP_FLAG_SETCONTINUEDMAP 	= 0x40;
+
+//Error codes for `#ignore error`
+enum
+{
+	_ERR_CANTOPENSOURCE,
+	_ERR_CANTOPENIMPORT,
+	_ERR_IMPORTRECURSION,
+	_ERR_IMPORTBADSCOPE,
+	_ERR_FUNCTIONREDEF,
+	_ERR_FUNCTIONVOIDPARAM,
+	_ERR_SCRIPTREDEF,
+	_ERR_VOIDVAR,
+	_ERR_VARREDEF,
+	_ERR_VARUNDECLARED,
+	_ERR_FUNCUNDECLARED,
+	_ERR_SCRIPTNORUN,
+	_ERR_SCRIPTRUNNOTVOID,
+	_ERR_SCRIPTNUMNOTINT,
+	_ERR_SCRIPTNUMTOOBIG,
+	_ERR_SCRIPTNUMREDEF,
+	_ERR_IMPLICITCAST,
+	_ERR_ILLEGALCAST,
+	_ERR_VOIDEXPR,
+	_ERR_DIVBYZERO,
+	_ERR_CONSTTRUNC,
+	_ERR_NOFUNCMATCH,
+	_ERR_TOOFUNCMATCH,
+	_ERR_FUNCBADRETURN,
+	_ERR_TOOMANYGLOBAL,
+	_ERR_SHIFTNOTINT,
+	_ERR_REFVAR,
+	_ERR_ARROWNOTPOINTER,
+	_ERR_ARROWNOFUNC,
+	_ERR_ARROWNOVAR,
+	_ERR_TOOMANYRUN,
+	_ERR_INDEXNOTINT,
+	_ERR_SCRIPTBADTYPE,
+	_ERR_BREAKBAD,
+	_ERR_CONTINUEBAD,
+	_ERR_CONSTREDEF,
+	_ERR_LVALCONST,
+	_ERR_BADGLOBALINIT,
+	_ERR_DEPRECATEDGLOBAL,
+	_ERR_VOIDARR,
+	_ERR_REFARR,
+	_ERR_ARRREDEF,
+	_ERR_ARRAYTOOSMALL,
+	_ERR_ARRAYLISTTOOLARGE,
+	_ERR_ARRAYLISTSTRINGTOOLARGE,
+	_ERR_NONINTEGERARRAYSIZE,
+	_ERR_EXPRNOTCONSTANT,
+	_ERR_UNRESOLVEDTYPE,
+	_ERR_CONSTUNINITIALIZED,
+	_ERR_CONSTASSIGN,
+	_ERR_EMPTYARRAYLITERAL,
+	_ERR_DIMENSIONMISMATCH,
+	_ERR_ARRAYLITERALRESIZE,
+	_ERR_MISSINGCOMPILEERROR,
+	_ERR_UNIMPLEMENTEDFEATURE,
+	_ERR_UNKNOWNOPTION,
+	_ERR_NOREADTYPE,
+	_ERR_NOWRITETYPE,
+	_ERR_UNRESOLVEDSCRIPTTYPE,
+	_ERR_REDEFSCRIPTTYPE,
+	_ERR_ARRAYINVALIDSIZE,
+	_ERR_ARRAYDECIMAL,
+	_ERR_CONSTNOTCONSTANT,
+	_ERR_TOOMANYUSING,
+	_ERR_DUPLICATEUSING,
+	_ERR_TOOMANYVAR,
+	_ERR_HEADERGUARDERR,
+	_ERR_HEADERGUARDWARN,
+	_ERR_REDEFDATATYPE,
+	_ERR_CONSTALREADYCONSTANT
+};
