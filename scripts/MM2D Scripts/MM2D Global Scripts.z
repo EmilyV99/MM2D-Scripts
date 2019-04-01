@@ -9,23 +9,30 @@ global script Init
 {
 	void run()
 	{
+		//Starting settings
 		Game->DisableActiveSubscreen=true;
-		CopyTile(TILE_INVIS,19);
-		CopyTile(TILE_INVIS,39);
 		Game->MCounter[CR_DEKUNUTS] = 20;
 		Game->MCounter[CR_MAGICBEANS] = 20;
 		Game->MCounter[CR_BANKBAL] = 5000;
 		setGlobalVar(GVAR_DIFFICULTY,GV_MISC,1);
+		//Make FFC tiles invisible
+		CopyTile(TILE_INVIS,19);
+		CopyTile(TILE_INVIS,39);
+		//Check debug mode
 		int saveName[16];
 		Game->GetSaveName(saveName);
 		if(!strcmp(saveName,"Link"))debugEnabled=false;
 		else debugEnabled=true;
+		//Set up tint palettes
 		setGlobalVar(TINT_DAY,GV_PAL,createTintPalette(0,0,0));
 		setGlobalVar(TINT_SUNSETORANGE,GV_PAL,createTintPalette(-3,-9,-14));
 		setGlobalVar(TINT_NIGHT,GV_PAL,createTintPalette(-21,-23,-10));
 		setGlobalVar(TINT_LENS,GV_PAL,createTintPalette(-17,-48,5));
 		setGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL,true);
+		//Bugfix
 		TIME_HOTWATER = TIME_HOUR*4;
+		//Default controls
+		Controls[CONTROL_OPTIONS] = KEY_TAB;
 	}
 }
 //end
@@ -1019,3 +1026,362 @@ global script onExit
 	}
 }
 //end OnExit Script
+//start Options Menu
+untyped opt[256] = {false};
+DEFINE OPT_RFS = 0;
+
+link script OptionsMenu
+{
+	//start Menu constants
+	CONFIG NUM_MENU_OPTIONS = 3;
+	CONFIG MENU_SPACING = 16;
+	CONFIG MENU_FONT = FONT_Z3SMALL;
+	CONFIG MENU_FONT_HEIGHT = 6;
+	CONFIG TOP_MENU = -56;
+	CONFIG MENU_TOP_MARGIN_HEIGHT = 24;
+	CONFIG MENU_LEFT_MARGIN_WIDTH = 16;
+	CONFIG MENU_RIGHT_MARGIN_WIDTH = 16;
+	CONFIG MENU_BOTTOM_MARGIN_HEIGHT = 16;
+	CONFIG TILE_POINTER = 0; //Should be MENU_FONT_HEIGHT pixels tall
+	CONFIG MENU_LAYER = 7;
+	CONFIG MENU_TCOLOR_INACTIVE = COLOR_LIGHTGRAY;
+	CONFIG MENU_TCOLOR_ACTIVE = COLOR_WHITE;
+	CONFIG MENU_SCROLL_INC = 8;
+	CONFIG MENU_HOLD_DELAY = 20;
+	//
+	CONFIG MENU_ENFORCE_MARGINS = 1;
+	//
+	DEFINE MENU_BITMAP_WIDTH = 256;
+	DEFINE NUM_MENU_BITMAPS = 4;
+	DEFINE VIS_SCREEN_HEIGHT = 168 - TOP_MENU;
+	DEFINE __MHEIGHT = (NUM_MENU_OPTIONS * (MENU_SPACING + MENU_FONT_HEIGHT)) - MENU_SPACING + MENU_TOP_MARGIN_HEIGHT + MENU_BOTTOM_MARGIN_HEIGHT;
+	DEFINE OP_HEIGHT = __MHEIGHT < VIS_SCREEN_HEIGHT ? VIS_SCREEN_HEIGHT : __MHEIGHT;
+	DEFINE MENU_TOP_MARGIN = TOP_MENU + MENU_TOP_MARGIN_HEIGHT;
+	DEFINE MENU_LEFT_MARGIN = MENU_LEFT_MARGIN_WIDTH;
+	DEFINE MENU_RIGHT_MARGIN = 255 - MENU_RIGHT_MARGIN_WIDTH;
+	DEFINE MENU_BOTTOM_MARGIN = OP_HEIGHT - MENU_BOTTOM_MARGIN_HEIGHT;
+	
+	DEFINE MENU_ACTIVE_PERM = 0;
+	DEFINE MENU_INACTIVE_PERM = MENU_ACTIVE_PERM + MENU_BITMAP_WIDTH;
+	DEFINE MENU_TEMP = MENU_INACTIVE_PERM + MENU_BITMAP_WIDTH;
+	DEFINE MENU_CONTROL_LIST = MENU_TEMP + MENU_BITMAP_WIDTH;
+	
+	//end
+	
+	int optionScrollCheck(int option, int scroll)
+	{
+		int optTop = MENU_TOP_MARGIN + ((MENU_FONT + MENU_SPACING) * option) - ((MENU_SPACING + MENU_FONT) / 2);
+		int optBot = optTop + MENU_FONT + MENU_SPACING;
+		if(optTop < scroll + (MENU_ENFORCE_MARGINS ? MENU_TOP_MARGIN_HEIGHT : 0)) return -1;
+		if(optBot > scroll + VIS_SCREEN_HEIGHT - (MENU_ENFORCE_MARGINS ? MENU_BOTTOM_MARGIN_HEIGHT : 0)) return 1;
+		return 0;
+	}
+	
+	void run()
+	{
+		bitmap menu = Game->CreateBitmap(MENU_BITMAP_WIDTH * NUM_MENU_BITMAPS, OP_HEIGHT);
+		while(1)
+		{
+			Waitframe();
+			Waitdraw();
+			if(isFrozen && !getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL)) continue;
+			
+			if(getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL))
+			{
+				//Full options menu, with various global variables to be modified.
+				DEFINE MAX_SCROLL = OP_HEIGHT - VIS_SCREEN_HEIGHT;
+				DEFINE STATE_MAIN = -1;
+				//States are equivalent to the mainOption value that represents that state
+				DEFINE STATE_OPTIONSKEY = 0;
+				DEFINE STATE_RFS = STATE_OPTIONSKEY + 1;
+				DEFINE STATE_LT = STATE_RFS + 1;
+				int scroll = 0;
+				int x = 0;
+				int mainOption = 0;
+				int subOption = 0;
+				int state = STATE_MAIN;
+				reloadBitmap(menu);
+				while(getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL))
+				{
+					loadTempBitmap(menu);
+					bool confirm = Link->PressA || Input->ReadKey[KEY_ENTER] || Input->ReadKey[KEY_ENTER_PAD];
+					bool deny = Link->PressB || Input->ReadKey[KEY_BACKSPACE];
+					//
+					if(deny)
+					{
+						if(state == STATE_MAIN)
+							setGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL, false);
+						else
+							state = STATE_MAIN;
+					}
+					else if(Input->ReadKey[Controls[CONTROL_OPTIONS]])
+					{
+						setGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL, false);
+					}
+					switch(state)
+					{
+						case STATE_MAIN:
+						{
+							//Scroll the menu visual based on currently selected option
+							if(!mainOption) scroll = 0;
+							else if(mainOption == NUM_MENU_OPTIONS - 1) scroll = MAX_SCROLL;
+							else if(optionScrollCheck(mainOption, scroll) != 0)
+							{
+								while(optionScrollCheck(mainOption, scroll) == 1)
+								{
+									scroll += MENU_SCROLL_INC;
+								}
+								while(optionScrollCheck(mainOption, scroll) == -1)
+								{
+									scroll -= MENU_SCROLL_INC;
+								}
+								scroll = VBound(scroll, MAX_SCROLL, 0);
+							}
+							if(confirm)
+							{
+								state = mainOption;
+								subOption = 0;
+							}
+							else if(Link->PressUp || (Link->InputUp && !(gameframe % MENU_HOLD_DELAY)))
+								--mainOption;
+							else if(Link->PressDown || (Link->InputDown && !(gameframe % MENU_HOLD_DELAY)))
+								++mainOption;
+							if(mainOption < 0) mainOption += NUM_MENU_OPTIONS;
+							else mainOption %= NUM_MENU_OPTIONS;
+							break;
+						}
+						
+						case STATE_OPTIONSKEY:
+						{
+							int buf0[64];
+							KeyToString(Controls[CONTROL_OPTIONS], buf0, true, true);
+							DrawMenuString(buf0, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), MENU_TCOLOR_ACTIVE, TF_RIGHT);
+							Game->TypingMode = true;
+							int key = getKeyPress();
+							if(key)
+							{
+								Controls[CONTROL_OPTIONS] = key;
+								state = STATE_MAIN;
+								Game->TypingMode = false;
+							}
+							break;
+						}
+						
+						case STATE_RFS:
+						{
+							DrawMenuString(opt[OPT_RFS] ? "On" : "Off", menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), opt[OPT_RFS] ? COLOR_GREEN : COLOR_RED, TF_RIGHT);
+							if(confirm)
+								opt[OPT_RFS] = !opt[OPT_RFS];
+							break;
+						}
+						
+						case STATE_LT:
+						{
+							DEFINE PREVIEW = 0;
+							DEFINE RED = 1;
+							DEFINE GREEN = 2;
+							DEFINE BLUE = 3;
+							int inc = (Link->PressUp) ? 1 : ((Link->PressDown) ? -1 : 0);
+							if(Link->PressRight || (Link->InputRight && (gameframe % MENU_HOLD_DELAY))) ++subOption;
+							else if(Link->PressLeft || (Link->InputLeft && (gameframe % MENU_HOLD_DELAY))) --subOption;
+							subOption < 0 ? (subOption += 4) : (subOption %= 4);
+							switch(subOption)
+							{
+								case PREVIEW:
+									DrawMenuString("Preview\t   \t   \t   ", menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), MENU_TCOLOR_ACTIVE, TF_RIGHT);
+									if(confirm)
+									{
+										setTint(getGlobalVar(TINT_LENS, GV_PAL), true);
+										WaitTotalNoAction(30);
+										Waitdraw();
+										setTint(getGlobalVar(TINT_LENS, GV_PAL), false);
+										DrawMenuString("Preview\t   \t   \t   ", menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), MENU_TCOLOR_ACTIVE, TF_RIGHT);
+									}
+									break;
+									
+								case RED:
+									int buf1[12] = "   \t   \t   ";
+									itoa(buf1, (((__tintR[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintR[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintR[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0), __tintR[getGlobalVar(TINT_LENS, GV_PAL)]);
+									DrawMenuString(buf1, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), COLOR_RED, TF_RIGHT);
+									__tintR[getGlobalVar(TINT_LENS, GV_PAL)] += inc;
+									__tintR[getGlobalVar(TINT_LENS, GV_PAL)] = VBound(__tintR[getGlobalVar(TINT_LENS, GV_PAL)], 63, -63);
+									break;
+									
+								case GREEN:
+									int buf2[12] = "   \t   \t   ";
+									itoa(buf2, (((__tintG[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintG[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintG[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 4, __tintG[getGlobalVar(TINT_LENS, GV_PAL)]);
+									DrawMenuString(buf2, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), COLOR_GREEN, TF_RIGHT);
+									__tintG[getGlobalVar(TINT_LENS, GV_PAL)] += inc;
+									__tintG[getGlobalVar(TINT_LENS, GV_PAL)] = VBound(__tintG[getGlobalVar(TINT_LENS, GV_PAL)], 63, -63);
+									break;
+									
+								case BLUE:
+									int buf3[12] = "   \t   \t   ";
+									itoa(buf3, (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintB[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 8, __tintB[getGlobalVar(TINT_LENS, GV_PAL)]);
+									DrawMenuString(buf3, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), COLOR_BLUE, TF_RIGHT);
+									__tintB[getGlobalVar(TINT_LENS, GV_PAL)] += inc;
+									__tintB[getGlobalVar(TINT_LENS, GV_PAL)] = VBound(__tintB[getGlobalVar(TINT_LENS, GV_PAL)], 63, -63);
+									break;
+							}
+							break;
+						}
+					}
+					printf("State: %d\nMainOpt: %d\nSubOpt: %d\nScroll: %d\n\n", state, mainOption, subOption, scroll);
+					//
+					int yoffs = (ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN)) ? (TOP_MENU < 0 ? 56 : 0) : 0;
+					if(Link->InputStart)
+					{
+						menu->Blit(MENU_LAYER, RT_SCREEN, x + MENU_CONTROL_LIST, scroll, 256, VIS_SCREEN_HEIGHT - yoffs, 0, TOP_MENU + yoffs, 256, VIS_SCREEN_HEIGHT - yoffs, 0, 0, 0, 0, 0, true);
+					}
+					else
+					{
+						menu->Blit(MENU_LAYER, RT_SCREEN, x + (state == STATE_MAIN ? MENU_ACTIVE_PERM : MENU_INACTIVE_PERM), scroll, 256, VIS_SCREEN_HEIGHT - yoffs, 0, TOP_MENU + yoffs, 256, VIS_SCREEN_HEIGHT - yoffs, 0, 0, 0, 0, 0, true);
+						if(Input->Key[KEY_P]) menu->Blit(MENU_LAYER, RT_SCREEN, x + MENU_TEMP, scroll, 256, VIS_SCREEN_HEIGHT - yoffs, 0, TOP_MENU + yoffs, 256, VIS_SCREEN_HEIGHT - yoffs, 0, 0, 0, 0, 0, true);
+					}
+					if(MENU_ENFORCE_MARGINS)
+					{
+						Screen->Rectangle(MENU_LAYER, 0,                 TOP_MENU + yoffs,                256,                  MENU_TOP_MARGIN - 1 + yoffs, COLOR_BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+						Screen->Rectangle(MENU_LAYER, 0,                 TOP_MENU + yoffs,                MENU_LEFT_MARGIN - 1, 176,                         COLOR_BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+						Screen->Rectangle(MENU_LAYER, MENU_RIGHT_MARGIN, TOP_MENU + yoffs,                256,                  176,                         COLOR_BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+						Screen->Rectangle(MENU_LAYER, 0,                 176 - MENU_BOTTOM_MARGIN_HEIGHT, 256,                  176,                         COLOR_BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+					}
+					//
+					WaitTotalNoAction();
+					Waitdraw();
+				}
+				reloadOptions();
+				Screen_Freeze(0);
+			}
+			else
+			{
+				if(Input->ReadKey[Controls[CONTROL_OPTIONS]])
+				{
+					setGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL, true);
+					Screen_Freeze(2);
+				}
+			}
+		}
+	}
+
+	int menupos(int opt)
+	{
+		return MENU_TOP_MARGIN + ((MENU_SPACING + MENU_FONT_HEIGHT) * opt);
+	}
+	
+	//Call in OnContinue(), and when exiting options menu.
+	void reloadOptions()
+	{
+		//Forcibly ensure that all option settings are in effect
+		//
+		//Options control should not need reloading
+		//
+		//Set "Flip Right-Handed Slash" on all swords
+		itemdata it = Game->LoadItemData(I_SWORD_KOKIRI);
+		it->Flags[7] = opt[OPT_RFS];
+		it = Game->LoadItemData(I_SWORD_RAZOR);
+		it->Flags[7] = opt[OPT_RFS];
+		it = Game->LoadItemData(I_SWORD_GILDED);
+		it->Flags[7] = opt[OPT_RFS];
+		it = Game->LoadItemData(I_SWORD_GFAIRY);
+		it->Flags[7] = opt[OPT_RFS];
+		//
+		//Lens tint should not need reloading
+		//
+	}
+	
+	void reloadBitmap(bitmap menu)
+	{
+		for(int j = 0; j < 2; ++j)
+		{
+			int x = j ? MENU_ACTIVE_PERM : MENU_INACTIVE_PERM;
+			int y = MENU_TOP_MARGIN_HEIGHT;
+			int white = j ? MENU_TCOLOR_ACTIVE : MENU_TCOLOR_INACTIVE;
+			menu->Rectangle(0, x, 0, MENU_BITMAP_WIDTH, OP_HEIGHT, COLOR_BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+			//
+			DrawMenuString("Options Menu", menu, 1, x + MENU_LEFT_MARGIN, y, white, TF_NORMAL);
+			y += MENU_FONT_HEIGHT + MENU_SPACING;
+			//
+			DrawMenuString("Flip Right-Facing Slash", menu, 1, x + MENU_LEFT_MARGIN, y, white, TF_NORMAL);
+			y += MENU_FONT_HEIGHT + MENU_SPACING;
+			//
+			DrawMenuString("Lens Tint Color", menu, 1, x + MENU_LEFT_MARGIN, y, white, TF_NORMAL);
+			y += MENU_FONT_HEIGHT + MENU_SPACING;
+			//{}Module
+			y += MENU_FONT_HEIGHT + MENU_SPACING;
+			//{}Module
+			y += MENU_FONT_HEIGHT + MENU_SPACING;
+			//{}Module
+			y += MENU_FONT_HEIGHT + MENU_SPACING;
+			//{}Module
+			y += MENU_FONT_HEIGHT + MENU_SPACING;
+			//{}Module
+			y += MENU_FONT_HEIGHT + MENU_SPACING;
+			//{}Module
+			y += MENU_FONT_HEIGHT + MENU_SPACING;
+			//{}Module
+			y += MENU_FONT_HEIGHT + MENU_SPACING;
+			//{}Module
+			y += MENU_FONT_HEIGHT + MENU_SPACING;
+			//{}Module
+		}
+		//
+		int x = MENU_CONTROL_LIST + 128;
+		int y = MENU_TOP_MARGIN;
+		//
+		DrawMenuString("A: Confirm / Toggle", menu, 1, x, y, MENU_TCOLOR_ACTIVE, TF_CENTERED);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString("B: Back", menu, 1, x, y, MENU_TCOLOR_ACTIVE, TF_CENTERED);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString("Default Lens of Truth: -17, -48, 5", menu, 1, x, y, MENU_TCOLOR_ACTIVE, TF_CENTERED);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString("When control binding:", menu, 1, x, y, MENU_TCOLOR_ACTIVE, TF_CENTERED);
+		DrawMenuString("Press any keyboard key to bind it. Conflicting binds may cause issues.", menu, 1, x, y + MENU_FONT_HEIGHT, MENU_TCOLOR_ACTIVE, TF_CENTERED);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString("Hold Start: View these controls", menu, 1, x, y, MENU_TCOLOR_ACTIVE, TF_CENTERED);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		/*
+		DrawMenuString(, menu, 1, x, y, MENU_TCOLOR_ACTIVE, TF_CENTERED);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;*/
+	}
+	
+	void DrawMenuString(int str, bitmap menu, int layer, int x, int y, int color, int format)
+	{
+		DrawMenuString(str, menu, layer, x, y, color, format, true);
+	}
+	
+	void DrawMenuString(int str, bitmap menu, int layer, int x, int y, int color, int format, bool transbg)
+	{
+		menu->DrawString(layer, x, y, MENU_FONT, color, -1, format, str, OP_OPAQUE);
+	}
+	
+	void loadTempBitmap(bitmap menu)
+	{
+		menu->Rectangle(0, MENU_TEMP, 0, MENU_BITMAP_WIDTH, OP_HEIGHT, 0x00, 1, 0, 0, 0, true, OP_OPAQUE);
+		int y = MENU_TOP_MARGIN_HEIGHT;
+		//
+		int buf0[64];
+		KeyToString(Controls[CONTROL_OPTIONS], buf0, true, true);
+		DrawMenuString(buf0, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, MENU_TCOLOR_INACTIVE, TF_RIGHT);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString(opt[OPT_RFS] ? "On" : "Off", menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, opt[OPT_RFS] ? COLOR_DARKGREEN : COLOR_DARKRED, TF_RIGHT);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString("Preview            ", menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, MENU_TCOLOR_INACTIVE, TF_RIGHT);
+		int buf1[12] = "           ";
+		itoa(buf1, (((__tintR[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintR[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintR[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0), __tintR[getGlobalVar(TINT_LENS, GV_PAL)]);
+		DrawMenuString(buf1, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, COLOR_DARKRED, TF_RIGHT);
+		int buf2[12] = "           ";
+		itoa(buf2, (((__tintG[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintG[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintG[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 4, __tintG[getGlobalVar(TINT_LENS, GV_PAL)]);
+		DrawMenuString(buf2, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, COLOR_DARKGREEN, TF_RIGHT);
+		int buf3[12] = "           ";
+		itoa(buf3, (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintB[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 8, __tintB[getGlobalVar(TINT_LENS, GV_PAL)]);
+		DrawMenuString(buf3, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, COLOR_DARKBLUE, TF_RIGHT);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+	}
+}
+//end

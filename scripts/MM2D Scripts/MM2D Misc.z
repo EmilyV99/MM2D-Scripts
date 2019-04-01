@@ -156,6 +156,18 @@ void TotalNoAction()//start
 	Link->PressStart=false;
 	Link->InputStart=false;
 }//end
+void WaitTotalNoAction()//start
+{
+	WaitTotalNoAction(1);
+}//end
+void WaitTotalNoAction(int frames)//start
+{
+	for(int j = 0; j < frames; ++j)
+	{
+		TotalNoAction();
+		Waitframe();
+	}
+}//end
 void NoActionButA()//start
 {
 	Link->InputDown=false;Link->PressDown=false;
@@ -427,3 +439,193 @@ void HeightFastLine(int layer, int x, int y, int x2, int y2, int color, int opac
 	HeightLine(layer, x, y, x2, y2, color, 0, 0, 0, 0, opacity);
 }
 //end Misc Functions
+//start Keyboard
+void KeyToString(int key, int buf)
+{
+	KeyToString(key, buf, false);
+}
+
+void KeyToString(int key, int buf, bool ShowPad)
+{
+	KeyToString(key, buf, ShowPad, false);
+}
+
+void KeyToString(int key, int buf, bool ShowPad, bool AllCaps)
+{
+	switch(key)
+	{
+		case KEY_TAB:
+			strcat(buf, "Tab");
+			break;
+		
+		case KEY_BACKSPACE:
+			strcat(buf, "Back");
+			break;
+			
+		case KEY_ENTER:
+		case KEY_ENTER_PAD:
+			strcat(buf, "Enter");
+			if(ShowPad && key == KEY_ENTER_PAD) strcat(buf, " (Pad)");
+			break;
+			
+		case KEY_SPACE:
+			strcat(buf, "Space");
+			break;
+			
+		case KEY_DEL:
+		case KEY_DEL_PAD:
+			strcat(buf, "Del");
+			if(ShowPad && key == KEY_DEL_PAD) strcat(buf, " (Pad)");
+			break;
+			
+		case KEY_HOME:
+			strcat(buf, "Home");
+			break;
+			
+		case KEY_END:
+			strcat(buf, "End");
+			break;
+			
+		case KEY_PGUP:
+			strcat(buf, "PgUp");
+			break;
+			
+		case KEY_PGDN:
+			strcat(buf, "PgDn");
+			break;
+			
+		case KEY_UP:
+			strcat(buf, "Up");
+			break;
+			
+		case KEY_DOWN:
+			strcat(buf, "Down");
+			break;
+			
+		case KEY_LEFT:
+			strcat(buf, "Left");
+			break;
+			
+		case KEY_RIGHT:
+			strcat(buf, "Right");
+			break;
+		
+		case KEY_PRTSCR:
+			strcat(buf, "PrintScr");
+			break;
+			
+		case KEY_PAUSE:
+			strcat(buf, "Pause");
+			break;
+		
+		case KEY_ESC:
+			strcat(buf, "Esc");
+			break;
+			
+		case KEY_F1:
+		case KEY_F2:
+		case KEY_F3:
+		case KEY_F4:
+		case KEY_F5:
+		case KEY_F6:
+		case KEY_F7:
+		case KEY_F8:
+		case KEY_F9:
+			strcat(buf, {'F', key - KEY_F1 + '1', 0});
+			break;
+			
+		case KEY_F10:
+		case KEY_F11:
+		case KEY_F12:
+			strcat(buf, {'F', '1', key - KEY_F10 + '0', 0});
+			break;
+			
+		case KEY_LCONTROL:
+			strcat(buf, "LCtrl");
+			break;
+			
+		case KEY_RCONTROL:
+			strcat(buf, "RCtrl");
+			break;
+			
+		case KEY_LSHIFT:
+			strcat(buf, "LShift");
+			break;
+			
+		case KEY_RSHIFT:
+			strcat(buf, "RShift");
+			break;
+			
+		case KEY_ALT:
+			strcat(buf, "LAlt");
+			break;
+			
+		case KEY_ALTGR:
+			strcat(buf, "RAlt");
+			break;
+			
+		case KEY_LWIN:
+			strcat(buf, "LWin");
+			break;
+			
+		case KEY_RWIN:
+			strcat(buf, "RWin");
+			break;
+			
+		case KEY_MENU:
+			strcat(buf, "Menu");
+			break;
+			
+		case KEY_SCRLOCK:
+			strcat(buf, "ScrLock");
+			break;
+		
+		case KEY_NUMLOCK:
+			strcat(buf, "NumLock");
+			break;
+		
+		case KEY_CAPSLOCK:
+			strcat(buf, "CapsLock");
+			break;
+			
+		case KEY_COMMAND:
+			strcat(buf, "Cmd");
+			break;
+			
+		default:
+			int keyChar = KeyToChar(key, false, false);
+			strcat(buf, (int[2]){AllCaps ? LowerToUpper(keyChar) : keyChar});
+			if(ShowPad)
+			{
+				switch(key)
+				{
+					case KEY_SLASH_PAD:
+					case KEY_MINUS_PAD:
+					case KEY_PLUS_PAD:
+					case KEY_ASTERISK:
+					case KEY_EQUALS_PAD:
+					case KEY_0_PAD:
+					case KEY_1_PAD:
+					case KEY_2_PAD:
+					case KEY_3_PAD:
+					case KEY_4_PAD:
+					case KEY_5_PAD:
+					case KEY_6_PAD:
+					case KEY_7_PAD:
+					case KEY_8_PAD:
+					case KEY_9_PAD:
+						strcat(buf, " (Pad)");
+				}
+			}
+	}
+}
+
+int getKeyPress()
+{
+	for(int key = -4096; key < KEY_FINAL; key < -1 ? (key /= 2) : ++key)
+	{
+		if(Input->ReadKey[key]) return key;
+	}
+	return 0;
+}
+//end

@@ -5,11 +5,13 @@
 ////////////////////////////////////////
 
 import "std.zh"
+
 //start typedefs
 typedef const int GVAR;
 typedef const int DEFINE;
+typedef const int CONFIG;
+typedef untyped u;
 //end typedefs
-
 //start header imports
 import "scripts/string.zh"
 import "scripts/ffcscript.zh"
