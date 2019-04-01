@@ -32,7 +32,7 @@ bool warpUp(){
 	if(dmap!=-1){
 		int scr = getUpScreen(true);
 		storeWeapons();
-		Link->PitWarp(dmap,scr);
+		Hero->PitWarp(dmap,scr);
 		return true;
 	}
 	return false;
@@ -43,7 +43,7 @@ bool warpDown(){
 	if(dmap!=-1){
 		int scr = getDownScreen(true);
 		storeWeapons();
-		Link->PitWarp(dmap,scr);
+		Hero->PitWarp(dmap,scr);
 		return true;
 	}
 	return false;
@@ -76,12 +76,12 @@ int getUpScreen(bool mod){
 }
 
 bool isCenteredOnPlacedFlag(int flag, bool notType, bool yesType, int type, bool notInherent, bool yesInherent, int inherent){
-	int x = Link->X;
-	int y = Link->Y;
-	int c1 = ComboAt(Link->X+2,Link->Y+9);
-	int c2 = ComboAt(Link->X+12,Link->Y+9);
-	int c3 = ComboAt(Link->X+12,Link->Y+12);
-	int c4 = ComboAt(Link->X+2,Link->Y+12);
+	int x = Hero->X;
+	int y = Hero->Y;
+	int c1 = ComboAt(Hero->X+2,Hero->Y+9);
+	int c2 = ComboAt(Hero->X+12,Hero->Y+9);
+	int c3 = ComboAt(Hero->X+12,Hero->Y+12);
+	int c4 = ComboAt(Hero->X+2,Hero->Y+12);
 	if(notType){
 		if(notInherent){
 			return (Screen->ComboF[c1]==flag&&Screen->ComboT[c1]!=type&&Screen->ComboI[c1]!=inherent)&&(Screen->ComboF[c2]==flag&&Screen->ComboT[c2]!=type&&Screen->ComboI[c2]!=inherent)&&(Screen->ComboF[c3]==flag&&Screen->ComboT[c3]!=type&&Screen->ComboI[c3]!=inherent)&&(Screen->ComboF[c4]==flag&&Screen->ComboT[c4]!=type&&Screen->ComboI[c4]!=inherent);
@@ -110,18 +110,18 @@ bool isCenteredOnPlacedFlag(int flag, bool notType, bool yesType, int type, bool
 }
 
 bool isTouchingComboType(int combotype){
-	int x = Link->X;
-	int y = Link->Y;
-	if(Screen->ComboT[ComboAt(Link->X,Link->Y+8)]==combotype)return true;
-	if(Screen->ComboT[ComboAt(Link->X+15,Link->Y+8)]==combotype)return true;
-	if(Screen->ComboT[ComboAt(Link->X,Link->Y+15)]==combotype)return true;
-	if(Screen->ComboT[ComboAt(Link->X+15,Link->Y+15)]==combotype)return true;
+	int x = Hero->X;
+	int y = Hero->Y;
+	if(Screen->ComboT[ComboAt(Hero->X,Hero->Y+8)]==combotype)return true;
+	if(Screen->ComboT[ComboAt(Hero->X+15,Hero->Y+8)]==combotype)return true;
+	if(Screen->ComboT[ComboAt(Hero->X,Hero->Y+15)]==combotype)return true;
+	if(Screen->ComboT[ComboAt(Hero->X+15,Hero->Y+15)]==combotype)return true;
 	return false;
 }
 //end Height
 //start FallDown
 void checkFall(){
-	if(!floating&&!Deku_flying&&canFall&&Link->Action!=LA_RAFTING){
+	if(!floating&&!Deku_flying&&canFall&&Hero->Action!=LA_RAFTING){
 		linkPitfall();
 	}
 }
@@ -130,29 +130,29 @@ void linkPitfall(){
 	int dmap = getDownDMap();
 	int scr = getDownScreen(true);
 	if(!(dmap==-1||scr==-1)){
-		int combosAt[] = {ComboAt(Link->X+3,Link->Y+9),ComboAt(Link->X+12,Link->Y+9),ComboAt(Link->X+3,Link->Y+12),ComboAt(Link->X+12,Link->Y+12)};
+		int combosAt[] = {ComboAt(Hero->X+3,Hero->Y+9),ComboAt(Hero->X+12,Hero->Y+9),ComboAt(Hero->X+3,Hero->Y+12),ComboAt(Hero->X+12,Hero->Y+12)};
 		for(int i = 0;i<4;i++){
 			if(Screen->ComboT[combosAt[i]]==CT_PITFALL){
-				int dir = Link->Dir;
+				int dir = Hero->Dir;
 				//
-				Link->X=ComboX(combosAt[i]);
-				Link->Y=ComboY(combosAt[i]);
+				Hero->X=ComboX(combosAt[i]);
+				Hero->Y=ComboY(combosAt[i]);
 				//
-				if(Link->X<16)Link->X+=2;
-				else if(Link->X>16*14)Link->X-=2;
-				if(Link->Y<16)Link->Y+=2;
-				else if(Link->Y>16*9)Link->Y-=2;
+				if(Hero->X<16)Hero->X+=2;
+				else if(Hero->X>16*14)Hero->X-=2;
+				if(Hero->Y<16)Hero->Y+=2;
+				else if(Hero->Y>16*9)Hero->Y-=2;
 				//
 				freezeFrames=5;
 				//
-				Link->PitWarp(dmap,scr);
+				Hero->PitWarp(dmap,scr);
 				//
 				/*int msg[] = "Pitwarping! Dmap, Scr:";
 				TraceS(msg);
 				Trace(dmap);
 				Trace(scr);*/
 				//
-				Link->Dir=dir;
+				Hero->Dir=dir;
 			}
 		}
 	}
@@ -206,31 +206,31 @@ void jump(){//start jump
 			if(LinkOnFlagMod(CF_SCRIPT20,dirX(floatDir)*floatPix,(dirY(floatDir)*floatPix),2,false)){
 				movPix=0;
 			}
-			Link->X+=dirX(floatDir)*movPix;
-			Link->Y+=dirY(floatDir)*movPix;
+			Hero->X+=dirX(floatDir)*movPix;
+			Hero->Y+=dirY(floatDir)*movPix;
 			floating--;
 		}
 		if(floating<=0){
 			if(floatDir==DIR_DOWN||floatDir==DIR_UP){
-				Link->Y=GridY(Link->Y+12);
+				Hero->Y=GridY(Hero->Y+12);
 			} else if(floatDir==DIR_RIGHT||floatDir==DIR_LEFT){
-				Link->X=GridX(Link->X+8);
+				Hero->X=GridX(Hero->X+8);
 			}
 			int timeOut = 25;//Prevent infinite loop
 			int jumpDir = wouldJump();
 			while(jumpDir!=-1&&timeOut>0){
-				if(jumpDir==DIR_DOWN)Link->Y--;
-				if(jumpDir==DIR_RIGHT)Link->X--;
-				if(jumpDir==DIR_LEFT)Link->X++;
-				if(jumpDir==DIR_UP)Link->Y++;
+				if(jumpDir==DIR_DOWN)Hero->Y--;
+				if(jumpDir==DIR_RIGHT)Hero->X--;
+				if(jumpDir==DIR_LEFT)Hero->X++;
+				if(jumpDir==DIR_UP)Hero->Y++;
 				jumpDir=wouldJump();
 				timeOut--;
 			}
 			canFall=true;
-			Link->Invisible=false;
+			Hero->Invisible=false;
 			floating=0;
 		} else {
-			//Draw Link's jumping tile over him, with a Y-Offset based on how far through the jump he is, peaking at the middle.
+			//Draw Hero's jumping tile over him, with a Y-Offset based on how far through the jump he is, peaking at the middle.
 			int maxFloating = getFloating();
 			if(curled){
 				maxFloating=getRampFloat();
@@ -247,7 +247,7 @@ void jump(){//start jump
 			if(!form){
 				NoActionButA();
 			} else {
-				NoAction();
+				MyNoAction();
 			}
 		}
 	}
@@ -258,48 +258,48 @@ DEFINE TILE_LINKSHADOW = 10453;
 
 void replaceLinkTile(int mod, int aframes, int aspeed,int xOffSet,int yOffSet,bool drawShadow){
 	aframes = Max(aframes,1);aspeed = Max(aspeed,1);
-	Link->Invisible=true;
+	Hero->Invisible=true;
 	int linkTile = TILE_LINKUL+mod;
-	linkTile+=Link->Dir*aframes;
+	linkTile+=Hero->Dir*aframes;
 	linkTile+=Floor((gameframe%(aframes*aspeed))/aspeed);
 	linkTile+=getLinkTileModifier();
 	if(drawShadow){
-		Screen->FastTile(1,Link->X,Link->Y,TILE_LINKSHADOW,6,OP_TRANS);
+		Screen->FastTile(1,Hero->X,Hero->Y,TILE_LINKSHADOW,6,OP_TRANS);
 	}
-	Screen->FastTile(1,Link->X+xOffSet,Link->Y+yOffSet,linkTile,6,OP_OPAQUE);
+	Screen->FastTile(1,Hero->X+xOffSet,Hero->Y+yOffSet,linkTile,6,OP_OPAQUE);
 }
 
 int getLinkTileModifier(){
-	if(Link->Item[FORM1])return GetLinkTileModifier(FORM1);
-	else if(Link->Item[FORM2])return GetLinkTileModifier(FORM2);
-	else if(Link->Item[FORM3])return GetLinkTileModifier(FORM3);
-	else if(Link->Item[FORM4])return GetLinkTileModifier(FORM4);
-	else if(Link->Item[FORM2CURLED])return GetLinkTileModifier(FORM2CURLED);
-	else if(Link->Item[FORM_SHIELD])return GetLinkTileModifier(FORM_SHIELD);
-	else if(Link->Item[FORM_M_SHIELD])return GetLinkTileModifier(FORM_M_SHIELD);
-	else if(Link->Item[FORM2SPIKED])return GetLinkTileModifier(FORM2SPIKED);
+	if(Hero->Item[FORM1])return GetLinkTileModifier(FORM1);
+	else if(Hero->Item[FORM2])return GetLinkTileModifier(FORM2);
+	else if(Hero->Item[FORM3])return GetLinkTileModifier(FORM3);
+	else if(Hero->Item[FORM4])return GetLinkTileModifier(FORM4);
+	else if(Hero->Item[FORM2CURLED])return GetLinkTileModifier(FORM2CURLED);
+	else if(Hero->Item[FORM_SHIELD])return GetLinkTileModifier(FORM_SHIELD);
+	else if(Hero->Item[FORM_M_SHIELD])return GetLinkTileModifier(FORM_M_SHIELD);
+	else if(Hero->Item[FORM2SPIKED])return GetLinkTileModifier(FORM2SPIKED);
 	else return 0;
 }//end tilemods
 
 int wouldJump(){//start
-	int linkCombo = ComboAt(Link->X+8,Link->Y+12);
+	int linkCombo = ComboAt(Hero->X+8,Hero->Y+12);
 	int linkPlacedFlag = Screen->ComboF[linkCombo];
 	if(Screen->ComboI[linkCombo]==CF_SCRIPT1&&Screen->ComboT[linkCombo]!=CT_WATER){
-		if(Link->Dir==DIR_DOWN&&Link->InputDown&&linkPlacedFlag==CF_SCRIPT1&&linkCombo!=ComboAt(Link->X+8,Link->Y+16)){
+		if(Hero->Dir==DIR_DOWN&&Hold[CB_DOWN]&&linkPlacedFlag==CF_SCRIPT1&&linkCombo!=ComboAt(Hero->X+8,Hero->Y+16)){
 			return DIR_DOWN;
-		} else if(Link->Dir==DIR_RIGHT&&Link->InputRight&&linkPlacedFlag==CF_SCRIPT2&&linkCombo!=ComboAt(Link->X+16,Link->Y+12)){
+		} else if(Hero->Dir==DIR_RIGHT&&Hold[CB_RIGHT]&&linkPlacedFlag==CF_SCRIPT2&&linkCombo!=ComboAt(Hero->X+16,Hero->Y+12)){
 			return DIR_RIGHT;
-		} else if(Link->Dir==DIR_LEFT&&Link->InputLeft&&linkPlacedFlag==CF_SCRIPT3&&linkCombo!=ComboAt(Link->X-1,Link->Y+12)){
+		} else if(Hero->Dir==DIR_LEFT&&Hold[CB_LEFT]&&linkPlacedFlag==CF_SCRIPT3&&linkCombo!=ComboAt(Hero->X-1,Hero->Y+12)){
 			return DIR_LEFT;
-		} else if(Link->Dir==DIR_UP&&Link->InputUp&&linkPlacedFlag==CF_SCRIPT4&&linkCombo!=ComboAt(Link->X+8,Link->Y+7)){
+		} else if(Hero->Dir==DIR_UP&&Hold[CB_UP]&&linkPlacedFlag==CF_SCRIPT4&&linkCombo!=ComboAt(Hero->X+8,Hero->Y+7)){
 			return DIR_UP;
-		} else if(Link->Dir==DIR_DOWN&&Link->InputDown&&(Screen->ComboF[linkCombo]==CF_SCRIPT7||Screen->ComboF[linkCombo]==CF_SCRIPT5||Screen->ComboF[linkCombo]==CF_SCRIPT13)&&linkCombo!=ComboAt(Link->X+8,Link->Y+16)){
+		} else if(Hero->Dir==DIR_DOWN&&Hold[CB_DOWN]&&(Screen->ComboF[linkCombo]==CF_SCRIPT7||Screen->ComboF[linkCombo]==CF_SCRIPT5||Screen->ComboF[linkCombo]==CF_SCRIPT13)&&linkCombo!=ComboAt(Hero->X+8,Hero->Y+16)){
 			return DIR_DOWN;
-		} else if(Link->Dir==DIR_RIGHT&&Link->InputRight&&(Screen->ComboF[linkCombo]==CF_SCRIPT5||Screen->ComboF[linkCombo]==CF_SCRIPT6||Screen->ComboF[linkCombo]==CF_SCRIPT14)&&linkCombo!=ComboAt(Link->X+16,Link->Y+12)){
+		} else if(Hero->Dir==DIR_RIGHT&&Hold[CB_RIGHT]&&(Screen->ComboF[linkCombo]==CF_SCRIPT5||Screen->ComboF[linkCombo]==CF_SCRIPT6||Screen->ComboF[linkCombo]==CF_SCRIPT14)&&linkCombo!=ComboAt(Hero->X+16,Hero->Y+12)){
 			return DIR_RIGHT;
-		} else if(Link->Dir==DIR_LEFT&&Link->InputLeft&&(Screen->ComboF[linkCombo]==CF_SCRIPT8||Screen->ComboF[linkCombo]==CF_SCRIPT7||Screen->ComboF[linkCombo]==CF_SCRIPT14)&&linkCombo!=ComboAt(Link->X-1,Link->Y+12)){
+		} else if(Hero->Dir==DIR_LEFT&&Hold[CB_LEFT]&&(Screen->ComboF[linkCombo]==CF_SCRIPT8||Screen->ComboF[linkCombo]==CF_SCRIPT7||Screen->ComboF[linkCombo]==CF_SCRIPT14)&&linkCombo!=ComboAt(Hero->X-1,Hero->Y+12)){
 			return DIR_LEFT;
-		} else if(Link->Dir==DIR_UP&&Link->InputUp&&(Screen->ComboF[linkCombo]==CF_SCRIPT6||Screen->ComboF[linkCombo]==CF_SCRIPT8||Screen->ComboF[linkCombo]==CF_SCRIPT13)&&linkCombo!=ComboAt(Link->X+8,Link->Y+7)){
+		} else if(Hero->Dir==DIR_UP&&Hold[CB_UP]&&(Screen->ComboF[linkCombo]==CF_SCRIPT6||Screen->ComboF[linkCombo]==CF_SCRIPT8||Screen->ComboF[linkCombo]==CF_SCRIPT13)&&linkCombo!=ComboAt(Hero->X+8,Hero->Y+7)){
 			return DIR_UP;
 		}
 	}
@@ -308,28 +308,28 @@ int wouldJump(){//start
 //start RampJump
 void rampJump(){
 	if(curled&&timeRolling>=100){
-		int downCombo = ComboAt(Link->X+8,Link->Y+15);
-		int rightCombo = ComboAt(Link->X+15,Link->Y+12);
-		int leftCombo = ComboAt(Link->X,Link->Y+12);
-		int upCombo = ComboAt(Link->X+8,Link->Y+8);
-		if(Link->Dir==DIR_DOWN&&Screen->ComboT[downCombo]==CT_LEDGE&&Screen->ComboI[downCombo]==CF_SCRIPT2&&Screen->ComboS[downCombo]==1010b){
+		int downCombo = ComboAt(Hero->X+8,Hero->Y+15);
+		int rightCombo = ComboAt(Hero->X+15,Hero->Y+12);
+		int leftCombo = ComboAt(Hero->X,Hero->Y+12);
+		int upCombo = ComboAt(Hero->X+8,Hero->Y+8);
+		if(Hero->Dir==DIR_DOWN&&Screen->ComboT[downCombo]==CT_LEDGE&&Screen->ComboI[downCombo]==CF_SCRIPT2&&Screen->ComboS[downCombo]==1010b){
 			floatDir=DIR_DOWN;
-			Link->Y=ComboY(downCombo);
+			Hero->Y=ComboY(downCombo);
 			setRampFloat();
 			rampWarpUp(downCombo);
-		} else if(Link->Dir==DIR_RIGHT&&Screen->ComboT[rightCombo]==CT_LEDGE&&Screen->ComboI[rightCombo]==CF_SCRIPT2&&Screen->ComboS[rightCombo]==1100b){
+		} else if(Hero->Dir==DIR_RIGHT&&Screen->ComboT[rightCombo]==CT_LEDGE&&Screen->ComboI[rightCombo]==CF_SCRIPT2&&Screen->ComboS[rightCombo]==1100b){
 			floatDir=DIR_RIGHT;
-			Link->X=ComboX(rightCombo);
+			Hero->X=ComboX(rightCombo);
 			setRampFloat();
 			rampWarpUp(rightCombo);
-		} else if(Link->Dir==DIR_LEFT&&Screen->ComboT[leftCombo]==CT_LEDGE&&Screen->ComboI[leftCombo]==CF_SCRIPT2&&Screen->ComboS[leftCombo]==0011b){
+		} else if(Hero->Dir==DIR_LEFT&&Screen->ComboT[leftCombo]==CT_LEDGE&&Screen->ComboI[leftCombo]==CF_SCRIPT2&&Screen->ComboS[leftCombo]==0011b){
 			floatDir=DIR_LEFT;
-			Link->X=ComboX(leftCombo);
+			Hero->X=ComboX(leftCombo);
 			setRampFloat();
 			rampWarpUp(leftCombo);
-		} else if(Link->Dir==DIR_UP&&Screen->ComboT[upCombo]==CT_LEDGE&&Screen->ComboI[upCombo]==CF_SCRIPT2&&Screen->ComboS[upCombo]==0101b){
+		} else if(Hero->Dir==DIR_UP&&Screen->ComboT[upCombo]==CT_LEDGE&&Screen->ComboI[upCombo]==CF_SCRIPT2&&Screen->ComboS[upCombo]==0101b){
 			floatDir=DIR_UP;
-			Link->Y=ComboY(upCombo);
+			Hero->Y=ComboY(upCombo);
 			setRampFloat();
 			rampWarpUp(upCombo);
 		}

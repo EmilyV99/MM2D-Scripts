@@ -167,7 +167,7 @@ int EX2_item = 0;
 int B_item = 0;
 //end EX Item Button Global Variables
 //start FormVars
-//Link Tile Modifier items
+//Hero Tile Modifier items
 DEFINE FORM1 = 123;
 DEFINE FORM2 = 124;
 DEFINE FORM3 = 125;
@@ -498,7 +498,7 @@ int lastScreen = -1;
 int lastMap = -1;
 int lastLevel = -1;
 int lastDMap = -1;
-int lastHP = Link->HP;
+int lastHP = Hero->HP;
 //Misc
 int LinkActionOld = 0;
 int floatPix = 2;
@@ -516,6 +516,9 @@ bool dbsetup = false;
 bool dbdraw = false;
 bool debugEnabled = false;
 bool noSave = false;
+//Input
+bool Hold[BTN_MAX];
+bool Press[BTN_MAX];
 //Version Vars
 int version[] = {2};//{Global array}
 //end MISC

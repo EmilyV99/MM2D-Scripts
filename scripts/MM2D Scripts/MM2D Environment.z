@@ -42,29 +42,29 @@ void handleFreezableWater(){
 bool wasOnWaterLedge = false;
 void highLedgeFromWater(){
 	if(!wasOnWaterLedge){
-		if(Link->Action==LA_SWIMMING || Link->Action==LA_DIVING){
+		if(Hero->Action==LA_SWIMMING || Hero->Action==LA_DIVING){
 			if(LinkOnFlagMod(CF_NOWATERLEDGE2,0,LinkMovement[LM_STICKY]*3,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,0,LinkMovement[LM_STICKY]*3,0,true))){
 				if(LinkMovement[LM_STICKX]==0){
 					if(LinkMovement[LM_STICKY]==1){
-						Link->Dir=DIR_DOWN;
+						Hero->Dir=DIR_DOWN;
 					} else if (LinkMovement[LM_STICKY]==-1){
-						Link->Dir=DIR_UP;
+						Hero->Dir=DIR_UP;
 					}
 				}
-				Link->InputDown=false;
-				Link->InputUp=false;
+				Hold[CB_DOWN]=false;
+				Hold[CB_UP]=false;
 				LinkMovement_SetLinkSpeedBoost(0);
 			}
 			if(LinkOnFlagMod(CF_NOWATERLEDGE2,LinkMovement[LM_STICKX]*3,0,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,LinkMovement[LM_STICKX]*3,0,0,true))){
 				if(LinkMovement[LM_STICKY]==0){
 					if(LinkMovement[LM_STICKX]==1){
-						Link->Dir=DIR_RIGHT;
+						Hero->Dir=DIR_RIGHT;
 					} else if (LinkMovement[LM_STICKX]==-1){
-						Link->Dir=DIR_LEFT;
+						Hero->Dir=DIR_LEFT;
 					}
 				}
-				Link->InputLeft=false;
-				Link->InputRight=false;
+				Hold[CB_LEFT]=false;
+				Hold[CB_RIGHT]=false;
 				LinkMovement_SetLinkSpeedBoost(0);
 			}
 		} else {
@@ -83,80 +83,80 @@ ffc script climb{
 		int width = this->EffectWidth;
 		int height = this->EffectHeight;
 		int bottomheight = height;
-		if(Link->BigHitbox)bottomheight-=8;
+		if(Hero->BigHitbox)bottomheight-=8;
 		while(true){
 			if(!isFrozen&&(blockheight>2||form==1||(blockheight==2&&(!form||form==2)))){
 				if(dir==DIR_UP||dir==4){
-					if(Link->Y>=this->Y-(16+lspdboost)){//start inputdown
-						if(Link->Y<=this->Y-16){
-							if(Link->X>=this->X-15){
-								if(Link->X<=this->X+(width-1)){
-									if(Link->InputDown){
-										if(Link->Y!=this->Y-16)Link->Y=this->Y-16;
-										Link->Dir=DIR_DOWN;
-										if(Link->X>=this->X+(width-4)){
-											if(CanWalk(Link->X,Link->Y,DIR_RIGHT,Abs(Link->X-(this->X+width)),false))Link->X=this->X+width;
-										} else if(Link->X<=this->X-12)if(CanWalk(Link->X,Link->Y,DIR_LEFT,Abs(Link->X-this->X-16),false))Link->X=this->X-16;
+					if(Hero->Y>=this->Y-(16+lspdboost)){//start inputdown
+						if(Hero->Y<=this->Y-16){
+							if(Hero->X>=this->X-15){
+								if(Hero->X<=this->X+(width-1)){
+									if(Hold[CB_DOWN]){
+										if(Hero->Y!=this->Y-16)Hero->Y=this->Y-16;
+										Hero->Dir=DIR_DOWN;
+										if(Hero->X>=this->X+(width-4)){
+											if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(this->X+width)),false))Hero->X=this->X+width;
+										} else if(Hero->X<=this->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-this->X-16),false))Hero->X=this->X-16;
 									}
-									Link->InputDown=false;
-									Link->PressDown=false;
+									Hold[CB_DOWN]=false;
+									Press[CB_DOWN]=false;
 								}
 							}
 						}//end
 					}
 				}
 				if(dir==DIR_DOWN||dir==4){
-					if(Link->Y<=this->Y+(bottomheight+lspdboost)){//start inputup
-						if(Link->Y>=this->Y+bottomheight){
-							if(Link->X>=this->X-15){
-								if(Link->X<=this->X+(width-1)){
-									if(Link->InputUp){
-										if(Link->Y!=this->Y+bottomheight)Link->Y=this->Y+bottomheight;
-										Link->Dir=DIR_UP;
-										if(Link->X>=this->X+(width-4)){
-											if(CanWalk(Link->X,Link->Y,DIR_RIGHT,Abs(Link->X-(this->X+width)),false))Link->X=this->X+width;
-										} else if(Link->X<=this->X-12)if(CanWalk(Link->X,Link->Y,DIR_LEFT,Abs(Link->X-this->X-16),false))Link->X=this->X-16;
+					if(Hero->Y<=this->Y+(bottomheight+lspdboost)){//start inputup
+						if(Hero->Y>=this->Y+bottomheight){
+							if(Hero->X>=this->X-15){
+								if(Hero->X<=this->X+(width-1)){
+									if(Hold[CB_UP]){
+										if(Hero->Y!=this->Y+bottomheight)Hero->Y=this->Y+bottomheight;
+										Hero->Dir=DIR_UP;
+										if(Hero->X>=this->X+(width-4)){
+											if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(this->X+width)),false))Hero->X=this->X+width;
+										} else if(Hero->X<=this->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-this->X-16),false))Hero->X=this->X-16;
 									}
-									Link->InputUp=false;
-									Link->PressUp=false;
+									Hold[CB_UP]=false;
+									Press[CB_UP]=false;
 								}
 							}
 						}//end
 					}
 				}
 				if(dir==DIR_LEFT||dir==4){
-					if(Link->X>=this->X-(16+lspdboost)){//start inputright
-						if(Link->X<=this->X-16){
-							if(Link->Y<=this->Y+(bottomheight-1)){
-								if(Link->Y>=this->Y-15){
-									if(Link->InputRight){
-										if(Link->X!=this->X-16)Link->X=this->X-16;
-										Link->Dir=DIR_RIGHT;
-										if(Link->Y>=this->Y+(bottomheight-4)){
-											if(CanWalk(Link->X,Link->Y,DIR_DOWN,Abs(Link->Y-(this->Y+bottomheight)),false))Link->Y=this->Y+bottomheight;
-										} else if(Link->Y<=this->Y-12)if(CanWalk(Link->X,Link->Y,DIR_UP,Abs(Link->Y-(this->Y-16)),false))Link->Y=this->Y-16;
+					if(Hero->X>=this->X-(16+lspdboost)){//start inputright
+						if(Hero->X<=this->X-16){
+							if(Hero->Y<=this->Y+(bottomheight-1)){
+								if(Hero->Y>=this->Y-15){
+									if(Hold[CB_RIGHT]){
+										if(Hero->X!=this->X-16)Hero->X=this->X-16;
+										Hero->Dir=DIR_RIGHT;
+										if(Hero->Y>=this->Y+(bottomheight-4)){
+											if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(this->Y+bottomheight)),false))Hero->Y=this->Y+bottomheight;
+										} else if(Hero->Y<=this->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(this->Y-16)),false))Hero->Y=this->Y-16;
 									}
-									Link->InputRight=false;
-									Link->PressRight=false;
+									Hold[CB_RIGHT]=false;
+									Press[CB_RIGHT]=false;
 								}
 							}
 						}//end
 					}
 				}
 				if(dir==DIR_RIGHT||dir==4){
-					if(Link->X<=this->X+(width+lspdboost)){//start inputleft
-						if(Link->X>=this->X+width){
-							if(Link->Y>=this->Y-15){
-								if(Link->Y<=this->Y+(bottomheight-1)){
-									if(Link->InputLeft){
-										if(Link->X!=this->X+width)Link->X=this->X+width;
-										Link->Dir=DIR_LEFT;
-										if(Link->Y>=this->Y+(bottomheight-4)){
-											if(CanWalk(Link->X,Link->Y,DIR_DOWN,Abs(Link->Y-(this->Y+bottomheight)),false))Link->Y=this->Y+bottomheight;
-										} else if(Link->Y<=this->Y-12)if(CanWalk(Link->X,Link->Y,DIR_UP,Abs(Link->Y-(this->Y-16)),false))Link->Y=this->Y-16;
+					if(Hero->X<=this->X+(width+lspdboost)){//start inputleft
+						if(Hero->X>=this->X+width){
+							if(Hero->Y>=this->Y-15){
+								if(Hero->Y<=this->Y+(bottomheight-1)){
+									if(Hold[CB_LEFT]){
+										if(Hero->X!=this->X+width)Hero->X=this->X+width;
+										Hero->Dir=DIR_LEFT;
+										if(Hero->Y>=this->Y+(bottomheight-4)){
+											if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(this->Y+bottomheight)),false))Hero->Y=this->Y+bottomheight;
+										} else if(Hero->Y<=this->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(this->Y-16)),false))Hero->Y=this->Y-16;
 									}
-									Link->InputLeft=false;
-									Link->PressLeft=false;
+									Hold[CB_LEFT]=false;
+									Press[CB_LEFT]=false;
 								}
 							}
 						}//end
@@ -176,50 +176,50 @@ ffc script warpCustomReturn{
 		switch(side){
 			case DIR_UP:{
 				while(true){
-					if(!isFrozen&&Link->Y<=1&&(Link->PressUp||Link->InputUp)){
-						Link->X=X;
-						Link->Y=Y;
-						Link->PitWarp(dmap,screen);
+					if(!isFrozen&&Hero->Y<=1&&(Press[CB_UP]||Hold[CB_UP])){
+						Hero->X=X;
+						Hero->Y=Y;
+						Hero->PitWarp(dmap,screen);
 					}
 					Waitframe();
 				}
 			break;}
 			case DIR_DOWN:{
 				while(true){
-					if(!isFrozen&&Link->Y>=159&&(Link->PressDown||Link->InputDown)){
-						Link->X=X;
-						Link->Y=Y;
-						Link->PitWarp(dmap,screen);
+					if(!isFrozen&&Hero->Y>=159&&(Press[CB_DOWN]||Hold[CB_DOWN])){
+						Hero->X=X;
+						Hero->Y=Y;
+						Hero->PitWarp(dmap,screen);
 					}
 					Waitframe();
 				}
 			break;}
 			case DIR_LEFT:{
 				while(true){
-					if(!isFrozen&&Link->X<=1&&(Link->PressLeft||Link->InputLeft)){
-						Link->X=X;
-						Link->Y=Y;
-						Link->PitWarp(dmap,screen);
+					if(!isFrozen&&Hero->X<=1&&(Press[CB_LEFT]||Hold[CB_LEFT])){
+						Hero->X=X;
+						Hero->Y=Y;
+						Hero->PitWarp(dmap,screen);
 					}
 					Waitframe();
 				}
 			break;}
 			case DIR_RIGHT:{
 				while(true){
-					if(!isFrozen&&Link->X>=239&&(Link->PressRight||Link->InputRight)){
-						Link->X=X;
-						Link->Y=Y;
-						Link->PitWarp(dmap,screen);
+					if(!isFrozen&&Hero->X>=239&&(Press[CB_RIGHT]||Hold[CB_RIGHT])){
+						Hero->X=X;
+						Hero->Y=Y;
+						Hero->PitWarp(dmap,screen);
 					}
 					Waitframe();
 				}
 			break;}
 			default:{
 				while(true){
-					if(!isFrozen&&(Abs(Link->X-this->X)<=14&&Abs(Link->Y-this->Y)<=14)){
-						Link->X=X;
-						Link->Y=Y;
-						Link->PitWarp(dmap,screen);
+					if(!isFrozen&&(Abs(Hero->X-this->X)<=14&&Abs(Hero->Y-this->Y)<=14)){
+						Hero->X=X;
+						Hero->Y=Y;
+						Hero->PitWarp(dmap,screen);
 					}
 					Waitframe();
 				}
@@ -238,8 +238,8 @@ ffc script SoftSoil
 		int waitTime = 0;
 		if(startState==SSSTATE_GROWN)
 		{
-			this->X=GridX(Link->X+8);
-			this->Y=GridY(Link->Y+8);
+			this->X=GridX(Hero->X+8);
+			this->Y=GridY(Hero->Y+8);
 		}
 		if(startState)setSoilState(index,startState);
 		while(true)
@@ -248,7 +248,7 @@ ffc script SoftSoil
 			if(state!=SSSTATE_ACTIVE)
 			{
 				if(state==SSSTATE_WAITING)this->Data = COMBO_SOIL;
-				if(Link->X>this->X-8&&Link->X<this->X+8&&Link->Y>this->Y-8&&Link->Y<this->Y+8)
+				if(Hero->X>this->X-8&&Hero->X<this->X+8&&Hero->Y>this->Y-8&&Hero->Y<this->Y+8)
 				{
 					if(usingBugs>0&&!gskull)
 					{
@@ -308,10 +308,10 @@ ffc script SoftSoil
 			if(state==SSSTATE_GROWN)
 			{
 				this->Data = COMBO_BEANPLANT;
-				if(Link->X>this->X-8&&Link->X<this->X+8&&Link->Y>this->Y-8&&Link->Y<this->Y+8)
+				if(Hero->X>this->X-8&&Hero->X<this->X+8&&Hero->Y>this->Y-8&&Hero->Y<this->Y+8)
 				{
-					Link->X = this->X;
-					Link->Y = this->Y;
+					Hero->X = this->X;
+					Hero->Y = this->Y;
 					//if(startState==2)Waitframe();
 					Rafting[RAFT_DIR] = raftDir;
 					Rafting[RAFT_UP] = screensUp;
@@ -332,7 +332,7 @@ ffc script SoftSoil
 			}
 			if(state == SSSTATE_ACTIVE)
 			{
-				if(Link->Action==LA_RAFTING)
+				if(Hero->Action==LA_RAFTING)
 				{
 					if(startState==2)
 					{
@@ -347,7 +347,7 @@ ffc script SoftSoil
 				{
 					waitTime--;
 				}
-				else if(!Link->Action==LA_RAFTING)
+				else if(!Hero->Action==LA_RAFTING)
 				{
 					if(startState==SSSTATE_GROWN)
 					{
@@ -397,32 +397,32 @@ ffc script LadderClimb{
 		int ctime = 0;
 		while(true){
 			if(ctime>=climbtime){
-				Link->X+=dirX(dir)*16;
-				Link->Y+=dirY(dir)*16;
+				Hero->X+=dirX(dir)*16;
+				Hero->Y+=dirY(dir)*16;
 				warpNumFloors=floorsUp;
 			}
 			switch(dir){
 				case DIR_UP:{
-					if(Link->Y==this->Y){
-						if(Link->InputUp)ctime++;
+					if(Hero->Y==this->Y){
+						if(Hold[CB_UP])ctime++;
 						else ctime=0;
 					} else ctime=0;
 					break;}
 				case DIR_DOWN:{
-					if(Link->Y==this->Y){
-						if(Link->InputDown)ctime++;
+					if(Hero->Y==this->Y){
+						if(Hold[CB_DOWN])ctime++;
 						else ctime=0;
 					} else ctime=0;
 					break;}
 				case DIR_LEFT:{
-					if(Link->X==this->X){
-						if(Link->InputLeft)ctime++;
+					if(Hero->X==this->X){
+						if(Hold[CB_LEFT])ctime++;
 						else ctime=0;
 					} else ctime=0;
 					break;}
 				case DIR_RIGHT:{
-					if(Link->X==this->X){
-						if(Link->InputRight)ctime++;
+					if(Hero->X==this->X){
+						if(Hold[CB_RIGHT])ctime++;
 						else ctime=0;
 					} else ctime=0;
 					break;}
@@ -577,7 +577,7 @@ item script dekuStick
 {
 	void run()
 	{
-		if(!Link->PressB)Quit();
+		if(!Press[CB_B])Quit();
 		for(int i = 1;i<=Screen->NumLWeapons();i++)
 		{
 			lweapon weap = Screen->LoadLWeapon(i);
@@ -586,8 +586,8 @@ item script dekuStick
 				Quit();
 			}
 		}
-		lweapon stick = CreateLWeaponAt(LW_DEKUSTICK,Link->X+InFrontX(Link->Dir,0),Link->Y+InFrontY(Link->Dir,0));
-		stick->Dir = Link->Dir;
+		lweapon stick = CreateLWeaponAt(LW_DEKUSTICK,Hero->X+InFrontX(Hero->Dir,0),Hero->Y+InFrontY(Hero->Dir,0));
+		stick->Dir = Hero->Dir;
 		if(dekuStickLitTimer>0)
 		{
 			stick->Tile = TILE_DEKUSTICK_LIT + stick->Dir;
@@ -602,7 +602,7 @@ item script dekuStick
 		stick->CollDetection = false;
 		stick->DeadState = 15;
 		freezeFrames+=15;
-		Link->Action = LA_ATTACKING;
+		Hero->Action = LA_ATTACKING;
 	}
 }
 //end TorchPuzzle
@@ -653,7 +653,7 @@ void warpToOwl(int index)//start
 	switch(index)
 	{
 		case 0:
-			Link->Warp(1,0x6B);
+			Hero->Warp(1,0x6B);
 			break;
 		case 1:
 			break;
@@ -723,15 +723,15 @@ ffc script chest
 					if(solid)Screen->ComboD[ComboAt(this->X,this->Y)]=COMBO_SOLID;
 				}
 				if(!solid)ffcSolid(this);
-				if(Link->PressA&&AgainstComboBase(this->X,this->Y))
+				if(Press[CB_A]&&AgainstComboBase(this->X,this->Y))
 				{
-					Link->PressA=false;Link->InputA=false;
-					if(Link->Item[itemID])
+					Press[CB_A]=false;Hold[CB_A]=false;
+					if(Hero->Item[itemID])
 					{
 						itemID=1;
 					}
 					this->Data=open;
-					item itm = CreateItemAt(itemID,Link->X,Link->Y);
+					item itm = CreateItemAt(itemID,Hero->X,Hero->Y);
 					itm->Pickup=IP_HOLDUP;
 					setChestState(index,true);
 				}
@@ -741,7 +741,7 @@ ffc script chest
 	}
 	bool AgainstComboBase(int x, int y)
 	{
-		return Link->Z == 0 && ((Link->Dir == DIR_UP && Link->Y == y+8 && Abs(Link->X-x) < 8)||(Link->Dir == DIR_DOWN && Link->Y == y-16 && Abs(Link->X-x) < 8)||(Link->Dir == DIR_LEFT && Link->X == x+16 && Abs(Link->Y-y) < 8)||(Link->Dir == DIR_RIGHT && Link->X == x-16 && Abs(Link->Y-y) < 8));
+		return Hero->Z == 0 && ((Hero->Dir == DIR_UP && Hero->Y == y+8 && Abs(Hero->X-x) < 8)||(Hero->Dir == DIR_DOWN && Hero->Y == y-16 && Abs(Hero->X-x) < 8)||(Hero->Dir == DIR_LEFT && Hero->X == x+16 && Abs(Hero->Y-y) < 8)||(Hero->Dir == DIR_RIGHT && Hero->X == x-16 && Abs(Hero->Y-y) < 8));
     }
 }
 

@@ -170,17 +170,17 @@ void Overhead_Update() {
 
 		// If we've just started scrolling, figure out what direction it's in so
 		// we can draw the deleted combos properly. Also reset the timer.
-		if (LA_SCROLLING == Link->Action) {
-			if (-16 == Link->X) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_RIGHT;}
-			if (256 == Link->X) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_LEFT;}
-			if (-16 == Link->Y) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_DOWN;}
-			if (176 == Link->Y) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_UP;}
+		if (LA_SCROLLING == Hero->Action) {
+			if (-16 == Hero->X) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_RIGHT;}
+			if (256 == Hero->X) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_LEFT;}
+			if (-16 == Hero->Y) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_DOWN;}
+			if (176 == Hero->Y) {Overhead_Data[OVERHEAD_SCROLL_DIR] = DIR_UP;}
 			Overhead_Data[OVERHEAD_TIMER] = 0;
 		}
 	}
 
 	// If we've finished scrolling, copy over the layers and delete them.
-	if (LA_SCROLLING != Link->Action && OVERHEAD_STATE_SCROLLING == Overhead_Data[OVERHEAD_STATE]) {
+	if (LA_SCROLLING != Hero->Action && OVERHEAD_STATE_SCROLLING == Overhead_Data[OVERHEAD_STATE]) {
 		for (layer = 3; layer <= 6; ++layer) {
 			// Skip this layer if we're not configured to use it.
 			if (3 == layer && !OVERHEAD_USE_L3) {continue;}

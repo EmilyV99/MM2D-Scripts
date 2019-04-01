@@ -504,8 +504,8 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 				}
 				else if(cooldown>0)cooldown--;
 			}
-			Link->X = 120;
-			Link->Y = 112;
+			Hero->X = 120;
+			Hero->Y = 112;
 			timer--;
 			phaseTimer--;
 			Screen->FastTile(6,0,136,loadItemTile(I_BOWARROW),loadItemCSet(I_BOWARROW),OP_OPAQUE);
@@ -522,7 +522,7 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 			Screen->DrawInteger(6,16,136,FONT_DSPHANTOMP,0x0F,0x01,0,0,kills,0,OP_OPAQUE);
 			setGlobalVar(10,GV_MISC,kills);
 			setGlobalVar(11,GV_MISC,timer);
-			Link->PressL=false;Link->InputL=false;
+			Press[CB_L]=false;Hold[CB_L]=false;
 			runOmniArrows(2);
 			if(timer<=0)break;
 			Waitframe();
