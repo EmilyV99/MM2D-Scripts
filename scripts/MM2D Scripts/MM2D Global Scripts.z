@@ -73,7 +73,6 @@ global script Global
 		//end
 		//Tango_ConvertVariableName("anpc");
 		//Tango_ConvertFunctionName("npcend");
-		PollInput();
 		while(true)
 		{
 			if(!(gameframe%60) || refreshTime)//Refresh time-based events every 60 frames
@@ -984,6 +983,7 @@ global script Global
 		{
 			if(!toggleGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL))reskinSubscreen(1);
 		}
+		GameOverMenu::checkF6();
 	}//end
 }
 //end Global Script
@@ -1380,6 +1380,121 @@ hero script OptionsMenu
 		itoa(buf3, (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintB[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 8, __tintB[getGlobalVar(TINT_LENS, GV_PAL)]);
 		DrawMenuString(buf3, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, COLOR_DARKBLUE, TF_RIGHT);
 		y += MENU_FONT_HEIGHT + MENU_SPACING;
+	}
+}
+//end
+//start GameOverMenu
+namespace GameOverMenu
+{
+	enum QuitState { NONE = -1, CONTINUE, RESET_TIME, QUIT, CANCEL };
+	
+	//start Constants
+	CONFIG MENU_LAYER = 7;
+	CONFIG MENU_FONT = FONT_ACORN;
+	CONFIG MENU_FONT_HEIGHT = 8;
+	CONFIG MENU_SPACING = 16;
+	CONFIG MENU_COLOR_ACTIVE = COLOR_RED;
+	CONFIG MENU_COLOR_INACTIVE = COLOR_GRAY;
+	//
+	DEFINE SCREEN_HEIGHT = SCREEN_BOTTOM - SUBSCREEN_TOP;
+	DEFINE SCREEN_VCENTER = SCREEN_HEIGHT / 2;
+	DEFINE SCREEN_WIDTH = SCREEN_RIGHT - SCREEN_LEFT;
+	DEFINE SCREEN_HCENTER = SCREEN_WIDTH / 2;
+	//end
+	
+	hero script OnDeath
+	{
+		void run()
+		{
+			runGameOverMenu(false);
+		}
+	}
+
+	void checkF6()
+	{
+		if(Input->ReadKey[KEY_F6])
+		{
+			runGameOverMenu(true);
+		}
+	}
+
+	void runGameOverMenu(bool allowCancel)
+	{
+		QuitState state = NONE;
+		int cursor = 0;
+		DEFINE NUM_OPTIONS = 1 + <int>(allowCancel) + <int>(Hero->Item[I_OCARINA]) + <int>(day < 4);
+		DEFINE MENU_SENSITIVITY = 10;
+		DEFINE START_TEXT = SCREEN_VCENTER - (((NUM_OPTIONS * MENU_FONT_HEIGHT) + ((NUM_OPTIONS - 1) * MENU_SPACING)) / 2);
+		while(state==NONE)
+		{
+			if(Input->Press[CB_DOWN] || (Input->Hold[CB_DOWN] && !(gameframe%MENU_SENSITIVITY))) ++cursor;
+			else if(Input->Press[CB_UP] || (Input->Hold[CB_UP] && !(gameframe%MENU_SENSITIVITY))) --cursor;
+			cursor += NUM_OPTIONS; //Ensure it is positive, without changing the modulo value
+			cursor %= NUM_OPTIONS;
+			Screen->Rectangle(7, SCREEN_LEFT, SUBSCREEN_TOP, SCREEN_RIGHT, SCREEN_BOTTOM, COLOR_BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+			int opt = 0;
+			if(day < 4)
+			{
+				if(Input->Press[CB_START] && cursor==opt) state = CONTINUE;
+				drawOpt(SCREEN_HCENTER, START_TEXT + (opt * (MENU_FONT_HEIGHT + MENU_SPACING)), cursor==opt++, CONTINUE);
+			}
+			if(Hero->Item[I_OCARINA])
+			{
+				if(Input->Press[CB_START] && cursor==opt) state = RESET_TIME;
+				drawOpt(SCREEN_HCENTER, START_TEXT + (opt * (MENU_FONT_HEIGHT + MENU_SPACING)), cursor==opt++, RESET_TIME);
+			}
+			if(Input->Press[CB_START] && cursor==opt) state = QUIT;
+			drawOpt(SCREEN_HCENTER, START_TEXT + (opt * (MENU_FONT_HEIGHT + MENU_SPACING)), cursor==opt++, QUIT);
+			if(allowCancel)
+			{
+				if(Input->Press[CB_START] && cursor==opt) state = CANCEL;
+				drawOpt(SCREEN_HCENTER, START_TEXT + (opt * (MENU_FONT_HEIGHT + MENU_SPACING)), cursor==opt++, CANCEL);
+			}
+		}
+		end(state);
+	}
+	
+	void drawOpt(int x, int y, bool active, QuitState opt) //Default overload
+	{
+		drawOpt(MENU_LAYER, x, y, MENU_FONT, active ? MENU_COLOR_ACTIVE : MENU_COLOR_INACTIVE, COLOR_TRANS, TF_CENTERED, opt, OP_OPAQUE);
+	}
+	void drawOpt(int layer, int x, int y, int font, int color, int bgcolor, int format, QuitState opt, int opacity)
+	{
+		switch(opt)
+		{
+			case CONTINUE:
+				Screen->DrawString(layer, x, y, font, color, bgcolor, format, "Continue", opacity);
+				break;
+			case RESET_TIME:
+				Screen->DrawString(layer, x, y, font, color, bgcolor, format, "Reset Time", opacity);
+				break;
+			case QUIT:
+				Screen->DrawString(layer, x, y, font, color, bgcolor, format, "Quit", opacity);
+				break;
+			case CANCEL:
+				Screen->DrawString(layer, x, y, font, color, bgcolor, format, "Cancel", opacity);
+				break;
+		}
+	}
+	
+	void end(QuitState opt)
+	{
+		switch(opt)
+		{
+			case CONTINUE:
+				Hero->HP = Hero->MaxHP;
+				if(Hero->MP < (Hero->MaxMP / 2)) Hero->MP = Hero->MaxMP / 2;
+				Game->Continue();
+				break;
+			case RESET_TIME:
+				playSong(SONGNOTES_SongOfTime);
+				break;
+			case QUIT:
+				Game->End();
+				break;
+			case CANCEL: //Do nothing! Just leave!
+				break;
+		}
 	}
 }
 //end
