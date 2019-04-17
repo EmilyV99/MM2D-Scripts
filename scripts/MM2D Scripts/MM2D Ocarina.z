@@ -47,7 +47,7 @@ void ocarina()//start ocMode
 	if(ocIndex!=8 && ocIndex>0 && playSong(currSong))
 	{
 		for(;ocIndex<8;ocIndex++){}
-		MyNoAction();
+		NoAction();
 		ocarina_mode = false;
 	}
 	else if (ocIndex==8)
@@ -65,7 +65,7 @@ void ocarina()//start ocMode
 		}
 	}
 	drawNotes();
-	MyNoAction();
+	NoAction();
 }//end ocMode
 void drawNotes(){//start
 	//Border ripped from renameLink
@@ -275,7 +275,7 @@ void scarecrow(){//start
 		scarecrowRecord = false;
 	}
 	drawNotes();
-	MyNoAction();
+	NoAction();
 }//end
 bool isValidSong(int song, bool reqLearned){//start
 	if(reqLearned){

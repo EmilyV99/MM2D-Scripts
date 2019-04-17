@@ -31,7 +31,7 @@ ffc script NPC
 			{
 				if(AgainstFFCBase(this) && Input->Press[CB_A])
 				{
-					Input->Hold[CB_A] = false;
+					Input->Button[CB_A] = false;
 					Input->Press[CB_A] = false;
 					interact(this, NPCid);
 				}
@@ -73,7 +73,7 @@ ffc script NPC
 						{
 							if(AgainstFFCBase(this) && Input->Press[CB_A])
 							{
-								Input->Hold[CB_A] = false;
+								Input->Button[CB_A] = false;
 								Input->Press[CB_A] = false;
 								interact(this, NPCid);
 							}
@@ -90,7 +90,7 @@ ffc script NPC
 					{
 						if(AgainstFFCBase(this) && Input->Press[CB_A])
 						{
-							Input->Hold[CB_A] = false;
+							Input->Button[CB_A] = false;
 							Input->Press[CB_A] = false;
 							interact(this, NPCid);
 						}
@@ -171,7 +171,7 @@ ffc script NPC
 						}
 						if(AgainstFFCBase(this) && Input->Press[CB_A])
 						{
-							Input->Hold[CB_A] = false;
+							Input->Button[CB_A] = false;
 							Input->Press[CB_A] = false;
 							if(form != 1 && !getGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE))
 							{
@@ -757,7 +757,7 @@ ffc script cutscene
 					Quit();
 				}
 				HMS_visible = true;
-				MyNoAction();
+				NoAction();
 				Waitframe();
 				Game->PlaySound(220);
 				ShowMessageAndWait(5);
@@ -907,10 +907,10 @@ bool SelectPressInput(int input)
 
 void SetInput(int input, bool state)
 {
-    if(input == 0) Input->Hold[CB_A] = state;
-    else if(input == 1) Input->Hold[CB_B] = state;
-    else if(input == 2) Input->Hold[CB_L] = state;
-    else if(input == 3) Input->Hold[CB_R] = state;
+    if(input == 0) Input->Button[CB_A] = state;
+    else if(input == 1) Input->Button[CB_B] = state;
+    else if(input == 2) Input->Button[CB_L] = state;
+    else if(input == 3) Input->Button[CB_R] = state;
 }
 //end Signpost
 //start Shop
@@ -1100,7 +1100,7 @@ ffc script lockedDoor
 						{
 							if(AgainstFFCBase(this))
 							{
-								Input->Press[CB_A]=false;Input->Hold[CB_A]=false;
+								Input->Press[CB_A]=false;Input->Button[CB_A]=false;
 								ShowStringAndWait("Shooting Gallery@char(26)((6 a.m. to 10 p.m.))");
 								
 							}

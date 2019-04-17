@@ -135,41 +135,26 @@ int dirY(int dir)//start
 }//end
 void stopScreenTransition(int pxD,int pxR,int pxL, int pxU)//start
 {
-	if(Hero->Y>160-pxD)Input->Hold[CB_DOWN]=false;
-	if(Hero->X>240-pxR)Input->Hold[CB_RIGHT]=false;
-	if(Hero->X<0+pxL)Input->Hold[CB_LEFT]=false;
-	if(Hero->Y<0+pxU)Input->Hold[CB_UP]=false;
-}//end
-void MyNoAction()//start
-{
-	Input->Hold[CB_DOWN]=false;Input->Press[CB_DOWN]=false;
-	Input->Hold[CB_RIGHT]=false;Input->Press[CB_RIGHT]=false;
-	Input->Hold[CB_LEFT]=false;Input->Press[CB_LEFT]=false;
-	Input->Hold[CB_UP]=false;Input->Press[CB_UP]=false;
-	Input->Hold[CB_A]=false;Input->Press[CB_A]=false;
-	Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
-	Input->Hold[CB_R]=false;Input->Press[CB_R]=false;
-	Input->Hold[CB_L]=false;Input->Press[CB_L]=false;
-	Input->Hold[CB_EX1]=false;Input->Press[CB_EX1]=false;
-	Input->Hold[CB_EX2]=false;Input->Press[CB_EX2]=false;
-	Input->Hold[CB_EX3]=false;Input->Press[CB_EX3]=false;
-	Input->Hold[CB_EX4]=false; Input->Press[CB_EX4]=false;
+	if(Hero->Y>160-pxD)Input->Button[CB_DOWN]=false;
+	if(Hero->X>240-pxR)Input->Button[CB_RIGHT]=false;
+	if(Hero->X<0+pxL)Input->Button[CB_LEFT]=false;
+	if(Hero->Y<0+pxU)Input->Button[CB_UP]=false;
 }//end
 void NoActionButMoveAndEx4()//start
 {
-	Input->Hold[CB_A]=false;Input->Press[CB_A]=false;
-	Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
-	Input->Hold[CB_R]=false;Input->Press[CB_R]=false;
-	Input->Hold[CB_L]=false;Input->Press[CB_L]=false;
-	Input->Hold[CB_EX1]=false;Input->Press[CB_EX1]=false;
-	Input->Hold[CB_EX2]=false;Input->Press[CB_EX2]=false;
-	Input->Hold[CB_EX3]=false;Input->Press[CB_EX3]=false;
+	Input->Button[CB_A]=false;Input->Press[CB_A]=false;
+	Input->Button[CB_B]=false;Input->Press[CB_B]=false;
+	Input->Button[CB_R]=false;Input->Press[CB_R]=false;
+	Input->Button[CB_L]=false;Input->Press[CB_L]=false;
+	Input->Button[CB_EX1]=false;Input->Press[CB_EX1]=false;
+	Input->Button[CB_EX2]=false;Input->Press[CB_EX2]=false;
+	Input->Button[CB_EX3]=false;Input->Press[CB_EX3]=false;
 }//end
 void TotalNoAction()//start
 {
-	MyNoAction();
+	NoAction();
 	Input->Press[CB_START]=false;
-	Input->Hold[CB_START]=false;
+	Input->Button[CB_START]=false;
 }//end
 void WaitTotalNoAction()//start
 {
@@ -185,25 +170,25 @@ void WaitTotalNoAction(int frames)//start
 }//end
 void NoActionButA()//start
 {
-	Input->Hold[CB_DOWN]=false;Input->Press[CB_DOWN]=false;
-	Input->Hold[CB_RIGHT]=false;Input->Press[CB_RIGHT]=false;
-	Input->Hold[CB_LEFT]=false;Input->Press[CB_LEFT]=false;
-	Input->Hold[CB_UP]=false;Input->Press[CB_UP]=false;
-	Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
-	Input->Hold[CB_R]=false;Input->Press[CB_R]=false;
-	Input->Hold[CB_L]=false;Input->Press[CB_L]=false;
-	Input->Hold[CB_EX1]=false;Input->Press[CB_EX1]=false;
-	Input->Hold[CB_EX2]=false;Input->Press[CB_EX2]=false;
-	Input->Hold[CB_EX3]=false;Input->Press[CB_EX3]=false;
+	Input->Button[CB_DOWN]=false;Input->Press[CB_DOWN]=false;
+	Input->Button[CB_RIGHT]=false;Input->Press[CB_RIGHT]=false;
+	Input->Button[CB_LEFT]=false;Input->Press[CB_LEFT]=false;
+	Input->Button[CB_UP]=false;Input->Press[CB_UP]=false;
+	Input->Button[CB_B]=false;Input->Press[CB_B]=false;
+	Input->Button[CB_R]=false;Input->Press[CB_R]=false;
+	Input->Button[CB_L]=false;Input->Press[CB_L]=false;
+	Input->Button[CB_EX1]=false;Input->Press[CB_EX1]=false;
+	Input->Button[CB_EX2]=false;Input->Press[CB_EX2]=false;
+	Input->Button[CB_EX3]=false;Input->Press[CB_EX3]=false;
 }//end
 void NoActionButMoveAndEx4AndA()//start
 {
-	Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
-	Input->Hold[CB_R]=false;Input->Press[CB_R]=false;
-	Input->Hold[CB_L]=false;Input->Press[CB_L]=false;
-	Input->Hold[CB_EX1]=false;Input->Press[CB_EX1]=false;
-	Input->Hold[CB_EX2]=false;Input->Press[CB_EX2]=false;
-	Input->Hold[CB_EX3]=false;Input->Press[CB_EX3]=false;
+	Input->Button[CB_B]=false;Input->Press[CB_B]=false;
+	Input->Button[CB_R]=false;Input->Press[CB_R]=false;
+	Input->Button[CB_L]=false;Input->Press[CB_L]=false;
+	Input->Button[CB_EX1]=false;Input->Press[CB_EX1]=false;
+	Input->Button[CB_EX2]=false;Input->Press[CB_EX2]=false;
+	Input->Button[CB_EX3]=false;Input->Press[CB_EX3]=false;
 }//end
 bool isTouchingCombo(int comboID)//start
 {
@@ -217,10 +202,10 @@ bool isTouchingCombo(int comboID)//start
 }//end
 void NoDirs()//start
 {
-	Input->Hold[CB_DOWN]=false;Input->Press[CB_DOWN]=false;
-	Input->Hold[CB_RIGHT]=false;Input->Press[CB_RIGHT]=false;
-	Input->Hold[CB_LEFT]=false;Input->Press[CB_LEFT]=false;
-	Input->Hold[CB_UP]=false;Input->Press[CB_UP]=false;
+	Input->Button[CB_DOWN]=false;Input->Press[CB_DOWN]=false;
+	Input->Button[CB_RIGHT]=false;Input->Press[CB_RIGHT]=false;
+	Input->Button[CB_LEFT]=false;Input->Press[CB_LEFT]=false;
+	Input->Button[CB_UP]=false;Input->Press[CB_UP]=false;
 }//end
 int countNPCInRange(int x, int y, int radius)//start
 {
@@ -276,6 +261,13 @@ void Screen_Freeze(int freeze)//start
 		f2->Data = 0;
 		isFrozen=false;
 	}
+}
+
+int Get_Freeze()
+{
+	ffc f1 = Screen->LoadFFC(31);
+	ffc f2 = Screen->LoadFFC(32);
+	return (f1->Data == COMBO_FRZ1) ? (f2->Data == COMBO_FRZ2 ? 1 : 2) : (0);
 }//end
 int getNPCfromUID(npc n)//start
 {
@@ -302,7 +294,7 @@ void ffcSolid(ffc anFFC)//start
 			{
 				if(Hero->X<=anFFC->X+(width-1))
 				{
-					if(Input->Hold[CB_DOWN])
+					if(Input->Button[CB_DOWN])
 					{
 						if(Hero->Y!=anFFC->Y-16)Hero->Y=anFFC->Y-16;
 						Hero->Dir=DIR_DOWN;
@@ -312,7 +304,7 @@ void ffcSolid(ffc anFFC)//start
 						}
 						else if(Hero->X<=anFFC->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-anFFC->X-16),false))Hero->X=anFFC->X-16;
 					}
-					Input->Hold[CB_DOWN]=false;
+					Input->Button[CB_DOWN]=false;
 					Input->Press[CB_DOWN]=false;
 					return;
 				}
@@ -327,7 +319,7 @@ void ffcSolid(ffc anFFC)//start
 			{
 				if(Hero->X<=anFFC->X+(width-1))
 				{
-					if(Input->Hold[CB_UP])
+					if(Input->Button[CB_UP])
 					{
 						if(Hero->Y!=anFFC->Y+bottomheight)Hero->Y=anFFC->Y+bottomheight;
 						Hero->Dir=DIR_UP;
@@ -337,7 +329,7 @@ void ffcSolid(ffc anFFC)//start
 						}
 						else if(Hero->X<=anFFC->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-anFFC->X-16),false))Hero->X=anFFC->X-16;
 					}
-					Input->Hold[CB_UP]=false;
+					Input->Button[CB_UP]=false;
 					Input->Press[CB_UP]=false;
 					return;
 				}
@@ -352,7 +344,7 @@ void ffcSolid(ffc anFFC)//start
 			{
 				if(Hero->Y>=anFFC->Y-15)
 				{
-					if(Input->Hold[CB_RIGHT])
+					if(Input->Button[CB_RIGHT])
 					{
 						if(Hero->X!=anFFC->X-16)Hero->X=anFFC->X-16;
 						Hero->Dir=DIR_RIGHT;
@@ -362,7 +354,7 @@ void ffcSolid(ffc anFFC)//start
 						}
 						else if(Hero->Y<=anFFC->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(anFFC->Y-16)),false))Hero->Y=anFFC->Y-16;
 					}
-					Input->Hold[CB_RIGHT]=false;
+					Input->Button[CB_RIGHT]=false;
 					Input->Press[CB_RIGHT]=false;
 					return;
 				}
@@ -377,7 +369,7 @@ void ffcSolid(ffc anFFC)//start
 			{
 				if(Hero->Y<=anFFC->Y+(bottomheight-1))
 				{
-					if(Input->Hold[CB_LEFT])
+					if(Input->Button[CB_LEFT])
 					{
 						if(Hero->X!=anFFC->X+width)Hero->X=anFFC->X+width;
 						Hero->Dir=DIR_LEFT;
@@ -387,7 +379,7 @@ void ffcSolid(ffc anFFC)//start
 						}
 						else if(Hero->Y<=anFFC->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(anFFC->Y-16)),false))Hero->Y=anFFC->Y-16;
 					}
-					Input->Hold[CB_LEFT]=false;
+					Input->Button[CB_LEFT]=false;
 					Input->Press[CB_LEFT]=false;
 					return;
 				}
@@ -452,6 +444,18 @@ void FastLine(int layer, int x, int y, int x2, int y2, int color, int opacity)//
 void HeightFastLine(int layer, int x, int y, int x2, int y2, int color, int opacity)//start
 {
 	HeightLine(layer, x, y, x2, y2, color, 0, 0, 0, 0, opacity);
+}//end
+void killAllSfx() //start
+{
+	for(int q = 1; q < 256; ++q) Audio->EndSound(q);
+}//end
+void pauseAllSfx() //start
+{
+	for(int q = 1; q < 256; ++q) Audio->PauseSound(q);
+}//end
+void resumeAllSfx() //start
+{
+	for(int q = 1; q < 256; ++q) Audio->ResumeSound(q);
 }//end
 //end Misc Functions
 //start Keyboard
@@ -643,9 +647,4 @@ int getKeyPress()
 	}
 	return 0;
 }
-//end
-
-//start misc2
-//This WAS in `std_zh` at one point, but vanished?
-
 //end

@@ -41,6 +41,7 @@ void handleFreezableWater(){
 //start LedgeTooHighFromWater
 bool wasOnWaterLedge = false;
 void highLedgeFromWater(){
+	using namespace Misc;
 	if(!wasOnWaterLedge){
 		if(Hero->Action==LA_SWIMMING || Hero->Action==LA_DIVING){
 			if(LinkOnFlagMod(CF_NOWATERLEDGE2,0,LinkMovement[LM_STICKY]*3,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,0,LinkMovement[LM_STICKY]*3,0,true))){
@@ -51,8 +52,8 @@ void highLedgeFromWater(){
 						Hero->Dir=DIR_UP;
 					}
 				}
-				Input->Hold[CB_DOWN]=false;
-				Input->Hold[CB_UP]=false;
+				Input->Button[CB_DOWN]=false;
+				Input->Button[CB_UP]=false;
 				LinkMovement_SetLinkSpeedBoost(0);
 			}
 			if(LinkOnFlagMod(CF_NOWATERLEDGE2,LinkMovement[LM_STICKX]*3,0,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,LinkMovement[LM_STICKX]*3,0,0,true))){
@@ -63,8 +64,8 @@ void highLedgeFromWater(){
 						Hero->Dir=DIR_LEFT;
 					}
 				}
-				Input->Hold[CB_LEFT]=false;
-				Input->Hold[CB_RIGHT]=false;
+				Input->Button[CB_LEFT]=false;
+				Input->Button[CB_RIGHT]=false;
 				LinkMovement_SetLinkSpeedBoost(0);
 			}
 		} else {
@@ -91,14 +92,14 @@ ffc script climb{
 						if(Hero->Y<=this->Y-16){
 							if(Hero->X>=this->X-15){
 								if(Hero->X<=this->X+(width-1)){
-									if(Input->Hold[CB_DOWN]){
+									if(Input->Button[CB_DOWN]){
 										if(Hero->Y!=this->Y-16)Hero->Y=this->Y-16;
 										Hero->Dir=DIR_DOWN;
 										if(Hero->X>=this->X+(width-4)){
 											if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(this->X+width)),false))Hero->X=this->X+width;
 										} else if(Hero->X<=this->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-this->X-16),false))Hero->X=this->X-16;
 									}
-									Input->Hold[CB_DOWN]=false;
+									Input->Button[CB_DOWN]=false;
 									Input->Press[CB_DOWN]=false;
 								}
 							}
@@ -110,14 +111,14 @@ ffc script climb{
 						if(Hero->Y>=this->Y+bottomheight){
 							if(Hero->X>=this->X-15){
 								if(Hero->X<=this->X+(width-1)){
-									if(Input->Hold[CB_UP]){
+									if(Input->Button[CB_UP]){
 										if(Hero->Y!=this->Y+bottomheight)Hero->Y=this->Y+bottomheight;
 										Hero->Dir=DIR_UP;
 										if(Hero->X>=this->X+(width-4)){
 											if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(this->X+width)),false))Hero->X=this->X+width;
 										} else if(Hero->X<=this->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-this->X-16),false))Hero->X=this->X-16;
 									}
-									Input->Hold[CB_UP]=false;
+									Input->Button[CB_UP]=false;
 									Input->Press[CB_UP]=false;
 								}
 							}
@@ -129,14 +130,14 @@ ffc script climb{
 						if(Hero->X<=this->X-16){
 							if(Hero->Y<=this->Y+(bottomheight-1)){
 								if(Hero->Y>=this->Y-15){
-									if(Input->Hold[CB_RIGHT]){
+									if(Input->Button[CB_RIGHT]){
 										if(Hero->X!=this->X-16)Hero->X=this->X-16;
 										Hero->Dir=DIR_RIGHT;
 										if(Hero->Y>=this->Y+(bottomheight-4)){
 											if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(this->Y+bottomheight)),false))Hero->Y=this->Y+bottomheight;
 										} else if(Hero->Y<=this->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(this->Y-16)),false))Hero->Y=this->Y-16;
 									}
-									Input->Hold[CB_RIGHT]=false;
+									Input->Button[CB_RIGHT]=false;
 									Input->Press[CB_RIGHT]=false;
 								}
 							}
@@ -148,14 +149,14 @@ ffc script climb{
 						if(Hero->X>=this->X+width){
 							if(Hero->Y>=this->Y-15){
 								if(Hero->Y<=this->Y+(bottomheight-1)){
-									if(Input->Hold[CB_LEFT]){
+									if(Input->Button[CB_LEFT]){
 										if(Hero->X!=this->X+width)Hero->X=this->X+width;
 										Hero->Dir=DIR_LEFT;
 										if(Hero->Y>=this->Y+(bottomheight-4)){
 											if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(this->Y+bottomheight)),false))Hero->Y=this->Y+bottomheight;
 										} else if(Hero->Y<=this->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(this->Y-16)),false))Hero->Y=this->Y-16;
 									}
-									Input->Hold[CB_LEFT]=false;
+									Input->Button[CB_LEFT]=false;
 									Input->Press[CB_LEFT]=false;
 								}
 							}
@@ -176,7 +177,7 @@ ffc script warpCustomReturn{
 		switch(side){
 			case DIR_UP:{
 				while(true){
-					if(!isFrozen&&Hero->Y<=1&&(Input->Press[CB_UP]||Input->Hold[CB_UP])){
+					if(!isFrozen&&Hero->Y<=1&&(Input->Press[CB_UP]||Input->Button[CB_UP])){
 						Hero->X=X;
 						Hero->Y=Y;
 						Hero->PitWarp(dmap,screen);
@@ -186,7 +187,7 @@ ffc script warpCustomReturn{
 			break;}
 			case DIR_DOWN:{
 				while(true){
-					if(!isFrozen&&Hero->Y>=159&&(Input->Press[CB_DOWN]||Input->Hold[CB_DOWN])){
+					if(!isFrozen&&Hero->Y>=159&&(Input->Press[CB_DOWN]||Input->Button[CB_DOWN])){
 						Hero->X=X;
 						Hero->Y=Y;
 						Hero->PitWarp(dmap,screen);
@@ -196,7 +197,7 @@ ffc script warpCustomReturn{
 			break;}
 			case DIR_LEFT:{
 				while(true){
-					if(!isFrozen&&Hero->X<=1&&(Input->Press[CB_LEFT]||Input->Hold[CB_LEFT])){
+					if(!isFrozen&&Hero->X<=1&&(Input->Press[CB_LEFT]||Input->Button[CB_LEFT])){
 						Hero->X=X;
 						Hero->Y=Y;
 						Hero->PitWarp(dmap,screen);
@@ -206,7 +207,7 @@ ffc script warpCustomReturn{
 			break;}
 			case DIR_RIGHT:{
 				while(true){
-					if(!isFrozen&&Hero->X>=239&&(Input->Press[CB_RIGHT]||Input->Hold[CB_RIGHT])){
+					if(!isFrozen&&Hero->X>=239&&(Input->Press[CB_RIGHT]||Input->Button[CB_RIGHT])){
 						Hero->X=X;
 						Hero->Y=Y;
 						Hero->PitWarp(dmap,screen);
@@ -404,25 +405,25 @@ ffc script LadderClimb{
 			switch(dir){
 				case DIR_UP:{
 					if(Hero->Y==this->Y){
-						if(Input->Hold[CB_UP])ctime++;
+						if(Input->Button[CB_UP])ctime++;
 						else ctime=0;
 					} else ctime=0;
 					break;}
 				case DIR_DOWN:{
 					if(Hero->Y==this->Y){
-						if(Input->Hold[CB_DOWN])ctime++;
+						if(Input->Button[CB_DOWN])ctime++;
 						else ctime=0;
 					} else ctime=0;
 					break;}
 				case DIR_LEFT:{
 					if(Hero->X==this->X){
-						if(Input->Hold[CB_LEFT])ctime++;
+						if(Input->Button[CB_LEFT])ctime++;
 						else ctime=0;
 					} else ctime=0;
 					break;}
 				case DIR_RIGHT:{
 					if(Hero->X==this->X){
-						if(Input->Hold[CB_RIGHT])ctime++;
+						if(Input->Button[CB_RIGHT])ctime++;
 						else ctime=0;
 					} else ctime=0;
 					break;}
@@ -725,7 +726,7 @@ ffc script chest
 				if(!solid)ffcSolid(this);
 				if(Input->Press[CB_A]&&AgainstComboBase(this->X,this->Y))
 				{
-					Input->Press[CB_A]=false;Input->Hold[CB_A]=false;
+					Input->Press[CB_A]=false;Input->Button[CB_A]=false;
 					if(Hero->Item[itemID])
 					{
 						itemID=1;

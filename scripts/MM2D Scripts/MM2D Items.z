@@ -33,46 +33,46 @@ void handleEXItems(){
 			Hero->ItemJinx=0;
 			if(SetBItem(useItem)){
 				Input->Press[CB_B] = true;
-				Input->Hold[CB_B] = true;
+				Input->Button[CB_B] = true;
 				useItem = 0;
 				usingItem = useItem;
 			} else {
-				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
+				Input->Button[CB_B]=false;Input->Press[CB_B]=false;
 			}
-		} else if(Input->Hold[CB_B]&&B_item!=0){
+		} else if(Input->Button[CB_B]&&B_item!=0){
 			if(isArrow(B_item)&&!canShootArrow()){
-				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
+				Input->Button[CB_B]=false;Input->Press[CB_B]=false;
 			} else if(SetBItem(B_item)){
-				Input->Hold[CB_B] = true;
-				Input->Hold[CB_EX1]=false;
-				Input->Hold[CB_EX2]=false;
+				Input->Button[CB_B] = true;
+				Input->Button[CB_EX1]=false;
+				Input->Button[CB_EX2]=false;
 			} else {
-				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
+				Input->Button[CB_B]=false;Input->Press[CB_B]=false;
 			}
-		} else if(Input->Hold[CB_EX1]&&EX1_item!=0){
+		} else if(Input->Button[CB_EX1]&&EX1_item!=0){
 			if(isArrow(EX1_item)&&!canShootArrow()){
-				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
+				Input->Button[CB_B]=false;Input->Press[CB_B]=false;
 			} else if(SetBItem(EX1_item)){
-				Input->Hold[CB_B] = true;
+				Input->Button[CB_B] = true;
 				if(Input->Press[CB_EX1])Input->Press[CB_B] = true;
-				Input->Hold[CB_EX2]=false;
+				Input->Button[CB_EX2]=false;
 			} else {
-				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
+				Input->Button[CB_B]=false;Input->Press[CB_B]=false;
 			}
-		} else if(Input->Hold[CB_EX2]&&EX2_item!=0){
+		} else if(Input->Button[CB_EX2]&&EX2_item!=0){
 			if(isArrow(EX2_item)&&!canShootArrow()){
-				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
+				Input->Button[CB_B]=false;Input->Press[CB_B]=false;
 			} else if(SetBItem(EX2_item)){
-				Input->Hold[CB_B] = true;
+				Input->Button[CB_B] = true;
 				if(Input->Press[CB_EX2])Input->Press[CB_B] = true;
 			} else {
-				Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
+				Input->Button[CB_B]=false;Input->Press[CB_B]=false;
 			}
-		} else if((Input->Press[CB_B]||Input->Hold[CB_B])&&!B_item){
-			Input->Hold[CB_B]=false;Input->Press[CB_B]=false;
+		} else if((Input->Press[CB_B]||Input->Button[CB_B])&&!B_item){
+			Input->Button[CB_B]=false;Input->Press[CB_B]=false;
 		}
 		
-	} else if(subState == SUBSTATE_ITEMS && (!Input->Hold[CB_EX3]&&(Input->Press[CB_EX1]||Input->Press[CB_EX2]||Input->Press[CB_B]||pressA))){
+	} else if(subState == SUBSTATE_ITEMS && (!Input->Button[CB_EX3]&&(Input->Press[CB_EX1]||Input->Press[CB_EX2]||Input->Press[CB_B]||pressA))){
 		int itID = ItemIDs[cursorIndex];
 		if(canEquip(itID)){
 			if(itID==211){
@@ -172,7 +172,7 @@ item script throwableBombs
 			bomb->Script = this->WeaponScript;
 			bomb->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
 			bomb->Misc[BOMB_MISC_MODE] = BOMB_STATE_HELD;
-			MyNoAction();
+			NoAction();
 		}
 	}
 }
@@ -227,10 +227,10 @@ lweapon script throwableBombs_LW
 						this->Dir = Hero->Dir;
 						this->Misc[BOMB_MISC_MODE] = BOMB_STATE_STILL;
 						Input->Press[CB_R]=false;
-						Input->Hold[CB_R]=false;
+						Input->Button[CB_R]=false;
 					}
 					Input->Press[CB_START]=false;
-					Input->Hold[CB_START]=false;
+					Input->Button[CB_START]=false;
 					NoActionButMoveAndEx4AndA();
 					break;
 				}
@@ -351,10 +351,10 @@ item script omniArrows
 		if(arrowAimMode)
 		{
 			int angle;
-			if(Input->Hold[CB_RIGHT] && Input->Hold[CB_DOWN])     angle = 45;
-			else if(Input->Hold[CB_LEFT] && Input->Hold[CB_DOWN]) angle = 135;
-			else if(Input->Hold[CB_LEFT] && Input->Hold[CB_UP])   angle = 225;
-			else if(Input->Hold[CB_RIGHT] && Input->Hold[CB_UP])  angle = 315;
+			if(Input->Button[CB_RIGHT] && Input->Button[CB_DOWN])     angle = 45;
+			else if(Input->Button[CB_LEFT] && Input->Button[CB_DOWN]) angle = 135;
+			else if(Input->Button[CB_LEFT] && Input->Button[CB_UP])   angle = 225;
+			else if(Input->Button[CB_RIGHT] && Input->Button[CB_UP])  angle = 315;
 			else switch(Hero->Dir)
 			{
 				case DIR_RIGHT:
@@ -435,70 +435,70 @@ void runOmniArrows(int mult)
 	else
 	{ //Aiming arrows
 		if(Input->Press[CB_L]){arrowAimMode = false; return;}
-		if(Input->Hold[CB_R])
+		if(Input->Button[CB_R])
 		{
-			if(Input->Hold[CB_RIGHT] && Input->Hold[CB_DOWN]) angle = 45;
-			else if(Input->Hold[CB_LEFT] && Input->Hold[CB_DOWN]) angle = 135;
-			else if(Input->Hold[CB_LEFT] && Input->Hold[CB_UP]) angle = 225;
-			else if(Input->Hold[CB_RIGHT] && Input->Hold[CB_UP]) angle = 315;
-			else if(Input->Hold[CB_RIGHT]) angle = 0;
-			else if(Input->Hold[CB_DOWN]) angle = 90;
-			else if(Input->Hold[CB_LEFT]) angle = 180;
-			else if(Input->Hold[CB_UP]) angle = 270;
+			if(Input->Button[CB_RIGHT] && Input->Button[CB_DOWN]) angle = 45;
+			else if(Input->Button[CB_LEFT] && Input->Button[CB_DOWN]) angle = 135;
+			else if(Input->Button[CB_LEFT] && Input->Button[CB_UP]) angle = 225;
+			else if(Input->Button[CB_RIGHT] && Input->Button[CB_UP]) angle = 315;
+			else if(Input->Button[CB_RIGHT]) angle = 0;
+			else if(Input->Button[CB_DOWN]) angle = 90;
+			else if(Input->Button[CB_LEFT]) angle = 180;
+			else if(Input->Button[CB_UP]) angle = 270;
 		}
 		else
 		{
 			int startAngle = angle;
-			if(Input->Hold[CB_RIGHT] && Input->Hold[CB_DOWN])
+			if(Input->Button[CB_RIGHT] && Input->Button[CB_DOWN])
 			{
 				if(startAngle != 45)
 				{
 					angle += (startAngle > 45 && startAngle < 225) ? -mult : mult;
 				}
 			}
-			else if(Input->Hold[CB_LEFT] && Input->Hold[CB_DOWN])
+			else if(Input->Button[CB_LEFT] && Input->Button[CB_DOWN])
 			{
 				if(startAngle != 135)
 				{
 					angle += (startAngle > 135 && startAngle < 315) ? -mult : mult;
 				}
 			}
-			else if(Input->Hold[CB_LEFT] && Input->Hold[CB_UP])
+			else if(Input->Button[CB_LEFT] && Input->Button[CB_UP])
 			{
 				if(startAngle != 225)
 				{
 					angle += (startAngle > 45 && startAngle < 225) ? mult : -mult;
 				}
 			}
-			else if(Input->Hold[CB_RIGHT] && Input->Hold[CB_UP])
+			else if(Input->Button[CB_RIGHT] && Input->Button[CB_UP])
 			{
 				if(startAngle != 315)
 				{
 					angle += (startAngle > 135 && startAngle < 315) ? mult : -mult;
 				}
 			}
-			else if(Input->Hold[CB_UP])
+			else if(Input->Button[CB_UP])
 			{
 				if(startAngle != 270)
 				{
 					angle += (startAngle > 90 && startAngle < 270) ? mult : -mult;
 				}
 			}
-			else if(Input->Hold[CB_DOWN])
+			else if(Input->Button[CB_DOWN])
 			{
 				if(startAngle != 90)
 				{
 					angle += (startAngle > 90 && startAngle < 270) ? -mult : mult;
 				}
 			}
-			else if(Input->Hold[CB_LEFT])
+			else if(Input->Button[CB_LEFT])
 			{
 				if(startAngle != 180)
 				{
 					angle += (startAngle < 180) ? mult : -mult;
 				}
 			}
-			else if(Input->Hold[CB_RIGHT])
+			else if(Input->Button[CB_RIGHT])
 			{
 				if(startAngle != 0)
 				{
@@ -792,7 +792,7 @@ void EmptyBottleGlobal(){//start defaultBottleCode
 			}
 		}
 		BottleState[BSI_BOTTLETIMER]--;
-		MyNoAction();
+		NoAction();
 		if(BottleState[BSI_BOTTLETIMER]<=0){
 			if(BottleState[bottle]==BS_MILK){
 				BottleState[bottle]=BS_HALFMILK;
@@ -1044,7 +1044,7 @@ ffc script ItemShop{//start
 					if(fullCounter(CR_RUPEES)>=price){
 						if(potion>0&&!CanFillBottle()){
 							ShowMessageAndWait(STR_NOBOTTLE);
-							MyNoAction();
+							NoAction();
 						}
 						else{
 							item itm = CreateItemAt(id, Hero->X, Hero->Y);
@@ -1057,7 +1057,7 @@ ffc script ItemShop{//start
 					}
 					else{
 						ShowMessageAndWait(STR_CANTAFFORD);
-						MyNoAction();
+						NoAction();
 					}
 				}
 			}
