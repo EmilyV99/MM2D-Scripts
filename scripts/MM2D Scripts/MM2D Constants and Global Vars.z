@@ -4,6 +4,7 @@
 //                                             //
 /////////////////////////////////////////////////
 
+DEFINE __DEBUG = 1;
 //start Ocarina Global Variables
 //A combo representing the pressed button, with a transparent background
 DEFINE NOTETILE_A = 892;
@@ -310,6 +311,8 @@ DEFINE I_REMAINS2 = 159;
 DEFINE I_REMAINS3 = 160;
 DEFINE I_REMAINS4 = 161;
 DEFINE I_DEKUSTICK = 138;
+DEFINE I_WALLET = 41;
+DEFINE I_WALLET_BIG = 42;
 //end
 //start Palette
 DEFINE MULT_SUNRISE = 2;
@@ -527,59 +530,78 @@ DEFINE TARGET_OCTO_BLUE = 21;
 //end Minigames
 //start Controls
 int Controls[256];
-DEFINE CONTROL_OPTIONS = 0;
+enum Control
+{
+	CONTROL_OPTIONS
+};
 //end
 
 //start Global Vars Array
-int gvars[214747];
-int gbuf[214747];
+int gvars[MAX_INT];
+int gbuf[MAX_INT];
 //
-GVAR GV_MISC = 0;
-GVAR GVAR_BLASTMASKCOOLDOWN = 0;
-GVAR GVAR_MAINTANGOSLOT = 1;
-GVAR GVAR_ACTIVENPCID = 2;
-GVAR GVAR_NPCTANGOSLOT = 3;
-GVAR GVAR_DIFFICULTY = 4;
-GVAR GVAR_ARROWANGLE = 5;
-GVAR GVAR_MGSTATE = 6;
-GVAR GVAR_EXITYEAR = 7;
-GVAR GVAR_EXITDAY = 8;
+DEFINE GV_MISC = 0;
+enum GVAR_MISC
+{
+	GVAR_BLASTMASKCOOLDOWN,
+	GVAR_MAINTANGOSLOT,
+	GVAR_ACTIVENPCID,
+	GVAR_NPCTANGOSLOT,
+	GVAR_DIFFICULTY,
+	GVAR_ARROWANGLE,
+	GVAR_MGSTATE,
+	GVAR_EXITYEAR,
+	GVAR_EXITDAY
+};
 //
-GVAR GV_MISC_BOOL = GV_MISC + 1000;
-GVAR GVAR_BANK_REW1 = 0;
-GVAR GVAR_BANK_REW2 = 1;
-GVAR GVAR_BANK_REW3 = 2;
-GVAR GVAR_B_SPECTHEME = 3;
-GVAR GVAR_B_SPECTHEME_ACTIVE = 4;
-GVAR GVAR_OPTIONS_MENU = 5;
+DEFINE GV_MISC_BOOL = GV_MISC + 1000;
+enum GVAR_MISC_BOOL
+{
+	GVAR_BANK_REW1,
+	GVAR_BANK_REW2,
+	GVAR_BANK_REW3,
+	GVAR_B_SPECTHEME,
+	GVAR_B_SPECTHEME_ACTIVE,
+	GVAR_OPTIONS_MENU
+};
 //
 GVAR GV_PAL = GV_MISC_BOOL + 1000;
-GVAR TINT_DAY = 0;
-GVAR TINT_SUNSETORANGE = 1;
-GVAR TINT_NIGHT = 2;
-GVAR TINT_LENS = 3;
-DEFINE NUM_PAL = 4;
+enum GVAR_PAL
+{
+	TINT_DAY,
+	TINT_SUNSETORANGE,
+	TINT_NIGHT,
+	TINT_LENS,
+	NUM_PAL
+};
 //
 GVAR GV_BNOTEBOOK = GV_PAL + NUM_PAL;
 //
-GVAR GVAR_START_RESET = GV_BNOTEBOOK + 20;
-GVAR GV_CHEST = GVAR_START_RESET;
+GVAR GV_START_RESET = GV_BNOTEBOOK + 20;
+GVAR GV_CHEST = GV_START_RESET;
+DEFINE NUM_CHESTS = 320; //20 indexes, at 16 BITS_INT
 //
-GVAR GV_MISCRESETTABLE = GV_CHEST + 1000;
-GVAR GVAR_GUARDSMOVED = 0;
+GVAR GV_MISCRESETTABLE = GV_CHEST + (NUM_CHESTS / BITS_INT);
+enum GVAR_MISCRESETTABLE
+{
+	GVAR_GUARDSMOVED
+};
 //
 GVAR GV_SOFTSOIL = GV_MISCRESETTABLE + 1000;
 //
 GVAR GV_NPCDIA = GV_SOFTSOIL + 10;
-GVAR GVAR_END_RESET = GV_NPCDIA + 1000;
+GVAR GV_END_RESET = GV_NPCDIA + 1000;
 //
-GVAR GV_MINIGAME = GVAR_END_RESET;
-GVAR GVAR_MGOCTO = 0;
-GVAR GVAR_CHESTGAME = 1;
+GVAR GV_MINIGAME = GV_END_RESET;
+enum GVAR_MINIGAME
+{
+	GVAR_MGOCTO,
+	GVAR_CHESTGAME
+};
 ////
 int getGlobalVar(int index, int add)
 {
-    return gvars[index+add];
+	return gvars[index+add];
 }
 
 void setGlobalVar(int index, int add, int state)
@@ -604,13 +626,12 @@ bool getFlagGlobalVar(int index, int add, int flag)
 
 bool getChestState(int index)
 {
-    return getGlobalVar(index,GV_CHEST)!=0;
+	return getGlobalBool(index,GV_CHEST);
 }
 
 void setChestState(int index, bool state)
 {
-	if(state)setGlobalVar(index,GV_CHEST,1);
-	else setGlobalVar(index,GV_CHEST,0);
+	setGlobalBool(index,GV_CHEST,state);
 }
 
 int getSoilState(int index)
@@ -691,8 +712,9 @@ void resetHintBools()
 {
 	setGlobalBool(GVAR_B_SPECTHEME,GV_MISC_BOOL,false);
 }
-//end Global Vars Array
+//end
 //start Global Weapons Arrays
+
 int lwArr[214747];
 int ewArr[214747];
 DEFINE LWMISC_LAYERDMAP = 31;
@@ -1067,5 +1089,76 @@ mapdata getLayerMapdata(int relativeHeight)
 	dmapdata dmap = Game->LoadDMapData(Game->GetCurDMap() + relativeHeight);
 	return Game->LoadMapData(dmap->Map,Game->GetCurScreen());
 }
+//end 
+//start Global Items Array
+enum ItemLoc
+{
+	//Chest locations; equivalent to chest ID #
+	IL_CTLEDGE20_CHEST,
+	IL_CTTOWERMONEY_CHEST,
+	IL_CTLEDGE100_CHEST,
+	//Loose items; for existing in the world
+	IL_LOOSE = 500,
+	IL_CTTOWERHEARTPIECE = 500,
+	IL_CTSLIDEHEARTPIECE,
+	//
+	IL_SCRIPT_ACCESS = 700,
+	IL_BANKER1 = 700,
+	IL_BANKER2,
+	IL_BANKER3,
+	IL_TCSHOOTING1,
+	IL_TCSHOOTING2,
+	
+	//
+	IL_MAX
+};
+int items[MAX_INT];
+int itUpgrade[512];
+namespace Items
+{
+	void initUpgrade()
+	{
+		itUpgrade[I_SWORD_KOKIRI] = I_SWORD_RAZOR;
+		itUpgrade[I_SWORD_RAZOR] = I_SWORD_GILDED;
+		itUpgrade[I_BOMBBAG] = I_BOMBBAG_BIG;
+		itUpgrade[I_BOMBBAG_BIG] = I_BOMBBAG_BIGGEST;
+		itUpgrade[I_QUIVER] = I_QUIVER_BIG;
+		itUpgrade[I_QUIVER_BIG] = I_QUIVER_BIGGEST;
+		itUpgrade[I_WALLET] = I_WALLET_BIG;
+		//UNFINISHED // Sidequest items!
+	}
+	void defaultItemInit()
+	{
+		defaultItemInit(items);
+	}
+	void defaultItemInit(int items)
+	{
+		items[IL_CTLEDGE20_CHEST] = I_RUPEE20;
+		items[IL_CTTOWERMONEY_CHEST] = I_RUPEE50;
+		items[IL_CTLEDGE100_CHEST] = I_RUPEE100;
+		//
+		items[IL_CTTOWERHEARTPIECE] = I_HCPIECE;
+		items[IL_CTSLIDEHEARTPIECE] = I_HCPIECE;
+		items[IL_BANKER1] = I_WALLET;
+		items[IL_BANKER2] = I_RUPEE5;
+		items[IL_BANKER3] = I_HCPIECE;
+		items[IL_TCSHOOTING1] = I_QUIVER;
+		items[IL_TCSHOOTING2] = I_HCPIECE;
+	}
+	int getItem(ItemLoc location)
+	{
+		if(!(location > -1 && location < IL_MAX))
+		{
+			DebugTrace("ItemLoc invalid! Returning -1... @`Items::getItem(ItemLoc location)`");
+			return -1;
+		}
+		int it = items[location];
+		while(itUpgrade[it] && Hero->Item[it]) it = itUpgrade[it]; //Upgrade if Hero already has the item, and it has an upgrade
+		return it;
+	}
+	int getLooseItem(ItemLoc location)
+	{
+		return getItem(<ItemLoc>(location + IL_LOOSE));
+	}
+}
 //end
-

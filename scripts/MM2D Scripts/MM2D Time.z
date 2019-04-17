@@ -30,7 +30,7 @@ void resetTime()
 		BottleState[i]=BS_EMPTY;
 	}
 	RefreshBottles();
-	for(int i = GVAR_START_RESET;i<GVAR_END_RESET;i++)
+	for(int i = GV_START_RESET;i<GV_END_RESET;i++)
 	{
 		setGlobalVar(i,0,0);
 	}

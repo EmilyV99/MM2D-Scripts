@@ -39,17 +39,18 @@ global script Global
 {
 	void run()//start mainGlobal
 	{
+		//start init
+		ClearTrace();
+		TraceS("Launching TLoZ: Majora's Mask 2D...\n");
 		Game->DisableActiveSubscreen = true; //Disable engine subscreen.
 		testrun();
+		initGame(); //Handle rando stuff here.
 		bool isLensTinted = false;
 		bool refreshTime = false;
 		arrowAimMode = false;
 		setEnterEndsTyping(true);
 		setAllowBackspaceDelete(true);
 		setOverflowWraps(false);
-		//start init
-		ClearTrace();
-		TraceS("Launching TLoZ: Majora's Mask 2D...");TraceNL();
 		if(Hero->Item[81])Game->MCounter[CR_BOMBCHUS]=40;
 		bool scrnChanged = false;
 		LinkMovement_Init();
@@ -1025,6 +1026,14 @@ global script onExit
 	}
 }
 //end OnExit Script
+//start Game Init
+void initGame()
+{
+	//Do initialization things, which may take into account randomizer stuff.
+	Items::defaultItemInit();
+	Items::initUpgrade();
+}
+//end Game Init
 //start Options Menu
 untyped opt[256] = {false};
 enum
@@ -1089,7 +1098,6 @@ hero script OptionsMenu
 	
 	void run() //start
 	{
-		bitmap foo = Game->CreateBitmap(512, 512);
 		bitmap menu = Game->CreateBitmap(OP_HEIGHT, MENU_BITMAP_WIDTH * NUM_MENU_BITMAPS);
 		while(1)
 		{
@@ -1587,10 +1595,4 @@ namespace GameOverMenu
 void testrun() //Function for testing things quickly at the start of the game
 {
 	return;
-	int x = 5;
-	TraceB(x > 0);
-	Trace(x > 0);
-	Trace(<int>(x>0));
-	Trace(OPTION_VALUE(RELATIONAL_OP_RETURN_DECIMAL));
-	Game->End();
 }//end

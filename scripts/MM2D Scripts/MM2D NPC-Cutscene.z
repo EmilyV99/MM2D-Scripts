@@ -547,7 +547,7 @@ ffc script NPC
 									}
 									else
 									{
-										item itm = CreateItemAt(I_QUIVER_BIG,Hero->X,Hero->Y);
+										item itm = CreateItemAt(Items::getItem(Items::IL_TCSHOOTING1),Hero->X,Hero->Y);
 										itm->Pickup = IP_HOLDUP;
 										flagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG1);
 									}
@@ -565,7 +565,7 @@ ffc script NPC
 									}
 									else
 									{
-										item itm = CreateItemAt(I_HCPIECE,Hero->X,Hero->Y);
+										item itm = CreateItemAt(Items::getItem(Items::IL_TCSHOOTING2),Hero->X,Hero->Y);
 										itm->Pickup = IP_HOLDUP;
 										flagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG2);
 									}
@@ -978,29 +978,21 @@ void bankGiveRewards()
 {
 	if(fullCounter(CR_BANKBAL)>=200&&!getGlobalVar(GVAR_BANK_REW1,GV_MISC))
 	{
-		if(Hero->Item[41])
-		{
-			item i = CreateItemAt(42,Hero->X,Hero->Y);
-			i->Pickup = IP_HOLDUP;
-		}
-		else
-		{
-			item i = CreateItemAt(41,Hero->X,Hero->Y);
-			i->Pickup = IP_HOLDUP;
-		}
+		item i = CreateItemAt(Items::getItem(Items::IL_BANKER1),Hero->X,Hero->Y);
+		i->Pickup = IP_HOLDUP;
 		ShowStringAndWait("Here, you've deposited enough rupees to earn a reward!");
 		setGlobalVar(GVAR_BANK_REW1,GV_MISC,1);
 	}
 	if(fullCounter(CR_BANKBAL)>=1000&&!getGlobalVar(GVAR_BANK_REW2,GV_MISC))
 	{
-		item i = CreateItemAt(1,Hero->X,Hero->Y);
+		item i = CreateItemAt(Items::getItem(Items::IL_BANKER2),Hero->X,Hero->Y);
 		i->Pickup = IP_HOLDUP;
 		ShowStringAndWait("Here, you've deposited enough rupees to earn another reward!");
 		setGlobalVar(GVAR_BANK_REW2,GV_MISC,1);
 	}
 	if(fullCounter(CR_BANKBAL)>=5000&&!getGlobalVar(GVAR_BANK_REW3,GV_MISC))
 	{
-		item i = CreateItemAt(I_HCPIECE,Hero->X,Hero->Y);
+		item i = CreateItemAt(Items::getItem(Items::IL_BANKER3),Hero->X,Hero->Y);
 		i->Pickup = IP_HOLDUP;
 		ShowStringAndWait("Here, you've deposited enough rupees to earn the final reward!");
 		setGlobalVar(GVAR_BANK_REW3,GV_MISC,1);

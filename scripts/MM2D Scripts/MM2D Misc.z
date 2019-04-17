@@ -457,6 +457,14 @@ void resumeAllSfx() //start
 {
 	for(int q = 1; q < 256; ++q) Audio->ResumeSound(q);
 }//end
+void DebugTrace(int str) //start
+{
+	if(!__DEBUG) return;
+	int buf[4096] = "[MM2D Debug] ";
+	strcat(buf, str);
+	TraceS(buf);
+}
+//end
 //end Misc Functions
 //start Keyboard
 void KeyToString(int key, int buf)
