@@ -1,0 +1,658 @@
+////////////////////////////////////////
+//                                    //
+//     MM2D Script: Miscellaneous     //
+//                                    //
+////////////////////////////////////////
+
+
+//start CanWalkM
+//lweapon
+bool CanWalkM(lweapon weap, mapdata map, int dir, int step)
+{
+	return CanWalkM(weap, map, dir, step, false);
+}
+
+bool CanWalkM(lweapon weap, mapdata map, int dir, int step, bool useHit)
+{
+	if(!weap->isValid())return false;
+	return CanWalkM(weap->X, weap->Y, weap->X + Cond(useHit, weap->HitWidth, weap->TileWidth * 16) - 1, weap->Y + Cond(useHit, weap->HitHeight, weap->TileHeight * 16) - 1, map, dir, step);
+}
+//eweapon
+bool CanWalkM(eweapon weap, mapdata map, int dir, int step)
+{
+	return CanWalkM(weap, map, dir, step, false);
+}
+
+bool CanWalkM(eweapon weap, mapdata map, int dir, int step, bool useHit)
+{
+	if(!weap->isValid())return false;
+	return CanWalkM(weap->X, weap->Y, weap->X + Cond(useHit, weap->HitWidth, weap->TileWidth * 16) - 1, weap->Y + Cond(useHit, weap->HitHeight, weap->TileHeight * 16) - 1, map, dir, step);
+}
+//npc
+bool CanWalkM(npc n, mapdata map, int dir, int step)
+{
+	return CanWalkM(n, map, dir, step, false);
+}
+
+bool CanWalkM(npc n, mapdata map, int dir, int step, bool useHit)
+{
+	if(!n->isValid())return false;
+	return CanWalkM(n->X, n->Y, n->X + Cond(useHit, n->HitWidth, n->TileWidth * 16) - 1, n->Y + Cond(useHit, n->HitHeight, n->TileHeight * 16) - 1, map, dir, step);
+}
+//ffc
+bool CanWalkM(ffc f, mapdata map, int dir, int step)
+{
+	return CanWalkM(f, map, dir, step, false);
+}
+
+bool CanWalkM(ffc f, mapdata map, int dir, int step, bool useEffect)
+{
+	return CanWalkM(f->X, f->Y, f->X + Cond(useEffect, f->EffectWidth, f->TileWidth * 16) - 1, f->Y + Cond(useEffect, f->EffectHeight, f->TileHeight * 16) - 1, map, dir, step);
+}
+//Hero
+bool CanWalkM(mapdata map, int dir, int step, bool largeHitbox)
+{
+	return CanWalkM(Hero->X, Hero->Y + Cond(largeHitbox, 0, 8), Hero->X + 15, Hero->Y + 15, map, dir, step);
+}
+//Main
+bool CanWalkM(int x, int y, int xx, int yy, mapdata map, int dir, int step)
+{
+	int width = xx - x + 1;
+	int height = yy - y + 1;
+    switch(dir)
+	{
+		case DIR_UP: return !(y-step<0||map->isSolid(x,y-step)||map->isSolid(x+Floor(width/2),y-step)||map->isSolid(xx,y-step));
+		case DIR_DOWN: return !(yy+step>=176||map->isSolid(x,yy+step)||map->isSolid(x+Floor(width/2),yy+step)||map->isSolid(xx,yy+step));
+		case DIR_LEFT: return !(x-step<0||map->isSolid(x-step,y)||map->isSolid(x-step,y+Floor(height/2))||map->isSolid(x-step,yy));
+		case DIR_RIGHT: return !(xx+step>=256||map->isSolid(xx+step,y)||map->isSolid(xx+step,y+Floor(height/2))||map->isSolid(xx+step,yy));
+		case DIR_LEFTUP: return (CanWalkM(x, y, xx, yy, map, DIR_LEFT, step) && CanWalkM(x, y, xx, yy, map, DIR_UP, step));
+		case DIR_LEFTDOWN: return (CanWalkM(x, y, xx, yy, map, DIR_LEFT, step) && CanWalkM(x, y, xx, yy, map, DIR_DOWN, step));
+		case DIR_RIGHTUP: return (CanWalkM(x, y, xx, yy, map, DIR_RIGHT, step) && CanWalkM(x, y, xx, yy, map, DIR_UP, step));
+		case DIR_RIGHTDOWN: return (CanWalkM(x, y, xx, yy, map, DIR_RIGHT, step) && CanWalkM(x, y, xx, yy, map, DIR_DOWN, step));
+	}
+	return false; //invalid direction
+}
+//end CanWalkM
+//start Misc Functions
+void saveTheGame()//start
+{
+	if(noSave)return;
+	Screen->DrawScreen(7,LAYERSMAP1,LAYERSCREEN_SAVING,0,0,0);
+	Waitframe();
+	Game->Save();
+}//end
+bool linkWalkingOntoFlag(int flag, int setting,bool fullTile)//start
+{
+	int lspeed = Ceiling(1.5+LinkMovement_GetLinkSpeedBoost());
+	return LinkOnFlagMod(flag,LinkMovement[LM_STICKX]*lspeed,LinkMovement[LM_STICKY]*lspeed,setting,fullTile);
+}//end
+bool LinkOnFlagMod(int flag, int x, int y, int setting, bool fullTile)//start
+{
+	int yCorrection = 0;
+	if(!fullTile)yCorrection=8;
+	int combos[4] = {ComboAt(Hero->X+x,Hero->Y+y+yCorrection),ComboAt(Hero->X+x+15,Hero->Y+y+yCorrection),ComboAt(Hero->X+x+15,Hero->Y+y+15),ComboAt(Hero->X+x,Hero->Y+y+15)};
+	for(int i=0;i<4;i++)
+	{
+		if(setting)
+			if(Screen->ComboI[combos[i]]==flag)return true;
+		if(setting!=1)
+			if(Screen->ComboF[combos[i]]==flag)return true;
+	}
+	return false;
+}//end
+bool LinkOnFlag(int flag)//start
+{
+	int combos[4] = {ComboAt(Hero->X,Hero->Y),ComboAt(Hero->X+15,Hero->Y),ComboAt(Hero->X+15,Hero->Y+15),ComboAt(Hero->X,Hero->Y+15)};
+	for(int i=0;i<4;i++)
+	{
+		if(Screen->ComboF[combos[i]]==flag)return true;
+	}
+	return false;
+}//end
+int dirX(int dir)//start
+{
+	switch(dir)
+	{
+		case DIR_RIGHT: case DIR_RIGHTUP: case DIR_RIGHTDOWN:
+			return 1;
+		case DIR_LEFT: case DIR_LEFTUP: case DIR_LEFTDOWN:
+			return -1;
+		default:
+			return 0;
+	}
+}//end
+int dirY(int dir)//start
+{
+	switch(dir)
+	{
+		case DIR_DOWN: case DIR_LEFTDOWN: case DIR_RIGHTDOWN:
+			return 1;
+		case DIR_UP: case DIR_LEFTUP: case DIR_RIGHTUP:
+			return -1;
+		default:
+			return 0;
+	}
+}//end
+void stopScreenTransition(int pxD,int pxR,int pxL, int pxU)//start
+{
+	if(Hero->Y>160-pxD)Input->Button[CB_DOWN]=false;
+	if(Hero->X>240-pxR)Input->Button[CB_RIGHT]=false;
+	if(Hero->X<0+pxL)Input->Button[CB_LEFT]=false;
+	if(Hero->Y<0+pxU)Input->Button[CB_UP]=false;
+}//end
+void NoActionButMoveAndEx4()//start
+{
+	Input->Button[CB_A]=false;Input->Press[CB_A]=false;
+	Input->Button[CB_B]=false;Input->Press[CB_B]=false;
+	Input->Button[CB_R]=false;Input->Press[CB_R]=false;
+	Input->Button[CB_L]=false;Input->Press[CB_L]=false;
+	Input->Button[CB_EX1]=false;Input->Press[CB_EX1]=false;
+	Input->Button[CB_EX2]=false;Input->Press[CB_EX2]=false;
+	Input->Button[CB_EX3]=false;Input->Press[CB_EX3]=false;
+}//end
+void TotalNoAction()//start
+{
+	NoAction();
+	Input->Press[CB_START]=false;
+	Input->Button[CB_START]=false;
+}//end
+void WaitTotalNoAction()//start
+{
+	WaitTotalNoAction(1);
+}//end
+void WaitTotalNoAction(int frames)//start
+{
+	for(int j = 0; j < frames; ++j)
+	{
+		TotalNoAction();
+		Waitframe();
+	}
+}//end
+void NoActionButA()//start
+{
+	Input->Button[CB_DOWN]=false;Input->Press[CB_DOWN]=false;
+	Input->Button[CB_RIGHT]=false;Input->Press[CB_RIGHT]=false;
+	Input->Button[CB_LEFT]=false;Input->Press[CB_LEFT]=false;
+	Input->Button[CB_UP]=false;Input->Press[CB_UP]=false;
+	Input->Button[CB_B]=false;Input->Press[CB_B]=false;
+	Input->Button[CB_R]=false;Input->Press[CB_R]=false;
+	Input->Button[CB_L]=false;Input->Press[CB_L]=false;
+	Input->Button[CB_EX1]=false;Input->Press[CB_EX1]=false;
+	Input->Button[CB_EX2]=false;Input->Press[CB_EX2]=false;
+	Input->Button[CB_EX3]=false;Input->Press[CB_EX3]=false;
+}//end
+void NoActionButMoveAndEx4AndA()//start
+{
+	Input->Button[CB_B]=false;Input->Press[CB_B]=false;
+	Input->Button[CB_R]=false;Input->Press[CB_R]=false;
+	Input->Button[CB_L]=false;Input->Press[CB_L]=false;
+	Input->Button[CB_EX1]=false;Input->Press[CB_EX1]=false;
+	Input->Button[CB_EX2]=false;Input->Press[CB_EX2]=false;
+	Input->Button[CB_EX3]=false;Input->Press[CB_EX3]=false;
+}//end
+bool isTouchingCombo(int comboID)//start
+{
+	int x = Hero->X;
+	int y = Hero->Y;
+	if(Screen->ComboD[ComboAt(Hero->X,Hero->Y+8)]==comboID)return true;
+	if(Screen->ComboD[ComboAt(Hero->X+15,Hero->Y+8)]==comboID)return true;
+	if(Screen->ComboD[ComboAt(Hero->X,Hero->Y+15)]==comboID)return true;
+	if(Screen->ComboD[ComboAt(Hero->X+15,Hero->Y+15)]==comboID)return true;
+	return false;
+}//end
+void NoDirs()//start
+{
+	Input->Button[CB_DOWN]=false;Input->Press[CB_DOWN]=false;
+	Input->Button[CB_RIGHT]=false;Input->Press[CB_RIGHT]=false;
+	Input->Button[CB_LEFT]=false;Input->Press[CB_LEFT]=false;
+	Input->Button[CB_UP]=false;Input->Press[CB_UP]=false;
+}//end
+int countNPCInRange(int x, int y, int radius)//start
+{
+	int npcCount = 0;
+	for(int i = 1;i<=Screen->NumNPCs();i++)
+	{
+		npc anNPC = Screen->LoadNPC(i);
+		if(anNPC->X>x-(radius+anNPC->HitWidth-1)&&anNPC->X<x+radius&&anNPC->Y>y-(radius+anNPC->HitHeight-1)&&anNPC->Y<y+radius)
+		{
+			npcCount++;
+		}
+	}
+	return npcCount;
+}//end
+npc getNthNPCInRange(int x, int y, int radius, int num)//start
+{
+	int npcCount = 0;
+	for(int i = 1;i<=Screen->NumNPCs();i++)
+	{
+		npc anNPC = Screen->LoadNPC(i);
+		if(anNPC->X>x-(radius+anNPC->HitWidth-1)&&anNPC->X<x+radius&&anNPC->Y>y-(radius+anNPC->HitHeight-1)&&anNPC->Y<y+radius)
+		{
+			if(npcCount==num)
+			{
+				return anNPC;
+			}
+			else
+			{
+				npcCount++;
+			}
+		}
+	}
+}//end
+void Screen_Freeze(int freeze)//start
+{
+	ffc f1 = Screen->LoadFFC(31);
+	ffc f2 = Screen->LoadFFC(32);
+	if(freeze==2)
+	{
+		f1->Data = COMBO_FRZ1;
+		f2->Data = COMBO_FRZ2;
+		isFrozen=true;
+	}
+	else if(freeze==1)
+	{
+		f1->Data = COMBO_FRZ1;
+		f2->Data = 0;
+		isFrozen=true;
+	}
+	else
+	{
+		f1->Data = 0;
+		f2->Data = 0;
+		isFrozen=false;
+	}
+}
+
+int Get_Freeze()
+{
+	ffc f1 = Screen->LoadFFC(31);
+	ffc f2 = Screen->LoadFFC(32);
+	return (f1->Data == COMBO_FRZ1) ? (f2->Data == COMBO_FRZ2 ? 1 : 2) : (0);
+}//end
+int getNPCfromUID(npc n)//start
+{
+	for(int i = 1;i<=Screen->NumNPCs();i++)
+	{
+		npc anNPC = Screen->LoadNPC(i);
+		if(anNPC->UID==n->UID)return i;
+	}
+	return -1;
+}//end
+void ffcSolid(ffc anFFC)//start
+{
+	int lspdboost = Ceiling(1.5+LinkMovement_GetLinkSpeedBoost());
+	int width = anFFC->EffectWidth;
+	int height = anFFC->EffectHeight;
+	int bottomheight=height;
+	if(!Hero->BigHitbox	)bottomheight-=8;
+	if(bottomheight<=0)return;
+	if(Hero->Y>=anFFC->Y-(16+lspdboost))//start inputdown
+	{
+		if(Hero->Y<=anFFC->Y-16)
+		{
+			if(Hero->X>=anFFC->X-15)
+			{
+				if(Hero->X<=anFFC->X+(width-1))
+				{
+					if(Input->Button[CB_DOWN])
+					{
+						if(Hero->Y!=anFFC->Y-16)Hero->Y=anFFC->Y-16;
+						Hero->Dir=DIR_DOWN;
+						if(Hero->X>=anFFC->X+(width-4))
+						{
+							if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(anFFC->X+width)),false))Hero->X=anFFC->X+width;
+						}
+						else if(Hero->X<=anFFC->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-anFFC->X-16),false))Hero->X=anFFC->X-16;
+					}
+					Input->Button[CB_DOWN]=false;
+					Input->Press[CB_DOWN]=false;
+					return;
+				}
+			}
+		}//end
+	}
+	if(Hero->Y<=anFFC->Y+(bottomheight+lspdboost))//start inputup
+	{
+		if(Hero->Y>=anFFC->Y+bottomheight)
+		{
+			if(Hero->X>=anFFC->X-15)
+			{
+				if(Hero->X<=anFFC->X+(width-1))
+				{
+					if(Input->Button[CB_UP])
+					{
+						if(Hero->Y!=anFFC->Y+bottomheight)Hero->Y=anFFC->Y+bottomheight;
+						Hero->Dir=DIR_UP;
+						if(Hero->X>=anFFC->X+(width-4))
+						{
+							if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(anFFC->X+width)),false))Hero->X=anFFC->X+width;
+						}
+						else if(Hero->X<=anFFC->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-anFFC->X-16),false))Hero->X=anFFC->X-16;
+					}
+					Input->Button[CB_UP]=false;
+					Input->Press[CB_UP]=false;
+					return;
+				}
+			}
+		}//end
+	}
+	if(Hero->X>=anFFC->X-(16+lspdboost))//start inputright
+	{
+		if(Hero->X<=anFFC->X-16)
+		{
+			if(Hero->Y<=anFFC->Y+(bottomheight-1))
+			{
+				if(Hero->Y>=anFFC->Y-15)
+				{
+					if(Input->Button[CB_RIGHT])
+					{
+						if(Hero->X!=anFFC->X-16)Hero->X=anFFC->X-16;
+						Hero->Dir=DIR_RIGHT;
+						if(Hero->Y>=anFFC->Y+(bottomheight-4))
+						{
+							if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(anFFC->Y+bottomheight)),false))Hero->Y=anFFC->Y+bottomheight;
+						}
+						else if(Hero->Y<=anFFC->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(anFFC->Y-16)),false))Hero->Y=anFFC->Y-16;
+					}
+					Input->Button[CB_RIGHT]=false;
+					Input->Press[CB_RIGHT]=false;
+					return;
+				}
+			}
+		}//end
+	}
+	if(Hero->X<=anFFC->X+(width+lspdboost))//start inputleft
+	{
+		if(Hero->X>=anFFC->X+width)
+		{
+			if(Hero->Y>=anFFC->Y-15)
+			{
+				if(Hero->Y<=anFFC->Y+(bottomheight-1))
+				{
+					if(Input->Button[CB_LEFT])
+					{
+						if(Hero->X!=anFFC->X+width)Hero->X=anFFC->X+width;
+						Hero->Dir=DIR_LEFT;
+						if(Hero->Y>=anFFC->Y+(bottomheight-4))
+						{
+							if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(anFFC->Y+bottomheight)),false))Hero->Y=anFFC->Y+bottomheight;
+						}
+						else if(Hero->Y<=anFFC->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(anFFC->Y-16)),false))Hero->Y=anFFC->Y-16;
+					}
+					Input->Button[CB_LEFT]=false;
+					Input->Press[CB_LEFT]=false;
+					return;
+				}
+			}
+		}//end
+	}
+}//end
+int LimitFPSStateSave = 00b;//start
+void saveFPSstate()
+{
+	/*if(!(LimitFPSStateSave & 10b)){
+		if(Game->CappedFPS)LimitFPSStateSave |= 11b;
+		else LimitFPSStateSave |= 10b;
+	}*/
+}
+
+void loadFPSstate(){
+	/*if((LimitFPSStateSave & 10b) == 10b){
+		if((LimitFPSStateSave & 01b) == 01b)Game->CappedFPS = true;
+		else Game->CappedFPS = false;
+		LimitFPSStateSave = 0;
+	}*/
+}//end
+int fullCounter(int counter)//start
+{
+	return Game->Counter[counter]+Game->DCounter[counter];
+}//end
+bool isOverworldScreen()//start
+{
+	dmapdata dm = Game->LoadDMapData(Game->GetCurDMap());
+	if(IsDungeonFlag())return false;
+	if(IsInteriorFlag())return false;
+	if(dm->Type%2)return true;
+	return false;
+}//end
+int SpinDir8(int dir){return SpinDir8(dir,1);} //Spin a dir clockwise by 45°. start SpinDir8
+int SpinDir8(int dir, int repeat) //Spin a dir clockwise by 45° * repeat. A negative will spin counterclockwise, as expected.
+{
+	while(repeat<0)repeat+=8;
+	repeat %= 8;
+	for(int q = 0; q < repeat; ++q)
+	{
+		switch(dir)
+		{
+			case DIR_UP: dir = DIR_RIGHTUP;
+			case DIR_RIGHTUP: dir = DIR_RIGHT;
+			case DIR_RIGHT: dir = DIR_RIGHTDOWN;
+			case DIR_RIGHTDOWN: dir = DIR_DOWN;
+			case DIR_DOWN: dir = DIR_LEFTDOWN;
+			case DIR_LEFTDOWN: dir = DIR_LEFT;
+			case DIR_LEFT: dir = DIR_LEFTUP;
+			case DIR_LEFTUP: dir = DIR_UP;
+			default: return -1;
+		}
+	}
+	return dir;
+}//end SpinDir8
+void FastLine(int layer, int x, int y, int x2, int y2, int color, int opacity)//start
+{
+	Screen->Line(layer, x, y, x2, y2, color, 0, 0, 0, 0, opacity);
+}//end
+void HeightFastLine(int layer, int x, int y, int x2, int y2, int color, int opacity)//start
+{
+	HeightLine(layer, x, y, x2, y2, color, 0, 0, 0, 0, opacity);
+}//end
+void killAllSfx() //start
+{
+	for(int q = 1; q < 256; ++q) Audio->EndSound(q);
+}//end
+void pauseAllSfx() //start
+{
+	for(int q = 1; q < 256; ++q) Audio->PauseSound(q);
+}//end
+void resumeAllSfx() //start
+{
+	for(int q = 1; q < 256; ++q) Audio->ResumeSound(q);
+}//end
+void DebugTrace(int str) //start
+{
+	if(!__DEBUG) return;
+	int buf[4096] = "[MM2D Debug] ";
+	strcat(buf, str);
+	TraceS(buf);
+}
+//end
+//end Misc Functions
+//start Keyboard
+void KeyToString(int key, int buf)
+{
+	KeyToString(key, buf, false);
+}
+
+void KeyToString(int key, int buf, bool ShowPad)
+{
+	KeyToString(key, buf, ShowPad, false);
+}
+
+void KeyToString(int key, int buf, bool ShowPad, bool AllCaps)
+{
+	switch(key)
+	{
+		case KEY_TAB:
+			strcat(buf, "Tab");
+			break;
+		
+		case KEY_BACKSPACE:
+			strcat(buf, "Back");
+			break;
+			
+		case KEY_ENTER:
+		case KEY_ENTER_PAD:
+			strcat(buf, "Enter");
+			if(ShowPad && key == KEY_ENTER_PAD) strcat(buf, " (Pad)");
+			break;
+			
+		case KEY_SPACE:
+			strcat(buf, "Space");
+			break;
+			
+		case KEY_DEL:
+		case KEY_DEL_PAD:
+			strcat(buf, "Del");
+			if(ShowPad && key == KEY_DEL_PAD) strcat(buf, " (Pad)");
+			break;
+			
+		case KEY_HOME:
+			strcat(buf, "Home");
+			break;
+			
+		case KEY_END:
+			strcat(buf, "End");
+			break;
+			
+		case KEY_PGUP:
+			strcat(buf, "PgUp");
+			break;
+			
+		case KEY_PGDN:
+			strcat(buf, "PgDn");
+			break;
+			
+		case KEY_UP:
+			strcat(buf, "Up");
+			break;
+			
+		case KEY_DOWN:
+			strcat(buf, "Down");
+			break;
+			
+		case KEY_LEFT:
+			strcat(buf, "Left");
+			break;
+			
+		case KEY_RIGHT:
+			strcat(buf, "Right");
+			break;
+		
+		case KEY_PRTSCR:
+			strcat(buf, "PrintScr");
+			break;
+			
+		case KEY_PAUSE:
+			strcat(buf, "Pause");
+			break;
+		
+		case KEY_ESC:
+			strcat(buf, "Esc");
+			break;
+			
+		case KEY_F1:
+		case KEY_F2:
+		case KEY_F3:
+		case KEY_F4:
+		case KEY_F5:
+		case KEY_F6:
+		case KEY_F7:
+		case KEY_F8:
+		case KEY_F9:
+			strcat(buf, {'F', key - KEY_F1 + '1', 0});
+			break;
+			
+		case KEY_F10:
+		case KEY_F11:
+		case KEY_F12:
+			strcat(buf, {'F', '1', key - KEY_F10 + '0', 0});
+			break;
+			
+		case KEY_LCONTROL:
+			strcat(buf, "LCtrl");
+			break;
+			
+		case KEY_RCONTROL:
+			strcat(buf, "RCtrl");
+			break;
+			
+		case KEY_LSHIFT:
+			strcat(buf, "LShift");
+			break;
+			
+		case KEY_RSHIFT:
+			strcat(buf, "RShift");
+			break;
+			
+		case KEY_ALT:
+			strcat(buf, "LAlt");
+			break;
+			
+		case KEY_ALTGR:
+			strcat(buf, "RAlt");
+			break;
+			
+		case KEY_LWIN:
+			strcat(buf, "LWin");
+			break;
+			
+		case KEY_RWIN:
+			strcat(buf, "RWin");
+			break;
+			
+		case KEY_MENU:
+			strcat(buf, "Menu");
+			break;
+			
+		case KEY_SCRLOCK:
+			strcat(buf, "ScrLock");
+			break;
+		
+		case KEY_NUMLOCK:
+			strcat(buf, "NumLock");
+			break;
+		
+		case KEY_CAPSLOCK:
+			strcat(buf, "CapsLock");
+			break;
+			
+		case KEY_COMMAND:
+			strcat(buf, "Cmd");
+			break;
+			
+		default:
+			int keyChar = KeyToChar(key, false, false);
+			strcat(buf, (int[2]){AllCaps ? LowerToUpper(keyChar) : keyChar});
+			if(ShowPad)
+			{
+				switch(key)
+				{
+					case KEY_SLASH_PAD:
+					case KEY_MINUS_PAD:
+					case KEY_PLUS_PAD:
+					case KEY_ASTERISK:
+					case KEY_EQUALS_PAD:
+					case KEY_0_PAD:
+					case KEY_1_PAD:
+					case KEY_2_PAD:
+					case KEY_3_PAD:
+					case KEY_4_PAD:
+					case KEY_5_PAD:
+					case KEY_6_PAD:
+					case KEY_7_PAD:
+					case KEY_8_PAD:
+					case KEY_9_PAD:
+						strcat(buf, " (Pad)");
+				}
+			}
+	}
+}
+
+int getKeyPress()
+{
+	for(int key = -4096; key < KEY_FINAL; key < -1 ? (key /= 2) : ++key)
+	{
+		if(Input->ReadKey[key]) return key;
+	}
+	return 0;
+}
+//end

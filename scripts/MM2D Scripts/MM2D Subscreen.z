@@ -25,13 +25,13 @@ void runSubscreen(){
 	}
 	//start SwapScreen
 	int lastSubState = subState;
-	if(Link->PressR){
+	if(Input->Press[CB_R]){
 		subState++;
 		if(subState>2){
 			subState = 0;
 		}
 		cursorPos = 0;
-	} else if(Link->PressL){
+	} else if(Input->Press[CB_L]){
 		subState--;
 		if(subState<0){
 			subState = 2;
@@ -62,13 +62,13 @@ void runSubscreen(){
 	//start MoveCursor
 	int lastIndex = cursorIndex;
 	if(!subState){
-		if(Link->PressDown){
+		if(Input->Press[CB_DOWN]){
 			cursorIndex+=12;
-		} else if(Link->PressUp){
+		} else if(Input->Press[CB_UP]){
 			cursorIndex-=12;
-		} else if(Link->PressRight){
+		} else if(Input->Press[CB_RIGHT]){
 			cursorIndex++;
-		} else if(Link->PressLeft){
+		} else if(Input->Press[CB_LEFT]){
 			cursorIndex--;
 		}
 		if(cursorIndex>=ITEM_MAX_INDEX){
@@ -78,7 +78,7 @@ void runSubscreen(){
 		}
 		cursorPos = ITEM_LOCS[cursorIndex];
 	} else if(subState==1){
-		if(Link->PressDown){
+		if(Input->Press[CB_DOWN]){
 			if(!cursorIndex)cursorIndex=18;
 			else if(cursorIndex>=1&&cursorIndex<=5)cursorIndex+=7;
 			else if(cursorIndex==6)cursorIndex=17;
@@ -91,7 +91,7 @@ void runSubscreen(){
 			else if(cursorIndex==16)cursorIndex=5;
 			else if(cursorIndex==17)cursorIndex=6;
 			else if(cursorIndex==18)cursorIndex=0;
-		} else if(Link->PressUp){
+		} else if(Input->Press[CB_UP]){
 			if(!cursorIndex)cursorIndex=18;
 			else if(cursorIndex>=8&&cursorIndex<=12)cursorIndex-=7;
 			else if(cursorIndex==6)cursorIndex=17;
@@ -105,7 +105,7 @@ void runSubscreen(){
 			else if(cursorIndex==16)cursorIndex=12;
 			else if(cursorIndex==17)cursorIndex=6;
 			else if(cursorIndex==18)cursorIndex=0;
-		} else if(Link->PressRight){
+		} else if(Input->Press[CB_RIGHT]){
 			if(cursorIndex==12){
 				cursorIndex=6;
 			}else if(cursorIndex==7){
@@ -116,7 +116,7 @@ void runSubscreen(){
 			if(cursorIndex>=KEY_MAX_INDEX){
 				cursorIndex=0;
 			}
-		} else if(Link->PressLeft){
+		} else if(Input->Press[CB_LEFT]){
 			if(cursorIndex==13){
 				cursorIndex=7;
 			} else {
@@ -147,139 +147,139 @@ void runSubscreen(){
 		drawBase(SCRN_SUBSCREEN_ITEM);
 		//start Draw Item Screen
 		//start Masks
-		if(Link->Item[187]){//Postman's Hat
+		if(Hero->Item[187]){//Postman's Hat
 			drawTileToLoc(loadItemTile(187),loadItemCSet(187),2,1,6);
 		}
-		if(Link->Item[188]){//All-Night Mask
+		if(Hero->Item[188]){//All-Night Mask
 			drawTileToLoc(loadItemTile(188),loadItemCSet(188),2,2,6);
 		}
-		if(Link->Item[189]){//Blast Mask
+		if(Hero->Item[189]){//Blast Mask
 			drawTileToLoc(loadItemTile(189),loadItemCSet(189),2,3,6);
 		}
-		if(Link->Item[190]){//Stone Mask
+		if(Hero->Item[190]){//Stone Mask
 			drawTileToLoc(loadItemTile(190),loadItemCSet(190),2,4,6);
 		}
-		if(Link->Item[191]){//Great Fairy's Mask
+		if(Hero->Item[191]){//Great Fairy's Mask
 			drawTileToLoc(loadItemTile(191),loadItemCSet(191),2,5,6);
 		}
-		if(Link->Item[144]){//Deku Mask
+		if(Hero->Item[144]){//Deku Mask
 			drawTileToLoc(loadItemTile(144),loadItemCSet(144),2,6,6);
 		}
-		if(Link->Item[192]){//Keaton's Mask
+		if(Hero->Item[192]){//Keaton's Mask
 			drawTileToLoc(loadItemTile(192),loadItemCSet(192),3,1,6);
 		}
-		if(Link->Item[193]){//Bremen Mask
+		if(Hero->Item[193]){//Bremen Mask
 			drawTileToLoc(loadItemTile(193),loadItemCSet(193),3,2,6);
 		}
-		if(Link->Item[194]){//Bunny Hood
+		if(Hero->Item[194]){//Bunny Hood
 			drawTileToLoc(loadItemTile(194),loadItemCSet(194),3,3,6);
 		}
-		if(Link->Item[195]){//Don Gero's Mask
+		if(Hero->Item[195]){//Don Gero's Mask
 			drawTileToLoc(loadItemTile(195),loadItemCSet(195),3,4,6);
 		}
-		if(Link->Item[196]){//Mask of Scents
+		if(Hero->Item[196]){//Mask of Scents
 			drawTileToLoc(loadItemTile(196),loadItemCSet(196),3,5,6);
 		}
-		if(Link->Item[127]){//Goron Mask
+		if(Hero->Item[127]){//Goron Mask
 			drawTileToLoc(loadItemTile(127),loadItemCSet(127),3,6,6);
 		}
-		if(Link->Item[197]){//Romani's Mask
+		if(Hero->Item[197]){//Romani's Mask
 			drawTileToLoc(loadItemTile(197),loadItemCSet(197),4,1,6);
 		}
-		if(Link->Item[198]){//Circus Leader's Mask
+		if(Hero->Item[198]){//Circus Leader's Mask
 			drawTileToLoc(loadItemTile(198),loadItemCSet(198),4,2,6);
 		}
-		if(Link->Item[199]){//Kafei's Mask
+		if(Hero->Item[199]){//Kafei's Mask
 			drawTileToLoc(loadItemTile(199),loadItemCSet(199),4,3,6);
 		}
-		if(Link->Item[200]){//Couple's Mask
+		if(Hero->Item[200]){//Couple's Mask
 			drawTileToLoc(loadItemTile(200),loadItemCSet(200),4,4,6);
 		}
-		if(Link->Item[201]){//Mask of Truth
+		if(Hero->Item[201]){//Mask of Truth
 			drawTileToLoc(loadItemTile(201),loadItemCSet(201),4,5,6);
 		}
-		if(Link->Item[131]){//Zora Mask
+		if(Hero->Item[131]){//Zora Mask
 			drawTileToLoc(loadItemTile(131),loadItemCSet(131),4,6,6);
 		}
-		if(Link->Item[202]){//Kamaro's Mask
+		if(Hero->Item[202]){//Kamaro's Mask
 			drawTileToLoc(loadItemTile(202),loadItemCSet(202),5,1,6);
 		}
-		if(Link->Item[203]){//Gibdo Mask
+		if(Hero->Item[203]){//Gibdo Mask
 			drawTileToLoc(loadItemTile(203),loadItemCSet(203),5,2,6);
 		}
-		if(Link->Item[204]){//Garo Mask
+		if(Hero->Item[204]){//Garo Mask
 			drawTileToLoc(loadItemTile(204),loadItemCSet(204),5,3,6);
 		}
-		if(Link->Item[205]){//Captain's Hat
+		if(Hero->Item[205]){//Captain's Hat
 			drawTileToLoc(loadItemTile(205),loadItemCSet(205),5,4,6);
 		}
-		if(Link->Item[206]){//Giant's Mask
+		if(Hero->Item[206]){//Giant's Mask
 			drawTileToLoc(loadItemTile(206),loadItemCSet(206),5,5,6);
 		}
-		if(Link->Item[207]){//Fierce Deity's Mask
+		if(Hero->Item[207]){//Fierce Deity's Mask
 			drawTileToLoc(loadItemTile(207),loadItemCSet(207),5,6,6);
 		}
 		//end Masks
 		//start Items
-		if(Link->Item[31]){//Ocarina of Time
+		if(Hero->Item[31]){//Ocarina of Time
 			drawTileToLoc(loadItemTile(31),loadItemCSet(31),2,9,6);
 		}
-		if(Link->Item[13]){//Arrow
+		if(Hero->Item[13]){//Arrow
 			drawTileToLoc(loadItemTile(13),loadItemCSet(13),2,10,6);
 		}
-		if(Link->Item[14]){//Fire Arrow
+		if(Hero->Item[14]){//Fire Arrow
 			drawTileToLoc(loadItemTile(14),loadItemCSet(14),2,11,6);
 		}
-		if(Link->Item[57]){//Ice Arrow
+		if(Hero->Item[57]){//Ice Arrow
 			drawTileToLoc(loadItemTile(57),loadItemCSet(57),2,12,6);
 		}
-		if(Link->Item[137]){//Light Arrow
+		if(Hero->Item[137]){//Light Arrow
 			drawTileToLoc(loadItemTile(137),loadItemCSet(137),2,13,6);
 		}
-		if(Link->Item[81]){//Bombs (item is 3 for bombs and 139 for bombchus, check is for bomb bag)
+		if(Hero->Item[81]){//Bombs (item is 3 for bombs and 139 for bombchus, check is for bomb bag)
 			drawTileToLoc(loadItemTile(3),loadItemCSet(3),3,9,6);
 			drawTileToLoc(loadItemTile(139),loadItemCSet(139),3,10,6);
 		}
-		if(Link->Item[I_DEKUSTICK]){//Deku Stick
+		if(Hero->Item[I_DEKUSTICK]){//Deku Stick
 			int tile = loadItemTile(138);
 			if(dekuStickLitTimer>0)tile+=20;
 			drawTileToLoc(tile,loadItemCSet(138),3,11,6);
 		}
-		if(Link->Item[140]){//Deku Nut
+		if(Hero->Item[140]){//Deku Nut
 			drawTileToLoc(loadItemTile(140),loadItemCSet(140),3,12,6);
 		}
-		if(Link->Item[153]){//Magic Bean
+		if(Hero->Item[153]){//Magic Bean
 			drawTileToLoc(loadItemTile(153),loadItemCSet(153),3,13,6);
 		}
-		if(Link->Item[106]){//Powder Keg (item is 48,check is for bomb bag)
+		if(Hero->Item[106]){//Powder Keg (item is 48,check is for bomb bag)
 			drawTileToLoc(loadItemTile(48),loadItemCSet(48),4,9,6);
 		}
-		if(Link->Item[53]){//Lens of Truth
+		if(Hero->Item[53]){//Lens of Truth
 			drawTileToLoc(loadItemTile(53),loadItemCSet(53),4,11,6);
 		}
-		if(Link->Item[52]){//Hookshot
+		if(Hero->Item[52]){//Hookshot
 			drawTileToLoc(loadItemTile(52),loadItemCSet(52),4,12,6);
 		}
-		if(Link->Item[211]){//GFSword
+		if(Hero->Item[211]){//GFSword
 			drawTileToLoc(loadItemTile(211),loadItemCSet(211),4,13,6);
 		}
 		//
-		if(Link->Item[146]){
+		if(Hero->Item[146]){
 			drawTileToLoc(loadItemTile(146),loadItemCSet(146),5,9,6);
 		}
-		if(Link->Item[147]){
+		if(Hero->Item[147]){
 			drawTileToLoc(loadItemTile(147),loadItemCSet(147),5,10,6);
 		}
-		if(Link->Item[148]){
+		if(Hero->Item[148]){
 			drawTileToLoc(loadItemTile(148),loadItemCSet(148),5,11,6);
 		}
-		if(Link->Item[149]){
+		if(Hero->Item[149]){
 			drawTileToLoc(loadItemTile(149),loadItemCSet(149),5,12,6);
 		}
-		if(Link->Item[150]){
+		if(Hero->Item[150]){
 			drawTileToLoc(loadItemTile(150),loadItemCSet(150),5,13,6);
 		}
-		if(Link->Item[151]){
+		if(Hero->Item[151]){
 			drawTileToLoc(loadItemTile(151),loadItemCSet(151),5,14,6);
 		}
 		//
@@ -326,7 +326,7 @@ void runSubscreen(){
 		drawBase(SCRN_SUBSCREEN_KEY);
 		//start Draw Key Screen
 		int cursorNotes[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-		if(Link->Item[31]){//start songs
+		if(Hero->Item[31]){//start songs
 			if(LEARNED_SONGS[SONG_SongOfTime]){
 				drawTileToLoc(TILE_NOTE_DEFAULT,0,3,3,6);
 				cursorNotes[1]=SONGNOTES_SongOfTime;
@@ -458,51 +458,51 @@ void runSubscreen(){
 				}
 			}
 		}//end songs
-		if(Link->Item[76]){
+		if(Hero->Item[76]){
 			drawTileToLoc(loadItemTile(76),loadItemCSet(76),6,7,6);
 			if(cursorIndex==16){
 				itemdata theItem = Game->LoadItemData(76);
 				theItem->GetName(itemDescStr);
 			}
-		} else if(Link->Item[75]){
+		} else if(Hero->Item[75]){
 			drawTileToLoc(loadItemTile(75),loadItemCSet(75),6,7,6);
 			if(cursorIndex==16){
 				itemdata theItem = Game->LoadItemData(75);
 				theItem->GetName(itemDescStr);
 			}
-		} else if(Link->Item[13]){//Check is for Arrows
+		} else if(Hero->Item[13]){//Check is for Arrows
 			drawTileToLoc(loadItemTile(74),loadItemCSet(74),6,7,6);
 			if(cursorIndex==16){
 				itemdata theItem = Game->LoadItemData(74);
 				theItem->GetName(itemDescStr);
 			}
 		}
-		if(Link->Item[83]){
+		if(Hero->Item[83]){
 			drawTileToLoc(loadItemTile(83),loadItemCSet(83),6,5,6);
 			if(cursorIndex==15){
 				itemdata theItem = Game->LoadItemData(83);
 				theItem->GetName(itemDescStr);
 			}
-		} else if(Link->Item[82]){
+		} else if(Hero->Item[82]){
 			drawTileToLoc(loadItemTile(82),loadItemCSet(82),6,5,6);
 			if(cursorIndex==15){
 				itemdata theItem = Game->LoadItemData(82);
 				theItem->GetName(itemDescStr);
 			}
-		} else if(Link->Item[81]){
+		} else if(Hero->Item[81]){
 			drawTileToLoc(loadItemTile(81),loadItemCSet(81),6,5,6);
 			if(cursorIndex==15){
 				itemdata theItem = Game->LoadItemData(81);
 				theItem->GetName(itemDescStr);
 			}
 		}
-		if(Link->Item[7]){
+		if(Hero->Item[7]){
 			drawTileToLoc(loadItemTile(7),loadItemCSet(7),6,1,6);
 			if(cursorIndex==13){
 				itemdata theItem = Game->LoadItemData(7);
 				theItem->GetName(itemDescStr);
 			}
-		} else if(Link->Item[6]){
+		} else if(Hero->Item[6]){
 			drawTileToLoc(loadItemTile(6),loadItemCSet(6),6,1,6);
 			if(cursorIndex==13){
 				itemdata theItem = Game->LoadItemData(6);
@@ -528,26 +528,26 @@ void runSubscreen(){
 				theItem->GetName(itemDescStr);
 			}
 		}
-		if(Link->Item[I_REMAINS1]){
+		if(Hero->Item[I_REMAINS1]){
 			
 			if(!cursorIndex){
 				itemdata theItem = Game->LoadItemData(I_REMAINS1);
 				theItem->GetName(itemDescStr);
 			}
 		}
-		if(Link->Item[I_REMAINS2]){
+		if(Hero->Item[I_REMAINS2]){
 			
 			if(cursorIndex==6){
 				itemdata theItem = Game->LoadItemData(I_REMAINS2);
 				theItem->GetName(itemDescStr);
 			}
-		}if(Link->Item[I_REMAINS3]){
+		}if(Hero->Item[I_REMAINS3]){
 			
 			if(cursorIndex==7){
 				itemdata theItem = Game->LoadItemData(I_REMAINS3);
 				theItem->GetName(itemDescStr);
 			}
-		}if(Link->Item[I_REMAINS4]){
+		}if(Hero->Item[I_REMAINS4]){
 			
 			if(cursorIndex==18){
 				itemdata theItem = Game->LoadItemData(I_REMAINS4);
@@ -613,6 +613,7 @@ void runSubscreen(){
 }
 
 void passiveSubscreen(){//start PassiveSubscreen
+	if(getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL)) return; //No subscreen in the options menu
 	//Inventory
 	int A_tile = TILE_INVIS;
 	int R_tile = TILE_INVIS;
@@ -622,15 +623,15 @@ void passiveSubscreen(){//start PassiveSubscreen
 	int L_cset = 0;
 	int RUPEE_tile = 60;
 	int RUPEE_cset = 5;
-	if(Link->Item[42]){
+	if(Hero->Item[42]){
 		RUPEE_cset = 1;
-	} else if(Link->Item[41]){
+	} else if(Hero->Item[41]){
 		RUPEE_cset = 0;
 	}
 	if(!form||form==4){
-		A_tile = loadItemTile(Link->ItemA);
-		A_cset = loadItemCSet(Link->ItemA);
-		if(form==4||!Link->Item[210]){
+		A_tile = loadItemTile(Hero->ItemA);
+		A_cset = loadItemCSet(Hero->ItemA);
+		if(form==4||!Hero->Item[210]){
 			if(hasMirrorShield){
 				R_tile = loadItemTile(37);
 				R_cset = loadItemCSet(37);
@@ -640,8 +641,8 @@ void passiveSubscreen(){//start PassiveSubscreen
 			}
 		}
 	} else if(form==1){
-		A_tile = loadItemTile(Link->ItemA);
-		A_cset = loadItemCSet(Link->ItemA);
+		A_tile = loadItemTile(Hero->ItemA);
+		A_cset = loadItemCSet(Hero->ItemA);
 		if(Game->MCounter[CR_MAGIC]>0){
 			R_tile = loadItemTile(ITEM_BUBBLE);
 			R_cset = loadItemCSet(ITEM_BUBBLE);
@@ -651,14 +652,14 @@ void passiveSubscreen(){//start PassiveSubscreen
 			A_tile = loadItemTile(ITEM_POUND);
 			A_cset = loadItemCSet(ITEM_POUND);
 		} else {
-			A_tile = loadItemTile(Link->ItemA);
-			A_cset = loadItemCSet(Link->ItemA);
+			A_tile = loadItemTile(Hero->ItemA);
+			A_cset = loadItemCSet(Hero->ItemA);
 		}
 		R_tile = TILE_CURL;
 		R_cset = 0;
 	} else if(form==3){
-		A_tile = loadItemTile(Link->ItemA);
-		A_cset = loadItemCSet(Link->ItemA);
+		A_tile = loadItemTile(Hero->ItemA);
+		A_cset = loadItemCSet(Hero->ItemA);
 		R_tile = loadItemTile(23);
 		R_cset = loadItemCSet(23);
 	}
@@ -728,27 +729,27 @@ void passiveSubscreen(){//start PassiveSubscreen
 	//Rupee Marker
 	Screen->FastTile(7,26,-24,RUPEE_tile,RUPEE_cset,OP_OPAQUE);
 	//Tael
-	if(Link->Item[I_TAEL_1]){
+	if(Hero->Item[I_TAEL_1]){
 		Screen->FastTile(7,TAEL_X,TAEL_Y,loadItemTile(I_TAEL_1),0,OP_OPAQUE);
 		Screen->FastTile(7,TAEL_X+16,TAEL_Y,loadItemTile(I_TAEL_2),0,OP_OPAQUE);
 	}
 	//Time
 	if(day<4){
 		if(slowTime){
-			Screen->FastTile(7,DAYSTART_X-8,DAYSTART_Y,12613,0,OP_OPAQUE);
+			Screen->FastTile(7,DAYSTART_X-8,DAYSTART_Y,SLOWTIME_TILE,0,OP_OPAQUE);
 		}
-		Screen->FastTile(7,DAYSTART_X,DAYSTART_Y,12610,0,OP_OPAQUE);
-		Screen->FastTile(7,DAYSTART_X+16,DAYSTART_Y,12611,0,OP_OPAQUE);
-		Screen->FastTile(7,DAYNUM_X,DAYNUM_Y,NumberTiles[day],0,OP_OPAQUE);
-		Screen->FastTile(7,TIMESTART_X,TIMESTART_Y,NumberTiles[Floor(hour/10)],0,OP_OPAQUE);
-		Screen->FastTile(7,TIMESTART_X+7,TIMESTART_Y,NumberTiles[hour%10],0,OP_OPAQUE);
+		Screen->FastTile(7,DAYSTART_X,DAYSTART_Y,DAYTILE,0,OP_OPAQUE);
+		Screen->FastTile(7,DAYSTART_X+16,DAYSTART_Y,DAYTILE+1,0,OP_OPAQUE);
+		Screen->FastTile(7,DAYNUM_X,DAYNUM_Y,NUMBERTILE + day,0,OP_OPAQUE);
+		Screen->FastTile(7,TIMESTART_X,TIMESTART_Y,NUMBERTILE + Floor(hour/10),0,OP_OPAQUE);
+		Screen->FastTile(7,TIMESTART_X+7,TIMESTART_Y,NUMBERTILE + hour%10,0,OP_OPAQUE);
 		Screen->FastTile(7,TIMESTART_X+12,TIMESTART_Y,SEMICOLON,0,OP_OPAQUE);
 		int minute = Floor(time/FRAMES_MINUTE);
-		Screen->FastTile(7,TIMESTART_X+17,TIMESTART_Y,NumberTiles[Floor(minute/10)],0,OP_OPAQUE);
-		Screen->FastTile(7,TIMESTART_X+24,TIMESTART_Y,NumberTiles[minute%10],0,OP_OPAQUE);
+		Screen->FastTile(7,TIMESTART_X+17,TIMESTART_Y,NUMBERTILE + Floor(minute/10),0,OP_OPAQUE);
+		Screen->FastTile(7,TIMESTART_X+24,TIMESTART_Y,NUMBERTILE + minute%10,0,OP_OPAQUE);
 	} else {
-		Screen->FastTile(7,DAYSTART_X-4,DAYSTART_Y,12608,0,OP_OPAQUE);
-		Screen->FastTile(7,DAYSTART_X+12,DAYSTART_Y,12609,0,OP_OPAQUE);
+		Screen->FastTile(7,DAYSTART_X-4,DAYSTART_Y,DOOMTILE,0,OP_OPAQUE);
+		Screen->FastTile(7,DAYSTART_X+12,DAYSTART_Y,DOOMTILE + 1,0,OP_OPAQUE);
 	}
 }//end PassiveSubscreen
 
@@ -801,3 +802,20 @@ int locToCol(int loc){
 void drawBase(int baseScreen){
 	Screen->DrawScreen(6,MAP_SUBSCREEN,baseScreen,0,0,0);
 }//end subscreenFunctions
+
+//start subscreenSkin
+void reskinSubscreen(int skin)
+{
+	if(skin!=1)
+	{
+		if(!getGlobalBool(GVAR_B_SPECTHEME,GV_MISC_BOOL))
+		{
+			setGlobalBool(GVAR_B_SPECTHEME,GV_MISC_BOOL,true);
+			strcpy(gbuf,"A special subscreen theme is active!@char(26)Press CTRL+1 to toggle this theme.");
+			RunFFCScript(FFC_SHOWSTRING,{gbuf,0,1});
+		}
+	}
+	int source = 67600 + (120 * skin) + (Floor(skin/2)*20);
+	CopyTileBlock(source, source + 119,67600);
+}
+//end subscreenSkin

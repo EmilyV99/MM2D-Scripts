@@ -5,37 +5,37 @@
 ////////////////////////////////////////
 void ocarina()//start ocMode
 {
-	if(Link->PressA)
+	if(Input->Press[CB_A])
 	{
 		currSong[ocIndex] = NOTE_A;
 		Game->PlaySound(NOTESOUND_A);
 		ocIndex++;
 	}
-	else if(Link->PressDown)
+	else if(Input->Press[CB_DOWN])
 	{
 		currSong[ocIndex] = NOTE_DOWN;
 		Game->PlaySound(NOTESOUND_DOWN);
 		ocIndex++;
 	}
-	else if(Link->PressRight)
+	else if(Input->Press[CB_RIGHT])
 	{
 		currSong[ocIndex] = NOTE_RIGHT;
 		Game->PlaySound(NOTESOUND_RIGHT);
 		ocIndex++;
 	}
-	else if(Link->PressLeft)
+	else if(Input->Press[CB_LEFT])
 	{
 		currSong[ocIndex] = NOTE_LEFT;
 		Game->PlaySound(NOTESOUND_LEFT);
 		ocIndex++;
 	}
-	else if(Link->PressUp)
+	else if(Input->Press[CB_UP])
 	{
 		currSong[ocIndex] = NOTE_UP;
 		Game->PlaySound(NOTESOUND_UP);
 		ocIndex++;
 	}
-	else if(Link->PressB)
+	else if(Input->Press[CB_B])
 	{
 		playedSong = -1;
 		songFrames = 0;
@@ -239,27 +239,27 @@ bool compareSongs(int song, int song2){//start
 	return true;
 }//end
 void scarecrow(){//start
-	if(Link->PressA){
+	if(Input->Press[CB_A]){
 		currSong[ocIndex] = NOTE_A;
 		Game->PlaySound(NOTESOUND_A);
 		ocIndex++;
-	} else if(Link->PressDown) {
+	} else if(Input->Press[CB_DOWN]) {
 		currSong[ocIndex] = NOTE_DOWN;
 		Game->PlaySound(NOTESOUND_DOWN);
 		ocIndex++;
-	} else if(Link->PressRight) {
+	} else if(Input->Press[CB_RIGHT]) {
 		currSong[ocIndex] = NOTE_RIGHT;
 		Game->PlaySound(NOTESOUND_RIGHT);
 		ocIndex++;
-	} else if(Link->PressLeft) {
+	} else if(Input->Press[CB_LEFT]) {
 		currSong[ocIndex] = NOTE_LEFT;
 		Game->PlaySound(NOTESOUND_LEFT);
 		ocIndex++;
-	} else if(Link->PressUp) {
+	} else if(Input->Press[CB_UP]) {
 		currSong[ocIndex] = NOTE_UP;
 		Game->PlaySound(NOTESOUND_UP);
 		ocIndex++;
-	} else if(Link->PressB){
+	} else if(Input->Press[CB_B]){
 		playedSong = -1;
 		songFrames = 10;
 		scarecrowRecord = false;
@@ -367,7 +367,7 @@ ffc script SongTriggersSecrets{
 		bool waiting = true;
 		while(waiting){
 			if(playedSong==song){
-				if(!reqOnFFC||(Link->X>this->X-8&&Link->X<this->X+8&&Link->Y>this->Y-8&&Link->Y<this->Y+8)){
+				if(!reqOnFFC||(Hero->X>this->X-8&&Hero->X<this->X+8&&Hero->Y>this->Y-8&&Hero->Y<this->Y+8)){
 					Screen->TriggerSecrets();
 					if(perm){
 						Screen->State[ST_SECRET] = true;
@@ -406,7 +406,7 @@ ffc script LearnASong{
 			bgColor=0;
 		}
 		while(waiting){
-			if(Link->X>this->X-8&&Link->X<this->X+8&&Link->Y>this->Y-8&&Link->Y<this->Y+8){
+			if(Hero->X>this->X-8&&Hero->X<this->X+8&&Hero->Y>this->Y-8&&Hero->Y<this->Y+8){
 				LEARNED_SONGS[song]=true;
 				if(!drawstate){
 					draw=true;
@@ -427,13 +427,13 @@ ffc script LearnASong{
 //start Scarecrow Song Create
 ffc script MakeScarecrowsSong{
 	//
-	//If Link is standing on this FFC and uses the Ocarina, he will not be able to play normal songs, but will instead play an 8-note song of his making which will be the scarecrow's song!
-	//NOTE: Link must still first LEARN the ScarecrowsSong using the LearnASong script, just as any other song. You can place that here as well, or place it elsewhere to simulate "activating" the song as is done in OOT!
+	//If Hero is standing on this FFC and uses the Ocarina, he will not be able to play normal songs, but will instead play an 8-note song of his making which will be the scarecrow's song!
+	//NOTE: Hero must still first LEARN the ScarecrowsSong using the LearnASong script, just as any other song. You can place that here as well, or place it elsewhere to simulate "activating" the song as is done in OOT!
 	//The player may come back to this spot any time to change the ScarecrowsSong.
 	//
 	void run(){
 		while(true){
-			if(Link->X>this->X-8&&Link->X<this->X+8&&Link->Y>this->Y-8&&Link->Y<this->Y+8){
+			if(Hero->X>this->X-8&&Hero->X<this->X+8&&Hero->Y>this->Y-8&&Hero->Y<this->Y+8){
 				scarecrowMode = true;
 			} else {
 				scarecrowMode = false;

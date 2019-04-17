@@ -22,15 +22,15 @@ void resetTime()
 	Game->Counter[CR_DEKUNUTS]=0;
 	Game->Counter[CR_MAGICBEANS]=0;
 	swordCounter = 0;
-	Link->Item[I_SWORD_RAZOR]=false;
-	Link->Item[I_SWORD_KOKIRI]=true;
-	Link->Item[INF_MAGIC]=false;
+	Hero->Item[I_SWORD_RAZOR]=false;
+	Hero->Item[I_SWORD_KOKIRI]=true;
+	Hero->Item[INF_MAGIC]=false;
 	for(int i=0;i<6;i++)
 	{
 		BottleState[i]=BS_EMPTY;
 	}
 	RefreshBottles();
-	for(int i = GVAR_START_RESET;i<GVAR_END_RESET;i++)
+	for(int i = GV_START_RESET;i<GV_END_RESET;i++)
 	{
 		setGlobalVar(i,0,0);
 	}

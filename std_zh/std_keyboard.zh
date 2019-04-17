@@ -97,7 +97,7 @@ int KeyToChar(int key) { return KeyToChar(key,false,false); }
 int KeyToChar(int key, bool shifted) { return KeyToChar(key,shifted,false); }
 
 int KeyToChar(int key, bool shifted, bool caps){
-	//TraceS("KeyToChar bool shifted is: "); TraceB(shifted);
+	TraceS("KeyToChar bool shifted is: "); TraceB(shifted);
 	if ( shifted )
 	{
 		if ( key == KEY_A ) return 'A';

@@ -3,27 +3,34 @@
 //     MM2D Script: Global Scripts    //
 //                                    //
 ////////////////////////////////////////
-
 //start Init Script
 global script Init
 {
 	void run()
 	{
-		Game->DisableActiveSubscreen=true;
-		CopyTile(TILE_INVIS,19);
-		CopyTile(TILE_INVIS,39);
+		//Starting settings
 		Game->MCounter[CR_DEKUNUTS] = 20;
 		Game->MCounter[CR_MAGICBEANS] = 20;
 		Game->MCounter[CR_BANKBAL] = 5000;
 		setGlobalVar(GVAR_DIFFICULTY,GV_MISC,1);
+		//Make FFC tiles invisible
+		CopyTile(TILE_INVIS,19);
+		CopyTile(TILE_INVIS,39);
+		//Check debug mode
 		int saveName[16];
 		Game->GetSaveName(saveName);
-		if(!strcmp(saveName,"Venrob"))debugEnabled=true;
+		if(!strcmp(saveName,"Link"))debugEnabled=false;
+		else debugEnabled=true;
+		//Set up tint palettes
 		setGlobalVar(TINT_DAY,GV_PAL,createTintPalette(0,0,0));
 		setGlobalVar(TINT_SUNSETORANGE,GV_PAL,createTintPalette(-3,-9,-14));
 		setGlobalVar(TINT_NIGHT,GV_PAL,createTintPalette(-21,-23,-10));
 		setGlobalVar(TINT_LENS,GV_PAL,createTintPalette(-17,-48,5));
+		setGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL,true);
+		//Bugfix
 		TIME_HOTWATER = TIME_HOUR*4;
+		//Default controls
+		Controls[CONTROL_OPTIONS] = KEY_TAB;
 	}
 }
 //end
@@ -32,18 +39,22 @@ global script Global
 {
 	void run()//start mainGlobal
 	{
+		//start init
+		ClearTrace();
+		TraceS("Launching TLoZ: Majora's Mask 2D...\n");
+		Game->DisableActiveSubscreen = true; //Disable engine subscreen.
+		testrun();
+		initGame(); //Handle rando stuff here.
 		bool isLensTinted = false;
+		bool refreshTime = false;
+		arrowAimMode = false;
 		setEnterEndsTyping(true);
 		setAllowBackspaceDelete(true);
 		setOverflowWraps(false);
-		//start init
-		ClearTrace();
-		TraceS("Launching TLoZ: Majora's Mask 2D...");TraceNL();
-		if(Link->Item[81])Game->MCounter[CR_BOMBCHUS]=40;
+		if(Hero->Item[81])Game->MCounter[CR_BOMBCHUS]=40;
 		bool scrnChanged = false;
 		LinkMovement_Init();
 		TangoInit();
-		StartGhostZH();
 		//start Ocarina init
 		scarecrowMode = false;
 		scarecrowRecord = false;
@@ -58,13 +69,45 @@ global script Global
 		clearBitmap(RT_BITMAP0);
 		//end init bitmaps
 		//start Global Script Scope Vars
-		lweapon zoraBoom1;
-		lweapon zoraBoom2;
+		int subskin = 1;
+		int lastskin = -1;
 		//end
 		//Tango_ConvertVariableName("anpc");
 		//Tango_ConvertFunctionName("npcend");
 		while(true)
 		{
+			if(!(gameframe%60) || refreshTime)//Refresh time-based events every 60 frames
+			{
+				int month = GetSystemTime(RTC_MONTH);
+				int day = GetSystemTime(RTC_DAYOFMONTH);
+				subskin = 1;
+				if(month == 12)
+				{
+					subskin = 2;
+					if(day>23&&day<26)subskin = 3;
+				}
+				refreshTime = false;
+			}
+			if(!ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN))
+			{
+				if(getGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL))
+				{
+					if(subskin != lastskin)
+					{
+						lastskin = subskin;
+						reskinSubscreen(subskin);
+					}
+				}
+				else
+				{
+					subskin = 1;
+					if(lastskin!=1)
+					{
+						lastskin = 1;
+						reskinSubscreen(1);
+					}
+				}
+			}
 			clearBitmap(RT_BITMAP0);
 			handleTyping();
 			if(debugEnabled)testingMenu();
@@ -91,20 +134,20 @@ global script Global
 					lastLevel = Game->GetCurLevel();
 				}
 			}
-			if(Link->HP!=lastHP)
+			if(Hero->HP!=lastHP)
 			{
-				if(Link->HP < lastHP)
+				if(Hero->HP < lastHP)
 				{
 					onLinkHurt();
 				}
-				lastHP = Link->HP;
+				lastHP = Hero->HP;
 			}
 			layer4Toggle();
 			if(subscreen)
 			{
-				pressA=Link->PressA;
-				Link->PressA=false;
-				Link->InputA=false;
+				pressA=Input->Press[CB_A];
+				Input->Press[CB_A]=false;
+				Input->Button[CB_A]=false;
 			}
 			
 			varIntegrity();
@@ -115,7 +158,7 @@ global script Global
 				NoAction();
 				freezeFrames--;
 			}
-			gameframe++;
+			++gameframe;
 			if(gameframe>=3600)
 			{
 				gameframe=0;
@@ -150,72 +193,11 @@ global script Global
 				pauseGradient();
 			}
 			//end Time Passing
-			bombCheck();
-			runOmniArrows();
+			if(!getGlobalVar(GVAR_MGSTATE,GV_MISC))runOmniArrows();
 			Tango_Update1();
-			//start Ocarina loop
-			if(songFrames>0)
-			{
-				/*if(Game->CappedFPS)
-				{
-					saveFPSstate();
-					Game->CappedFPS=false;
-				}*/
-				TotalNoAction();
-				ocarina_mode = false;
-				if(!fakeSong)
-					drawNotes();
-				songFrames--;
-				if(!songFrames)
-				{
-					loadFPSstate();
-					if(midiToReturn!=-6&&midiToReturn<205)
-						Audio->PlayMIDI(midiToReturn);
-					if(!fakeSong&&playedSong>-1)
-						activateSong(playedSong);
-					playedSong=-1;
-					fakeSong=false;
-					if(!subscreen)
-						Screen_Freeze(0);
-				}
-			}
-			else
-			{
-				midiToReturn = Game->GetMIDI();
-			}
-			if(OC_doItemJinx)
-			{
-				if(Link->InputB)
-				{
-					Link->ItemJinx=2;
-				}
-				else
-				{
-					OC_doItemJinx=false;
-				}
-			}
-			if(ocarina_mode)
-			{
-				Screen_Freeze(2);
-				ocarina();
-				Link->PressStart=false;
-				Link->InputStart=false;
-			}
-			if(scarecrowRecord)
-			{
-				scarecrow();
-			}
-			if(ocarina_mode||scarecrowRecord||songFrames>0)
-			{
-				Link->CollDetection = false;
-			}
-			else
-			{
-				Link->CollDetection = true;
-			}
-			//end Ocarina loopz
+			handleOcarina();
 			//start Subscreen
-			if((!isFrozen||subscreen)&&Link->PressStart&&!ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN))
+			if((!isFrozen||subscreen)&&Input->Press[CB_START]&&!ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN))
 			{
 				toggleSubscreen();
 			}
@@ -235,22 +217,8 @@ global script Global
 				Screen_Freeze(0);
 				slotWasDisplayed=false;
 			}
-			Link->PressStart=false;
-			Link->InputStart=false;
 			razorSwordCheck();
-			//transformaitons
-			handleTransformations(zoraBoom1,zoraBoom2);
-			if(Game->Misc[0]!=Debug->Null())
-			{
-				zoraBoom1=Game->Misc[0];
-				Game->Misc[0]=Debug->Null();
-			}
-			if(Game->Misc[1]!=Debug->Null())
-			{
-				zoraBoom2=Game->Misc[1];
-				Game->Misc[1]=Debug->Null();
-			}
-			//
+			handleTransformations();
 			handleEXItems();
 			handleMasks();
 			//end
@@ -269,18 +237,15 @@ global script Global
 				handleFreezableWater();
 			}//end
 			//start
-			LinkActionOld=Link->Action;
+			LinkActionOld=Hero->Action;
 			raftingCheck();
 			LinkMovement_Update1();
 			if(!isFrozen)
 				highLedgeFromWater();
-			Link->PressR=false;Link->InputR=false;
-			Link->PressL=false;Link->InputL=false;
 			Overhead_Update();
 			drawExtraLayerEffects();
 			lwLoop();
 			ewLoop();
-			UpdateGhostZH1();
 			//end
 			if(UsingItem(53)&&fullCounter(CR_MAGIC)>2)
 			{
@@ -298,6 +263,9 @@ global script Global
 					isLensTinted=false;
 				}
 			}
+			bool temp = getGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL);
+			runExtraControls();
+			if(temp != getGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL))refreshTime = true;
 			timePalette();
 			runTints();
 			runHeightBitmap();
@@ -308,7 +276,6 @@ global script Global
 				EmptyBottleGlobal();
 			}
 			Tango_Update2();
-			UpdateGhostZH2();
 			if(isFrozen)LinkMovement_SetLinkSpeedBoost(0);
 			LinkMovement_Update2();
 			Waitframe();
@@ -324,10 +291,10 @@ global script Global
 				toggleSubscreen();
 				Waitframe();
 			}
-			Link->Warp(0,32);
+			Hero->Warp(0,32);
 			Waitframes(2);
 			int args[8];
-			if(LEARNED_SONGS[SONG_SongOfTime]&&Link->Item[31])
+			if(LEARNED_SONGS[SONG_SongOfTime]&&Hero->Item[31])
 			{
 				args[0]=3;
 			}
@@ -342,7 +309,7 @@ global script Global
 	//start extra
 	void layer4Toggle()
 	{
-		if(Link->PressEx4)
+		if(Input->Press[CB_EX4])
 		{
 			hideLayer4 = !hideLayer4;
 		}
@@ -404,7 +371,22 @@ global script Global
 					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getOwlCombo(m->GetFFCInitD(i, 0)),m->FFCCSet[i],OP_OPAQUE);
 					break;
 				case FFC_NPC:
-					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getNPCCombo(m->FFCData[i], m->GetFFCInitD(i, 0)+0, m->GetFFCInitD(i, 1)+0, m->GetFFCInitD(i, 2)+0, m->GetFFCInitD(i, 3)+0, m->GetFFCInitD(i, 4)+0, m->GetFFCInitD(i, 5)+0, (m->GetFFCInitD(i, 7))>0),m->FFCCSet[i],OP_OPAQUE);
+					int cmbo = getNPCCombo(m->FFCData[i], m->GetFFCInitD(i, 0)+0, m->GetFFCInitD(i, 1)+0, m->GetFFCInitD(i, 2)+0, m->GetFFCInitD(i, 3)+0, m->GetFFCInitD(i, 4)+0, m->GetFFCInitD(i, 5)+0, (m->GetFFCInitD(i, 7))>0);
+					if(m->FFCTileWidth[i] > 1 || m->FFCTileHeight[i] > 1)
+					{
+						combodata cmbod = Game->LoadComboData(cmbo);
+						for(int x = 0; x < m->FFCTileWidth[i]; ++x)
+						{
+							for(int y = 0; y < m->FFCTileHeight[i]; ++y)
+							{
+								HeightFastTile(layer,m->FFCX[i] + (16*x),m->FFCY[i] + (16*y),cmbod->Tile + (x) + (20*y) + (gameframe % Max(cmbod->Frames,1)),m->FFCCSet[i],OP_OPAQUE);
+							}
+						}
+					}
+					else
+					{
+						HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],cmbo,m->FFCCSet[i],OP_OPAQUE);
+					}
 					break;
 				case FFC_SOFTSOIL:
 					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getSoilCombo(m->GetFFCInitD(i,4)),m->FFCCSet[i],OP_OPAQUE);
@@ -433,9 +415,10 @@ global script Global
 	void changedScreens()
 	{
 		songOfStormsRain = false;
-		if(!floating)Link->Invisible=false;
+		if(!floating)Hero->Invisible=false;
 		if(lwArr[0]||ewArr[0])loadWeapons();
 		clearWeapons();
+		setGlobalVar(GVAR_MGSTATE,GV_MISC,0);
 	}
 	
 	void changedLevel()
@@ -484,12 +467,12 @@ global script Global
 		if(floating<0)floating=0;
 		if(Deku_flying<0)Deku_flying=0;
 		if(Game->MCounter[CR_SBOMBS]>1)Game->MCounter[CR_SBOMBS]=1;//PATCHWORK//
-		if(rafting&&Link->Action!=LA_RAFTING)
+		if(rafting&&Hero->Action!=LA_RAFTING)
 		{
 			canFall=true;
 			rafting=false;
 		}
-		else if(!rafting&&Link->Action==LA_RAFTING)
+		else if(!rafting&&Hero->Action==LA_RAFTING)
 		{
 			canFall=false;
 			rafting=true;
@@ -499,28 +482,28 @@ global script Global
 	}//end
 	void raftingCheck()//start rafting
 	{
-		if(Link->Action==LA_RAFTING)
+		if(Hero->Action==LA_RAFTING)
 		{
 			Rafting[RAFT_DIR]=-1;
-			if(Link->PressRight&&CanWalk(Link->X,Link->Y,DIR_RIGHT,16,false))
+			if(Input->Press[CB_RIGHT]&&CanWalk(Hero->X,Hero->Y,DIR_RIGHT,16,false))
 			{
-				Link->X+=16;
-				Link->Action=LA_NONE;
+				Hero->X+=16;
+				Hero->Action=LA_NONE;
 			}
-			else if(Link->PressLeft&&CanWalk(Link->X,Link->Y,DIR_LEFT,16,false))
+			else if(Input->Press[CB_LEFT]&&CanWalk(Hero->X,Hero->Y,DIR_LEFT,16,false))
 			{
-				Link->X-=16;
-				Link->Action=LA_NONE;
+				Hero->X-=16;
+				Hero->Action=LA_NONE;
 			}
-			else if(Link->PressUp&&CanWalk(Link->X,Link->Y,DIR_UP,16,false))
+			else if(Input->Press[CB_UP]&&CanWalk(Hero->X,Hero->Y,DIR_UP,16,false))
 			{
-				Link->Y-=16;
-				Link->Action=LA_NONE;
+				Hero->Y-=16;
+				Hero->Action=LA_NONE;
 			}
-			else if(Link->PressDown&&CanWalk(Link->X,Link->Y,DIR_DOWN,16,false))
+			else if(Input->Press[CB_DOWN]&&CanWalk(Hero->X,Hero->Y,DIR_DOWN,16,false))
 			{
-				Link->Y+=16;
-				Link->Action=LA_NONE;
+				Hero->Y+=16;
+				Hero->Action=LA_NONE;
 			}
 		}
 		else if(Rafting[RAFT_DIR]!=-1)
@@ -542,31 +525,31 @@ global script Global
 			else
 			{
 				//
-				Link->Dir=Rafting[RAFT_DIR];
+				Hero->Dir=Rafting[RAFT_DIR];
 				if(Rafting[RAFT_X]!=-1&&Rafting[RAFT_Y]!=-1&&!(gameframe%10))
 				{
-					Link->X = Rafting[RAFT_X];
-					Link->Y = Rafting[RAFT_Y];
+					Hero->X = Rafting[RAFT_X];
+					Hero->Y = Rafting[RAFT_Y];
 				}
 				if(Rafting[RAFT_DIR]==DIR_DOWN)
 				{
-					Link->PressDown=true;
-					Link->InputDown=true;
+					Input->Press[CB_DOWN]=true;
+					Input->Button[CB_DOWN]=true;
 				}
 				else if(Rafting[RAFT_DIR]==DIR_RIGHT)
 				{
-					Link->PressRight=true;
-					Link->InputRight=true;
+					Input->Press[CB_RIGHT]=true;
+					Input->Button[CB_RIGHT]=true;
 				}
 				else if(Rafting[RAFT_DIR]==DIR_LEFT)
 				{
-					Link->PressLeft=true;
-					Link->InputLeft=true;
+					Input->Press[CB_LEFT]=true;
+					Input->Button[CB_LEFT]=true;
 				}
 				else if(Rafting[RAFT_DIR]==DIR_UP)
 				{
-					Link->PressUp=true;
-					Link->InputUp=true;
+					Input->Press[CB_UP]=true;
+					Input->Button[CB_UP]=true;
 				}
 			}
 		}
@@ -672,7 +655,7 @@ global script Global
 			{
 				debug=!debug;
 				//Game->TypingMode = !Game->TypingMode;
-				Link->CollDetection=!debug;
+				Hero->CollDetection=!debug;
 				canFall=!debug;
 			}
 			if(debug)
@@ -773,14 +756,14 @@ global script Global
 				{
 					noSave = !noSave;
 				}
-				if(Input->ReadKey[KEY_0])Link->Warp(0,0x24);//Warp to test area
-				if(Input->ReadKey[KEY_R])Link->PitWarp(Game->GetCurDMap(),Game->GetCurDMapScreen());//Reset the screen by pitwarping to it
+				if(Input->ReadKey[KEY_0])Hero->Warp(0,0x24);//Warp to test area
+				if(Input->ReadKey[KEY_R])Hero->PitWarp(Game->GetCurDMap(),Game->GetCurDMapScreen());//Reset the screen by pitwarping to it
 				if(Input->ReadKey[KEY_BACKSLASH])dbdraw = !dbdraw;
 				if(Input->ReadKey[KEY_F])debugCanFall = !debugCanFall;
 				if(Input->ReadKey[KEY_OPENBRACE])warpDown();
 				if(Input->ReadKey[KEY_CLOSEBRACE])warpUp();
 				NoAction();
-				Link->PressStart=false;Link->InputStart=false;
+				Input->Press[CB_START]=false;Input->Button[CB_START]=false;
 			}
 		}
 	}//end
@@ -795,17 +778,17 @@ global script Global
 		}
 		for(int i=0;i<48;i++)
 		{
-			if(ItemIDs[i]!=0)Link->Item[ItemIDs[i]]=true;
+			if(ItemIDs[i]!=0)Hero->Item[ItemIDs[i]]=true;
 		}
 		//bbags
-		Link->Item[81]=true;
-		Link->Item[82]=true;
-		Link->Item[83]=true;
-		Link->Item[106]=true;
+		Hero->Item[81]=true;
+		Hero->Item[82]=true;
+		Hero->Item[83]=true;
+		Hero->Item[106]=true;
 		//quivs
-		Link->Item[74]=true;
-		Link->Item[75]=true;
-		Link->Item[76]=true;
+		Hero->Item[74]=true;
+		Hero->Item[75]=true;
+		Hero->Item[76]=true;
 		Game->MCounter[CR_LIFE]=320;
 		Game->MCounter[CR_MAGIC]=256;
 		Game->Counter[CR_LIFE]=320;
@@ -867,6 +850,7 @@ global script Global
 		for(int i = Screen->NumLWeapons(); i > 0; i--)
 		{
 			lweapon weap = Screen->LoadLWeapon(i);
+			if(weap->ID == LW_THRBOMBS && weap->DeadState != WDS_ALIVE)Trace(weap->DeadState);
 			if(weap->ID!=LW_ARROW)
 			{
 				if(weap->Misc[LWMISC_LAYERDMAP])
@@ -932,13 +916,88 @@ global script Global
 		}
 	}
 	//end loops
-}
+	void runExtraControls()//start extraControls
+	{
+		if(PressControl() && (Input->ReadKey[KEY_1] || Input->ReadKey[KEY_1_PAD]))
+		{
+			if(!toggleGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL))reskinSubscreen(1);
+		}
+		GameOverMenu::checkF6();
+	}//end
+	void handleOcarina()//start
+	{
+		if(songFrames>0)
+		{
+			/*if(Game->CappedFPS)
+			{
+				saveFPSstate();
+				Game->CappedFPS=false;
+			}*/
+			TotalNoAction();
+			ocarina_mode = false;
+			if(!fakeSong)
+				drawNotes();
+			--songFrames;
+			if(!songFrames)
+			{
+				loadFPSstate();
+				if(midiToReturn!=-6&&midiToReturn<205)
+					Audio->PlayMIDI(midiToReturn);
+				if(!fakeSong&&playedSong>-1)
+					activateSong(playedSong);
+				playedSong=-1;
+				fakeSong=false;
+				if(!subscreen)
+					Screen_Freeze(0);
+			}
+		}
+		else
+		{
+			midiToReturn = Game->GetMIDI();
+		}
+		if(OC_doItemJinx)
+		{
+			if(Input->Button[CB_B])
+			{
+				Hero->ItemJinx=2;
+			}
+			else
+			{
+				OC_doItemJinx=false;
+			}
+		}
+		if(ocarina_mode)
+		{
+			Screen_Freeze(2);
+			ocarina();
+			Input->Press[CB_START]=false;
+			Input->Button[CB_START]=false;
+		}
+		if(scarecrowRecord)
+		{
+			scarecrow();
+		}
+		if(ocarina_mode||scarecrowRecord||songFrames>0)
+		{
+			Hero->CollDetection = false;
+		}
+		else
+		{
+			Hero->CollDetection = true;
+		}
+	}
+}//end
 //end Global Script
 //start OnContinue Script
 global script onFileLoad
 {
 	void run()
 	{
+		if(daysAgo() >= DAYS_TO_HINT_RESET)
+		{
+			resetHintBools();
+			storeTime();
+		}
 		if(owlSaved)
 		{
 			owlSaved=false;
@@ -948,13 +1007,14 @@ global script onFileLoad
 		}
 		else
 		{
-			Link->Warp(0,0);
+			Hero->Warp(0,0);
 			resetTime();
 			Game->ContinueDMap=0;
 			Game->ContinueScreen=0;
 			Game->Save();
 		}
 		tintOnContinue();
+		OptionsMenu.reloadOptions();
 	}
 }//end
 //start OnExit Script
@@ -962,7 +1022,577 @@ global script onExit
 {
 	void run()
 	{
-	
+		storeTime();
 	}
 }
 //end OnExit Script
+//start Game Init
+void initGame()
+{
+	//Do initialization things, which may take into account randomizer stuff.
+	Items::defaultItemInit();
+	Items::initUpgrade();
+}
+//end Game Init
+//start Options Menu
+untyped opt[256] = {false};
+enum
+{
+	OPT_RFS
+};
+
+hero script OptionsMenu
+{
+	//start Menu constants
+	CONFIG NUM_MENU_OPTIONS = 3;
+	CONFIG MENU_SPACING = 16;
+	CONFIG MENU_FONT = FONT_Z3SMALL;
+	CONFIG MENU_FONT_HEIGHT = 6;
+	CONFIG TOP_MENU = -56;
+	CONFIG MENU_TOP_MARGIN_HEIGHT = 24;
+	CONFIG MENU_LEFT_MARGIN_WIDTH = 16;
+	CONFIG MENU_RIGHT_MARGIN_WIDTH = 16;
+	CONFIG MENU_BOTTOM_MARGIN_HEIGHT = 16;
+	CONFIG MENU_LAYER = 7;
+	CONFIG MENU_TCOLOR_INACTIVE = COLOR_WHITE;
+	CONFIG MENU_TCOLOR_ACTIVE = COLOR_YELLOW;
+	CONFIG MENU_SCROLL_INC = 8;
+	CONFIG MENU_HOLD_DELAY = 90;
+	//
+	CONFIG MENU_ENFORCE_MARGINS = 1;
+	//
+	DEFINE MENU_BITMAP_WIDTH = 256;
+	DEFINE NUM_MENU_BITMAPS = 4;
+	DEFINE VIS_SCREEN_HEIGHT = 168 - TOP_MENU;
+	DEFINE __MHEIGHT = (NUM_MENU_OPTIONS * (MENU_SPACING + MENU_FONT_HEIGHT)) - MENU_SPACING + MENU_TOP_MARGIN_HEIGHT + MENU_BOTTOM_MARGIN_HEIGHT;
+	DEFINE OP_HEIGHT = __MHEIGHT < VIS_SCREEN_HEIGHT ? VIS_SCREEN_HEIGHT : __MHEIGHT;
+	DEFINE MENU_TOP_MARGIN = TOP_MENU + MENU_TOP_MARGIN_HEIGHT;
+	DEFINE MENU_LEFT_MARGIN = MENU_LEFT_MARGIN_WIDTH;
+	DEFINE MENU_RIGHT_MARGIN = 255 - MENU_RIGHT_MARGIN_WIDTH;
+	DEFINE MENU_BOTTOM_MARGIN = OP_HEIGHT - MENU_BOTTOM_MARGIN_HEIGHT;
+	
+	DEFINE MENU_PERM = MENU_BITMAP_WIDTH*0;
+	DEFINE MENU_TEMP = MENU_BITMAP_WIDTH*1;
+	DEFINE MENU_CONTROL_LIST = MENU_BITMAP_WIDTH*2;
+	
+	DEFINE MAX_SCROLL = OP_HEIGHT - VIS_SCREEN_HEIGHT;
+	//end
+	
+	//States are equivalent to the mainOption value that represents that state
+	enum OptState
+	{
+		STATE_MAIN = -1,
+		STATE_OPTIONSKEY,
+		STATE_RFS,
+		STATE_LT
+	};
+	
+	int optionScrollCheck(int option, int scroll)
+	{
+		int optTop = MENU_TOP_MARGIN + ((MENU_FONT + MENU_SPACING) * option) - ((MENU_SPACING + MENU_FONT) / 2);
+		int optBot = optTop + MENU_FONT + MENU_SPACING;
+		if(optTop < scroll + (MENU_ENFORCE_MARGINS ? MENU_TOP_MARGIN_HEIGHT : 0)) return -1;
+		if(optBot > scroll + VIS_SCREEN_HEIGHT - (MENU_ENFORCE_MARGINS ? MENU_BOTTOM_MARGIN_HEIGHT : 0)) return 1;
+		return 0;
+	}
+	
+	void run() //start
+	{
+		bitmap menu = Game->CreateBitmap(OP_HEIGHT, MENU_BITMAP_WIDTH * NUM_MENU_BITMAPS);
+		while(1)
+		{
+			Waitframe();
+			Waitdraw();
+			if(isFrozen && !getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL)) continue;
+			
+			if(getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL))
+			{
+				//Full options menu, with various global variables to be modified.
+				int scroll = 0;
+				int x = 0;
+				int mainOption = 0;
+				int subOption = 0;
+				OptState state = STATE_MAIN;
+				while(getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL))
+				{
+					reloadBitmap(menu); //UNFINISHED : This shouldn't need to be in the loop. There's an issue with `bitmap->Blit()`!
+					loadTempBitmap(menu);
+					bool confirm = Input->Press[CB_A] || Input->ReadKey[KEY_ENTER] || Input->ReadKey[KEY_ENTER_PAD];
+					bool deny = Input->Press[CB_B] || Input->ReadKey[KEY_BACKSPACE];
+					//
+					if(deny)
+					{
+						if(state == STATE_MAIN)
+							setGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL, false);
+						else
+							state = STATE_MAIN;
+					}
+					else if(Input->ReadKey[Controls[CONTROL_OPTIONS]])
+					{
+						setGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL, false);
+					}
+					switch(state)
+					{
+						case STATE_MAIN:
+						{
+							//Scroll the menu visual based on currently selected option
+							if(!mainOption) scroll = 0;
+							else if(mainOption == NUM_MENU_OPTIONS - 1) scroll = MAX_SCROLL;
+							else if(optionScrollCheck(mainOption, scroll) != 0)
+							{
+								while(optionScrollCheck(mainOption, scroll) == 1)
+								{
+									scroll += MENU_SCROLL_INC;
+								}
+								while(optionScrollCheck(mainOption, scroll) == -1)
+								{
+									scroll -= MENU_SCROLL_INC;
+								}
+								scroll = VBound(scroll, MAX_SCROLL, 0);
+							}
+							switch(mainOption)
+							{
+								case STATE_OPTIONSKEY:
+									DrawMenuString("Options Menu", menu, 2, MENU_TEMP + MENU_LEFT_MARGIN, menupos(mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
+									break;
+									
+								case STATE_RFS:
+									DrawMenuString("Flip Right-Facing Slash", menu, 2, MENU_TEMP + MENU_LEFT_MARGIN, menupos(mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
+									break;
+									
+								case STATE_LT:
+									DrawMenuString("Lens Tint Color", menu, 2, MENU_TEMP + MENU_LEFT_MARGIN, menupos(mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
+									break;
+							}
+							if(confirm)
+							{
+								state = <OptState>mainOption;
+								subOption = 0;
+							}
+							else if(Input->Press[CB_UP] || (Input->Button[CB_UP] && !(gameframe % MENU_HOLD_DELAY)))
+								--mainOption;
+							else if(Input->Press[CB_DOWN] || (Input->Button[CB_DOWN] && !(gameframe % MENU_HOLD_DELAY)))
+								++mainOption;
+							if(mainOption < 0) mainOption += NUM_MENU_OPTIONS;
+							else mainOption %= NUM_MENU_OPTIONS;
+							break;
+						}
+						
+						case STATE_OPTIONSKEY:
+						{
+							int buf0[64];
+							KeyToString(Controls[CONTROL_OPTIONS], buf0, true, true);
+							DrawMenuString(buf0, menu, 2, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), MENU_TCOLOR_ACTIVE, TF_RIGHT);
+							if(Input->Button[CB_A]) break; //Don't take input while `A` is held
+							int key = getKeyPress();
+							switch(isValidKey(key))
+							{
+								case 1:
+									Controls[CONTROL_OPTIONS] = key;
+									//Fall-through
+								case -1:
+									state = STATE_MAIN;
+									Game->TypingMode = false;
+									break;
+							}
+							break;
+						}
+						
+						case STATE_RFS:
+						{
+							DrawMenuString(opt[OPT_RFS] ? "  On" : "Off", menu, 2, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), opt[OPT_RFS] ? COLOR_GREEN : COLOR_RED, TF_RIGHT);
+							if(confirm)
+								opt[OPT_RFS] = !opt[OPT_RFS];
+							break;
+						}
+						
+						case STATE_LT:
+						{
+							DEFINE PREVIEW = 0;
+							DEFINE RED = 1;
+							DEFINE GREEN = 2;
+							DEFINE BLUE = 3;
+							int inc = (Input->Press[CB_UP]) ? 1 : ((Input->Press[CB_DOWN]) ? -1 : 0);
+							if(Input->Press[CB_RIGHT] || (Input->Button[CB_RIGHT] && !(gameframe % MENU_HOLD_DELAY))) ++subOption;
+							else if(Input->Press[CB_LEFT] || (Input->Button[CB_LEFT] && !(gameframe % MENU_HOLD_DELAY))) --subOption;
+							subOption < 0 ? (subOption += 4) : (subOption %= 4);
+							switch(subOption)
+							{
+								case PREVIEW:
+									DrawMenuString("Preview            ", menu, 2, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), MENU_TCOLOR_ACTIVE, TF_RIGHT, true);
+									if(confirm)
+									{
+										setTint(getGlobalVar(TINT_LENS, GV_PAL), true);
+										WaitTotalNoAction(30);
+										//Waitdraw();
+										setTint(getGlobalVar(TINT_LENS, GV_PAL), false);
+									}
+									break;
+									
+								case RED:
+									int buf1[12] = "           ";
+									itoa(buf1, (((__tintR[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintR[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintR[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0), __tintR[getGlobalVar(TINT_LENS, GV_PAL)]);
+									DrawMenuString(buf1, menu, 2, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), COLOR_RED, TF_RIGHT, true);
+									__tintR[getGlobalVar(TINT_LENS, GV_PAL)] += inc;
+									__tintR[getGlobalVar(TINT_LENS, GV_PAL)] = VBound(__tintR[getGlobalVar(TINT_LENS, GV_PAL)], 63, -63);
+									break;
+									
+								case GREEN:
+									int buf2[12] = "           ";
+									itoa(buf2, (((__tintG[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintG[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintG[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 4, __tintG[getGlobalVar(TINT_LENS, GV_PAL)]);
+									DrawMenuString(buf2, menu, 2, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), COLOR_GREEN, TF_RIGHT, true);
+									__tintG[getGlobalVar(TINT_LENS, GV_PAL)] += inc;
+									__tintG[getGlobalVar(TINT_LENS, GV_PAL)] = VBound(__tintG[getGlobalVar(TINT_LENS, GV_PAL)], 63, -63);
+									break;
+									
+								case BLUE:
+									int buf3[12] = "           ";
+									itoa(buf3, (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintB[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 8, __tintB[getGlobalVar(TINT_LENS, GV_PAL)]);
+									DrawMenuString(buf3, menu, 2, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), COLOR_BLUE, TF_RIGHT, true);
+									__tintB[getGlobalVar(TINT_LENS, GV_PAL)] += inc;
+									__tintB[getGlobalVar(TINT_LENS, GV_PAL)] = VBound(__tintB[getGlobalVar(TINT_LENS, GV_PAL)], 63, -63);
+									break;
+							}
+							break;
+						}
+					}
+					//printf("State: %d\nMainOpt: %d\nSubOpt: %d\nScroll: %d\n\n", state, mainOption, subOption, scroll);
+					Screen->Rectangle(MENU_LAYER, 0, TOP_MENU, 256, VIS_SCREEN_HEIGHT, COLOR_BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+					//
+					int yoffs = (ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN)) ? (TOP_MENU < 0 ? 56 : 0) : 0;
+					if(Input->Key[KEY_O])
+					{
+						TotalNoAction();
+						Waitframe();
+						loadTempBitmap(menu);
+						for(int bmp = 0; bmp < NUM_MENU_BITMAPS; ++bmp)
+						{
+							printf("Displaying bitmap segment %d.\n",bmp+1);
+							for(int q = 0; q < 10; ++q)
+							{
+								menu->Blit(MENU_LAYER, RT_SCREEN, bmp*256, -56, 256, 176, 0, -56, 256, 176, 0, 0, 0, 0, 0, true);
+								TotalNoAction();
+								Waitframe();
+							}
+						}
+					}
+					
+					if(Input->Button[CB_START])
+						menu->Blit(MENU_LAYER, RT_SCREEN, MENU_CONTROL_LIST, scroll, 256, VIS_SCREEN_HEIGHT - yoffs, 0, TOP_MENU + yoffs, 256, VIS_SCREEN_HEIGHT - yoffs, 0, 0, 0, 0, 0, true);
+					else
+					{
+						if(Input->Key[KEY_P]) menu->Blit(MENU_LAYER, RT_SCREEN, MENU_TEMP, scroll, 256, VIS_SCREEN_HEIGHT - yoffs, 0, TOP_MENU + yoffs, 256, VIS_SCREEN_HEIGHT - yoffs, 0, 0, 0, 0, 0, true);
+						menu->Blit(MENU_LAYER, RT_SCREEN, MENU_PERM, scroll, 256, VIS_SCREEN_HEIGHT - yoffs, 0, TOP_MENU + yoffs, 256, VIS_SCREEN_HEIGHT - yoffs, 0, 0, 0, 0, 0, true);
+					}
+					//menu->Blit(MENU_LAYER, RT_SCREEN, 0, scroll, 256, VIS_SCREEN_HEIGHT, 0, TOP_MENU, 256, VIS_SCREEN_HEIGHT, 0, 0, 0, 0, 0, true);
+					if(MENU_ENFORCE_MARGINS)
+					{
+						Screen->Rectangle(MENU_LAYER, 0,                 TOP_MENU + yoffs,                256,                  MENU_TOP_MARGIN - 1 + yoffs, COLOR_BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+						Screen->Rectangle(MENU_LAYER, 0,                 TOP_MENU + yoffs,                MENU_LEFT_MARGIN - 1, 176,                         COLOR_BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+						Screen->Rectangle(MENU_LAYER, MENU_RIGHT_MARGIN, TOP_MENU + yoffs,                256,                  176,                         COLOR_BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+						Screen->Rectangle(MENU_LAYER, 0,                 176 - MENU_BOTTOM_MARGIN_HEIGHT, 256,                  176,                         COLOR_BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+					}
+					//
+					TotalNoAction();
+					Waitframe();
+					//Waitdraw();
+				}
+				reloadOptions();
+				Screen_Freeze(0);
+			}
+			else
+			{
+				if(Input->ReadKey[Controls[CONTROL_OPTIONS]])
+				{
+					setGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL, true);
+					Screen_Freeze(2);
+				}
+			}
+		}
+	}//end
+
+	int menupos(int opt)
+	{
+		return MENU_TOP_MARGIN_HEIGHT + ((MENU_SPACING + MENU_FONT_HEIGHT) * opt);
+	}
+	
+	//Call in OnContinue(), and when exiting options menu.
+	void reloadOptions()
+	{
+		//Forcibly ensure that all option settings are in effect
+		//
+		//Options control should not need reloading
+		//
+		//Set "Flip Right-Handed Slash" on all swords
+		itemdata it = Game->LoadItemData(I_SWORD_KOKIRI);
+		it->Flags[7] = opt[OPT_RFS];
+		it = Game->LoadItemData(I_SWORD_RAZOR);
+		it->Flags[7] = opt[OPT_RFS];
+		it = Game->LoadItemData(I_SWORD_GILDED);
+		it->Flags[7] = opt[OPT_RFS];
+		it = Game->LoadItemData(I_SWORD_GFAIRY);
+		it->Flags[7] = opt[OPT_RFS];
+		it = Game->LoadItemData(I_SWORD_ZORA_BLADE);
+		it->Flags[7] = opt[OPT_RFS];
+		//
+		//Lens tint should not need reloading
+		//
+	}
+	
+	void reloadBitmap(bitmap menu)
+	{
+		menu->Rectangle(0, MENU_PERM, 0, MENU_BITMAP_WIDTH, OP_HEIGHT, 0x00, 1, 0, 0, 0, true, OP_OPAQUE);
+		int x = MENU_PERM + MENU_LEFT_MARGIN_WIDTH;
+		int y = MENU_TOP_MARGIN_HEIGHT;
+		//
+		DrawMenuString("Options Menu", menu, 1, x, y, MENU_TCOLOR_INACTIVE, TF_NORMAL);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString("Flip Right-Facing Slash", menu, 1, x, y, MENU_TCOLOR_INACTIVE, TF_NORMAL);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString("Lens Tint Color", menu, 1, x, y, MENU_TCOLOR_INACTIVE, TF_NORMAL);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//{}Module
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//{}Module
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//{}Module
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//{}Module
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//{}Module
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//{}Module
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//{}Module
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//{}Module
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//{}Module
+		///////////////////////
+		menu->Rectangle(0, MENU_CONTROL_LIST, 0, MENU_BITMAP_WIDTH, OP_HEIGHT, 0x00, 1, 0, 0, 0, true, OP_OPAQUE);
+		x = MENU_CONTROL_LIST + (MENU_BITMAP_WIDTH / 2);
+		y = MENU_TOP_MARGIN_HEIGHT;
+		//
+		DrawMenuString("A: Confirm / Toggle", menu, 1, x, y, MENU_TCOLOR_INACTIVE, TF_CENTERED);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString("B: Back", menu, 1, x, y, MENU_TCOLOR_INACTIVE, TF_CENTERED);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString("Default Lens of Truth: -17, -48, 5", menu, 1, x, y, MENU_TCOLOR_INACTIVE, TF_CENTERED);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString("When control binding:", menu, 1, x, y, MENU_TCOLOR_INACTIVE, TF_CENTERED);
+		DrawMenuString("Press any keyboard key to bind it.", menu, 1, x, y + MENU_FONT_HEIGHT, MENU_TCOLOR_INACTIVE, TF_CENTERED);
+		DrawMenuString("Conflicting binds may cause issues.", menu, 1, x, y + MENU_FONT_HEIGHT + MENU_FONT_HEIGHT, MENU_TCOLOR_INACTIVE, TF_CENTERED);
+		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString("Hold Start: View these controls", menu, 1, x, y, MENU_TCOLOR_INACTIVE, TF_CENTERED);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		/*
+		DrawMenuString(, menu, 1, x, y, MENU_TCOLOR_INACTIVE, TF_CENTERED);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;*/
+	}
+	
+	void DrawMenuString(int str, bitmap menu, int layer, int x, int y, int color, int format)
+	{
+		DrawMenuString(str, menu, layer, x, y, color, format, false);
+	}
+	
+	void DrawMenuString(int str, bitmap menu, int layer, int x, int y, int color, int format, bool transbg)
+	{
+		menu->DrawString(layer, x, y, MENU_FONT, color, transbg ? -1 : COLOR_BLACK, format, str, OP_OPAQUE);
+	}
+	
+	void loadTempBitmap(bitmap menu)
+	{
+		menu->Rectangle(0, MENU_TEMP, 0, MENU_BITMAP_WIDTH, OP_HEIGHT, 0x00, 1, 0, 0, 0, true, OP_OPAQUE);
+		int y = MENU_TOP_MARGIN_HEIGHT;
+		//
+		int buf0[64] = "                              ";
+		KeyToString(Controls[CONTROL_OPTIONS], buf0, true, true);
+		DrawMenuString(buf0, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, MENU_TCOLOR_INACTIVE, TF_RIGHT);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString(opt[OPT_RFS] ? "  On" : "Off", menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, opt[OPT_RFS] ? COLOR_DARKGREEN : COLOR_DARKRED, TF_RIGHT);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString("Preview            ", menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, MENU_TCOLOR_INACTIVE, TF_RIGHT);
+		int buf1[12] = "           ";
+		itoa(buf1, (((__tintR[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintR[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintR[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0), __tintR[getGlobalVar(TINT_LENS, GV_PAL)]);
+		DrawMenuString(buf1, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, COLOR_DARKRED, TF_RIGHT, true);
+		int buf2[12] = "           ";
+		itoa(buf2, (((__tintG[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintG[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintG[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 4, __tintG[getGlobalVar(TINT_LENS, GV_PAL)]);
+		DrawMenuString(buf2, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, COLOR_DARKGREEN, TF_RIGHT, true);
+		int buf3[12] = "           ";
+		itoa(buf3, (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintB[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 8, __tintB[getGlobalVar(TINT_LENS, GV_PAL)]);
+		DrawMenuString(buf3, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, COLOR_DARKBLUE, TF_RIGHT, true);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+	}
+	
+	int isValidKey(int key)
+	{
+		switch(key)
+		{
+			case 0:
+			case KEY_BACKSPACE:
+			case KEY_ENTER:
+			case KEY_ENTER_PAD:
+				return 0;
+			case KEY_ESC:
+				return -1;
+				
+			default: return 1;
+		}
+	}
+}
+//end
+//start GameOverMenu
+namespace GameOverMenu
+{
+	enum QuitState { NONE = -1, CONTINUE, RESET_TIME, QUIT, CANCEL };
+	
+	//start Constants
+	CONFIG MENU_LAYER = 7;
+	CONFIG MENU_FONT = FONT_ACORN;
+	CONFIG MENU_FONT_HEIGHT = 10;
+	CONFIG MENU_SPACING = 16;
+	CONFIG MENU_COLOR_ACTIVE = COLOR_RED;
+	CONFIG MENU_COLOR_INACTIVE = COLOR_GRAY;
+	//
+	DEFINE SCREEN_HEIGHT = SCREEN_BOTTOM - SUBSCREEN_TOP;
+	DEFINE SCREEN_VCENTER = (SCREEN_HEIGHT / 2) + SUBSCREEN_TOP;
+	DEFINE SCREEN_WIDTH = SCREEN_RIGHT - SCREEN_LEFT;
+	DEFINE SCREEN_HCENTER = (SCREEN_WIDTH / 2) + SCREEN_LEFT;
+	//end
+	
+	hero script OnDeath
+	{
+		void run()
+		{
+			Hero->HP = Hero->MaxHP; //Stop heart beep
+			killAllSfx();
+			runGameOverMenu(false);
+		}
+	}
+
+	void checkF6()
+	{
+		if(Input->ReadKey[KEY_F6])
+		{
+			int frz = Get_Freeze();
+			Screen_Freeze(2);
+			pauseAllSfx();
+			QuitState state = runGameOverMenu(true);
+			resumeAllSfx();
+			if(state == CANCEL) Screen_Freeze(frz);
+		}
+	}
+
+	QuitState runGameOverMenu(bool allowCancel)
+	{
+		QuitState state = NONE;
+		int cursor = 0;
+		DEFINE NUM_OPTIONS = 1 + <int>(allowCancel) + <int>(Hero->Item[I_OCARINA]) + <int>(day < 4);
+		DEFINE MENU_SENSITIVITY = 90;
+		DEFINE START_TEXT = SCREEN_VCENTER - (((NUM_OPTIONS * MENU_FONT_HEIGHT) + ((NUM_OPTIONS - 1) * MENU_SPACING)) / 2);
+		while(state==NONE)
+		{
+			if(Input->Press[CB_DOWN] || (Input->Button[CB_DOWN] && !(gameframe%MENU_SENSITIVITY))) ++cursor;
+			else if(Input->Press[CB_UP] || (Input->Button[CB_UP] && !(gameframe%MENU_SENSITIVITY))) --cursor;
+			while(cursor<0)cursor+=NUM_OPTIONS;
+			cursor %= NUM_OPTIONS;
+			Screen->Rectangle(7, SCREEN_LEFT, SUBSCREEN_TOP, SCREEN_RIGHT, SCREEN_BOTTOM, COLOR_BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+			int opt = 0;
+			if(day < 4)
+			{
+				if(Input->Press[CB_START] && cursor==opt) state = CONTINUE;
+				drawOpt(SCREEN_HCENTER, START_TEXT + (opt * (MENU_FONT_HEIGHT + MENU_SPACING)), cursor==opt++, CONTINUE);
+			}
+			if(Hero->Item[I_OCARINA])
+			{
+				if(Input->Press[CB_START] && cursor==opt) state = RESET_TIME;
+				drawOpt(SCREEN_HCENTER, START_TEXT + (opt * (MENU_FONT_HEIGHT + MENU_SPACING)), cursor==opt++, RESET_TIME);
+			}
+			if(Input->Press[CB_START] && cursor==opt) state = QUIT;
+			drawOpt(SCREEN_HCENTER, START_TEXT + (opt * (MENU_FONT_HEIGHT + MENU_SPACING)), cursor==opt++, QUIT);
+			if(allowCancel)
+			{
+				if(Input->Press[CB_START] && cursor==opt) state = CANCEL;
+				drawOpt(SCREEN_HCENTER, START_TEXT + (opt * (MENU_FONT_HEIGHT + MENU_SPACING)), cursor==opt++, CANCEL);
+			}
+			NoAction();
+			Waitframe();
+		}
+		end(state);
+		return state;
+	}
+	
+	void drawOpt(int x, int y, bool active, QuitState opt) //Default overload
+	{
+		drawOpt(MENU_LAYER, x, y, MENU_FONT, active ? MENU_COLOR_ACTIVE : MENU_COLOR_INACTIVE, COLOR_TRANS, TF_CENTERED, opt, OP_OPAQUE);
+	}
+	void drawOpt(int layer, int x, int y, int font, int color, int bgcolor, int format, QuitState opt, int opacity)
+	{
+		switch(opt)
+		{
+			case CONTINUE:
+				Screen->DrawString(layer, x, y, font, color, bgcolor, format, "Continue", opacity);
+				break;
+			case RESET_TIME:
+				Screen->DrawString(layer, x, y, font, color, bgcolor, format, "Reset Time", opacity);
+				break;
+			case QUIT:
+				Screen->DrawString(layer, x, y, font, color, bgcolor, format, "Quit", opacity);
+				break;
+			case CANCEL:
+				Screen->DrawString(layer, x, y, font, color, bgcolor, format, "Cancel", opacity);
+				break;
+		}
+	}
+	
+	void end(QuitState opt)
+	{
+		switch(opt)
+		{
+			case CONTINUE:
+				Hero->HP = Hero->MaxHP;
+				if(Hero->MP < (Hero->MaxMP / 2)) Hero->MP = Hero->MaxMP / 2;
+				Screen_Freeze(0);
+				Game->Continue();
+				break;
+			case RESET_TIME:
+				fakeSong = true;
+				playSong(SONGNOTES_SongOfTime);
+				playedSong = -1;
+				while(songFrames)
+				{
+					Global.handleOcarina();
+					playedSong = -1;
+					Waitframe();
+				}
+				Screen_Freeze(0);
+				saveTheGame();
+				Hero->PitWarp(0,0x10);
+				Hero->X = 120;
+				Hero->Y = 32;
+				resetTime();
+				break;
+			case QUIT:
+				Screen_Freeze(0);
+				Game->End();
+				break;
+			case CANCEL: //Do nothing! Just leave!
+				Screen_Freeze(0);
+				break;
+		}
+	}
+}
+//end
+
+void testrun() //Function for testing things quickly at the start of the game
+{
+	return;
+}//end

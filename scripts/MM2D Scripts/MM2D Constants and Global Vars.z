@@ -4,6 +4,7 @@
 //                                             //
 /////////////////////////////////////////////////
 
+DEFINE __DEBUG = 1;
 //start Ocarina Global Variables
 //A combo representing the pressed button, with a transparent background
 DEFINE NOTETILE_A = 892;
@@ -145,8 +146,11 @@ DEFINE DAYNUM_X = 112;
 DEFINE DAYNUM_Y = -24;
 DEFINE TIMESTART_X = 88;
 DEFINE TIMESTART_Y = -15;
-int NumberTiles[] = {12630,12631,12632,12633,12634,12635,12636,12637,12638,12639};
-DEFINE SEMICOLON = 12612;
+DEFINE NUMBERTILE = 67706;
+DEFINE SEMICOLON = 67694;
+DEFINE DOOMTILE = 67690;
+DEFINE DAYTILE = 67692;
+DEFINE SLOWTIME_TILE = 67695;
 DEFINE TAEL_X = 95;
 DEFINE TAEL_Y = -45;
 //end Subscreen Global Variables
@@ -164,7 +168,7 @@ int EX2_item = 0;
 int B_item = 0;
 //end EX Item Button Global Variables
 //start FormVars
-//Link Tile Modifier items
+//Hero Tile Modifier items
 DEFINE FORM1 = 123;
 DEFINE FORM2 = 124;
 DEFINE FORM3 = 125;
@@ -178,7 +182,6 @@ DEFINE ITEM_POUND = 54;
 DEFINE ITEM_BUBBLE = 25;
 DEFINE ITEM_DEKUNUT = 140;
 DEFINE COMBO_LILYPAD = 7372;
-DEFINE SPRITE_NONE = 89;
 DEFINE MAGICCOST_SPIKEROLL = 1;
 DEFINE EVERYXFRAMES_SPIKEROLL = 10;
 DEFINE NPCMISC_LASTSPIKEHIT = 0;
@@ -269,7 +272,8 @@ DEFINE I_MASK_GIBDO = 203;
 DEFINE I_SWORD_GILDED = 7;
 DEFINE I_MASK_GORON = 127;
 DEFINE I_MASK_GFAIRY = 191;
-DEFINE I_SWORD_GFAIRY = 211;
+DEFINE I_SWORD_GFAIRY = 210;
+DEFINE I_SWORD_GFAIRY_HAS = 211;
 DEFINE I_HYLIANSHIELD = 8;
 DEFINE I_ICEARROWS = 57;
 DEFINE I_MASK_KAFEI = 199;
@@ -299,6 +303,7 @@ DEFINE I_DEED_SWAMP = 180;
 DEFINE I_DEED_TOWN = 179;
 DEFINE I_INFMAG = 152;
 DEFINE I_MASK_ZORA = 131;
+DEFINE I_SWORD_ZORA_BLADE = 136;
 DEFINE I_TAEL_1 = 212;
 DEFINE I_TAEL_2 = 213;
 DEFINE I_REMAINS1 = 158;
@@ -306,11 +311,46 @@ DEFINE I_REMAINS2 = 159;
 DEFINE I_REMAINS3 = 160;
 DEFINE I_REMAINS4 = 161;
 DEFINE I_DEKUSTICK = 138;
+DEFINE I_WALLET = 41;
+DEFINE I_WALLET_BIG = 42;
 //end
 //start Palette
 DEFINE MULT_SUNRISE = 2;
 //end Palette
+//start Flags
+DEFINE FLAG1 = 00000001b;
+DEFINE FLAG2 = 00000010b;
+DEFINE FLAG3 = 00000100b;
+DEFINE FLAG4 = 00001000b;
+DEFINE FLAG5 = 00010000b;
+DEFINE FLAG6 = 00100000b;
+DEFINE FLAG7 = 01000000b;
+DEFINE FLAG8 = 10000000b;
+//end Flags
 //start MISC
+//start Colors
+DEFINE COLOR_TRANS = 0x00;
+
+DEFINE COLOR_WHITE = 0x01;
+
+DEFINE COLOR_LIGHTGRAY = 0x5C;
+DEFINE COLOR_GRAY = 0x5D;
+DEFINE COLOR_DARKGRAY = 0x5E;
+
+DEFINE COLOR_BLACK = 0x0F;
+
+DEFINE COLOR_YELLOW = 0x12;
+
+DEFINE COLOR_BLUE = 0x08;
+DEFINE COLOR_DARKBLUE = 0x09;
+
+DEFINE COLOR_RED = 0x6D;
+DEFINE COLOR_DARKRED = 0x6E;
+
+DEFINE COLOR_GREEN = 0x13;
+DEFINE COLOR_MEDGREEN = 0x14;
+DEFINE COLOR_DARKGREEN = 0x15;
+//end
 //Combos
 DEFINE COMBO_INVIS = 4;
 DEFINE COMBO_SOLID = 38408;
@@ -332,6 +372,7 @@ DEFINE TILE_CURL = 12591;
 DEFINE TILE_QUIT = 12592;
 DEFINE TILE_AIM = 12593;
 DEFINE TILE_AIMARROW = 139;
+DEFINE TILE_COLOR = 1020;
 //WIP TILES
 DEFINE TILE_REMAINS1UL = 0;
 DEFINE TILE_REMAINS2UL = 0;
@@ -345,6 +386,9 @@ DEFINE CR_BOMBCHUS = 7;
 DEFINE CR_DEKUNUTS = 8;
 DEFINE CR_BANKBAL = 10;
 //Combo Flags
+DEFINE CI_RAMP = CF_SCRIPT1;
+DEFINE CF_RAMP_UP = CF_SCRIPT9;
+DEFINE CF_RAMP_DOWN = CF_SCRIPT10;
 DEFINE CF_NOWATERLEDGE = CF_SCRIPT11; //Can only get out by using deku or freezing water
 DEFINE CF_NOWATERLEDGE2 = CF_SCRIPT12; //Can only get out by freezing water
 DEFINE CF_BOMBCHU1 = 98; //Combo solidity on combos locations with this flag will be treated opposite by the bombchu.
@@ -357,6 +401,10 @@ DEFINE CT_BOMBCHU = 143;
 DEFINE LW_DEKUSTICK = 34;
 DEFINE LW_BOMBCHU = 40; //The weapon ID of the bombchu, must be unique and between 31 and 40.
 //EW Types
+//Sprites
+DEFINE SPRITE_FIREARROW = 90;
+DEFINE SPRITE_NONE = 255;
+DEFINE SPRITE_BRANG = 4;
 //SFX/MIDI
 DEFINE SFX_BANKMENU = 18;
 DEFINE SFX_CHEST_APPEAR = SFX_SECRET;
@@ -379,10 +427,10 @@ DEFINE DEKU_MAX_TIMER = 240;
 DEFINE ARRTYPE_FIRE = 1;
 DEFINE ARRTYPE_ICE = 2;
 DEFINE ARRTYPE_LIGHT = 3;
-DEFINE SPRITE_FIREARROW = 90;
 //
 DEFINE MAX_LEVEL = 10; //Max DMap "Level" used
-//FFC Scripts
+DEFINE MAX_NONRESERVED_FFC = 26;
+//Scripts (FFC)
 DEFINE FFC_SIGN = 1;
 DEFINE FFC_LEARNSONG = 3;
 DEFINE FFC_MAKESCARECROWSONG = 4;
@@ -401,14 +449,26 @@ DEFINE FFC_SHOWSTRING = 16;
 DEFINE FFC_SHOP = 18;
 DEFINE FFC_OWL = 22;
 DEFINE FFC_CHANGENAME = 24;
-//z
-DEFINE MAX_NONRESERVED_FFC = 26;
+DEFINE FFC_MINIGAME_OCTO = 25;
+DEFINE FFC_LOCKEDDOOR = 26;
+DEFINE FFC_INVISMAZE = 27;
+//Scripts (LW)
+DEFINE LWSCR_ZORABRANG = 1;
 //Soft Soil States
 DEFINE SSSTATE_UNDEFINED = 0;
 DEFINE SSSTATE_WAITING = 1;
 DEFINE SSSTATE_PLANTED = 2;
 DEFINE SSSTATE_GROWN = 3;
 DEFINE SSSTATE_ACTIVE = 4;
+//
+DEFINE BITS_INT = 16;
+DEFINE DAYS_TO_HINT_RESET = 7;
+//Weapon misc indexes
+DEFINE BRANG_MISC_ANGLEACC = 0;
+DEFINE BRANG_MISC_HASTURNED = 1;
+DEFINE BRANG_MISC_DEADTIMER = 2;
+DEFINE BRANG_MISC_OTHER = 3;
+DEFINE BRANG_MISC_MULT = 4;
 //Torch puzzle vars
 bool torchPuzzleStates[4 * MAX_LEVEL];
 int torchPuzzle[4 * MAX_LEVEL];
@@ -443,7 +503,7 @@ int lastScreen = -1;
 int lastMap = -1;
 int lastLevel = -1;
 int lastDMap = -1;
-int lastHP = Link->HP;
+int lastHP = Hero->HP;
 //Misc
 int LinkActionOld = 0;
 int floatPix = 2;
@@ -462,44 +522,86 @@ bool dbdraw = false;
 bool debugEnabled = false;
 bool noSave = false;
 //Version Vars
-int version[] = {1};//{Global array}
+int version[] = {2};//{Global array}
 //end MISC
+//start Minigames
+DEFINE TARGET_OCTO_RED = 20;
+DEFINE TARGET_OCTO_BLUE = 21;
+//end Minigames
+//start Controls
+int Controls[256];
+enum Control
+{
+	CONTROL_OPTIONS
+};
+//end
 
 //start Global Vars Array
-int gvars[214747];
+int gvars[MAX_INT];
+int gbuf[MAX_INT];
 //
-GVAR GV_MISC = 0;
-GVAR GVAR_BLASTMASKCOOLDOWN = 0;
-GVAR GVAR_BANK_REW1 = 1;
-GVAR GVAR_BANK_REW2 = 2;
-GVAR GVAR_BANK_REW3 = 3;
-GVAR GVAR_MAINTANGOSLOT = 4;
-GVAR GVAR_ACTIVENPCID = 5;
-GVAR GVAR_NPCTANGOSLOT = 6;
-GVAR GVAR_DIFFICULTY = 7;
-GVAR GVAR_ARROWANGLE = 8;
+DEFINE GV_MISC = 0;
+enum GVAR_MISC
+{
+	GVAR_BLASTMASKCOOLDOWN,
+	GVAR_MAINTANGOSLOT,
+	GVAR_ACTIVENPCID,
+	GVAR_NPCTANGOSLOT,
+	GVAR_DIFFICULTY,
+	GVAR_ARROWANGLE,
+	GVAR_MGSTATE,
+	GVAR_EXITYEAR,
+	GVAR_EXITDAY
+};
 //
-GVAR GV_PAL = GV_MISC + 1000;
-GVAR TINT_DAY = 0;
-GVAR TINT_SUNSETORANGE = 1;
-GVAR TINT_NIGHT = 2;
-GVAR TINT_LENS = 3;
-DEFINE NUM_PAL = 4;
+DEFINE GV_MISC_BOOL = GV_MISC + 1000;
+enum GVAR_MISC_BOOL
+{
+	GVAR_BANK_REW1,
+	GVAR_BANK_REW2,
+	GVAR_BANK_REW3,
+	GVAR_B_SPECTHEME,
+	GVAR_B_SPECTHEME_ACTIVE,
+	GVAR_OPTIONS_MENU
+};
+//
+GVAR GV_PAL = GV_MISC_BOOL + 1000;
+enum GVAR_PAL
+{
+	TINT_DAY,
+	TINT_SUNSETORANGE,
+	TINT_NIGHT,
+	TINT_LENS,
+	NUM_PAL
+};
 //
 GVAR GV_BNOTEBOOK = GV_PAL + NUM_PAL;
 //
-GVAR GVAR_START_RESET = GV_BNOTEBOOK + 20;
-GVAR GV_CHEST = GVAR_START_RESET;
+GVAR GV_START_RESET = GV_BNOTEBOOK + 20;
+GVAR GV_CHEST = GV_START_RESET;
+DEFINE NUM_CHESTS = 320; //20 indexes, at 16 BITS_INT
 //
-GVAR GV_MISCRESETTABLE = GV_CHEST + 1000;
-GVAR GVAR_GUARDSMOVED = 0;
+GVAR GV_MISCRESETTABLE = GV_CHEST + (NUM_CHESTS / BITS_INT);
+enum GVAR_MISCRESETTABLE
+{
+	GVAR_GUARDSMOVED
+};
 //
 GVAR GV_SOFTSOIL = GV_MISCRESETTABLE + 1000;
-GVAR GVAR_END_RESET = GV_SOFTSOIL + 10;
+//
+GVAR GV_NPCDIA = GV_SOFTSOIL + 10;
+GVAR GV_END_RESET = GV_NPCDIA + 1000;
+//
+GVAR GV_MINIGAME = GV_END_RESET;
+enum GVAR_MINIGAME
+{
+	GVAR_MGOCTO,
+	GVAR_CHESTGAME
+};
 ////
 int getGlobalVar(int index, int add)
 {
-    return gvars[index+add];
+	return gvars[index+add];
 }
 
 void setGlobalVar(int index, int add, int state)
@@ -512,15 +614,24 @@ void incGlobalVar(int index, int add, int inc)
 	gvars[index+add]+=inc;
 }
 
+void flagGlobalVar(int index, int add, int flag)
+{
+	gvars[index+add]|=flag;
+}
+
+bool getFlagGlobalVar(int index, int add, int flag)
+{
+	return (gvars[index+add] & flag) > 0;
+}
+
 bool getChestState(int index)
 {
-    return getGlobalVar(index,GV_CHEST)!=0;
+	return getGlobalBool(index,GV_CHEST);
 }
 
 void setChestState(int index, bool state)
 {
-	if(state)setGlobalVar(index,GV_CHEST,1);
-	else setGlobalVar(index,GV_CHEST,0);
+	setGlobalBool(index,GV_CHEST,state);
 }
 
 int getSoilState(int index)
@@ -542,12 +653,73 @@ void setBNstate(int index)
 {
 	setGlobalVar(index, GV_BNOTEBOOK, 1);
 }
-//end Global Vars Array
+
+bool getNPCflag(int index, int flag)
+{
+	return getFlagGlobalVar(index, GV_NPCDIA, flag);
+}
+
+void setNPCflag(int index, int flag)
+{
+	flagGlobalVar(index, GV_NPCDIA, flag);
+}
+
+void setGlobalBool(int index, int add, int flag)
+{
+	setGlobalBool(index,add,flag>0);
+}
+
+void setGlobalBool(int index, int add, bool flag)
+{
+	if(flag)
+	{
+		gvars[Div(index,BITS_INT) + add] |= 1 << (index % BITS_INT);
+	}
+	else
+	{
+		gvars[Div(index,BITS_INT) + add] &= ~(1 << (index % BITS_INT));
+	}
+}
+
+bool getGlobalBool(int index, int add)
+{
+	return ((gvars[Div(index,BITS_INT) + add] >> (index % BITS_INT))&1)== 1;
+}
+
+bool toggleGlobalBool(int index, int add)
+{
+	bool old = getGlobalBool(index,add);
+	setGlobalBool(index,add,!old);
+	return !old;
+}
+
+void storeTime()
+{
+	setGlobalVar(GVAR_EXITYEAR,GV_MISC,GetSystemTime(RTC_YEAR));
+	setGlobalVar(GVAR_EXITDAY,GV_MISC,GetSystemTime(RTC_DAYOFYEAR));
+}
+
+int daysAgo()
+{
+	int lastyear = getGlobalVar(GVAR_EXITYEAR,GV_MISC) - 2018;
+	int thisyear = GetSystemTime(RTC_YEAR) - 2018;
+	int lastday = getGlobalVar(GVAR_EXITDAY,GV_MISC);
+	int thisday = GetSystemTime(RTC_DAYOFYEAR);
+	return (((thisyear * 365) + thisday) - ((lastyear * 365) + lastday));
+}
+
+void resetHintBools()
+{
+	setGlobalBool(GVAR_B_SPECTHEME,GV_MISC_BOOL,false);
+}
+//end
 //start Global Weapons Arrays
+
 int lwArr[214747];
 int ewArr[214747];
 DEFINE LWMISC_LAYERDMAP = 31;
 DEFINE EWMISC_LAYERDMAP = 31;
+DEFINE NPCMISC_LAYERDMAP = 31;
 
 void storeWeapons()
 {
@@ -596,6 +768,8 @@ void storeWeapons()
 		lwArr[globalIndex++] = weap->DrawZOffset;
 		for(int q = 0; q < 32; q++)lwArr[globalIndex++] = weap->Misc[q];
 		lwArr[globalIndex++] = weap->Parent;
+		lwArr[globalIndex++] = weap->Script;
+		for(int q = 0; q < 8; q++)lwArr[globalIndex++] = weap->InitD[q];
 	}
 	lwArr[0] = globalIndex;
 	globalIndex = 1;
@@ -640,6 +814,8 @@ void storeWeapons()
 		ewArr[globalIndex++] = weap->DrawZOffset;
 		for(int q = 0; q < 32; q++)ewArr[globalIndex++] = weap->Misc[q];
 		ewArr[globalIndex++] = weap->Parent;
+		ewArr[globalIndex++] = weap->Script;
+		for(int q = 0; q < 8; q++)ewArr[globalIndex++] = weap->InitD[q];
 	}
 	ewArr[0] = globalIndex;
 }
@@ -687,6 +863,8 @@ void loadWeapons()
 		weap->DrawZOffset = lwArr[globalIndex++];
 		for(int q = 0; q < 32; q++)weap->Misc[q] = lwArr[globalIndex++];
 		weap->Parent = lwArr[globalIndex++];
+		weap->Script = lwArr[globalIndex++];
+		for(int q = 0; q < 8; q++)weap->InitD[q] = lwArr[globalIndex++];
 	}
 	globalIndex = 1;
 	while(globalIndex<ewArr[0])
@@ -728,6 +906,8 @@ void loadWeapons()
 		weap->DrawZOffset = ewArr[globalIndex++];
 		for(int q = 0; q < 32; q++)weap->Misc[q] = ewArr[globalIndex++];
 		weap->Parent = ewArr[globalIndex++];
+		weap->Script = ewArr[globalIndex++];
+		for(int q = 0; q < 8; q++)weap->InitD[q] = ewArr[globalIndex++];
 	}
 }
 
@@ -776,6 +956,8 @@ void TraceWeap(lweapon weap)
 	TraceS("DrawZOffset: ");Trace(weap->DrawZOffset);
 	TraceS("Misc:\n");for(int q = 0; q < 32; q++)Trace(weap->Misc[q]);
 	TraceS("Parent: ");Trace(weap->Parent);
+	TraceS("Script: ");Trace(weap->Script);
+	TraceS("InitD:\n");for(int q = 0; q < 8; q++)Trace(weap->InitD[q]);
 }
 
 void TraceWeap(eweapon weap)
@@ -817,5 +999,166 @@ void TraceWeap(eweapon weap)
 	TraceS("DrawZOffset: ");Trace(weap->DrawZOffset);
 	TraceS("Misc:\n");for(int q = 0; q < 32; q++)Trace(weap->Misc[q]);
 	TraceS("Parent: ");Trace(weap->Parent);
+	TraceS("Script: ");Trace(weap->Script);
+	TraceS("InitD:\n");for(int q = 0; q < 8; q++)Trace(weap->InitD[q]);
+}
+
+int getRelativeHeight(lweapon weap)
+{
+	if(!weap->Misc[LWMISC_LAYERDMAP])weap->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return weap->Misc[LWMISC_LAYERDMAP] - (Game->GetCurDMap() + 1);
+}
+
+int getRelativeHeight(eweapon weap)
+{
+	if(!weap->Misc[LWMISC_LAYERDMAP])weap->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return weap->Misc[EWMISC_LAYERDMAP] - (Game->GetCurDMap() + 1);
+}
+
+int getRelativeHeight(npc n)
+{
+	if(!n->Misc[LWMISC_LAYERDMAP])n->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return n->Misc[NPCMISC_LAYERDMAP] - (Game->GetCurDMap() + 1);
+}
+
+int getRelativeHeight(lweapon o1, lweapon o2)
+{
+	if(!o1->Misc[LWMISC_LAYERDMAP])o1->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[LWMISC_LAYERDMAP])o2->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[LWMISC_LAYERDMAP] - o2->Misc[LWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(lweapon o1, eweapon o2)
+{
+	if(!o1->Misc[LWMISC_LAYERDMAP])o1->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[EWMISC_LAYERDMAP])o2->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[LWMISC_LAYERDMAP] - o2->Misc[EWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(eweapon o1, lweapon o2)
+{
+	if(!o1->Misc[EWMISC_LAYERDMAP])o1->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[LWMISC_LAYERDMAP])o2->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[EWMISC_LAYERDMAP] - o2->Misc[LWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(eweapon o1, eweapon o2)
+{
+	if(!o1->Misc[EWMISC_LAYERDMAP])o1->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[EWMISC_LAYERDMAP])o2->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[EWMISC_LAYERDMAP] - o2->Misc[EWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(npc o1, lweapon o2)
+{
+	if(!o1->Misc[NPCMISC_LAYERDMAP])o1->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[LWMISC_LAYERDMAP])o2->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[NPCMISC_LAYERDMAP] - o2->Misc[LWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(lweapon o1, npc o2)
+{
+	if(!o1->Misc[LWMISC_LAYERDMAP])o1->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[NPCMISC_LAYERDMAP])o2->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[LWMISC_LAYERDMAP] - o2->Misc[NPCMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(npc o1, npc o2)
+{
+	if(!o1->Misc[NPCMISC_LAYERDMAP])o1->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[NPCMISC_LAYERDMAP])o2->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[NPCMISC_LAYERDMAP] - o2->Misc[NPCMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(npc o1, eweapon o2)
+{
+	if(!o1->Misc[NPCMISC_LAYERDMAP])o1->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[EWMISC_LAYERDMAP])o2->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[NPCMISC_LAYERDMAP] - o2->Misc[EWMISC_LAYERDMAP];
+}
+
+int getRelativeHeight(eweapon o1, npc o2)
+{
+	if(!o1->Misc[EWMISC_LAYERDMAP])o1->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	if(!o2->Misc[NPCMISC_LAYERDMAP])o2->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return o1->Misc[EWMISC_LAYERDMAP] - o2->Misc[NPCMISC_LAYERDMAP];
+}
+
+mapdata getLayerMapdata(int relativeHeight)
+{
+	dmapdata dmap = Game->LoadDMapData(Game->GetCurDMap() + relativeHeight);
+	return Game->LoadMapData(dmap->Map,Game->GetCurScreen());
+}
+//end 
+//start Global Items Array
+enum ItemLoc
+{
+	//Chest locations; equivalent to chest ID #
+	IL_CTLEDGE20_CHEST,
+	IL_CTTOWERMONEY_CHEST,
+	IL_CTLEDGE100_CHEST,
+	//Loose items; for existing in the world
+	IL_LOOSE = 500,
+	IL_CTTOWERHEARTPIECE = 500,
+	IL_CTSLIDEHEARTPIECE,
+	//
+	IL_SCRIPT_ACCESS = 700,
+	IL_BANKER1 = 700,
+	IL_BANKER2,
+	IL_BANKER3,
+	IL_TCSHOOTING1,
+	IL_TCSHOOTING2,
+	
+	//
+	IL_MAX
+};
+int items[MAX_INT];
+int itUpgrade[512];
+namespace Items
+{
+	void initUpgrade()
+	{
+		itUpgrade[I_SWORD_KOKIRI] = I_SWORD_RAZOR;
+		itUpgrade[I_SWORD_RAZOR] = I_SWORD_GILDED;
+		itUpgrade[I_BOMBBAG] = I_BOMBBAG_BIG;
+		itUpgrade[I_BOMBBAG_BIG] = I_BOMBBAG_BIGGEST;
+		itUpgrade[I_QUIVER] = I_QUIVER_BIG;
+		itUpgrade[I_QUIVER_BIG] = I_QUIVER_BIGGEST;
+		itUpgrade[I_WALLET] = I_WALLET_BIG;
+		//UNFINISHED // Sidequest items!
+	}
+	void defaultItemInit()
+	{
+		defaultItemInit(items);
+	}
+	void defaultItemInit(int items)
+	{
+		items[IL_CTLEDGE20_CHEST] = I_RUPEE20;
+		items[IL_CTTOWERMONEY_CHEST] = I_RUPEE50;
+		items[IL_CTLEDGE100_CHEST] = I_RUPEE100;
+		//
+		items[IL_CTTOWERHEARTPIECE] = I_HCPIECE;
+		items[IL_CTSLIDEHEARTPIECE] = I_HCPIECE;
+		items[IL_BANKER1] = I_WALLET;
+		items[IL_BANKER2] = I_RUPEE5;
+		items[IL_BANKER3] = I_HCPIECE;
+		items[IL_TCSHOOTING1] = I_QUIVER;
+		items[IL_TCSHOOTING2] = I_HCPIECE;
+	}
+	int getItem(ItemLoc location)
+	{
+		if(!(location > -1 && location < IL_MAX))
+		{
+			DebugTrace("ItemLoc invalid! Returning -1... @`Items::getItem(ItemLoc location)`");
+			return -1;
+		}
+		int it = items[location];
+		while(itUpgrade[it] && Hero->Item[it]) it = itUpgrade[it]; //Upgrade if Hero already has the item, and it has an upgrade
+		return it;
+	}
+	int getLooseItem(ItemLoc location)
+	{
+		return getItem(<ItemLoc>(location + IL_LOOSE));
+	}
 }
 //end

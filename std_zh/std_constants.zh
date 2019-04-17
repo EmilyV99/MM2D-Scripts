@@ -1,6 +1,8 @@
-// std_constants.zh for ZC v2.53.0 and later.
-// 10th September, 2017
+// std_constants.zh for ZC v2.55.0 and later.
+// 26-Dec-2018
 // Contains required constants for std.zh and ZScript functions.
+
+typedef const int define;
 
 const int ERR_RETURN 			= -1; 
 
@@ -50,6 +52,9 @@ const int MIN_FFC			= 1;
 const int MAX_FFC			= 32; 
 const int MIN_OBJ			= 1; //Short, const for loops. 
 
+const int MIN_COMBO_POS 			= 0;
+const int MAX_COMBO_POS 			= 175;
+const int NUM_COMBO_POS 			= 176;
 
 const int MAX_OBJECT_POINTERS 		= 255; //Max of any one type. 
 const int MAX_WEAPON_POINTERS 		= 510; //eweapon and lweapon combined.
@@ -456,7 +461,7 @@ const int MB_RIGHTCLICK			= 0x2;
 const int MB_MIDDLECLICK		= 0x4; //Keep in in mind that not all mice/touchpads have a middle mouse button
 
 //Controller buttons
-const int CB_UP 	= 0; 
+/*const int CB_UP 	= 0; 
 const int CB_DOWN	= 1;
 const int CB_LEFT	= 2;
 const int CB_RIGHT	= 3;
@@ -473,7 +478,7 @@ const int CB_EX4	= 13;
 const int CB_STICKUP	= 14;
 const int CB_STICKDOWN	= 15;
 const int CB_STICKLEFT	= 16;
-const int CB_STICKRIGHT	= 17;
+const int CB_STICKRIGHT	= 17;*/
 
 
 
@@ -1547,7 +1552,7 @@ const int RT_BITMAP6            = 6; // draws to off-screen bitmap 6
 /// DMaps, Screens, Rooms
 
 //Screen Flag categories. Flags from each category are ORed together, starting with the first flag
-//See Screen Data dialog for what flags are contained in each category. Use in Screen->Flags or ScreenFlag()
+//See Screen Data dialog for what flags are contained in each category. Use in Screen->Flags
 const int SF_ROOMTYPE			= 0;
 const int SF_VIEW			= 1;
 const int SF_SECRETS			= 2;
@@ -1625,30 +1630,10 @@ const int SFM_SCRIPT4		= 5; //0x0020; //General use 4 (Scripts)
 const int SFM_SCRIPT5		= 6; //0x0040; //General use 5 (Scripts)
 
 //Screen Enemy Flag categories, handled in the same way as the SF_ constants.
-//Use in Screen->EFlags or ScreenEFlag()
+//Use in Screen->EFlags
 const int SEF_SPAWN				= 0;
 const int SEF_LIST1				= 1; //left-hand list
 const int SEF_LIST2				= 2; //right-hand list
-
-//Screen Enemy Flags Spawn
-const int SEFS_ZORA				= 0; //0x0001; //Zora (1 x Zora)
-const int SEFS_CTRAP			= 1; //0x0002; //Corner Traps (4 x Trap (4-way))
-const int SEFS_MTRAP			= 2; //0x0004; //Middle Traps (2 x Trap (4-way))
-const int SEFS_ROCKS			= 3; //0x0008; //Falling Rocks (3 x Rock)
-const int SEFS_SHOOTER			= 4; //0x0010; //Shooting Statues (Shooter (Fireball) per combo)
-
-//Screen Enemy Flags List
-const int SEFL_RINGLEADER		= 0; //0x0001; //First Enemy is "Ring Leader"
-const int SEFL_ITEM				= 1; //0x0002; //First Enemy carries Item
-const int SEFL_INVIS			= 2; //0x0004; //All enemies are invisible
-const int SEFL_BOSS				= 3; //0x0008; //Dungeon Boss (Don't Return)
-const int SEFL_TRAPIGNORE		= 4; //0x0010; //Traps ignore walkability
-
-//Screen Enemy Flags List2
-const int SEFL2_ALWAYSRET		= 0; //0x0001; //Enemies Always Return
-const int SEFL2_EITEM			= 1; //0x0002; //Enemies -> Item
-const int SEFL2_ESECRET			= 2; //0x0004; //Enemies -> Secret
-const int SEFL2_ESECRETPERM		= 3; //0x0008; //Enemies -> Secret is Permanent
 
 //Room types (Screen => Room Type)
 //Use with Screen->RoomType
@@ -1738,19 +1723,6 @@ const int SL_EWPNS              = 2; // Enemy weapons
 const int SL_LWPNS              = 3; // Link's weapons
 const int SL_DECORATIONS        = 4; // Grass clippings, Hover boots glow, etc.
 const int SL_PARTICLES          = 5; // Farore's Wind particles
-
-//Warp types. Use with Screen->SetSideWarp
-const int WT_CAVE			= 0;
-const int WT_PASSAGE			= 1;
-const int WT_ENTRANCEEXIT		= 2;
-const int WT_SCROLLING			= 3;
-const int WT_IAWARP			= 4;
-const int WT_IWARPBLACKOUT		= 5;
-const int WT_IWARPOPENWIPE		= 6;
-const int WT_IWARPZAP			= 7;
-const int WT_IWARPWAVE		  	= 8;
-const int WT_NOWARP			= 9;
-
 
 ///////////////////
 /// Link Properties
@@ -2331,7 +2303,7 @@ const int VOL_MUSIC	= 2;
 const int VOL_SFX	= 3;
 
 //Input->
-/* Defined earlier.
+// Defined earlier.
 const int CB_UP		= 0;
 const int CB_DOWN	= 1;
 const int CB_LEFT	= 2;
@@ -2351,7 +2323,7 @@ const int CB_AXIS_DOWN	= 15;
 const int CB_AXIS_LEFT	= 16;
 const int CB_AXIS_RIGHT	= 17;
 
-*/
+
 
 const float DIR16_DEG_INCREMENT = 22.5; //Number of degrees per 1/16 rotation
 
@@ -2391,3 +2363,147 @@ const float DIR16_RADS_RIGHT 	= 0;
 const float DIR16_RADS_RIGHTRIGHTUP = 5.8905;
 const float DIR16_RADS_RIGHTUP 	= 5.4978;
 const float DIR16_RADS_RIGHTUPUP 	= 5.1141;
+
+//DMap Types for use with dmapdata->Type
+define DMAP_DUNGEON = 0;
+define DMAP_OVERWORLD = 1;
+define DMAP_CAVE = 2;
+define DMAP_BSOVERWORLD = 3;
+
+/*Monochrome Tints and modes
+	for use with Graphics->Monochrome(int mode)
+	Add together the MODE and the TINT, e.g.:
+	Graphics->Monochrome(TINT_MODE_DISTRIBUTED+TINT_AMBER); //Set amber, distribuyted
+			
+	Set to TINT_NONE to disable Monochrome:
+	Graphics->Monochrome(TINT_NONE); 
+*/
+
+//Tint Options
+const int TINT_NONE = 0;
+const int TINT_GREY = 1;
+const int TINT_RED = 2;
+const int TINT_GREEN = 3;
+const int TINT_BLUE = 4;
+const int TINT_VIOLET = 5;
+const int TINT_TEAL = 6;
+const int TINT_AMBER = 7;
+const int TINT_CYAN = 8;
+const int TINT_MODE_UNIFORM = 0;
+const int TINT_MODE_DISTRIBUTED = 1000;
+
+//System Real Time Clock (RTC) categories for GetSystemTime(int category)
+define RTC_YEAR		= 0;
+define RTC_MONTH	= 1;
+define RTC_DAYOFMONTH	= 2;
+define RTC_DAYOFWEEK	= 3;
+define RTC_HOUR		= 4;
+define RTC_MINUTE	= 5;
+define RTC_SECOND	= 6;
+define RTC_DAYOFYEAR	= 7;
+define RTC_DAYLIGHTTIME	= 8;
+define RTC_LAST		= 9;
+
+//Warp types. Use with Screen->SetSideWarp
+//and Link->WarpEx()
+const int WT_CAVE			= 0;
+const int WT_PASSAGE			= 1;
+const int WT_ENTRANCEEXIT		= 2;
+const int WT_SCROLLING			= 3;
+const int WT_IWARP			= 4;
+const int WT_IWARPBLACKOUT		= 5;
+const int WT_IWARPOPENWIPE		= 6;
+const int WT_IWARPZAP			= 7;
+const int WT_IWARPWAVE		  	= 8;
+const int WT_NOWARP			= 9;
+
+//Warp Eddects for Link->WarpEx
+define WARPEFFECT_NONE = 0;
+define WARPEFFECT_ZAP = 1;
+define WARPEFFECT_WAVE = 2;
+define WARPEFFECT_INSTANT = 3;
+define WARPEFFECT_OPENWIPE = 4;
+
+//Warp Flags for Link->WarpEx()
+define WARP_FLAG_PLAYSOUNDS 		= 0x02;
+define WARP_FLAG_PLAYMUSIC 		= 0x04;
+define WARP_FLAG_SCRIPTDRAW 		= 0x01;
+define WARP_FLAG_SETENTRANCESCREEN 	= 0x08;
+define WARP_FLAG_SETENTRANCEDMAP 	= 0x10;
+define WARP_FLAG_SETCONTINUESCREEN 	= 0x20;
+define WARP_FLAG_SETCONTINUEDMAP 	= 0x40;
+
+//Error codes for `#ignore error`
+enum
+{
+	_ERR_CANTOPENSOURCE,
+	_ERR_CANTOPENIMPORT,
+	_ERR_IMPORTRECURSION,
+	_ERR_IMPORTBADSCOPE,
+	_ERR_FUNCTIONREDEF,
+	_ERR_FUNCTIONVOIDPARAM,
+	_ERR_SCRIPTREDEF,
+	_ERR_VOIDVAR,
+	_ERR_VARREDEF,
+	_ERR_VARUNDECLARED,
+	_ERR_FUNCUNDECLARED,
+	_ERR_SCRIPTNORUN,
+	_ERR_SCRIPTRUNNOTVOID,
+	_ERR_SCRIPTNUMNOTINT,
+	_ERR_SCRIPTNUMTOOBIG,
+	_ERR_SCRIPTNUMREDEF,
+	_ERR_IMPLICITCAST,
+	_ERR_ILLEGALCAST,
+	_ERR_VOIDEXPR,
+	_ERR_DIVBYZERO,
+	_ERR_CONSTTRUNC,
+	_ERR_NOFUNCMATCH,
+	_ERR_TOOFUNCMATCH,
+	_ERR_FUNCBADRETURN,
+	_ERR_TOOMANYGLOBAL,
+	_ERR_SHIFTNOTINT,
+	_ERR_REFVAR,
+	_ERR_ARROWNOTPOINTER,
+	_ERR_ARROWNOFUNC,
+	_ERR_ARROWNOVAR,
+	_ERR_TOOMANYRUN,
+	_ERR_INDEXNOTINT,
+	_ERR_SCRIPTBADTYPE,
+	_ERR_BREAKBAD,
+	_ERR_CONTINUEBAD,
+	_ERR_CONSTREDEF,
+	_ERR_LVALCONST,
+	_ERR_BADGLOBALINIT,
+	_ERR_DEPRECATEDGLOBAL,
+	_ERR_VOIDARR,
+	_ERR_REFARR,
+	_ERR_ARRREDEF,
+	_ERR_ARRAYTOOSMALL,
+	_ERR_ARRAYLISTTOOLARGE,
+	_ERR_ARRAYLISTSTRINGTOOLARGE,
+	_ERR_NONINTEGERARRAYSIZE,
+	_ERR_EXPRNOTCONSTANT,
+	_ERR_UNRESOLVEDTYPE,
+	_ERR_CONSTUNINITIALIZED,
+	_ERR_CONSTASSIGN,
+	_ERR_EMPTYARRAYLITERAL,
+	_ERR_DIMENSIONMISMATCH,
+	_ERR_ARRAYLITERALRESIZE,
+	_ERR_MISSINGCOMPILEERROR,
+	_ERR_UNIMPLEMENTEDFEATURE,
+	_ERR_UNKNOWNOPTION,
+	_ERR_NOREADTYPE,
+	_ERR_NOWRITETYPE,
+	_ERR_UNRESOLVEDSCRIPTTYPE,
+	_ERR_REDEFSCRIPTTYPE,
+	_ERR_ARRAYINVALIDSIZE,
+	_ERR_ARRAYDECIMAL,
+	_ERR_CONSTNOTCONSTANT,
+	_ERR_TOOMANYUSING,
+	_ERR_DUPLICATEUSING,
+	_ERR_TOOMANYVAR,
+	_ERR_HEADERGUARDERR,
+	_ERR_HEADERGUARDWARN,
+	_ERR_REDEFDATATYPE,
+	_ERR_CONSTALREADYCONSTANT
+};
