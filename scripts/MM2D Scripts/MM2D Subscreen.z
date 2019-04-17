@@ -613,6 +613,7 @@ void runSubscreen(){
 }
 
 void passiveSubscreen(){//start PassiveSubscreen
+	if(getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL)) return; //No subscreen in the options menu
 	//Inventory
 	int A_tile = TILE_INVIS;
 	int R_tile = TILE_INVIS;
