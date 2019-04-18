@@ -1,8 +1,8 @@
 ///////////////////////////////////
 //         Tint.zh Header        //
 //             Venrob            //
-//         Version: 0.2          //
-//           31 Mar 19           //
+//         Version: 0.3          //
+//           18 Apr 19           //
 ///////////////////////////////////
 
 #option HEADER_GUARD on
@@ -31,32 +31,36 @@ CONFIG GRADIENT_RATE = 1; //Every how many frames should the gradient update? Ma
 CONFIG DEBUG = 0; //Set to 1 to enable debug traces
 //end
 //start Internal Array Indexes
-//Misc
-DEFINE DATA_UPDATED = 0; //Has the runTints() updated the screen since the last modification?
-DEFINE DATA_NEXT_PALETTE = 1; //What is the next open palette index to store to?
-//Tint Data
-DEFINE DATA_BASE = 2; //What base is currently being used?
-DEFINE DATA_R_SUM = 3; //What is the total red tint currently active?
-DEFINE DATA_G_SUM = 4; //What is the total green tint currently active?
-DEFINE DATA_B_SUM = 5; //What is the total blue tint currently active?
-DEFINE DATA_R_CHANGED = 6; //What has red been modified by since the last time runTints() updated the screen?
-DEFINE DATA_G_CHANGED = 7; //What has green been modified by since the last time runTints() updated the screen?
-DEFINE DATA_B_CHANGED = 8; //What has blue been modified by since the last time runTints() updated the screen?
-//Gradients: The counter and rate will be cleared when the gradient is disabled. The other values will retain, until a new gradient is run.
-DEFINE DATA_GRADIENT_RATE = 9; //How many frames should the gradient take to get from beginning to end?
-DEFINE DATA_GRADIENT_COUNTER = 10; //How many frames has it been since the gradient was activated?
-DEFINE DATA_R_GRADIENT_S = 11; //What is the starting red of the current gradient?
-DEFINE DATA_G_GRADIENT_S = 12; //What is the starting green of the current gradient?
-DEFINE DATA_B_GRADIENT_S = 13; //What is the starting blue of the current gradient?
-DEFINE DATA_R_GRADIENT_F = 14; //What is the finishing red of the current gradient?
-DEFINE DATA_G_GRADIENT_F = 15; //What is the finishing green of the current gradient?
-DEFINE DATA_B_GRADIENT_F = 16; //What is the finishing blue of the current gradient?
-DEFINE DATA_R_GRADIENT_C = 17; //What is the current red of the current gradient?
-DEFINE DATA_G_GRADIENT_C = 18; //What is the current green of the current gradient?
-DEFINE DATA_B_GRADIENT_C = 19; //What is the current blue of the current gradient?
-DEFINE DATA_GRADIENT_KEEP = 20; //What palette does the gradient finish on, if it supposed to be kept?
-DEFINE DATA_TINT_CLOCK = 21; //A clock for checking every-x-frame things
-DEFINE DATA_GRADIENT_STATE = 22; //Is the gradient currently hidden or paused?
+enum
+{
+	//Misc
+	DATA_UPDATED, 			//Has the runTints() updated the screen since the last modification?
+	DATA_NEXT_PALETTE, 		//What is the next open palette index to store to?
+	DATA_TINT_PAUSED,
+	//Tint Data
+	DATA_BASE, 				//What base is currently being used?
+	DATA_R_SUM, 			//What is the total red tint currently active?
+	DATA_G_SUM, 			//What is the total green tint currently active?
+	DATA_B_SUM, 			//What is the total blue tint currently active?
+	DATA_R_CHANGED, 		//What has red been modified by since the last time runTints() updated the screen?
+	DATA_G_CHANGED, 		//What has green been modified by since the last time runTints() updated the screen?
+	DATA_B_CHANGED, 		//What has blue been modified by since the last time runTints() updated the screen?
+	//Gradients: The counter and rate will be cleared when the gradient is disabled. The other values will retain, until a new gradient is run.
+	DATA_GRADIENT_RATE, 	//How many frames should the gradient take to get from beginning to end?
+	DATA_GRADIENT_COUNTER, 	//How many frames has it been since the gradient was activated?
+	DATA_R_GRADIENT_S, 		//What is the starting red of the current gradient?
+	DATA_G_GRADIENT_S, 		//What is the starting green of the current gradient?
+	DATA_B_GRADIENT_S, 		//What is the starting blue of the current gradient?
+	DATA_R_GRADIENT_F, 		//What is the finishing red of the current gradient?
+	DATA_G_GRADIENT_F, 		//What is the finishing green of the current gradient?
+	DATA_B_GRADIENT_F, 		//What is the finishing blue of the current gradient?
+	DATA_R_GRADIENT_C, 		//What is the current red of the current gradient?
+	DATA_G_GRADIENT_C, 		//What is the current green of the current gradient?
+	DATA_B_GRADIENT_C, 		//What is the current blue of the current gradient?
+	DATA_GRADIENT_KEEP,		//What palette does the gradient finish on, if it supposed to be kept?
+	DATA_TINT_CLOCK, 		//A clock for checking every-x-frame things
+	DATA_GRADIENT_STATE		//Is the gradient currently hidden or paused?
+};
 //end
 //start Data
 int __tintR[MAX_TINT_PALETTES];
@@ -72,7 +76,7 @@ void runTints()
 {
 	incTintVar(DATA_TINT_CLOCK,1);
 	if(getTintVar(DATA_TINT_CLOCK)>=3600)setTintVar(DATA_TINT_CLOCK,getTintVar(DATA_TINT_CLOCK)%3600);
-	if(isGradient() && !(getTintVar(DATA_TINT_CLOCK)%GRADIENT_RATE))
+	if(isGradient() && !(getTintVar(DATA_TINT_CLOCK)%GRADIENT_RATE) && !getTintVar(DATA_TINT_PAUSED))
 	{
 		dbtraces("Running Gradient");
 		if(!readTintFlag(DATA_GRADIENT_STATE,STATE_PAUSED)){
@@ -113,22 +117,25 @@ void runTints()
 	}
     if(!getTintVar(DATA_UPDATED) || (isGradient() && !(getTintVar(DATA_TINT_CLOCK)%GRADIENT_RATE)))
     {
-		dbtraces("Updating screen...");
-		if(getTintVar(DATA_BASE) == BASE_TINTED)
+		if(!getTintVar(DATA_TINT_PAUSED))
 		{
-			Graphics->Tint(getTintVar(DATA_R_CHANGED),getTintVar(DATA_G_CHANGED),getTintVar(DATA_B_CHANGED));
+			dbtraces("Updating screen...");
+			if(getTintVar(DATA_BASE) == BASE_TINTED)
+			{
+				Graphics->Tint(getTintVar(DATA_R_CHANGED),getTintVar(DATA_G_CHANGED),getTintVar(DATA_B_CHANGED));
+			}
+			else
+			{
+				Graphics->MonochromeHue(getTintVar(DATA_R_CHANGED),getTintVar(DATA_G_CHANGED),getTintVar(DATA_B_CHANGED),getTintVar(DATA_BASE)==BASE_DISTRIBUTED);
+			}
+			incTintVar(DATA_R_SUM,getTintVar(DATA_R_CHANGED));
+			incTintVar(DATA_G_SUM,getTintVar(DATA_G_CHANGED));
+			incTintVar(DATA_B_SUM,getTintVar(DATA_B_CHANGED));
+			setTintVar(DATA_R_CHANGED,0);
+			setTintVar(DATA_G_CHANGED,0);
+			setTintVar(DATA_B_CHANGED,0);
+			setTintVar(DATA_UPDATED,1);
 		}
-		else
-		{
-			Graphics->MonochromeHue(getTintVar(DATA_R_CHANGED),getTintVar(DATA_G_CHANGED),getTintVar(DATA_B_CHANGED),getTintVar(DATA_BASE)==BASE_DISTRIBUTED);
-		}
-		incTintVar(DATA_R_SUM,getTintVar(DATA_R_CHANGED));
-		incTintVar(DATA_G_SUM,getTintVar(DATA_G_CHANGED));
-		incTintVar(DATA_B_SUM,getTintVar(DATA_B_CHANGED));
-		setTintVar(DATA_R_CHANGED,0);
-		setTintVar(DATA_G_CHANGED,0);
-		setTintVar(DATA_B_CHANGED,0);
-		setTintVar(DATA_UPDATED,1);
     }
 }
 
@@ -289,7 +296,26 @@ void refreshTint()
 	}
 }
 
-
+void hideAllTints(bool hide)
+{
+	if(<bool>(getTintVar(DATA_TINT_PAUSED)) == hide) return; //Already set, don't reset.
+	setTintVar(DATA_TINT_PAUSED, <int>hide);
+	setTintVar(DATA_UPDATED, 0);
+	if(hide)
+	{
+		setTintVar(DATA_R_SUM, 0);
+		setTintVar(DATA_G_SUM, 0);
+		setTintVar(DATA_B_SUM, 0);
+		setTintVar(DATA_R_CHANGED,0);
+		setTintVar(DATA_G_CHANGED,0);
+		setTintVar(DATA_B_CHANGED,0);
+		setTintVar(DATA_R_GRADIENT_C,0);
+		setTintVar(DATA_G_GRADIENT_C,0);
+		setTintVar(DATA_B_GRADIENT_C,0);
+		Graphics->ClearTint();
+	}
+	else refreshTint();
+}
 //end
 //start Gradients
 /*
