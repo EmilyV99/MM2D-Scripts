@@ -249,7 +249,7 @@ global script Global
 			//end
 			if(UsingItem(53)&&fullCounter(CR_MAGIC)>2)
 			{
-				if(!isLensTinted)
+				if(!isLensTinted && !(getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL)))
 				{
 					setTint(getGlobalVar(TINT_LENS,GV_PAL),true);
 					isLensTinted=true;
@@ -1236,10 +1236,13 @@ hero script OptionsMenu
 									DrawMenuString("Preview            ", menu, 2, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), MENU_TCOLOR_ACTIVE, TF_RIGHT, true);
 									if(confirm)
 									{
+										setGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL, false);
 										setTint(getGlobalVar(TINT_LENS, GV_PAL), true);
+										hideAllTints(false);
 										WaitTotalNoAction(30);
 										Waitdraw();
 										setTint(getGlobalVar(TINT_LENS, GV_PAL), false);
+										setGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL, true);
 									}
 									break;
 									
