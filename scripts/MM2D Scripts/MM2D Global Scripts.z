@@ -266,6 +266,7 @@ global script Global
 			bool temp = getGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL);
 			runExtraControls();
 			if(temp != getGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL))refreshTime = true;
+			handleTintPausing();
 			timePalette();
 			runTints();
 			runHeightBitmap();
@@ -987,6 +988,11 @@ global script Global
 		}
 	}
 }//end
+	void handleTintPausing()//start
+	{
+		if(opt[OPT_HIDE_TINT_IN_MENU]) hideAllTints(subscreen || getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL));
+		else hideAllTints(false);
+	}//end
 //end Global Script
 //start OnContinue Script
 global script onFileLoad
@@ -1035,16 +1041,16 @@ void initGame()
 }
 //end Game Init
 //start Options Menu
-untyped opt[256] = {false};
+untyped opt[256] = {false, true};
 enum
 {
-	OPT_RFS
+	OPT_RFS,
+	OPT_HIDE_TINT_IN_MENU
 };
 
 hero script OptionsMenu
 {
 	//start Menu constants
-	CONFIG NUM_MENU_OPTIONS = 3;
 	CONFIG MENU_SPACING = 16;
 	CONFIG MENU_FONT = FONT_Z3SMALL;
 	CONFIG MENU_FONT_HEIGHT = 6;
@@ -1065,7 +1071,7 @@ hero script OptionsMenu
 	DEFINE MENU_BITMAP_WIDTH = 256;
 	DEFINE NUM_MENU_BITMAPS = 4;
 	DEFINE VIS_SCREEN_HEIGHT = 168 - TOP_MENU;
-	DEFINE __MHEIGHT = (NUM_MENU_OPTIONS * (MENU_SPACING + MENU_FONT_HEIGHT)) - MENU_SPACING + MENU_TOP_MARGIN_HEIGHT + MENU_BOTTOM_MARGIN_HEIGHT;
+	DEFINE __MHEIGHT = (STATE_MENU_MAX * (MENU_SPACING + MENU_FONT_HEIGHT)) - MENU_SPACING + MENU_TOP_MARGIN_HEIGHT + MENU_BOTTOM_MARGIN_HEIGHT;
 	DEFINE OP_HEIGHT = __MHEIGHT < VIS_SCREEN_HEIGHT ? VIS_SCREEN_HEIGHT : __MHEIGHT;
 	DEFINE MENU_TOP_MARGIN = TOP_MENU + MENU_TOP_MARGIN_HEIGHT;
 	DEFINE MENU_LEFT_MARGIN = MENU_LEFT_MARGIN_WIDTH;
@@ -1085,7 +1091,9 @@ hero script OptionsMenu
 		STATE_MAIN = -1,
 		STATE_OPTIONSKEY,
 		STATE_RFS,
-		STATE_LT
+		STATE_LT,
+		STATE_TINTHIDE,
+		STATE_MENU_MAX
 	};
 	
 	int optionScrollCheck(int option, int scroll)
@@ -1139,7 +1147,7 @@ hero script OptionsMenu
 						{
 							//Scroll the menu visual based on currently selected option
 							if(!mainOption) scroll = 0;
-							else if(mainOption == NUM_MENU_OPTIONS - 1) scroll = MAX_SCROLL;
+							else if(mainOption == STATE_MENU_MAX - 1) scroll = MAX_SCROLL;
 							else if(optionScrollCheck(mainOption, scroll) != 0)
 							{
 								while(optionScrollCheck(mainOption, scroll) == 1)
@@ -1165,6 +1173,10 @@ hero script OptionsMenu
 								case STATE_LT:
 									DrawMenuString("Lens Tint Color", menu, 2, MENU_TEMP + MENU_LEFT_MARGIN, menupos(mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
 									break;
+									
+								case STATE_TINTHIDE:
+									DrawMenuString("Hide Tint In Menus", menu, 1, MENU_TEMP + MENU_LEFT_MARGIN, menupos(mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
+									break;
 							}
 							if(confirm)
 							{
@@ -1175,8 +1187,8 @@ hero script OptionsMenu
 								--mainOption;
 							else if(Input->Press[CB_DOWN] || (Input->Button[CB_DOWN] && !(gameframe % MENU_HOLD_DELAY)))
 								++mainOption;
-							if(mainOption < 0) mainOption += NUM_MENU_OPTIONS;
-							else mainOption %= NUM_MENU_OPTIONS;
+							if(mainOption < 0) mainOption += STATE_MENU_MAX;
+							else mainOption %= STATE_MENU_MAX;
 							break;
 						}
 						
@@ -1257,6 +1269,14 @@ hero script OptionsMenu
 							}
 							break;
 						}
+						
+						case STATE_TINTHIDE:
+						{
+							DrawMenuString(opt[OPT_HIDE_TINT_IN_MENU] ? "  On" : "Off", menu, 2, MENU_TEMP + MENU_RIGHT_MARGIN, menupos(mainOption), opt[OPT_HIDE_TINT_IN_MENU] ? GREEN : RED, TF_RIGHT);
+							if(confirm)
+								opt[OPT_HIDE_TINT_IN_MENU] = !opt[OPT_HIDE_TINT_IN_MENU];
+							break;
+						}
 					}//end
 					//printf("State: %d\nMainOpt: %d\nSubOpt: %d\nScroll: %d\n\n", state, mainOption, subOption, scroll);
 					Screen->Rectangle(MENU_LAYER, 0, TOP_MENU, 256, VIS_SCREEN_HEIGHT, BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
@@ -1324,6 +1344,8 @@ hero script OptionsMenu
 		//
 		//Lens tint should not need reloading
 		//
+		//Tint hide should not need reloading
+		//
 	}
 	
 	//start Drawing
@@ -1341,7 +1363,8 @@ hero script OptionsMenu
 		//
 		DrawMenuString("Lens Tint Color", menu, 1, x, y, MENU_TCOLOR_INACTIVE, TF_NORMAL);
 		y += MENU_FONT_HEIGHT + MENU_SPACING;
-		//{}Module
+		//
+		DrawMenuString("Hide Tint In Menus", menu, 1, x, y, MENU_TCOLOR_INACTIVE, TF_NORMAL);
 		y += MENU_FONT_HEIGHT + MENU_SPACING;
 		//{}Module
 		y += MENU_FONT_HEIGHT + MENU_SPACING;
@@ -1399,6 +1422,10 @@ hero script OptionsMenu
 		itoa(buf3, (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintB[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 8, __tintB[getGlobalVar(TINT_LENS, GV_PAL)]);
 		DrawMenuString(buf3, menu, 1, MENU_TEMP + MENU_RIGHT_MARGIN, y, DARKBLUE, TF_RIGHT, true);
 		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
+		DrawMenuString(opt[OPT_HIDE_TINT_IN_MENU] ? "  On" : "Off", menu, 2, MENU_TEMP + MENU_RIGHT_MARGIN, y, opt[OPT_HIDE_TINT_IN_MENU] ? DARKGREEN : DARKRED, TF_RIGHT);
+		y += MENU_FONT_HEIGHT + MENU_SPACING;
+		//
 	}//end
 	
 	void DrawMenuString(int str, bitmap menu, int layer, int x, int y, int color, int format)
@@ -1472,6 +1499,7 @@ namespace GameOverMenu
 
 	QuitState runGameOverMenu(bool allowCancel)
 	{
+		if(opt[OPT_HIDE_TINT_IN_MENU]) hideAllTints(true);
 		QuitState state = NONE;
 		int cursor = 0;
 		DEFINE NUM_OPTIONS = 1 + <int>(allowCancel) + <int>(Hero->Item[I_OCARINA]) + <int>(day < 4);
