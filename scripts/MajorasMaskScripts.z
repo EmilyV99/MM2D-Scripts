@@ -10,6 +10,7 @@
 #option NO_LOGGING off
 //#option RELATIONAL_OP_RETURN_DECIMAL on
 import "std.zh"
+import "scripts/MM2D Scripts/MM2D Constants and Global Vars.z"
 
 //start typedefs
 typedef const int GVAR;
@@ -33,7 +34,6 @@ import "scripts/TypeAString.zh"
 import "scripts/Tint.zh"
 //end
 //start MM Imports
-import "scripts/MM2D Scripts/MM2D Constants and Global Vars.z"
 import "scripts/MM2D Scripts/MM2D Drawing.z"
 import "scripts/MM2D Scripts/MM2D Environment.z"
 import "scripts/MM2D Scripts/MM2D Global Scripts.z"
