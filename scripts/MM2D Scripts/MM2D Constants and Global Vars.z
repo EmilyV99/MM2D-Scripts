@@ -4,7 +4,126 @@
 //                                             //
 /////////////////////////////////////////////////
 
-DEFINE __DEBUG = 1;
+//start Version Vars
+DEFINE V1 = 2, V2 = 1;
+int version[2048] = {V1, V2};
+enum VerType
+{
+	VER_GLOBAL_ARRAY, VER_OPT_MENU, VER_MAX
+};
+
+namespace Version
+{
+	using namespace Internal;
+	void versionUpdate()
+	{
+		int buf[512];
+		for(VerType ver = <VerType>0; ver < VER_MAX; ver = <VerType>(ver+1))
+		{
+			remchr(buf, 0); //Clear buffer
+			verString(ver, buf); //Get version name
+			switch(Internal::v(ver))
+			{
+				case MORE:
+					printf("[MM2D] Error: Version mismatch \"%s\" (%d > %d). \n[MM2D] This save is from a newer version of the quest. \n[MM2D] The quest will not be run.\n", buf, getVer(ver), curVer(ver));
+					Game->End();
+				
+				case EQ:
+					printf("[MM2D] Version \"%s\" is up-to-date (%d).\n", buf, getVer(ver));
+					continue; //Next version state; this one is done.
+					
+				case LESS:
+					printf("[MM2D] Version \"%s\" is out-of-date (%d < %d). \n    Updating. . .\n", buf, getVer(ver), curVer(ver));
+					break; //Keep going; this needs to update.
+			}
+			Internal::updateVer(ver, getVer(ver), buf);
+		}
+	}
+	
+	int curVer(VerType ver)
+	{
+		switch(ver)
+		{
+			case VER_GLOBAL_ARRAY:
+				return V1;
+			case VER_OPT_MENU:
+				return V2;
+		}
+	}
+	
+	int getVer(VerType ver)
+	{
+		return version[ver];
+	}
+	
+	void verString(VerType ver, int buf)
+	{
+		switch(ver)
+		{
+			case VER_GLOBAL_ARRAY:
+				strcat(buf, "G_ARR");
+				return;
+			case VER_OPT_MENU:
+				strcat(buf, "OPT_MENU");
+				return;
+		}
+	}
+
+	namespace Internal
+	{
+		CompType v(VerType ver)
+		{
+			return comp(getVer(ver), curVer(ver));
+		}
+		
+		void updateVer(VerType ver, int val)
+		{
+			int str[512];
+			verString(ver, str);
+			updateVer(ver, val, str);
+		}
+		
+		void updateVer(VerType ver, int val, int str)
+		{
+			switch(ver)
+			{
+				case VER_GLOBAL_ARRAY:
+					if(val < 2)
+					{
+						printf("[MM2D] Version \"%s\" could not be updated; REASON: Unsupported version value \"%d\".", str, val);
+						return;
+					}
+					break;
+					
+				case VER_OPT_MENU:
+					if(val < 1)
+					{
+						opt[OPT_RFS] = false;
+						opt[OPT_HIDE_TINT_IN_MENU] = true;
+					}
+					break;
+			}
+			markVer(ver); //Update the internal version, so that it will not attempt to re-update.
+		}
+		
+		void markVer(VerType ver)
+		{
+			version[ver] = curVer(ver);
+		}
+	}
+}
+//end
+//start Custom Types
+enum CompType
+{
+	LESS = -1, EQ, MORE
+};
+
+CompType comp(u arg1, u arg2)
+{
+	return (arg1 < arg2) ? LESS : ((arg1 == arg2) ? EQ : MORE);
+}
+//end
 //start Ocarina Global Variables
 //A combo representing the pressed button, with a transparent background
 DEFINE NOTETILE_A = 892;
@@ -327,14 +446,12 @@ DEFINE FLAG6 = 00100000b;
 DEFINE FLAG7 = 01000000b;
 DEFINE FLAG8 = 10000000b;
 //end Flags
-//start MISC
 //start Colors
 enum Color
 {
 	//0x0x
 	TRANSBG = -1,
 	TRANS,
-	TRANSFG = 0,
 	TRANSPARENT = 0,
 	WHITE,
 	
@@ -380,6 +497,7 @@ enum Color
 };
 typedef const Color COLOR;
 //end
+//start MISC
 //Combos
 DEFINE COMBO_INVIS = 4;
 DEFINE COMBO_SOLID = 38408;
@@ -550,8 +668,6 @@ bool dbsetup = false;
 bool dbdraw = false;
 bool debugEnabled = false;
 bool noSave = false;
-//Version Vars
-int version[] = {2};//{Global array}
 //end MISC
 //start Minigames
 DEFINE TARGET_OCTO_RED = 20;
@@ -1191,3 +1307,4 @@ namespace Items
 	}
 }
 //end
+DEFINE __DEBUG = 1;
