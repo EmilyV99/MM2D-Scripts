@@ -751,8 +751,8 @@ void resetHintBools()
 //end
 //start Global Weapons Arrays
 
-int lwArr[214747];
-int ewArr[214747];
+u lwArr[214747];
+u ewArr[214747];
 DEFINE LWMISC_LAYERDMAP = 31;
 DEFINE EWMISC_LAYERDMAP = 31;
 DEFINE NPCMISC_LAYERDMAP = 31;

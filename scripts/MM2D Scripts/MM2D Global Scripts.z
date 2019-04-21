@@ -999,7 +999,6 @@ global script onFileLoad
 	void run()
 	{
 		onLaunch();
-		Version::versionUpdate();
 		if(daysAgo() >= DAYS_TO_HINT_RESET)
 		{
 			resetHintBools();
