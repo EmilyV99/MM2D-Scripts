@@ -4,7 +4,17 @@
 //                                             //
 /////////////////////////////////////////////////
 
-DEFINE __DEBUG = 1;
+//start Custom Types
+enum CompType
+{
+	LESS = -1, EQ, MORE
+};
+
+CompType comp(u arg1, u arg2)
+{
+	return (arg1 < arg2) ? LESS : ((arg1 == arg2) ? EQ : MORE);
+}
+//end
 //start Ocarina Global Variables
 //A combo representing the pressed button, with a transparent background
 DEFINE NOTETILE_A = 892;
@@ -327,14 +337,12 @@ DEFINE FLAG6 = 00100000b;
 DEFINE FLAG7 = 01000000b;
 DEFINE FLAG8 = 10000000b;
 //end Flags
-//start MISC
 //start Colors
 enum Color
 {
 	//0x0x
 	TRANSBG = -1,
 	TRANS,
-	TRANSFG = 0,
 	TRANSPARENT = 0,
 	WHITE,
 	
@@ -380,6 +388,7 @@ enum Color
 };
 typedef const Color COLOR;
 //end
+//start MISC
 //Combos
 DEFINE COMBO_INVIS = 4;
 DEFINE COMBO_SOLID = 38408;
@@ -550,8 +559,6 @@ bool dbsetup = false;
 bool dbdraw = false;
 bool debugEnabled = false;
 bool noSave = false;
-//Version Vars
-int version[] = {2};//{Global array}
 //end MISC
 //start Minigames
 DEFINE TARGET_OCTO_RED = 20;
@@ -744,8 +751,8 @@ void resetHintBools()
 //end
 //start Global Weapons Arrays
 
-int lwArr[214747];
-int ewArr[214747];
+u lwArr[214747];
+u ewArr[214747];
 DEFINE LWMISC_LAYERDMAP = 31;
 DEFINE EWMISC_LAYERDMAP = 31;
 DEFINE NPCMISC_LAYERDMAP = 31;
@@ -1191,3 +1198,4 @@ namespace Items
 	}
 }
 //end
+DEFINE __DEBUG = 1;
