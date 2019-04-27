@@ -1,0 +1,91 @@
+////////////////////////////////////////
+//                                    //
+//        MM2D Script: Randomizer     //
+//                                    //
+////////////////////////////////////////
+
+/*namespace Randomizer
+{
+	using namespace Internal;*/
+	//start FlagHandling
+	int randFlags[MAX_INT];
+
+	void setRandoFlag(int index, int add, int flag)
+	{
+		setRandoFlag(index,add,flag>0);
+	}
+
+	void setRandoFlag(int index, int add, bool flag)
+	{
+		if(flag)
+		{
+			randFlags[Div(index,BITS_INT) + add] |= 1 << (index % BITS_INT);
+		}
+		else
+		{
+			randFlags[Div(index,BITS_INT) + add] &= ~(1 << (index % BITS_INT));
+		}
+	}
+
+	bool getRandoFlag(int index, int add)
+	{
+		return ((randFlags[Div(index,BITS_INT) + add] >> (index % BITS_INT))&1)== 1;
+	}
+
+	bool toggleRandoFlag(int index, int add)
+	{
+		bool old = getRandoFlag(index,add);
+		setRandoFlag(index,add,!old);
+		return !old;
+	}
+	//end
+
+	enum RandoFlag
+	{
+		RF_SHUFFLESONGS
+	};
+	
+	/*namespace Internal
+	{*/
+		u foundData[MAX_INT];
+		enum dataInd
+		{
+			IND_INVALID = -1,
+			IND_MIN_ITEM = I_MIN,
+			IND_MAX_ITEM = I_MAX,
+			IND_MIN_SONG = I_MAX,
+			IND_MAX_SONG = I_MAX + 13,
+			IND_KEYS_WOODFALL = I_MAX + 13,
+			IND_KEYS_SNOWHEAD,
+			IND_KEYS_GREATBAY,
+			IND_KEYS_STONETOWER,
+			IND_LI_WOODFALL,
+			IND_LI_SNOWHEAD,
+			IND_LI_GREATBAY,
+			IND_LI_STONETOWER,
+			IND_STRFAI_TYPE_WOODFALL,
+			IND_STRFAI_TYPE_SNOWHEAD,
+			IND_STRFAI_TYPE_GREATBAY,
+			IND_STRFAI_TYPE_STONETOWER,
+			IND_TINGLE_MAPS,
+			IND_NUM_HCP,
+			IND_NUM_HC,
+			IND_END
+		}
+		
+		dataInd ind(ItemID itID)
+		{
+			return <dataInd>(IND_MIN_ITEM + itID);
+		}
+		
+		/*dataInd ind(SongID song)
+		{
+			return <dataInd>(IND_MIN_SONG + song);
+		}*/
+		
+		dataInd validateInd(dataInd ind)
+		{
+			return (ind <= IND_INVALID || IND >= IND_END) ? IND_INVALID : ind;
+		}
+	/*}
+}*/
