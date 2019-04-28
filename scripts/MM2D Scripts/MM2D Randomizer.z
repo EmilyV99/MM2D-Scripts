@@ -71,7 +71,7 @@
 			IND_NUM_HCP,
 			IND_NUM_HC,
 			IND_END
-		}
+		};
 		
 		dataInd ind(ItemID itID)
 		{
@@ -85,7 +85,7 @@
 		
 		dataInd validateInd(dataInd ind)
 		{
-			return (ind <= IND_INVALID || IND >= IND_END) ? IND_INVALID : ind;
+			return (ind <= IND_INVALID || ind >= IND_END) ? IND_INVALID : ind;
 		}
 	/*}
 }*/

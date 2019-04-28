@@ -49,9 +49,7 @@ always using namespace idata;
 #include "MM2D Minigames.z"
 #include "MM2D Misc.z"
 #include "MM2D Enemies.z"
-//end
-//start ghost imports
-//import "scripts/ghost/Skulltula.z"
+#include "MM2D Randomizer.z"
 //end
 
 //start AmmoRefiller
