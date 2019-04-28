@@ -656,3 +656,66 @@ int getKeyPress()
 	return 0;
 }
 //end
+//start Arrays
+//start Counts
+int countGT(u arr, u val)
+{
+	DEFINE LEN = SizeOfArray(arr);
+	int count = 0;
+	for(int q = 0; q < LEN; ++q)
+		if(arr[q]>val) ++count;
+	return count;
+}
+int countLT(u arr, u val)
+{
+	DEFINE LEN = SizeOfArray(arr);
+	int count = 0;
+	for(int q = 0; q < LEN; ++q)
+		if(arr[q]<val) ++count;
+	return count;
+}
+int countGE(u arr, u val)
+{
+	DEFINE LEN = SizeOfArray(arr);
+	int count = 0;
+	for(int q = 0; q < LEN; ++q)
+		if(arr[q]>=val) ++count;
+	return count;
+}
+int countLE(u arr, u val)
+{
+	DEFINE LEN = SizeOfArray(arr);
+	int count = 0;
+	for(int q = 0; q < LEN; ++q)
+		if(arr[q]<=val) ++count;
+	return count;
+}
+int countEQ(u arr, u val)
+{
+	DEFINE LEN = SizeOfArray(arr);
+	int count = 0;
+	for(int q = 0; q < LEN; ++q)
+		if(arr[q]==val) ++count;
+	return count;
+}
+int countNE(u arr, u val)
+{
+	DEFINE LEN = SizeOfArray(arr);
+	int count = 0;
+	for(int q = 0; q < LEN; ++q)
+		if(arr[q]!=val) ++count;
+	return count;
+}
+//end Counts
+//start GetNths
+int getNthNE(u arr, int n, u val)
+{
+	DEFINE LEN = SizeOfArray(arr);
+	int count = 0, q = 0;
+	for(; q < LEN && count != n; ++q)
+		if(arr[q]!=val) ++count;
+	if(q==LEN) return NULL;
+	return q;
+}
+//end GetNths
+//end

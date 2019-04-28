@@ -693,9 +693,8 @@ void quickSave(int scrn, int dmap)//start
 //start chests
 ffc script chest
 {
-	void run(int __PLACEHOLDER, int index, bool fake, bool killAllEnemies)
+	void run(int __PLACEHOLDER, ItemLoc index, bool fake, bool killAllEnemies)
 	{
-		int itemID = Items::getItem(<u>index);
 		if(this->Data==COMBO_INVIS||!this->Data)this->Data=COMBO_CHEST;
 		int closed = this->Data;
 		int open = this->Data+1;
@@ -728,12 +727,13 @@ ffc script chest
 				if(Input->Press[CB_A]&&AgainstComboBase(this->X,this->Y))
 				{
 					Input->Press[CB_A]=false;Input->Button[CB_A]=false;
-					if(Hero->Item[itemID])
-					{
-						itemID=I_RUPEE5;
-					}
+					item itm;
+					if(hasUniqueItem(index))
+						itm = Items::spawnItem(I_RUPEE5);
+					else itm = Items::spawnItem(index);
 					this->Data=open;
-					item itm = CreateItemAt(itemID,Hero->X,Hero->Y);
+					itm->X = Hero->X;
+					itm->Y = Hero->Y;
 					itm->Pickup=IP_HOLDUP;
 					setChestState(index,true);
 				}

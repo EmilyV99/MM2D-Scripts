@@ -4,50 +4,105 @@
 //                                    //
 ////////////////////////////////////////
 
+typedef int STR; //UNFINISHED temp
+
 /*namespace Randomizer
 {
 	using namespace Internal;*/
-	//start FlagHandling
-	int randFlags[MAX_INT];
-
-	void setRandoFlag(int index, int add, int flag)
-	{
-		setRandoFlag(index,add,flag>0);
-	}
-
-	void setRandoFlag(int index, int add, bool flag)
-	{
-		if(flag)
-		{
-			randFlags[Div(index,BITS_INT) + add] |= 1 << (index % BITS_INT);
-		}
-		else
-		{
-			randFlags[Div(index,BITS_INT) + add] &= ~(1 << (index % BITS_INT));
-		}
-	}
-
-	bool getRandoFlag(int index, int add)
-	{
-		return ((randFlags[Div(index,BITS_INT) + add] >> (index % BITS_INT))&1)== 1;
-	}
-
-	bool toggleRandoFlag(int index, int add)
-	{
-		bool old = getRandoFlag(index,add);
-		setRandoFlag(index,add,!old);
-		return !old;
-	}
-	//end
-
+	
 	enum RandoFlag
 	{
-		RF_SHUFFLESONGS
+		RF_MIN,
+		RF_SHUFFLESONGS = 0,
+		RF_SKIPFIRSTCYCLE,
+		RF_RANDOMIZE_BANK_5000,
+		RF_MAX
 	};
+	
+	void randomize(int seed)
+	{
+		//SRand(seed);
+		//Initialize starting available locations, which are ALWAYS available
+		int defAvail[] = {IL_CTLEDGE100_CHEST, IL_BANKER1, IL_BANKER2};
+		DEFINE numDefAvail = SizeOfArray(defAvail);
+		memcpy(available, defAvail, numDefAvail);
+		//Force the rest of the array to the invalid value
+		memset(available, numDefAvail, -1, IL_MAX - numDefAvail);
+		//Force the set of values to place to default
+		defaultVals();
+		//Begin adding starting availabilities, based on flags
+		for(int flag = RF_MIN; flag < RF_MAX; ++flag)
+		{
+			handleflag(<RandoFlag>flag);
+		}
+		//Get the counts
+		int loccount = countNE(available, IL_INVALID),
+		itemcount = countNE(valdata, IV_INVALID);
+		//Actually loop through and randomly assign stuff
+		while(itemcount)
+		{
+			DEFINE LOCINDEX = getNthNE(available, Rand(loccount) + 1, IL_INVALID);
+			DEFINE ITEMINDEX = getNthNE(valdata, Rand(itemcount) + 1, IV_INVALID);
+			ItemLoc loc = available[LOCINDEX];
+			ItemVal val = valdata[ITEMINDEX];
+			if(validAtLoc(val, loc))
+			{
+				items[loc] = val;
+				handleNewAdditions(val);
+				--itemcount;
+				loccount = countNE(available, IL_INVALID); //This needs to be re-called, because it could change in a variety of ways.
+				available[LOCINDEX] = IL_INVALID;
+				valdata[ITEMINDEX] = IV_INVALID;
+			}
+			//UNFINISHED
+		}
+		
+		//Handle any finishing touches
+		if(!getRandoFlag(RF_DOFIRSTCYCLE))
+		{
+			//UNFINISHED Spawn the items from the first cycle locations on Hero, to give them at start.
+		}
+	}
 	
 	/*namespace Internal
 	{*/
 		u foundData[MAX_INT];
+		ItemVal valdata[MAX_INT];
+		ItemLoc available[IL_MAX];
+		
+		//start FlagHandling
+		int randFlags[MAX_INT];
+
+		void setRandoFlag(RandoFlag index, int flag)
+		{
+			setRandoFlag(index,flag>0);
+		}
+
+		void setRandoFlag(RandoFlag index, bool flag)
+		{
+			if(flag)
+			{
+				randFlags[Div(index,BITS_INT)] |= 1 << (index % BITS_INT);
+			}
+			else
+			{
+				randFlags[Div(index,BITS_INT)] &= ~(1 << (index % BITS_INT));
+			}
+		}
+
+		bool getRandoFlag(RandoFlag index)
+		{
+			return ((randFlags[Div(index,BITS_INT)] >> (index % BITS_INT))&1)== 1;
+		}
+
+		bool toggleRandoFlag(RandoFlag index)
+		{
+			bool old = getRandoFlag(index);
+			setRandoFlag(index,!old);
+			return !old;
+		}
+		//end
+		//start Index stuff
 		enum dataInd
 		{
 			IND_INVALID = -1,
@@ -87,5 +142,110 @@
 		{
 			return (ind <= IND_INVALID || ind >= IND_END) ? IND_INVALID : ind;
 		}
+		//end
+		//start Location/Value handlers
+		bool validAtLoc(ItemVal val, ItemLoc loc)
+		{
+			if(val == IV_INVALID || loc == IL_INVALID) return false;
+			switch(loc)
+			{
+				//Return false here for items which cannot be placed in certain locations, due to flags preventing it
+				
+				default:
+					return true;
+			}
+		}
+		
+		//A new ItemVal has been placed. What new locations does this make available? Add them!
+		void handleNewAdditions(ItemVal val)
+		{
+			if(val >= IV_I_MIN && val < IV_I_MAX)
+				foundData[ind(<ItemID>(val - IV_I_MIN))] = true;
+				
+			if(val >= IV_SONG_MIN && val < IV_SONG_MAX)
+				foundData[ind(<SongID>(val - IV_SONG_MIN))] = true;
+			
+			//Handle checking if any new locations are now available, after this item has been placed accessibly
+			switch(val)
+			{
+				case I_BOWARROW:
+					//Check each thing that needs this item, and if all its' other requirements are met, add it to being available.
+					break;
+			}
+		}
+		
+		void addloc(ItemLoc loc)
+		{
+			for(int q = 0; q < IL_MAX; ++q)
+			{
+				if(available[q] == IL_INVALID)
+				{
+					available[q] = loc;
+					return;
+				}
+			}
+		}
+		
+		void addlocs(ItemLoc loc)
+		{
+			DEFINE LEN = SizeOfArray(loc);
+			int ind = 0;
+			for(int q = 0; q < IL_MAX && ind < LEN; ++q)
+			{
+				if(available[q] == IL_INVALID)
+				{
+					available[q] = loc[ind++];
+				}
+			}
+		}
+		
+		void handleflag(RandoFlag flag)
+		{
+			switch(flag)
+			{
+				case RF_SHUFFLESONGS:
+					/*for(int q = 0; q < 13; ++q)
+					{
+						addVal(IV_SONG_MIN + q);
+					}*/
+					//addlocs({IL_}); //These locations need to EXIST! Add them here.
+					break;
+					
+				case RF_DOFIRSTCYCLE:
+					/*
+					addVal(I_OCARINA);
+					addVal(I_);
+					addlocs({IL_});
+					*/
+					break;
+					
+				case RF_RANDOMIZE_BANK_5000:
+					addloc(IL_BANKER3);
+					addVal(I_HCPIECE);
+					break;
+			}
+		}
+		
+		void addVal(ItemVal value){addVal(value, 1);}
+		void addVal(ItemVal value, int num)
+		{
+			int q = 0;
+			for(int count = 0; count < num; ++count)
+				for(int q = 0; q < MAX_INT; ++q)
+				{
+					if(valdata[q] == IV_INVALID)
+					{
+						valdata[q] = value;
+						break;
+					}
+				}
+		}
+		
+		void defaultVals()
+		{
+			memset(valdata, 0, IV_INVALID, MAX_INT);
+			
+		}
+		//end Val/Loc
 	/*}
 }*/

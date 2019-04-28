@@ -90,12 +90,28 @@ enum ItemID      //start Item Constants
 	I_TAEL_1 = 212,
 	I_TAEL_2 = 213,
 	I_FLIPPERS2 = 214,
+	I_DUMMY = 255,
 	I_MAX = 256
 };
 
 ItemID castItem(int id)
 {
 	return (id < I_MIN || id >= I_MAX) ? I_INVALID : <ItemID>id;
+}
+
+item createItem(ItemID id)
+{
+	return Screen->CreateItem(id);
+}
+
+item dummyItem()
+{
+	item i = createItem(I_DUMMY);
+	i->DrawXOffset = 500;
+	i->DrawYOffset = 500;
+	i->HitXOffset = 500;
+	i->HitYOffset = 500;
+	return i; //This pointer can be modified, but, unless the draw/hit offsets are modified, will not DO anything.
 }
 //end
 //end
@@ -1140,8 +1156,10 @@ mapdata getLayerMapdata(int relativeHeight)
 //start Global Items Array
 enum ItemLoc
 {
+	IL_INVALID = -1,
+	IL_MIN = 0,
 	//Chest locations; equivalent to chest ID #
-	IL_CTLEDGE20_CHEST,
+	IL_CTLEDGE20_CHEST = 0,
 	IL_CTTOWERMONEY_CHEST,
 	IL_CTLEDGE100_CHEST,
 	//Loose items; for existing in the world
@@ -1159,8 +1177,21 @@ enum ItemLoc
 	//
 	IL_MAX
 };
+
+enum ItemVal
+{
+	IV_INVALID = -1,
+	IV_MIN = I_MIN,
+	IV_I_MIN = I_MIN,
+	IV_I_MAX = I_MAX,
+	IV_SONG_MIN = I_MAX,
+	IV_SONG_MAX = I_MAX + 13,
+	IV_MAX = I_MAX + 13
+};
+ItemVal IV(ItemID id){return <ItemVal>id;}
+
 int items[MAX_INT];
-int itUpgrade[512];
+int itUpgrade[I_MAX];
 namespace Items
 {
 	void initUpgrade()
@@ -1207,6 +1238,43 @@ namespace Items
 	{
 		return getItem(<ItemLoc>(location + IL_LOOSE));
 	}
+	item spawnItem(ItemVal id)
+	{
+		if(id >= IV_I_MIN && id < IV_I_MAX)
+		{
+			int it = id - IV_I_MIN;
+			while(itUpgrade[it] && Hero->Item[it]) it = itUpgrade[it];
+			return createItem(<ItemID>it);
+		}
+		else if(id >= IV_SONG_MIN && id < IV_SONG_MAX)
+			;//Do something new, to teach the song
+		
+		//Never return an invalid pointer, unless Screen->CreateItem does.
+		return dummyItem();
+	}
+	item spawnItem(ItemID id) //start
+	{
+		return spawnItem(<ItemVal>id);
+	}//end
+	item spawnItem(ItemLoc loc) //start
+	{
+		return spawnItem(<ItemVal>items[loc]);
+	}//end
+	item spawnLooseItem(ItemLoc loc) //start
+	{
+		return spawnItem(<ItemLoc>(loc + IL_LOOSE));
+	}//end
+	bool hasUniqueItem(ItemVal id) //start
+	{
+		if(id >= IV_I_MIN && id < IV_I_MAX)
+			return Hero->Item[id - IV_I_MIN];
+		if(id >= IV_SONG_MIN && id < IV_SONG_MAX)
+			return LEARNED_SONGS[id - IV_SONG_MIN];
+	}//end
+	bool hasUniqueItem(ItemLoc loc) //start
+	{
+		return hasUniqueItem(<ItemVal>items[loc]);
+	}//end
 }
 //end
 DEFINE __DEBUG = 1;
