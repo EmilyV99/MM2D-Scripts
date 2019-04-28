@@ -9,8 +9,11 @@
 #option TRUNCATE_DIVISION_BY_LITERAL_BUG off
 #option NO_LOGGING off
 //#option RELATIONAL_OP_RETURN_DECIMAL on
-import "std.zh"
-import "scripts/MM2D Scripts/MM2D Constants and Global Vars.z"
+//`include paths` should include `scripts/` and `scripts/MM2D Scripts/`, for the codebase to function.
+#include "std.zh"
+#include "std_zh/std_keyboard.zh"
+#include "std_zh/std_shortcuts.zh"
+#include "MM2D Constants and Global Vars.z"
 
 //start typedefs
 typedef const int GVAR;
@@ -19,35 +22,33 @@ typedef const int CONFIG;
 typedef untyped u;
 //end typedefs
 //start bonus imports
-import "std_zh/idata.zh"
+#include "std_zh/idata.zh"
 always using namespace idata;
 //end
 //start header imports
-import "scripts/string.zh"
-import "scripts/ffcscript.zh"
-import "scripts/LinkMovement.zh"
-import "tango.zh"
-import "tango/font/GUI.zh"
-import "tango/font/MajoraFont.zh"
-//import "ghost.zh"
-import "scripts/TypeAString.zh"
-import "scripts/Tint.zh"
+#include "ffcscript.zh"
+#include "LinkMovement.zh"
+#include "tango.zh"
+#include "tango/font/GUI.zh"
+#include "tango/font/MajoraFont.zh"
+#include "TypeAString.zh"
+#include "Tint.zh"
 //end
 //start MM Imports
-import "scripts/MM2D Scripts/MM2D Drawing.z"
-import "scripts/MM2D Scripts/MM2D Environment.z"
-import "scripts/MM2D Scripts/MM2D Global Scripts.z"
-import "scripts/MM2D Scripts/MM2D Height.z"
-import "scripts/MM2D Scripts/MM2D Items.z"
-import "scripts/MM2D Scripts/MM2D Masks and Forms.z"
-import "scripts/MM2D Scripts/MM2D NPC-Cutscene.z"
-import "scripts/MM2D Scripts/MM2D Ocarina.z"
-import "scripts/MM2D Scripts/MM2D Subscreen.z"
-import "scripts/MM2D Scripts/MM2D Tango.z"
-import "scripts/MM2D Scripts/MM2D Time.z"
-import "scripts/MM2D Scripts/MM2D Minigames.z"
-import "scripts/MM2D Scripts/MM2D Misc.z"
-import "scripts/MM2D Scripts/MM2D Enemies.z"
+#include "MM2D Drawing.z"
+#include "MM2D Environment.z"
+#include "MM2D Global Scripts.z"
+#include "MM2D Height.z"
+#include "MM2D Items.z"
+#include "MM2D Masks and Forms.z"
+#include "MM2D NPC-Cutscene.z"
+#include "MM2D Ocarina.z"
+#include "MM2D Subscreen.z"
+#include "MM2D Tango.z"
+#include "MM2D Time.z"
+#include "MM2D Minigames.z"
+#include "MM2D Misc.z"
+#include "MM2D Enemies.z"
 //end
 //start ghost imports
 //import "scripts/ghost/Skulltula.z"
