@@ -95,7 +95,7 @@ enum ItemID      //start Item Constants
 
 ItemID castItem(int id)
 {
-	return (id < ID_MIN || ID >= ID_MAX) ? I_INVALID : <ItemID>id;
+	return (id < I_MIN || id >= I_MAX) ? I_INVALID : <ItemID>id;
 }
 //end
 //end
