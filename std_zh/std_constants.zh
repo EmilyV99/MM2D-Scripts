@@ -581,6 +581,7 @@ const int IC_CUSTOM20           = 86;
 //Item IDs. Use with CreateItem() and Link->Item[].
 //These are DEFAULT values, and may not be correct for custom quests which
 //have overridden item action data.
+/*
 const int I_AMULET1             = 50;
 const int I_AMULET2             = 63;
 const int I_ARROW1              = 13;
@@ -703,7 +704,7 @@ const int I_WEALTHMEDAL3        = 111;
 const int I_WHIMSICALRING       = 122;
 const int I_WHISPRING1          = 99;
 const int I_WHISPRING2          = 100;
-const int I_WHISTLE             = 31;
+const int I_WHISTLE             = 31;*/
 
 //Item pickup flags. OR (|) these together to use with item->Pickup
 //Other values are reserved for internal usage, and have no effect
