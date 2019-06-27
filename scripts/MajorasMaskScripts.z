@@ -23,7 +23,6 @@ import "std_zh/idata.zh"
 always using namespace idata;
 //end
 //start header imports
-import "scripts/string.zh"
 import "scripts/ffcscript.zh"
 import "scripts/LinkMovement.zh"
 import "tango.zh"

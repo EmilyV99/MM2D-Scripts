@@ -416,11 +416,11 @@ bool isOverworldScreen()//start
 	return false;
 }//end
 int SpinDir8(int dir){return SpinDir8(dir,1);} //Spin a dir clockwise by 45°. start SpinDir8
-int SpinDir8(int dir, int repeat) //Spin a dir clockwise by 45° * repeat. A negative will spin counterclockwise, as expected.
+int SpinDir8(int dir, int repeatCount) //Spin a dir clockwise by 45° * repeatCount. A negative will spin counterclockwise, as expected.
 {
-	while(repeat<0)repeat+=8;
-	repeat %= 8;
-	for(int q = 0; q < repeat; ++q)
+	while(repeatCount<0)repeatCount+=8;
+	repeatCount %= 8;
+	for(int q = 0; q < repeatCount; ++q)
 	{
 		switch(dir)
 		{
