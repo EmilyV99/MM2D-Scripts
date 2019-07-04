@@ -486,7 +486,7 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 					break;
 			}
 			Game->Counter[CR_ARROWS] = 99;
-			if(!arrowAimMode)
+			unless(arrowAimMode)
 			{
 				if(cooldown==-1)
 				{

@@ -71,7 +71,7 @@ npc script Skulltula
 					{
 						flipped=false;
 						Audio->PlaySound(SFX_SKULLTULA_FLIP);
-						if(!this->Stun)
+						unless(this->Stun)
 							for(int i = 0;i<41;i++)
 							{
 								if(i!=NPCD_HOOKSHOT)

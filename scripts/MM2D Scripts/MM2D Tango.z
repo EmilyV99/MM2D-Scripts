@@ -75,7 +75,7 @@ void ShowStringAndWait(int str, bool menu4way, bool isNPC)
 void SignShowMessageAndWait(int msg)
 {
 	int slot = ShowMessage(msg,TSTYLE_SIGNS);
-	while(!Tango_SlotIsActive(slot)||!Tango_SlotIsFinished(slot))Waitframe();
+	while(Tango_SlotIsActive(slot)&&Tango_SlotIsFinished(slot))Waitframe();
 	Tango_ScrollSlot(slot,-Tango_GetSlotMaxScrollPos(slot));
 	handleMessageSlot(slot,false,false);
 }

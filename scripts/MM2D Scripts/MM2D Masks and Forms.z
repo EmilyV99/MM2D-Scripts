@@ -10,7 +10,7 @@ void handleMasks()
 	{
 		case 7:
 		{
-			if(!getGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC))
+			unless(getGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC))
 			{
 				if(Input->Press[CB_L])
 				{
@@ -99,28 +99,28 @@ void handleTransformations()//start
 	//end Form setup
 	if(Input->Button[CB_B])
 	{//start ItemJinxing
-		if(!itemAllowed(form,B_item))
+		unless(itemAllowed(form,B_item))
 		{
 			Hero->ItemJinx = 3;
 		}
 	}
 	else if(Input->Button[CB_EX1])
 	{
-		if(!itemAllowed(form,EX1_item))
+		unless(itemAllowed(form,EX1_item))
 		{
 			Hero->ItemJinx = 3;
 		}
 	}
 	else if(Input->Button[CB_EX2])
 	{
-		if(!itemAllowed(form,EX2_item))
+		unless(itemAllowed(form,EX2_item))
 		{
 			Hero->ItemJinx = 3;
 		}
 	}//end
-	if(!isFrozen)
+	unless(isFrozen)
 	{//start Form notPaused
-		if(!form)
+		unless(form)
 		{//start human
 			if(Input->Press[CB_R]&&Hero->Action!=LA_SWIMMING&&!Hero->Item[210])
 			{
@@ -144,7 +144,7 @@ void handleTransformations()//start
 		}
 		else if(form==1)
 		{//start deku
-			if(!Deku_flying)
+			unless(Deku_flying)
 			{
 				if(Input->Press[CB_R])
 				{
@@ -160,7 +160,7 @@ void handleTransformations()//start
 			int linkcombot = Screen->ComboT[ComboAt(Hero->X+8,Hero->Y+12)];
 			if(!Deku_flying&&(linkcombot==CT_WATER||linkcombot==CT_SHALLOWWATER))
 			{
-				Deku_floating--;
+				--Deku_floating;
 				if(isTouchingComboBy(COMBO_LILYPAD,8))
 				{
 					Deku_floating=60;
@@ -175,7 +175,7 @@ void handleTransformations()//start
 				Deku_floating = 60;
 				Hero->Item[51] = true;
 			}
-			if(!Deku_floating)
+			unless(Deku_floating)
 			{
 				Hero->Item[51]=false;
 				Hero->Action=LA_DROWNING;
@@ -207,7 +207,7 @@ void handleTransformations()//start
 					if(timeRolling<84)
 					{
 						LinkMovement_SetLinkSpeedBoost(-1.5);
-						if(!timeRolling)
+						unless(timeRolling)
 						{
 							Game->PlaySound(SFX_GORONROLL_BEGIN);
 						}
@@ -215,7 +215,7 @@ void handleTransformations()//start
 					}
 					else if(timeRolling<100)
 					{
-						if(!((timeRolling-84)%14))
+						unless((timeRolling-84)%14)
 						{
 							Game->PlaySound(SFX_GORONROLL_LOOP);
 						}
@@ -224,7 +224,7 @@ void handleTransformations()//start
 					}
 					else if(timeRolling<200||Game->Counter[CR_MAGIC]<MAGICCOST_SPIKEROLL)
 					{
-						if(!((timeRolling-84)%16))
+						unless((timeRolling-84)%16)
 						{
 							Game->PlaySound(SFX_GORONROLL_LOOP);
 						}
@@ -233,7 +233,7 @@ void handleTransformations()//start
 					}
 					else
 					{
-						if(!spikedRolling)
+						unless(spikedRolling)
 						{
 							spikeStartTime=timeRolling;
 							Game->PlaySound(SFX_GORONROLL_SPEEDUP);
@@ -247,7 +247,7 @@ void handleTransformations()//start
 							}
 						}
 						LinkMovement_SetLinkSpeedBoost(2.5);
-						if(!(gameframe%EVERYXFRAMES_SPIKEROLL))
+						unless(gameframe%EVERYXFRAMES_SPIKEROLL)
 							Game->DCounter[CR_MAGIC]-=MAGICCOST_SPIKEROLL;
 						spikedRolling=true;
 					}
@@ -344,7 +344,7 @@ void handleTransformations()//start
 		Hero->Item[209]=false;
 	}
 	//end Not-form-x
-	if(!form)
+	unless(form)
 	{//start HUMAN
 		Hero->Item[51] = true;
 		Hero->Item[214]=false;
@@ -391,7 +391,7 @@ void handleTransformations()//start
 //For default form, check if item is not on blacklist, else check if item is on whitelist
 bool itemAllowed(int form, int itemID)
 {
-	if(!form)
+	unless(form)
 	{
 		int F0_items[] = {48};//This is blacklist, others below are whitelist
 		for(int i = 0;i<SizeOfArray(F0_items);i++)
@@ -459,7 +459,7 @@ ffc script dekuFlower
 	void run(int filledCombo, int flightlength, int floorsUp, float speedMod)
 	{
 		int combo = this->Data;
-		if(!speedMod)speedMod=-.5;
+		unless(speedMod)speedMod=-.5;
 		bool dived = false;
 		int diveTime = 20;
 		while(true)
@@ -486,7 +486,7 @@ ffc script dekuFlower
 				if(dived)
 				{
 					diveTime = maxDiveTime;
-					if(!Input->Button[CB_A])
+					unless(Input->Button[CB_A])
 					{
 						dived=false;
 						DekuFlightSpeedMod = speedMod;
@@ -497,19 +497,19 @@ ffc script dekuFlower
 					}
 					else NoDirs();
 				}
-				else if(!Deku_flying)
+				else unless(Deku_flying)
 				{
 					if(Input->Button[CB_A]&&diveTime>0)
 					{
 						if(diveTime==maxDiveTime)Game->PlaySound(67);
 						diveTime--;
-						if(!diveTime)
+						unless(diveTime)
 						{
 							dived=true;
 						}
 						NoDirs();
 					}
-					else if(!Input->Button[CB_A])
+					else unless(Input->Button[CB_A])
 					{
 						diveTime = maxDiveTime;
 						Audio->EndSound(67);
@@ -526,7 +526,7 @@ void dekuFly()//start DekuFly
 {
 	Deku_flying--;
 	if(Input->Press[CB_R])Deku_flying=0;
-	if(!Deku_flying)
+	unless(Deku_flying)
 	{
 		Game->PlaySound(78);
 		canFall=true;
@@ -562,7 +562,7 @@ void goronSpikeRoll()//start GoronRoll
 }//end GoronSpikeRoll
 void fireZoraBoomerang()//start ZoraRang
 {
-	if(!countLWeaponType(LW_BRANG))
+	unless(countLWeaponType(LW_BRANG))
 	{
 		itemdata Parent = Game->LoadItemData(I_ZORABRANG);
 		lweapon zoraBoom1 = Screen->CreateLWeapon(LW_BRANG);
@@ -626,22 +626,22 @@ lweapon script zoraBrang
 		lweapon other = this->Misc[BRANG_MISC_OTHER];
 		while(this->isValid())
 		{
-			if(!(gameframe%20))Game->PlaySound(SFX_BRANG);
-			if(!other->isValid())
+			unless(gameframe%20)Game->PlaySound(SFX_BRANG);
+			unless(other->isValid())
 			{
-				if(!this->Misc[BRANG_MISC_DEADTIMER])
+				unless(this->Misc[BRANG_MISC_DEADTIMER])
 					this->Misc[BRANG_MISC_DEADTIMER] = 5;
 			}
 			else if(this->Misc[BRANG_MISC_DEADTIMER]<0)++this->Misc[BRANG_MISC_DEADTIMER];
 			else if(Collision(this,other))
 			{
-				if(!this->Misc[BRANG_MISC_DEADTIMER])this->Misc[BRANG_MISC_DEADTIMER] = 10;
-				if(!other->Misc[BRANG_MISC_DEADTIMER])other->Misc[BRANG_MISC_DEADTIMER] = 10;
+				unless(this->Misc[BRANG_MISC_DEADTIMER])this->Misc[BRANG_MISC_DEADTIMER] = 10;
+				unless(other->Misc[BRANG_MISC_DEADTIMER])other->Misc[BRANG_MISC_DEADTIMER] = 10;
 			}
 			int DegAngle = RadtoDeg(this->Angle);
 			if(DegAngle%90>=89||DegAngle%90<=1)
 			{
-				if(!this->Misc[BRANG_MISC_HASTURNED])
+				unless(this->Misc[BRANG_MISC_HASTURNED])
 				{
 					this->Misc[BRANG_MISC_ANGLEACC]*=3;
 					this->Misc[BRANG_MISC_HASTURNED]=1;
@@ -650,7 +650,7 @@ lweapon script zoraBrang
 			if(this->Misc[BRANG_MISC_DEADTIMER]>0)
 			{
 				--this->Misc[BRANG_MISC_DEADTIMER];
-				if(!this->Misc[BRANG_MISC_DEADTIMER])
+				unless(this->Misc[BRANG_MISC_DEADTIMER])
 				{
 					this->DeadState=WDS_BOUNCE;
 				}
@@ -697,7 +697,7 @@ void handleZoraScreenChange()//start ZoraSurfaceDive
 
 void handleZoraSurfacing()
 {
-	if(!Input->Press[CB_L])return;
+	unless(Input->Press[CB_L])return;
 	if(getUpDMap()==-1)return;
 	mapdata m = Game->LoadMapData(GetCurMap()+1,GetCurScreen());// UNFINISHED
 	int combos[] = {ComboAt(Hero->X,Hero->Y),ComboAt(Hero->X,Hero->Y+15),ComboAt(Hero->X+15,Hero->Y),ComboAt(Hero->X+15,Hero->Y+15)};

@@ -21,7 +21,7 @@ namespace MM2D
 
 	bool CanWalkM(lweapon weap, mapdata map, int dir, int step, bool useHit)
 	{
-		if(!weap->isValid())return false;
+		unless(weap->isValid())return false;
 		return CanWalkM(weap->X + (useHit ? weap->Misc[SPRITE_MISC_HITXOFFSET] : 0), weap->Y + (useHit ? weap->HitYOffset : 0), weap->X + (useHit ?  weap->HitWidth + weap->Misc[SPRITE_MISC_HITXOFFSET] :  weap->TileWidth * 16) - 1, weap->Y + (useHit ?  weap->HitHeight + weap->HitYOffset :  weap->TileHeight * 16) - 1, map, dir, step);
 	}
 	//eweapon
@@ -32,7 +32,7 @@ namespace MM2D
 
 	bool CanWalkM(eweapon weap, mapdata map, int dir, int step, bool useHit)
 	{
-		if(!weap->isValid())return false;
+		unless(weap->isValid())return false;
 		return CanWalkM(weap->X + (useHit ? weap->Misc[SPRITE_MISC_HITXOFFSET] : 0), weap->Y + (useHit ? weap->HitYOffset : 0), weap->X + (useHit ?  weap->HitWidth + weap->Misc[SPRITE_MISC_HITXOFFSET] :  weap->TileWidth * 16) - 1, weap->Y + (useHit ?  weap->HitHeight + weap->HitYOffset :  weap->TileHeight * 16) - 1, map, dir, step);
 	}
 	//npc
@@ -43,7 +43,7 @@ namespace MM2D
 
 	bool CanWalkM(npc n, mapdata map, int dir, int step, bool useHit)
 	{
-		if(!n->isValid())return false;
+		unless(n->isValid())return false;
 		return CanWalkM(n->X + (useHit ? n->Misc[SPRITE_MISC_HITXOFFSET] : 0), n->Y + (useHit ? n->HitYOffset : 0), n->X + (useHit ?  n->HitWidth + n->Misc[SPRITE_MISC_HITXOFFSET] :  n->TileWidth * 16) - 1, n->Y + (useHit ?  n->HitHeight + n->HitYOffset :  n->TileHeight * 16) - 1, map, dir, step);
 	}
 	//ffc
@@ -81,7 +81,7 @@ bool linkWalkingOntoFlag(int flag, int setting,bool fullTile)//start
 bool LinkOnFlagMod(int flag, int x, int y, int setting, bool fullTile)//start
 {
 	int yCorrection = 0;
-	if(!fullTile)yCorrection=8;
+	unless(fullTile)yCorrection=8;
 	int combos[4] = {ComboAt(Hero->X+x,Hero->Y+y+yCorrection),ComboAt(Hero->X+x+15,Hero->Y+y+yCorrection),ComboAt(Hero->X+x+15,Hero->Y+y+15),ComboAt(Hero->X+x,Hero->Y+y+15)};
 	for(int i=0;i<4;i++)
 	{
@@ -244,7 +244,7 @@ int getNPCfromUID(npc n)//start
 int LimitFPSStateSave = 00b;//start
 void saveFPSstate()
 {
-	/*if(!(LimitFPSStateSave & 10b))
+	/*unless(LimitFPSStateSave & 10b)
 	{
 		if(Game->CappedFPS)LimitFPSStateSave |= 11b;
 		else LimitFPSStateSave |= 10b;

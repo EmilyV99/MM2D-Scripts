@@ -55,7 +55,7 @@ bool wasOnWaterLedge = false;
 void highLedgeFromWater()
 {
 	//using namespace Misc;
-	if(!wasOnWaterLedge)
+	unless(wasOnWaterLedge)
 	{
 		if(Hero->Action==LA_SWIMMING || Hero->Action==LA_DIVING)
 		{
@@ -431,7 +431,7 @@ ffc script SoftSoil
 				{
 					waitTime--;
 				}
-				else if(!Hero->Action==LA_RAFTING)
+				else if(Hero->Action!=LA_RAFTING)
 				{
 					if(startState==SSSTATE_GROWN)
 					{
@@ -544,7 +544,7 @@ ffc script TorchPuzzle
 	void run(int thisNum, int defNum, int unlitCombo, int litCombo, int timer, int puzzleNum, bool noSecretSFX)
 	{
 		int add = (4*Game->GetCurLevel());
-		if(!torchPuzzleStates[puzzleNum + add])
+		unless(torchPuzzleStates[puzzleNum + add])
 		{
 			bool lit = false;
 			torchPuzzle[puzzleNum + add] |= defNum;
@@ -557,13 +557,13 @@ ffc script TorchPuzzle
 			{
 				this->Data = unlitCombo;
 			}
-			while(!torchPuzzleStates[puzzleNum + add])
+			until(torchPuzzleStates[puzzleNum + add])
 			{
-				if(!lit)
+				unless(lit)
 				{
 					if(torchLight(this))
 					{
-						if(!torchPuzzleTimer)torchPuzzleTimer=timer;
+						unless(torchPuzzleTimer)torchPuzzleTimer=timer;
 						lit = true;
 						this->Data = litCombo;
 						torchPuzzle[puzzleNum + add] |= thisNum;
@@ -572,7 +572,7 @@ ffc script TorchPuzzle
 				else
 				{
 					stickLight(this);
-					if(!torchPuzzleTimer)
+					unless(torchPuzzleTimer)
 					{
 						lit = false;
 						this->Data = unlitCombo;
@@ -581,7 +581,7 @@ ffc script TorchPuzzle
 					if(torchPuzzle[puzzleNum + add]==1111111111111111b)
 					{
 						torchPuzzleStates[puzzleNum + add]=true;
-						if(!noSecretSFX)Game->PlaySound(SFX_SECRET);
+						unless(noSecretSFX)Game->PlaySound(SFX_SECRET);
 					}
 				}
 				Waitframe();
@@ -622,7 +622,7 @@ bool torchLight(ffc torch)
 		lweapon weap = Screen->LoadLWeapon(i);
 		if(weap->isValid()&&weap->ID==LW_DEKUSTICK)
 		{
-			if(!dekuStickLitTimer)continue;
+			unless(dekuStickLitTimer)continue;
 			return Collision(torch, weap);
 		}
 		else if(weap->isValid()&&weap->ID==LW_ARROW&&arrowType==ARRTYPE_FIRE)
@@ -674,7 +674,7 @@ ffc script TorchSecrets
 	{
 		this->Data=COMBO_INVIS;
 		int add = 4 * Game->GetCurLevel();
-		while(!torchPuzzleStates[numPuzzle + add])Waitframe();
+		until(torchPuzzleStates[numPuzzle + add])Waitframe();
 		Screen->TriggerSecrets();
 	}
 }
@@ -683,7 +683,6 @@ item script dekuStick
 {
 	void run()
 	{
-		if(!Input->Press[CB_B])Quit();
 		for(int i = 1;i<=Screen->NumLWeapons();i++)
 		{
 			lweapon weap = Screen->LoadLWeapon(i);
@@ -732,9 +731,9 @@ ffc script owlStatue//start
 		{
 			this->Data=COMBO_OWLOFF;
 		}
-		while(!isFake)
+		until(isFake)
 		{
-			if(!form)
+			unless(form)
 			{
 				for(int i=0;i<countLWeaponType(LW_SWORD);i++)
 				{
@@ -808,14 +807,14 @@ ffc script chest
 		if(killAllEnemies&&EnemiesAlive())this->Data=COMBO_INVIS;
 		bool solid = (!(this->X%16)&&!(this->Y%16))&&!this->Flags[FFCF_TRANS];
 		if(solid&&(!killAllEnemies||getChestState(index)))Screen->ComboD[ComboAt(this->X,this->Y)]=COMBO_SOLID;
-		while(!fake)
+		until(fake)
 		{
 			if(getChestState(index))
 			{
 				this->Data=open;
 				while(true)
 				{
-					if(!solid)ffcSolid(this);
+					unless(solid)ffcSolid(this);
 					Waitframe();
 				}
 			}
@@ -829,7 +828,7 @@ ffc script chest
 					this->Data=closed;
 					if(solid)Screen->ComboD[ComboAt(this->X,this->Y)]=COMBO_SOLID;
 				}
-				if(!solid)ffcSolid(this);
+				unless(solid)ffcSolid(this);
 				if(Input->Press[CB_A]&&AgainstComboBase(this->X,this->Y))
 				{
 					Input->Press[CB_A]=false;Input->Button[CB_A]=false;
@@ -875,7 +874,7 @@ ffc script Mirror
 		DEFINE DIRY = INITIALIZED + 7;
 		DEFINE CHARGETIME = INITIALIZED + 8;
 		
-		if(!screenData[INITIALIZED])
+		unless(screenData[INITIALIZED])
 		{
 			screenData[DIR] = AngleDir8(WrapDegrees(-90 + (45*clockdir)));
 			switch(screenData[DIR])

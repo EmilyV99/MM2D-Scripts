@@ -49,7 +49,7 @@ void runSubscreen()
 		}
 		cursorPos = 0;
 	}
-	if(!cursorPos)
+	unless(cursorPos)
 	{
 		if(subState == SUBSTATE_ITEMS)
 		{
@@ -82,7 +82,7 @@ void runSubscreen()
 	//end SwapScreen
 	//start MoveCursor
 	int lastIndex = cursorIndex;
-	if(!subState)
+	unless(subState)
 	{
 		if(Input->Press[CB_DOWN])
 		{
@@ -114,7 +114,7 @@ void runSubscreen()
 	{
 		if(Input->Press[CB_DOWN])
 		{
-			if(!cursorIndex)cursorIndex=18;
+			unless(cursorIndex)cursorIndex=18;
 			else if(cursorIndex>=1&&cursorIndex<=5)cursorIndex+=7;
 			else if(cursorIndex==6)cursorIndex=17;
 			else if(cursorIndex==7)cursorIndex=18;
@@ -129,7 +129,7 @@ void runSubscreen()
 		}
 		else if(Input->Press[CB_UP])
 		{
-			if(!cursorIndex)cursorIndex=18;
+			unless(cursorIndex)cursorIndex=18;
 			else if(cursorIndex>=8&&cursorIndex<=12)cursorIndex-=7;
 			else if(cursorIndex==6)cursorIndex=17;
 			else if(cursorIndex==7)cursorIndex=0;
@@ -200,7 +200,7 @@ void runSubscreen()
 	int cursorCol = locToCol(cursorPos);
 	//start DrawThings
 	int itemDescStr[512];
-	if(!subState)
+	unless(subState)
 	{
 		drawBase(SCRN_SUBSCREEN_ITEM);
 		//start Draw Item Screen
@@ -704,7 +704,7 @@ void runSubscreen()
 		if(Hero->Item[I_REMAINS1])
 		{
 			
-			if(!cursorIndex)
+			unless(cursorIndex)
 			{
 				itemdata theItem = Game->LoadItemData(I_REMAINS1);
 				theItem->GetName(itemDescStr);
@@ -740,7 +740,7 @@ void runSubscreen()
 		drawTileToLoc(64640 + (Game->Generic[GEN_HEARTPIECES]),0,6,9,6);
 		if(cursorIndex==17)
 		{
-			if(!Game->Generic[GEN_HEARTPIECES])
+			unless(Game->Generic[GEN_HEARTPIECES])
 			{
 				int cpystr[] = "Heart Pieces";
 				strcpy(itemDescStr,cpystr);
@@ -885,11 +885,11 @@ void passiveSubscreen()//start PassiveSubscreen
 		R_tile = loadItemTile(23);
 		R_cset = loadItemCSet(23);
 	}
-	if(!form)switch(mask)
+	unless(form)switch(mask)
 	{
 		case 7:
 		{
-			if(!getGlobalVar(GVAR_BLASTMASKCOOLDOWN,0))
+			unless(getGlobalVar(GVAR_BLASTMASKCOOLDOWN,0))
 			{
 				L_tile=loadItemTile(189);
 				L_cset=loadItemCSet(189);
@@ -934,9 +934,9 @@ void passiveSubscreen()//start PassiveSubscreen
 		L_cset=0;
 		R_tile = TILE_AIM;
 		R_cset=0;
-		if(!isArrow(B_item))B_tile = TILE_INVIS;
-		if(!isArrow(EX1_item))EX1_tile = TILE_INVIS;
-		if(!isArrow(EX2_item))EX2_tile = TILE_INVIS;
+		unless(isArrow(B_item))B_tile = TILE_INVIS;
+		unless(isArrow(EX1_item))EX1_tile = TILE_INVIS;
+		unless(isArrow(EX2_item))EX2_tile = TILE_INVIS;
 		A_tile = TILE_INVIS;
 	}
 	Screen->FastTile(7,BX,BY,B_tile,B_cset,OP_OPAQUE);
