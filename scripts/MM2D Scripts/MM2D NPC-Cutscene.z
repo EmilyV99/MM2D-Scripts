@@ -19,13 +19,12 @@ ffc script NPC
 		this->Data = COMBO_INVIS;
 		int loc = ComboAt(this->X,this->Y);
 		bool visible = false;
-		Waitframe();//Grayswandir's overhead layers script wipes remote screens combos. This causes a conflict if we fall down from an above screen, or raise from a lower screen; Waitframe() fixes this, for now.
 		int comboDefault = Screen->ComboD[loc];
 		if(NPCid==3&&GetCurDMap()!=0)//Hardcode for Bremor to make it not conflict with the cutscene on that screen
 		{
 			comboDefault = 38404;
 		}
-        while(!special)//start
+		while(!special)//start
 		{
 			while(visible)
 			{
@@ -53,7 +52,7 @@ ffc script NPC
 				}
 				Waitframe();
 			}
-        }//end
+		}//end
 		while(special)//start
 		{
 			switch(NPCid)
@@ -275,7 +274,8 @@ ffc script NPC
 						{
 							bankGiveRewards();
 						}
-					} else if(tangoTempI==2)
+					}
+					else if(tangoTempI==2)
 					{
 						bankWithdraw();
 					}
@@ -863,17 +863,18 @@ ffc script cutscene
 //start Signpost
 ffc script Signpost
 {
-    void run(int m,int input,bool largeHitbox,bool anySide)
+	void run(int m,int input,bool largeHitbox,bool anySide)
 	{
-        int loc = ComboAt(this->X,this->Y);
-        while(true){
-            while(!AgainstComboBase(loc,largeHitbox,anySide) || !SelectPressInput(input)) Waitframe();
-            SetInput(input,false);
-            SignShowMessageAndWait(m);
-            Waitframe();
-        }
-    }
-    bool AgainstComboBase(int loc, bool largeHitbox, bool anySide)
+		int loc = ComboAt(this->X,this->Y);
+		while(true)
+		{
+			while(!AgainstComboBase(loc,largeHitbox,anySide) || !SelectPressInput(input)) Waitframe();
+			SetInput(input,false);
+			SignShowMessageAndWait(m);
+			Waitframe();
+		}
+	}
+	bool AgainstComboBase(int loc, bool largeHitbox, bool anySide)
 	{
 		if(isFrozen)return false;
 		if(largeHitbox && !anySide)
@@ -893,30 +894,33 @@ ffc script Signpost
 			return Hero->Z == 0 && ((Hero->Dir == DIR_UP && Hero->Y == ComboY(loc)+8 && Abs(Hero->X-ComboX(loc)) < 8)||(Hero->Dir == DIR_DOWN && Hero->Y == ComboY(loc)-16 && Abs(Hero->X-ComboX(loc)) < 8)||(Hero->Dir == DIR_LEFT && Hero->X == ComboX(loc)+16 && Abs(Hero->Y-ComboY(loc)) < 8)||(Hero->Dir == DIR_RIGHT && Hero->X == ComboX(loc)-16 && Abs(Hero->Y-ComboY(loc)) < 8));
 		}
 		else {return false;}
-    }
+	}
 }
 
 //!!These functions should only be included in your script file once!!
 bool SelectPressInput(int input)
 {
-    if(input == 0) return Input->Press[CB_A];
-    else if(input == 1) return Input->Press[CB_B];
-    else if(input == 2) return Input->Press[CB_L];
-    else if(input == 3) return Input->Press[CB_R];
+	if(input == 0) return Input->Press[CB_A];
+	else if(input == 1) return Input->Press[CB_B];
+	else if(input == 2) return Input->Press[CB_L];
+	else if(input == 3) return Input->Press[CB_R];
 }
 
 void SetInput(int input, bool state)
 {
-    if(input == 0) Input->Button[CB_A] = state;
-    else if(input == 1) Input->Button[CB_B] = state;
-    else if(input == 2) Input->Button[CB_L] = state;
-    else if(input == 3) Input->Button[CB_R] = state;
+	if(input == 0) Input->Button[CB_A] = state;
+	else if(input == 1) Input->Button[CB_B] = state;
+	else if(input == 2) Input->Button[CB_L] = state;
+	else if(input == 3) Input->Button[CB_R] = state;
 }
 //end Signpost
 //start Shop
-ffc script Shop{
-	void run(int itemID, int price, int shopSpecial, bool reqBottle){
-		if(shopSpecial!=0){
+ffc script Shop
+{
+	void run(int itemID, int price, int shopSpecial, bool reqBottle)
+	{
+		if(shopSpecial!=0)
+		{
 			//handle each shop id seperately, altering "itemID".
 		}
 		if(!itemID)Quit();
@@ -924,15 +928,18 @@ ffc script Shop{
 		thisVisual->Pickup=IP_DUMMY;
 		this->Data=COMBO_INVIS;
 		int loc = ComboAt(this->X,this->Y);
-        while(true){
-            while(!AgainstComboBase(loc) || !SelectPressInput(0)){ 
-				if(!thisVisual->isValid()){
+		while(true)
+		{
+			while(!AgainstComboBase(loc) || !SelectPressInput(0))
+			{ 
+				if(!thisVisual->isValid())
+				{
 					thisVisual = CreateItemAt(itemID, this->X, this->Y);
 					thisVisual->Pickup=IP_DUMMY;
 				}
 				Waitframe();
 			}
-            SetInput(0,false);
+			SetInput(0,false);
 			//Set shop vars
 			tangoTemp=false;
 			remchr(shopString,0);
@@ -941,24 +948,31 @@ ffc script Shop{
 			shopPrice=price;
 			//
 			bool hasEmptyBottle = CanFillBottle();
-			if((fullCounter(CR_RUPEES))>=price&&(!reqBottle||hasEmptyBottle)){
+			if((fullCounter(CR_RUPEES))>=price&&(!reqBottle||hasEmptyBottle))
+			{
 				ShowMessageAndWait(MSG_SHOPS);
-				if(tangoTemp){
+				if(tangoTemp)
+				{
 					item itm = CreateItemAt(itemID, Hero->X, Hero->Y);
 					itm->Pickup = IP_HOLDUP;
 					Game->DCounter[CR_RUPEES] -= price;
 					WaitNoAction(10);
 				}
-			} else if(reqBottle&&!hasEmptyBottle){
+			}
+			else if(reqBottle&&!hasEmptyBottle)
+			{
 				ShowMessageAndWait(30);//No bottle
-			} else {
+			}
+			else
+			{
 				ShowMessageAndWait(29);//No money
 			}
-        }
+		}
 	}
-    bool AgainstComboBase(int loc){
+	bool AgainstComboBase(int loc)
+	{
 		return Hero->Z == 0 && (Hero->Dir == DIR_UP && (Hero->Y >= ComboY(loc)+8&&Hero->Y <ComboY(loc)+16) && Abs(Hero->X-ComboX(loc)) < 8);
-    }
+	}
 }
 //end Shop
 //start bank
@@ -1006,70 +1020,70 @@ int chooseTripleDigitNum(int max)
 
 int chooseTripleDigitNum(int max, int sfx)
 {
-    DEFINE NUMZERO = 11180;
-    DEFINE BORDERTILE = 11201;
-    DEFINE CURSORTILE = 11200;
-    DEFINE FIRSTX = 104;
-    DEFINE FIRSTY = 64;
-    bool running = true;
-    int nums[3];
-    int num = 0;
-    int cursor = 2;
-    Screen_Freeze(1);
-    while(running)
+	DEFINE NUMZERO = 11180;
+	DEFINE BORDERTILE = 11201;
+	DEFINE CURSORTILE = 11200;
+	DEFINE FIRSTX = 104;
+	DEFINE FIRSTY = 64;
+	bool running = true;
+	int nums[3];
+	int num = 0;
+	int cursor = 2;
+	Screen_Freeze(1);
+	while(running)
 	{
-        Screen->FastTile(6,FIRSTX,FIRSTY,BORDERTILE,2,OP_OPAQUE);
-        Screen->FastTile(6,FIRSTX+16,FIRSTY,BORDERTILE+1,2,OP_OPAQUE);
-        Screen->FastTile(6,FIRSTX+32,FIRSTY,BORDERTILE+2,2,OP_OPAQUE);
-        if(gameframe%40<20)Screen->FastTile(6,FIRSTX+(cursor*16),FIRSTY,CURSORTILE,2,OP_OPAQUE);
-        Screen->FastTile(6,FIRSTX,FIRSTY,NUMZERO+nums[0],2,OP_OPAQUE);
-        Screen->FastTile(6,FIRSTX+16,FIRSTY,NUMZERO+nums[1],2,OP_OPAQUE);
-        Screen->FastTile(6,FIRSTX+32,FIRSTY,NUMZERO+nums[2],2,OP_OPAQUE);
-        if(Input->Press[CB_UP])
+		Screen->FastTile(6,FIRSTX,FIRSTY,BORDERTILE,2,OP_OPAQUE);
+		Screen->FastTile(6,FIRSTX+16,FIRSTY,BORDERTILE+1,2,OP_OPAQUE);
+		Screen->FastTile(6,FIRSTX+32,FIRSTY,BORDERTILE+2,2,OP_OPAQUE);
+		if(gameframe%40<20)Screen->FastTile(6,FIRSTX+(cursor*16),FIRSTY,CURSORTILE,2,OP_OPAQUE);
+		Screen->FastTile(6,FIRSTX,FIRSTY,NUMZERO+nums[0],2,OP_OPAQUE);
+		Screen->FastTile(6,FIRSTX+16,FIRSTY,NUMZERO+nums[1],2,OP_OPAQUE);
+		Screen->FastTile(6,FIRSTX+32,FIRSTY,NUMZERO+nums[2],2,OP_OPAQUE);
+		if(Input->Press[CB_UP])
 		{
-            nums[cursor]++;
-            if(nums[cursor]>9)nums[cursor]-=10;
+			nums[cursor]++;
+			if(nums[cursor]>9)nums[cursor]-=10;
 			Audio->PlaySound(sfx);
-        }
+		}
 		else if(Input->Press[CB_DOWN])
 		{
-            nums[cursor]--;
-            if(nums[cursor]<0)nums[cursor]+=10;
+			nums[cursor]--;
+			if(nums[cursor]<0)nums[cursor]+=10;
 			Audio->PlaySound(sfx);
-        }
-        if(Input->Press[CB_RIGHT])
+		}
+		if(Input->Press[CB_RIGHT])
 		{
-            cursor++;
-            if(cursor>2)cursor-=3;
+			cursor++;
+			if(cursor>2)cursor-=3;
 			Audio->PlaySound(sfx);
-        }
+		}
 		else if(Input->Press[CB_LEFT])
 		{
-            cursor--;
-            if(cursor<0)cursor+=3;
+			cursor--;
+			if(cursor<0)cursor+=3;
 			Audio->PlaySound(sfx);
-        }
-        if(Input->Press[CB_A])
+		}
+		if(Input->Press[CB_A])
 		{
-            num = (nums[0]*100)+(nums[1]*10)+(nums[2]);
-            if(num>max)
+			num = (nums[0]*100)+(nums[1]*10)+(nums[2]);
+			if(num>max)
 			{
-                num=max;
+				num=max;
 				nums[0]=Floor(num/100);
 				nums[1]=Floor(num/10)%10;
 				nums[2]=num%10;
 				Audio->PlaySound(sfx);
-            }
+			}
 			else
 			{
-                running=false;
-            }
-        }
-        TotalNoAction();
-        Waitframe();
-    }
-    Screen_Freeze(0);
-    return num;
+				running=false;
+			}
+		}
+		TotalNoAction();
+		Waitframe();
+	}
+	Screen_Freeze(0);
+	return num;
 }
 //end bank
 //start Locked Door

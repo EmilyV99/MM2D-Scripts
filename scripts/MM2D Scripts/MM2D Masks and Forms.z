@@ -4,21 +4,29 @@
 //                                    //
 ////////////////////////////////////////
 
-void handleMasks(){
-	switch(mask){
-		case 7:{
-			if(!getGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC)){
-				if(Input->Press[CB_L]){
+void handleMasks()
+{
+	switch(mask)
+	{
+		case 7:
+		{
+			if(!getGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC))
+			{
+				if(Input->Press[CB_L])
+				{
 					lweapon blast = CreateLWeaponAt(LW_BOMBBLAST,Hero->X+dirX(Hero->Dir)*16,Hero->Y+dirY(Hero->Dir)*16);
 					blast->Damage=2;
 					setGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC,360);
-					if(Hero->Item[8]||Hero->Item[37]){Hero->InvFrames=40;freezeFrames=30;NoAction();}
+					if(Hero->Item[8]||Hero->Item[37]) {Hero->InvFrames=40;freezeFrames=30;NoAction();}
 				}
-			} else {
+			}
+			else
+			{
 				incGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC,-1);
 			}
 			break;}
-		case 12:{
+		case 12:
+		{
 			if(Hero->Action==LA_SWIMMING)
 				LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_BUNNY_WATER);
 			else LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_BUNNY_LAND);
@@ -26,12 +34,17 @@ void handleMasks(){
 	}
 }
 
-item script Mask{//start
+item script Mask //start
+{
 	//0 is no mask, 1-4 are transformation masks.
-	void run(int maskID){
-		if(mask>0&&mask<=4||maskID>0&&maskID<=4){
-			if(maskID>0&&maskID<=4){
-				if(form==maskID){
+	void run(int maskID)
+	{
+		if(mask>0&&mask<=4||maskID>0&&maskID<=4)
+		{
+			if(maskID>0&&maskID<=4)
+			{
+				if(form==maskID)
+				{
 					form = 0;
 					mask = 0;
 					currMaskTile = FIRST_MASK_TILE;
@@ -40,7 +53,9 @@ item script Mask{//start
 					NOTESOUND_RIGHT = 202;
 					NOTESOUND_LEFT = 203;
 					NOTESOUND_UP = 204;
-				} else {
+				}
+				else
+				{
 					mask = maskID;
 					form = maskID;
 					currMaskTile = FIRST_MASK_TILE + maskID;
@@ -51,22 +66,29 @@ item script Mask{//start
 					NOTESOUND_UP = 204 + (5*maskID);
 				}
 			}
-		} else {
-			if(mask==maskID){
+		}
+		else
+		{
+			if(mask==maskID)
+			{
 				mask = 0;
 				currMaskTile = FIRST_MASK_TILE;
-			} else {
+			}
+			else
+			{
 				mask = maskID;
 				currMaskTile = FIRST_MASK_TILE + maskID;
 			}
 		}
-		/*switch(mask){
+		/*switch(mask)
+		{
 			
 		}*/
 	}
 }//end
 
-void handleTransformations(){//start
+void handleTransformations()//start
+{
 	//start Form setup
 	Hero->Item[FORM1] = (form==1);
 	Hero->Item[FORM2] = (form==2&&!curled);
@@ -75,105 +97,152 @@ void handleTransformations(){//start
 	Hero->Item[FORM3] = (form==3);
 	Hero->Item[FORM4] = (form==4);
 	//end Form setup
-	if(Input->Button[CB_B]){//start ItemJinxing
-		if(!itemAllowed(form,B_item)){
+	if(Input->Button[CB_B])
+	{//start ItemJinxing
+		if(!itemAllowed(form,B_item))
+		{
 			Hero->ItemJinx = 3;
 		}
-	} else if(Input->Button[CB_EX1]){
-		if(!itemAllowed(form,EX1_item)){
+	}
+	else if(Input->Button[CB_EX1])
+	{
+		if(!itemAllowed(form,EX1_item))
+		{
 			Hero->ItemJinx = 3;
 		}
-	} else if(Input->Button[CB_EX2]){
-		if(!itemAllowed(form,EX2_item)){
+	}
+	else if(Input->Button[CB_EX2])
+	{
+		if(!itemAllowed(form,EX2_item))
+		{
 			Hero->ItemJinx = 3;
 		}
 	}//end
-	if(!isFrozen){//start Form notPaused
-		if(!form){//start human
-			if(Input->Press[CB_R]&&Hero->Action!=LA_SWIMMING&&!Hero->Item[210]){
+	if(!isFrozen)
+	{//start Form notPaused
+		if(!form)
+		{//start human
+			if(Input->Press[CB_R]&&Hero->Action!=LA_SWIMMING&&!Hero->Item[210])
+			{
 				Game->PlaySound(SFX_SHIELD);
 			}
-			if(Input->Button[CB_R]&&Hero->Action!=LA_SWIMMING&&!Input->Button[CB_A]&&!Input->Button[CB_B]&&!Input->Button[CB_EX1]&&!Input->Button[CB_EX2]&&!Hero->Item[210]){
+			if(Input->Button[CB_R]&&Hero->Action!=LA_SWIMMING&&!Input->Button[CB_A]&&!Input->Button[CB_B]&&!Input->Button[CB_EX1]&&!Input->Button[CB_EX2]&&!Hero->Item[210])
+			{
 				Hero->Item[8]=true;
 				Hero->Item[37]=hasMirrorShield;
 				Hero->Item[FORM_SHIELD] = !hasMirrorShield;
 				Hero->Item[FORM_M_SHIELD] = hasMirrorShield;
-			} else {
+			}
+			else
+			{
 				Hero->Item[8]=false;
 				Hero->Item[37]=false;
 				Hero->Item[FORM_SHIELD] = false;
 				Hero->Item[FORM_M_SHIELD] = false;
 			}
 			//end human
-		} else if(form==1){//start deku
-			if(!Deku_flying){
-				if(Input->Press[CB_R]){
+		}
+		else if(form==1)
+		{//start deku
+			if(!Deku_flying)
+			{
+				if(Input->Press[CB_R])
+				{
 					useItem = ITEM_BUBBLE;
 					Input->Press[CB_R]=false;
 					Input->Button[CB_R]=false;
 				}
-			} else {
+			}
+			else
+			{
 				dekuFly();
 			}
 			int linkcombot = Screen->ComboT[ComboAt(Hero->X+8,Hero->Y+12)];
-			if(!Deku_flying&&(linkcombot==CT_WATER||linkcombot==CT_SHALLOWWATER)){
+			if(!Deku_flying&&(linkcombot==CT_WATER||linkcombot==CT_SHALLOWWATER))
+			{
 				Deku_floating--;
-				if(isTouchingComboBy(COMBO_LILYPAD,8)){
+				if(isTouchingComboBy(COMBO_LILYPAD,8))
+				{
 					Deku_floating=60;
-				} else if(Deku_floating>0&&Hero->Action!=LA_DROWNING&&!(Deku_floating%20)){//Play every 20 frames
+				}
+				else if(Deku_floating>0&&Hero->Action!=LA_DROWNING&&!(Deku_floating%20))
+				{//Play every 20 frames
 					Game->PlaySound(SFX_DEKUHOP);
 				}
-			} else {
+			}
+			else
+			{
 				Deku_floating = 60;
 				Hero->Item[51] = true;
 			}
-			if(!Deku_floating){
+			if(!Deku_floating)
+			{
 				Hero->Item[51]=false;
 				Hero->Action=LA_DROWNING;
 			}
 			//end deku
-		} else if(form==2){//start Goron
-			if(Input->Press[CB_R]){
+		}
+		else if(form==2)
+		{//start Goron
+			if(Input->Press[CB_R])
+			{
 				if(curled)Game->PlaySound(SFX_GORONUNCURL);
 				else Game->PlaySound(SFX_GORONCURL);
 				curled=!curled;
 				Hero->ItemJinx=3;
 			}
-			if(curled){
+			if(curled)
+			{
 				Hero->SwordJinx = 10;
-				if(Input->Press[CB_A]){
+				if(Input->Press[CB_A])
+				{
 					useItem = ITEM_POUND;
 					Input->Press[CB_A]=false;
 					Input->Button[CB_A]=false;
 				}
 				Hero->Item[36]=false;
 				Hero->Item[54]=true;
-				if((Input->Button[CB_DOWN]||Input->Button[CB_RIGHT]||Input->Button[CB_LEFT]||Input->Button[CB_UP])&&(Hero->Action==LA_NONE||Hero->Action==LA_WALKING||Hero->Action==LA_GOTHURTLAND)){
-					if(timeRolling<84){
+				if((Input->Button[CB_DOWN]||Input->Button[CB_RIGHT]||Input->Button[CB_LEFT]||Input->Button[CB_UP])&&(Hero->Action==LA_NONE||Hero->Action==LA_WALKING||Hero->Action==LA_GOTHURTLAND))
+				{
+					if(timeRolling<84)
+					{
 						LinkMovement_SetLinkSpeedBoost(-1.5);
-						if(!timeRolling){
+						if(!timeRolling)
+						{
 							Game->PlaySound(SFX_GORONROLL_BEGIN);
 						}
 						spikedRolling=false;
-					} else if(timeRolling<100){
-						if(!((timeRolling-84)%14)){
+					}
+					else if(timeRolling<100)
+					{
+						if(!((timeRolling-84)%14))
+						{
 							Game->PlaySound(SFX_GORONROLL_LOOP);
 						}
 						LinkMovement_SetLinkSpeedBoost(-0.5);
 						spikedRolling=false;
-					} else if(timeRolling<200||Game->Counter[CR_MAGIC]<MAGICCOST_SPIKEROLL){
-						if(!((timeRolling-84)%16)){
+					}
+					else if(timeRolling<200||Game->Counter[CR_MAGIC]<MAGICCOST_SPIKEROLL)
+					{
+						if(!((timeRolling-84)%16))
+						{
 							Game->PlaySound(SFX_GORONROLL_LOOP);
 						}
 						LinkMovement_SetLinkSpeedBoost(1);
 						spikedRolling=false;
-					} else {
-						if(!spikedRolling){
+					}
+					else
+					{
+						if(!spikedRolling)
+						{
 							spikeStartTime=timeRolling;
 							Game->PlaySound(SFX_GORONROLL_SPEEDUP);
-						} else {
+						}
+						else
+						{
 							int time = timeRolling-(spikeStartTime+60);
-							if(time>=0&&!(time%23)){
+							if(time>=0&&!(time%23))
+							{
 								Game->PlaySound(SFX_GORONROLL_SPEEDLOOP);
 							}
 						}
@@ -183,7 +252,9 @@ void handleTransformations(){//start
 						spikedRolling=true;
 					}
 					timeRolling++;
-				} else {
+				}
+				else
+				{
 					Audio->EndSound(SFX_GORONROLL_BEGIN);
 					Audio->EndSound(SFX_GORONROLL_LOOP);
 					Audio->EndSound(SFX_GORONROLL_SPEEDLOOP);
@@ -191,7 +262,9 @@ void handleTransformations(){//start
 					timeRolling = 0;
 					spikedRolling=false;
 				}
-			} else {
+			}
+			else
+			{
 				Audio->EndSound(SFX_GORONROLL_BEGIN);
 				Audio->EndSound(SFX_GORONROLL_LOOP);
 				Audio->EndSound(SFX_GORONROLL_SPEEDLOOP);
@@ -202,64 +275,83 @@ void handleTransformations(){//start
 				timeRolling = 0;
 				spikedRolling=false;
 			}
-			if(spikedRolling){
+			if(spikedRolling)
+			{
 				goronSpikeRoll();
 			}//end Goron
-		} else if(form==3){//start zora
-			if(Input->Press[CB_R]){
+		}
+		else if(form==3)
+		{//start zora
+			if(Input->Press[CB_R])
+			{
 				fireZoraBoomerang();
 				Input->Press[CB_R]=false;
 				Input->Button[CB_R]=false;
 			}
 			//end
-		} else if(form==4){//start Deity
-			if(Input->Press[CB_R]&&Hero->Action!=LA_SWIMMING){
+		}
+		else if(form==4)
+		{//start Deity
+			if(Input->Press[CB_R]&&Hero->Action!=LA_SWIMMING)
+			{
 				Game->PlaySound(SFX_SHIELD);
 			}
-			if(Input->Button[CB_R]&&Hero->Action!=LA_SWIMMING&&!Input->Button[CB_A]){
+			if(Input->Button[CB_R]&&Hero->Action!=LA_SWIMMING&&!Input->Button[CB_A])
+			{
 				Hero->Item[8]=true;
 				Hero->Item[37]=hasMirrorShield;
-				NoActionButMoveAndEx4AndA();
-			} else {
+				killActionsBut({CB_RIGHT,CB_LEFT,CB_UP,CB_DOWN,CB_EX4,CB_A});
+			}
+			else
+			{
 				Hero->Item[8]=false;
 				Hero->Item[37]=false;
 			}
 		}//end
 	}//end Form notonsubscreen	
-	if(form){//start Not-form-x
+	if(form)
+	{//start Not-form-x
 		Hero->Item[FORM_SHIELD] = false;
 		Hero->Item[FORM_M_SHIELD] = false;
 		Hero->Item[210] = false;
-		if(form!=4){
+		if(form!=4)
+		{
 			Hero->Item[8]=false;
 			Hero->Item[37]=false;
 		}
 	}
-	if(form!=1){
+	if(form!=1)
+	{
 		Hero->Item[133] = false;
 		Hero->Item[134] = false;
 		Hero->Item[135] = false;
 		Hero->Item[ITEM_BUBBLE] = false;
 	}
-	if(form!=2){
+	if(form!=2)
+	{
 		curled=false;
 		spikedRolling=false;
 		Hero->Item[36]=false;
 		Hero->Item[54]=false;
 	}
-	if(form!=3){
+	if(form!=3)
+	{
 		Hero->Item[136] = false;
 	}
-	if(form!=4){
+	if(form!=4)
+	{
 		Hero->Item[208]=false;
 		Hero->Item[209]=false;
 	}
 	//end Not-form-x
-	if(!form){//start HUMAN
+	if(!form)
+	{//start HUMAN
 		Hero->Item[51] = true;
 		Hero->Item[214]=false;
 		//end HUMAN
-	} else if(form==1){//start DEKU
+	}
+	else if(form==1)
+	{//start DEKU
 		Hero->Item[51] = true;
 		Hero->Item[214]=false;
 		Hero->Item[133] = true;
@@ -269,13 +361,17 @@ void handleTransformations(){//start
 		Hero->Item[8]=false;
 		Hero->Item[37]=false;
 		//end DEKU
-	} else if(form==2){//start GORON
+	}
+	else if(form==2)
+	{//start GORON
 		Hero->Item[51]=false;
 		Hero->Item[214]=false;
 		Hero->Item[8]=false;
 		Hero->Item[37]=false;
 		//end GORON
-	} else if(form==3){//start ZORA
+	}
+	else if(form==3)
+	{//start ZORA
 		Hero->Item[214]=true;
 		Hero->Item[8]=false;
 		Hero->Item[37]=false;
@@ -283,7 +379,9 @@ void handleTransformations(){//start
 		if(Hero->Action==LA_SWIMMING)LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_ZORA_WATER);
 		handleZoraScreenChange();
 		//end ZORA
-	} else if(form==4){//start DEITY
+	}
+	else if(form==4)
+	{//start DEITY
 		Hero->Item[208]=true;
 		Hero->Item[209]=true;
 		//end DEITY
@@ -291,43 +389,59 @@ void handleTransformations(){//start
 }//end
 //start formFunctions
 //For default form, check if item is not on blacklist, else check if item is on whitelist
-bool itemAllowed(int form, int itemID){
-	if(!form){
+bool itemAllowed(int form, int itemID)
+{
+	if(!form)
+	{
 		int F0_items[] = {48};//This is blacklist, others below are whitelist
-		for(int i = 0;i<SizeOfArray(F0_items);i++){
+		for(int i = 0;i<SizeOfArray(F0_items);i++)
+		{
 			if(F0_items[i]==itemID)return false;
 		}
 		return true;
-	} else if(form==1){
+	}
+	else if(form==1)
+	{
 		int F1_items[] = {31,144,127,131,25,207,53};
-		for(int i = 0;i<SizeOfArray(F1_items);i++){
+		for(int i = 0;i<SizeOfArray(F1_items);i++)
+		{
 			if(F1_items[i]==itemID)return true;
 		}
 		return false;
-	} else if(form==2){
+	}
+	else if(form==2)
+	{
 		if(curled)return false;
 		int F2_items[] = {31,144,127,131,207,53,48};
 		//if(itemID==48)return true;//PATCHWORK//
-		for(int i = 0;i<SizeOfArray(F2_items);i++){
+		for(int i = 0;i<SizeOfArray(F2_items);i++)
+		{
 			if(F2_items[i]==itemID)return true;
 		}
 		return false;
-	} else if(form==3){
+	}
+	else if(form==3)
+	{
 		int F3_items[] = {31,48,144,127,ITEM_POUND,131,207,53};	
-		for(int i = 0;i<SizeOfArray(F3_items);i++){
+		for(int i = 0;i<SizeOfArray(F3_items);i++)
+		{
 			if(F3_items[i]==itemID)return true;
 		}
 		return false;
-	} else if(form==4){
+	}
+	else if(form==4)
+	{
 		int F4_items[] = {144,127,131,207,53};
-		for(int i = 0;i<SizeOfArray(F4_items);i++){
+		for(int i = 0;i<SizeOfArray(F4_items);i++)
+		{
 			if(F4_items[i]==itemID)return true;
 		}
 		return false;
 	}
 }
 
-bool isTouchingComboBy(int comboID,int pixBy){
+bool isTouchingComboBy(int comboID,int pixBy)
+{
 	int x = Hero->X;
 	int y = Hero->Y;
 	if(Screen->ComboD[ComboAt(Hero->X+pixBy,Hero->Y+pixBy)]==comboID)return true;
@@ -340,80 +454,107 @@ bool isTouchingComboBy(int comboID,int pixBy){
 //start customFormFunctions
 //start FFC DekuFlower
 DEFINE maxDiveTime = 110;
-ffc script dekuFlower{
-	void run(int filledCombo, int flightlength, int floorsUp, float speedMod){
+ffc script dekuFlower
+{
+	void run(int filledCombo, int flightlength, int floorsUp, float speedMod)
+	{
 		int combo = this->Data;
 		if(!speedMod)speedMod=-.5;
 		bool dived = false;
 		int diveTime = 20;
-		while(true){
-			if(form!=1){
+		while(true)
+		{
+			if(form!=1)
+			{
 				Deku_flying=0;
 				diveTime = maxDiveTime;
 				dived=false;
 			}
-			if(Hero->Invisible&&!dived&&!Deku_flying){Waitframe();continue;}
-			if(dived){
+			if(Hero->Invisible&&!dived&&!Deku_flying) {Waitframe();continue;}
+			if(dived)
+			{
 				this->Data = filledCombo;
 				Hero->Invisible = true;	
-			} else {
+			}
+			else
+			{
 				this->Data = combo;
 				Hero->Invisible = false;
 			}
-			if(form==1&&Hero->X>this->X-8&&Hero->X<this->X+8&&Hero->Y>this->Y-8&&Hero->Y<this->Y+8){
-				if(dived){
+			if(form==1&&Hero->X>this->X-8&&Hero->X<this->X+8&&Hero->Y>this->Y-8&&Hero->Y<this->Y+8)
+			{
+				if(dived)
+				{
 					diveTime = maxDiveTime;
-					if(!Input->Button[CB_A]){
+					if(!Input->Button[CB_A])
+					{
 						dived=false;
 						DekuFlightSpeedMod = speedMod;
 						Deku_flying = flightlength;
 						Game->PlaySound(68);
 						Hero->Invisible = false;
 						warpNumFloors=floorsUp;
-					} else NoDirs();
-				} else if(!Deku_flying){
-					if(Input->Button[CB_A]&&diveTime>0){
+					}
+					else NoDirs();
+				}
+				else if(!Deku_flying)
+				{
+					if(Input->Button[CB_A]&&diveTime>0)
+					{
 						if(diveTime==maxDiveTime)Game->PlaySound(67);
 						diveTime--;
-						if(!diveTime){
+						if(!diveTime)
+						{
 							dived=true;
 						}
 						NoDirs();
-					} else if(!Input->Button[CB_A]){
+					}
+					else if(!Input->Button[CB_A])
+					{
 						diveTime = maxDiveTime;
 						Audio->EndSound(67);
 					}
 				}
-			} else diveTime = maxDiveTime;
+			}
+			else diveTime = maxDiveTime;
 			Waitframe();
 		}
 	}
 }
 //end FFC DekuFlower
-void dekuFly(){//start DekuFly
+void dekuFly()//start DekuFly
+{
 	Deku_flying--;
 	if(Input->Press[CB_R])Deku_flying=0;
-	if(!Deku_flying){
+	if(!Deku_flying)
+	{
 		Game->PlaySound(78);
 		canFall=true;
-	} else if((!(gameframe%6)&&Deku_flying>180)||(!(gameframe%12)&&Deku_flying>91)||(!(gameframe%24)||gameframe%24==6))
+	}
+	else if((!(gameframe%6)&&Deku_flying>180)||(!(gameframe%12)&&Deku_flying>91)||(!(gameframe%24)||gameframe%24==6))
 		Game->PlaySound(69);
 	if(Input->Press[CB_A])useItem=ITEM_DEKUNUT;
-	NoActionButMoveAndEx4();
+	killActionsBut({CB_RIGHT,CB_LEFT,CB_UP,CB_DOWN,CB_EX4});
 	LinkMovement_SetLinkSpeedBoost(DekuFlightSpeedMod);
 }//end
-void goronSpikeRoll(){//start GoronRoll
-	for(int i = 0;i<countNPCInRange(CenterLinkX(),CenterLinkY(),24);i++){
+void goronSpikeRoll()//start GoronRoll
+{
+	for(int i = 0;i<countNPCInRange(CenterLinkX(),CenterLinkY(),24);i++)
+	{
 		npc anNPC = getNthNPCInRange(CenterLinkX(),CenterLinkY(),24,i);
-		if(anNPC->isValid()){
-			if(anNPC->CollDetection&&!anNPC->InvFrames&&anNPC->Defense[NPCD_SCRIPT2]!=NPCDT_IGNORE){
+		if(anNPC->isValid())
+		{
+			if(anNPC->CollDetection&&!anNPC->InvFrames&&anNPC->Defense[NPCD_SCRIPT2]!=NPCDT_IGNORE)
+			{
 				lweapon hit = CreateLWeaponAt(LW_SCRIPT2,anNPC->X+(anNPC->HitXOffset)+(anNPC->HitWidth/2),anNPC->Y+(anNPC->HitYOffset)+(anNPC->HitHeight/2));
 				hit->Damage=2;
 				hit->HitWidth=1;
 				hit->HitHeight=1;
 				hit->UseSprite(SPRITE_NONE);
 				hit->Step=0;
-			} else if(anNPC->InvFrames){
+			}
+			else if(anNPC->InvFrames)
+			{
 				anNPC->Stun=5;
 			}
 		}
@@ -423,12 +564,16 @@ void fireZoraBoomerang()//start ZoraRang
 {
 	if(!countLWeaponType(LW_BRANG))
 	{
+		itemdata Parent = Game->LoadItemData(I_ZORABRANG);
 		lweapon zoraBoom1 = Screen->CreateLWeapon(LW_BRANG);
 		zoraBoom1->X=CenterLinkX();
 		zoraBoom1->Y=CenterLinkY();
+		zoraBoom1->UseSprite(Parent->Sprites[0]);
 		lweapon zoraBoom2 = Screen->CreateLWeapon(LW_BRANG);
 		zoraBoom2->X=CenterLinkX();
 		zoraBoom2->Y=CenterLinkY();
+		zoraBoom2->UseSprite(Parent->Sprites[0]);
+		
 		//
 		zoraBoom1->Angular=true;
 		zoraBoom2->Angular=true;
@@ -523,13 +668,13 @@ lweapon script zoraBrang
 						case NPCDT_HALFDAMAGE:{damage/=2;break;}
 						case NPCDT_QUARTERDAMAGE:{damage/=4;break;}
 						case NPCDT_STUN:{damage=0;break;}
-						case NPCDT_STUNORBLOCK:{if(damage < 1){Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}damage=0;break;}
-						case NPCDT_STUNORIGNORE:{if(damage < 1){continue;}damage=0;break;}
+						case NPCDT_STUNORBLOCK:{if(damage < 1) {Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}damage=0;break;}
+						case NPCDT_STUNORIGNORE:{if(damage < 1) {continue;}damage=0;break;}
 						case NPCDT_BLOCK:{this->DeadState = WDS_BOUNCE;continue;}
-						case NPCDT_BLOCK2:{if(damage < 2){Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}break;}
-						case NPCDT_BLOCK4:{if(damage < 4){Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}break;}
-						case NPCDT_BLOCK6:{if(damage < 6){Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}break;}
-						case NPCDT_BLOCK8:{if(damage < 8){Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}break;}
+						case NPCDT_BLOCK2:{if(damage < 2) {Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}break;}
+						case NPCDT_BLOCK4:{if(damage < 4) {Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}break;}
+						case NPCDT_BLOCK6:{if(damage < 6) {Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}break;}
+						case NPCDT_BLOCK8:{if(damage < 8) {Audio->PlaySound(SFX_CLINK);this->DeadState = WDS_BOUNCE;continue;}break;}
 						case NPCDT_IGNORE:{continue;}
 						case NPCDT_ONEHITKILL:{damage=n->HP;break;}
 					}
@@ -538,7 +683,6 @@ lweapon script zoraBrang
 					n->Stun=10;
 				}
 			}
-			if(getRelativeHeight(this))this->Tile = TILE_INVIS;
 			Waitframe();
 		}
 	}

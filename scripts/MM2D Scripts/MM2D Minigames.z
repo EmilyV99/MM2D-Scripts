@@ -49,16 +49,16 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 			switch(phase)
 			{
 				case 1://r1, r2, r3
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=2;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -73,18 +73,18 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
-					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1) {timer-=FRAMES_ROUND/2;b1=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=3;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
-						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()) {b1->HP = 0;b1=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -99,18 +99,18 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
-					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1) {timer-=FRAMES_ROUND/2;b1=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=4;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
-						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()) {b1->HP = 0;b1=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -125,18 +125,18 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
-					if(r4->isValid())if(r4->HP<1){++kills;r4=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
+					if(r4->isValid())if(r4->HP<1) {++kills;r4=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=5;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
-						if(r4->isValid()){r4->HP = 0;r4=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
+						if(r4->isValid()) {r4->HP = 0;r4=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -151,18 +151,18 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
-					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1) {timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1) {timer-=FRAMES_ROUND/2;b2=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=6;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
-						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(b1->isValid()) {b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()) {b2->HP = 0;b2=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -176,16 +176,16 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=7;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -200,18 +200,18 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
-					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1) {timer-=FRAMES_ROUND/2;b1=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=8;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
-						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()) {b1->HP = 0;b1=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -227,20 +227,20 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
-					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
-					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1) {timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1) {timer-=FRAMES_ROUND/2;b2=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=9;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
-						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
-						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()) {b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()) {b2->HP = 0;b2=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -258,24 +258,24 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
-					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
-					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
-					if(b3->isValid())if(b3->HP<1){timer-=FRAMES_ROUND/2;b3=Debug->Null();}
-					if(b4->isValid())if(b4->HP<1){timer-=FRAMES_ROUND/2;b4=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1) {timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1) {timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(b3->isValid())if(b3->HP<1) {timer-=FRAMES_ROUND/2;b3=Debug->Null();}
+					if(b4->isValid())if(b4->HP<1) {timer-=FRAMES_ROUND/2;b4=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=10;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
-						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
-						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
-						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
-						if(b4->isValid()){b4->HP = 0;b4=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()) {b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()) {b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()) {b3->HP = 0;b3=Debug->Null();}
+						if(b4->isValid()) {b4->HP = 0;b4=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -292,22 +292,22 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
-					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
-					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
-					if(b3->isValid())if(b3->HP<1){timer-=FRAMES_ROUND/2;b3=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1) {timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1) {timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(b3->isValid())if(b3->HP<1) {timer-=FRAMES_ROUND/2;b3=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=11;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
-						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
-						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
-						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()) {b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()) {b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()) {b3->HP = 0;b3=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -326,26 +326,26 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
-					if(r4->isValid())if(r4->HP<1){++kills;r4=Debug->Null();}
-					if(r5->isValid())if(r5->HP<1){++kills;r5=Debug->Null();}
-					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
-					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
-					if(b3->isValid())if(b3->HP<1){timer-=FRAMES_ROUND/2;b3=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
+					if(r4->isValid())if(r4->HP<1) {++kills;r4=Debug->Null();}
+					if(r5->isValid())if(r5->HP<1) {++kills;r5=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1) {timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1) {timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(b3->isValid())if(b3->HP<1) {timer-=FRAMES_ROUND/2;b3=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=12;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
-						if(r4->isValid()){r4->HP = 0;r4=Debug->Null();}
-						if(r5->isValid()){r5->HP = 0;r5=Debug->Null();}
-						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
-						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
-						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
+						if(r4->isValid()) {r4->HP = 0;r4=Debug->Null();}
+						if(r5->isValid()) {r5->HP = 0;r5=Debug->Null();}
+						if(b1->isValid()) {b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()) {b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()) {b3->HP = 0;b3=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -363,24 +363,24 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
-					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
-					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
-					if(b3->isValid())if(b3->HP<1){timer-=FRAMES_ROUND/2;b3=Debug->Null();}
-					if(b4->isValid())if(b4->HP<1){timer-=FRAMES_ROUND/2;b4=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1) {timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1) {timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(b3->isValid())if(b3->HP<1) {timer-=FRAMES_ROUND/2;b3=Debug->Null();}
+					if(b4->isValid())if(b4->HP<1) {timer-=FRAMES_ROUND/2;b4=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=13;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
-						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
-						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
-						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
-						if(b4->isValid()){b4->HP = 0;b4=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()) {b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()) {b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()) {b3->HP = 0;b3=Debug->Null();}
+						if(b4->isValid()) {b4->HP = 0;b4=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -397,22 +397,22 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
-					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
-					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
-					if(b3->isValid())if(b3->HP<1){timer-=FRAMES_ROUND/2;b3=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1) {timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1) {timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(b3->isValid())if(b3->HP<1) {timer-=FRAMES_ROUND/2;b3=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=14;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
-						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
-						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
-						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
+						if(b1->isValid()) {b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()) {b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()) {b3->HP = 0;b3=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -430,24 +430,24 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
-					if(r4->isValid())if(r4->HP<1){++kills;r4=Debug->Null();}
-					if(b1->isValid())if(b1->HP<1){timer-=FRAMES_ROUND/2;b1=Debug->Null();}
-					if(b2->isValid())if(b2->HP<1){timer-=FRAMES_ROUND/2;b2=Debug->Null();}
-					if(b3->isValid())if(b3->HP<1){timer-=FRAMES_ROUND/2;b3=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
+					if(r4->isValid())if(r4->HP<1) {++kills;r4=Debug->Null();}
+					if(b1->isValid())if(b1->HP<1) {timer-=FRAMES_ROUND/2;b1=Debug->Null();}
+					if(b2->isValid())if(b2->HP<1) {timer-=FRAMES_ROUND/2;b2=Debug->Null();}
+					if(b3->isValid())if(b3->HP<1) {timer-=FRAMES_ROUND/2;b3=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=15;
 						initPhase=true;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
-						if(r4->isValid()){r4->HP = 0;r4=Debug->Null();}
-						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
-						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
-						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
+						if(r4->isValid()) {r4->HP = 0;r4=Debug->Null();}
+						if(b1->isValid()) {b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()) {b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()) {b3->HP = 0;b3=Debug->Null();}
 						Waitframe();
 						continue;
 					}
@@ -463,23 +463,23 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 						phaseTimer = FRAMES_ROUND;
 						initPhase = false;
 					}
-					if(r1->isValid())if(r1->HP<1){++kills;r1=Debug->Null();}
-					if(r2->isValid())if(r2->HP<1){++kills;r2=Debug->Null();}
-					if(r3->isValid())if(r3->HP<1){++kills;r3=Debug->Null();}
-					if(r4->isValid())if(r4->HP<1){++kills;r4=Debug->Null();}
-					if(r5->isValid())if(r5->HP<1){++kills;r5=Debug->Null();}
+					if(r1->isValid())if(r1->HP<1) {++kills;r1=Debug->Null();}
+					if(r2->isValid())if(r2->HP<1) {++kills;r2=Debug->Null();}
+					if(r3->isValid())if(r3->HP<1) {++kills;r3=Debug->Null();}
+					if(r4->isValid())if(r4->HP<1) {++kills;r4=Debug->Null();}
+					if(r5->isValid())if(r5->HP<1) {++kills;r5=Debug->Null();}
 					if(phaseTimer==0)
 					{
 						phase=0;
-						if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-						if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-						if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
-						if(r4->isValid()){r4->HP = 0;r4=Debug->Null();}
-						if(r5->isValid()){r5->HP = 0;r5=Debug->Null();}
-						if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
-						if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
-						if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
-						if(b4->isValid()){b4->HP = 0;b4=Debug->Null();}
+						if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+						if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+						if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
+						if(r4->isValid()) {r4->HP = 0;r4=Debug->Null();}
+						if(r5->isValid()) {r5->HP = 0;r5=Debug->Null();}
+						if(b1->isValid()) {b1->HP = 0;b1=Debug->Null();}
+						if(b2->isValid()) {b2->HP = 0;b2=Debug->Null();}
+						if(b3->isValid()) {b3->HP = 0;b3=Debug->Null();}
+						if(b4->isValid()) {b4->HP = 0;b4=Debug->Null();}
 						arrowAimMode = false;
 						break;
 					}
@@ -527,15 +527,15 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 			if(timer<=0)break;
 			Waitframe();
 		}
-		if(r1->isValid()){r1->HP = 0;r1=Debug->Null();}
-		if(r2->isValid()){r2->HP = 0;r2=Debug->Null();}
-		if(r3->isValid()){r3->HP = 0;r3=Debug->Null();}
-		if(r4->isValid()){r4->HP = 0;r4=Debug->Null();}
-		if(r5->isValid()){r5->HP = 0;r5=Debug->Null();}
-		if(b1->isValid()){b1->HP = 0;b1=Debug->Null();}
-		if(b2->isValid()){b2->HP = 0;b2=Debug->Null();}
-		if(b3->isValid()){b3->HP = 0;b3=Debug->Null();}
-		if(b4->isValid()){b4->HP = 0;b4=Debug->Null();}
+		if(r1->isValid()) {r1->HP = 0;r1=Debug->Null();}
+		if(r2->isValid()) {r2->HP = 0;r2=Debug->Null();}
+		if(r3->isValid()) {r3->HP = 0;r3=Debug->Null();}
+		if(r4->isValid()) {r4->HP = 0;r4=Debug->Null();}
+		if(r5->isValid()) {r5->HP = 0;r5=Debug->Null();}
+		if(b1->isValid()) {b1->HP = 0;b1=Debug->Null();}
+		if(b2->isValid()) {b2->HP = 0;b2=Debug->Null();}
+		if(b3->isValid()) {b3->HP = 0;b3=Debug->Null();}
+		if(b4->isValid()) {b4->HP = 0;b4=Debug->Null();}
 		arrowAimMode = false;
 		Game->Counter[CR_ARROWS] = startArrows;
 		B_item = items[0];

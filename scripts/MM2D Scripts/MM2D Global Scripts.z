@@ -20,7 +20,7 @@ global script Init
 		//Check debug mode
 		int saveName[16];
 		Game->GetSaveName(saveName);
-		if(!strcmp(saveName,"Link"))debugEnabled=false;
+		unless(strcmp(saveName,"Link"))debugEnabled=false;
 		else debugEnabled=true;
 		//Set up tint palettes
 		setGlobalVar(TINT_DAY,GV_PAL,createTintPalette(0,0,0));
@@ -28,10 +28,13 @@ global script Init
 		setGlobalVar(TINT_NIGHT,GV_PAL,createTintPalette(-21,-23,-10));
 		setGlobalVar(TINT_LENS,GV_PAL,createTintPalette(-17,-48,5));
 		setGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL,true);
-		//Bugfix
-		TIME_HOTWATER = TIME_HOUR*4;
 		//Default controls
 		Controls[CONTROL_OPTIONS] = KEY_TAB;
+		//TypeAString.zh setup
+		setEnterEndsTyping(true);
+		setAllowBackspaceDelete(true);
+		setOverflowWraps(false);
+		
 	}
 }
 //end
@@ -44,12 +47,10 @@ global script Global
 		Game->DisableActiveSubscreen = true; //Disable engine subscreen.
 		testrun();
 		initGame(); //Handle rando stuff here.
+		OptionsMenu.menu_init();
 		bool isLensTinted = false;
 		bool refreshTime = false;
 		arrowAimMode = false;
-		setEnterEndsTyping(true);
-		setAllowBackspaceDelete(true);
-		setOverflowWraps(false);
 		if(Hero->Item[81])Game->MCounter[CR_BOMBCHUS]=40;
 		bool scrnChanged = false;
 		LinkMovement_Init();
@@ -87,7 +88,7 @@ global script Global
 				}
 				refreshTime = false;
 			}
-			if(!ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN))
+			unless(ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN))
 			{
 				if(getGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL))
 				{
@@ -163,14 +164,13 @@ global script Global
 				gameframe=0;
 			}//end FrameCounters
 			//start Time passing
-			bool timeIsNotFrozen = (!isFrozen&&(!slowTime||!(gameframe%2))&&(!ScreenFlag(SF_MISC,SFM_SCRIPT1))&&!songFrames);
-			if(!freezeTime&&timeIsNotFrozen)//freezeTime is a debug, and should ONLY apply to this block, not other sections that use `timeIsNotFrozen`.
+			if(freezeTime||(isFrozen||(slowTime&&(gameframe%2))||ScreenFlag(SF_MISC,SFM_SCRIPT1)||songFrames))
 			{
-				time++;
-				trueTime+= FRAME;
-				if(time%FRAMES_HOUR == 0)
+				++time;
+				trueTime += FRAME;
+				unless(time%FRAMES_HOUR)
 				{
-					hour++;
+					++hour;
 					time=0;
 					if(hour>=24)
 					{
@@ -178,7 +178,7 @@ global script Global
 					}
 					else if(hour==6)
 					{
-						day++;
+						++day;
 					}
 				}
 				if(day>3)
@@ -192,7 +192,7 @@ global script Global
 				pauseGradient();
 			}
 			//end Time Passing
-			if(!getGlobalVar(GVAR_MGSTATE,GV_MISC))runOmniArrows();
+			unless(getGlobalVar(GVAR_MGSTATE,GV_MISC))runOmniArrows();
 			Tango_Update1();
 			handleOcarina();
 			//start Subscreen
@@ -225,7 +225,7 @@ global script Global
 			{
 				NoAction();
 			}
-			else if(!isFrozen)
+			else unless(isFrozen)
 			{
 				warpfloors();
 				varDecrements();
@@ -239,16 +239,19 @@ global script Global
 			LinkActionOld=Hero->Action;
 			raftingCheck();
 			LinkMovement_Update1();
-			if(!isFrozen)
+			unless(isFrozen)
 				highLedgeFromWater();
-			Overhead_Update();
-			drawExtraLayerEffects();
-			lwLoop();
-			ewLoop();
+			unless(subscreen)
+			{
+				drawExtraLayerEffects();
+				lwLoop();
+				ewLoop();
+				itemLoop();
+			}
 			//end
 			if(UsingItem(53)&&fullCounter(CR_MAGIC)>2)
 			{
-				if(!isLensTinted && !(getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL)))
+				unless(isLensTinted || (getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL)))
 				{
 					setTint(getGlobalVar(TINT_LENS,GV_PAL),true);
 					isLensTinted=true;
@@ -282,16 +285,18 @@ global script Global
 		}
 	}//end mainGlobal
 	//start destruction
+	DEFINE DESTRUCTION_WARP_FLAGS = WARP_FLAG_SETCONTINUESCREEN | WARP_FLAG_SETCONTINUEDMAP | WARP_FLAG_SCRIPTDRAW | WARP_FLAG_PLAYMUSIC | WARP_FLAG_PLAYSOUNDS;
 	void destruction()
 	{
-		if(!(!Game->GetCurDMap()&&Game->GetCurScreen()==32))
+		unless(!Game->GetCurDMap()&&Game->GetCurScreen()==32)
 		{
 			if(subscreen)
 			{
 				toggleSubscreen();
 				Waitframe();
 			}
-			Hero->Warp(0,32);
+			//Hero->Warp(0,32);
+			Hero->WarpEx({WT_IWARP,0,32,-1,WARP_A,WARPEFFECT_NONE,SFX_DESTRUCTION,DESTRUCTION_WARP_FLAGS});
 			Waitframes(2);
 			int args[8];
 			if(LEARNED_SONGS[SONG_SongOfTime]&&Hero->Item[31])
@@ -312,12 +317,14 @@ global script Global
 		if(Input->Press[CB_EX4])
 		{
 			hideLayer4 = !hideLayer4;
+			layer4check();
 		}
 	}
 	
 	void layer4check()
 	{
-		//Handle Screen->LayerOpacity[]
+		Screen->LayerInvisible[4] = hideLayer4;
+		Screen->LayerOpacity[4] = OP_TRANS;
 	}
 	
 	void drawExtraLayerEffects()
@@ -336,7 +343,7 @@ global script Global
 				drawHeightLayerData(ddmap->Map,screen,2);
 			}
 		}
-		if(!hideLayer4)
+		unless(hideLayer4)
 		{
 			int updmap = getUpDMap();
 			if(updmap>-1)
@@ -354,7 +361,7 @@ global script Global
 	void drawHeightLayerData(int map, int screen, int layer)
 	{
 		mapdata m = Game->LoadMapData(map,screen);
-		if(!Game->GetScreenState(map, screen, ST_ITEM))
+		unless(Game->GetScreenState(map, screen, ST_ITEM))
 		{
 			if(m->HasItem)
 				HeightFastTile(layer,m->ItemX,m->ItemY,loadItemTile(m->Item),loadItemTile(m->Item),OP_TRANS);
@@ -415,10 +422,9 @@ global script Global
 	void changedScreens()
 	{
 		songOfStormsRain = false;
-		if(!floating)Hero->Invisible=false;
-		if(lwArr[0]||ewArr[0])loadWeapons();
-		clearWeapons();
+		unless(floating)Hero->Invisible=false;
 		setGlobalVar(GVAR_MGSTATE,GV_MISC,0);
+		Items::updateItemMapdata();
 	}
 	
 	void changedLevel()
@@ -558,13 +564,13 @@ global script Global
 	{
 		if(warpNumFloors>0)
 		{
-			if(!warpUp())warpNumFloors=0;
-			else warpNumFloors--;
+			unless(warpUp())warpNumFloors=0;
+			else --warpNumFloors;
 		}
 		else if(warpNumFloors<0)
 		{
-			if(!warpDown())warpNumFloors=0;
-			else warpNumFloors++;
+			unless(warpDown())warpNumFloors=0;
+			else ++warpNumFloors;
 		}
 	}//end
 	void timePalette()//start
@@ -573,7 +579,7 @@ global script Global
 		{
 			setTint(getGlobalVar(TINT_NIGHT,GV_PAL),false);
 			setTint(getGlobalVar(TINT_DAY,GV_PAL),false);
-			if(!isActiveGradient())
+			unless(isActiveGradient())
 			{
 				runGradient(getGlobalVar(TINT_NIGHT,GV_PAL),getGlobalVar(TINT_DAY,GV_PAL),FRAMES_HOUR*MULT_SUNRISE,true);
 			}
@@ -587,7 +593,7 @@ global script Global
 				runGradient(getGlobalVar(TINT_DAY,GV_PAL),getGlobalVar(TINT_SUNSETORANGE,GV_PAL),FRAMES_HOUR*MULT_SUNRISE/2);
 			}
 			
-			if(!(MULT_SUNRISE%2))
+			unless(MULT_SUNRISE%2)
 			{
 				if(time==0 && hour == 18-(MULT_SUNRISE/2))
 				{
@@ -633,7 +639,7 @@ global script Global
 	//start TestingMenu
 	void testingMenu()//start
 	{
-		if(!dbsetup)debugSetup();
+		unless(dbsetup)debugSetup();
 		if(debug || dbdraw)
 		{
 			drawDebugString(256,6*0,"Time: 00.0000",true);//Display base time, with formatting
@@ -650,11 +656,11 @@ global script Global
 			drawDebugString(256,6*5,"Arrow Angle:    ",true);
 			drawDebugInt(256,6*5,getGlobalVar(GVAR_ARROWANGLE,GV_MISC),true);
 		}
-		if(!isFrozen){
-			if(Input->ReadKey[KEY_TILDE])//Don't call ReadKey, it calls NoAction!
+		unless(isFrozen)
+		{
+			if(Input->ReadKey[KEY_TILDE])
 			{
 				debug=!debug;
-				//Game->TypingMode = !Game->TypingMode;
 				Hero->CollDetection=!debug;
 				canFall=!debug;
 			}
@@ -762,6 +768,7 @@ global script Global
 				if(Input->ReadKey[KEY_F])debugCanFall = !debugCanFall;
 				if(Input->ReadKey[KEY_OPENBRACE])warpDown();
 				if(Input->ReadKey[KEY_CLOSEBRACE])warpUp();
+				if(Input->ReadKey[KEY_I]) CreateItemAt(0,Hero->X,Hero->Y - 32)->Pickup |= IP_TIMEOUT;
 				NoAction();
 				Input->Press[CB_START]=false;Input->Button[CB_START]=false;
 			}
@@ -846,81 +853,103 @@ global script Global
 	//start loops
 	void lwLoop()
 	{
-		int curDMap = Game->GetCurDMap();
-		for(int i = Screen->NumLWeapons(); i > 0; i--)
+		DEFINE THISDMAP = Game->GetCurDMap();
+		for(int i = Screen->NumLWeapons(); i > 0; --i)
 		{
 			lweapon weap = Screen->LoadLWeapon(i);
-			if(weap->ID == LW_THRBOMBS && weap->DeadState != WDS_ALIVE)Trace(weap->DeadState);
-			if(weap->ID!=LW_ARROW)
+			unless(weap->Misc[LWMISC_LAYERDMAP]) weap->Misc[LWMISC_LAYERDMAP] = THISDMAP + 1;
+			switch(weap->ID)
 			{
-				if(weap->Misc[LWMISC_LAYERDMAP])
-				{
-					if((weap->Misc[LWMISC_LAYERDMAP]-1)>curDMap)
-					{
-						HeightFastTile(4,weap->X,weap->Y,weap->OriginalTile + weap->Frame,weap->CSet,OP_OPAQUE);
-						weap->Tile=TILE_INVIS;
-					}
-					else if((weap->Misc[LWMISC_LAYERDMAP]-1)<curDMap)
-					{
-						HeightFastTile(3,weap->X,weap->Y,weap->OriginalTile + weap->Frame,weap->CSet,OP_OPAQUE);
-						weap->Tile=TILE_INVIS;
-					}
-				}
-			}
-			else
-			{
-				bool didDraw = false;
-				if(weap->Misc[LWMISC_LAYERDMAP])
-				{
-					if((weap->Misc[LWMISC_LAYERDMAP]-1)>curDMap)
+				case LW_ARROW:
+					weap->ScriptTile = TILE_INVIS;
+					if((weap->Misc[LWMISC_LAYERDMAP]-1)>THISDMAP)
 					{
 						HeightAngularTile(4,weap->X+8,weap->Y+8,weap->OriginalTile + 1,weap->TileWidth,weap->TileHeight,weap->CSet,-1,-1,weap->X+8,weap->Y+8,RadtoDeg(weap->Angle),0,true,OP_OPAQUE);
-						weap->Tile=TILE_INVIS;
-						didDraw=true;
 					}
-					else if((weap->Misc[LWMISC_LAYERDMAP]-1)<curDMap)
+					else if((weap->Misc[LWMISC_LAYERDMAP]-1)<THISDMAP)
 					{
 						HeightAngularTile(3,weap->X+8,weap->Y+8,weap->OriginalTile + 1,weap->TileWidth,weap->TileHeight,weap->CSet,-1,-1,weap->X+8,weap->Y+8,RadtoDeg(weap->Angle),0,true,OP_OPAQUE);
-						weap->Tile=TILE_INVIS;
-						didDraw=true;
 					}
-				}
-				if(!didDraw)
-				{
-					MooshDrawTile(6,weap->X+8,weap->Y+8,weap->OriginalTile + 1,1,1,weap->CSet,16,16,weap->X+8,weap->Y+8,RadtoDeg(weap->Angle),0,true,OP_OPAQUE);
-					weap->Tile = TILE_INVIS;
-				}
+					else
+					{
+						MooshDrawTile(6,weap->X+8,weap->Y+8,weap->OriginalTile + 1,1,1,weap->CSet,16,16,weap->X+8,weap->Y+8,RadtoDeg(weap->Angle),0,true,OP_OPAQUE);
+					}
+					break;
+					
+				default:
+					if((weap->Misc[LWMISC_LAYERDMAP]-1)>THISDMAP)
+					{
+						HeightFastTile(4,weap->X,weap->Y,weap->OriginalTile + weap->Frame,weap->CSet,OP_OPAQUE);
+						weap->ScriptTile = TILE_INVIS;
+					}
+					else if((weap->Misc[LWMISC_LAYERDMAP]-1)<THISDMAP)
+					{
+						HeightFastTile(3,weap->X,weap->Y,weap->OriginalTile + weap->Frame,weap->CSet,OP_OPAQUE);
+						weap->ScriptTile = TILE_INVIS;
+					}
+					else weap->ScriptTile = -1;
 			}
+			weap->HitXOffset = 300 * ((weap->Misc[LWMISC_LAYERDMAP]-1)-THISDMAP) + weap->Misc[SPRITE_MISC_HITXOFFSET];
 		}
 	}
 	
 	void ewLoop()
 	{
-		int curDMap = Game->GetCurDMap();
-		for(int i = Screen->NumEWeapons(); i > 0; i--)
+		DEFINE THISDMAP = Game->GetCurDMap();
+		for(int i = Screen->NumEWeapons(); i > 0; --i)
 		{
 			eweapon weap = Screen->LoadEWeapon(i);
-			if(weap->Misc[EWMISC_LAYERDMAP])
+			unless(weap->Misc[EWMISC_LAYERDMAP]) weap->Misc[EWMISC_LAYERDMAP] = THISDMAP + 1;
+			switch(weap->ID)
 			{
-				if((weap->Misc[EWMISC_LAYERDMAP]-1)>curDMap)
-				{
-					HeightFastTile(4,weap->X,weap->Y,weap->Tile,weap->CSet,OP_OPAQUE);
-					weap->Tile=TILE_INVIS;
-				}
-				else if((weap->Misc[EWMISC_LAYERDMAP]-1)<curDMap)
-				{
-					HeightFastTile(3,weap->X,weap->Y,weap->Tile,weap->CSet,OP_OPAQUE);
-					weap->Tile=TILE_INVIS;
-				}
+				default:
+					if((weap->Misc[EWMISC_LAYERDMAP]-1)>THISDMAP)
+					{
+						HeightFastTile(4,weap->X,weap->Y,weap->Tile,weap->CSet,OP_OPAQUE);
+						weap->ScriptTile = TILE_INVIS;
+					}
+					else if((weap->Misc[EWMISC_LAYERDMAP]-1)<THISDMAP)
+					{
+						HeightFastTile(3,weap->X,weap->Y,weap->Tile,weap->CSet,OP_OPAQUE);
+						weap->ScriptTile = TILE_INVIS;
+					}
+					else weap->ScriptTile = -1;
 			}
+			weap->HitXOffset = 300 * ((weap->Misc[LWMISC_LAYERDMAP]-1)-THISDMAP) + weap->Misc[SPRITE_MISC_HITXOFFSET];
 		}
+	}
+	
+	void itemLoop()
+	{
+		/*DEFINE THISDMAP = Game->GetCurDMap();
+		for(int i = Screen->NumItems(); i > 0; --i)
+		{
+			item it = Screen->LoadItem(i);
+			unless(it->Misc[ITEMMISC_LAYERDMAP]) it->Misc[ITEMMISC_LAYERDMAP] = THISDMAP + 1;
+			switch(it->ID)
+			{
+				default:
+					if((it->Misc[ITEMMISC_LAYERDMAP]-1)>THISDMAP)
+					{
+						HeightFastTile(4,it->X,it->Y,it->Tile,it->CSet,OP_OPAQUE);
+						it->ScriptTile = TILE_INVIS;
+					}
+					else if((it->Misc[ITEMMISC_LAYERDMAP]-1)<THISDMAP)
+					{
+						HeightFastTile(3,it->X,it->Y,it->Tile,it->CSet,OP_OPAQUE);
+						it->ScriptTile = TILE_INVIS;
+					}
+					else it->ScriptTile = -1;
+			}
+			it->HitXOffset = (300 * ((it->Misc[ITEMMISC_LAYERDMAP]-1)-THISDMAP)) + ITEMHITXOFFSET + it->Misc[SPRITE_MISC_HITXOFFSET];
+		}*/
 	}
 	//end loops
 	void runExtraControls()//start extraControls
 	{
 		if(PressControl() && (Input->ReadKey[KEY_1] || Input->ReadKey[KEY_1_PAD]))
 		{
-			if(!toggleGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL))reskinSubscreen(1);
+			unless(toggleGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL))reskinSubscreen(1);
 		}
 		GameOverMenu::checkF6();
 	}//end
@@ -935,19 +964,19 @@ global script Global
 			}*/
 			TotalNoAction();
 			ocarina_mode = false;
-			if(!fakeSong)
+			unless(fakeSong)
 				drawNotes();
 			--songFrames;
-			if(!songFrames)
+			unless(songFrames)
 			{
 				loadFPSstate();
 				if(midiToReturn!=-6&&midiToReturn<205)
 					Audio->PlayMIDI(midiToReturn);
-				if(!fakeSong&&playedSong>-1)
+				unless(fakeSong||playedSong<0)
 					activateSong(playedSong);
 				playedSong=-1;
 				fakeSong=false;
-				if(!subscreen)
+				unless(subscreen)
 					Screen_Freeze(0);
 			}
 		}
@@ -1042,9 +1071,16 @@ void onLaunch() //Called from `Init` and `OnContinue`
 //start Game Init
 void initGame()
 {
+	if(getGlobalBool(GVAR_GAMEINITIALIZED,GV_MISC_BOOL)) return; //Already initialized!
 	//Do initialization things, which may take into account randomizer stuff.
+	//UNFINISHED
+	//From here, the standard options menu should be brought up, with a prompt when you close telling you that you can press (button) to re-open the menu at any time.
+	//Then, open the rando menu, and allow choosing of rando settings.
+	//Finally, run the randomizer (if chosen), and init everything.
 	Items::defaultItemInit();
 	Items::initUpgrade();
+	Items::updateItemMapdata();
+	setGlobalBool(GVAR_GAMEINITIALIZED,GV_MISC_BOOL,true);
 }
 //end Game Init
 //start Options Menu
@@ -1074,6 +1110,7 @@ hero script OptionsMenu
 	};
 	
 	int tabs[] = {STATE_RFS, STATE_OPTIONSKEY, STATE_RESET_DEFAULT, STATE_MENU_MAX};
+	int foo[] = {10, 20, 30, 9001};
 	enum Tab
 	{
 		TAB_INVALID = -1,
@@ -1082,6 +1119,8 @@ hero script OptionsMenu
 		TAB_SYSTEM,
 		TAB_END
 	};
+	
+	bitmap menu;
 	
 	//start Menu constants
 	CONFIG MENU_SPACING = 16;
@@ -1140,9 +1179,13 @@ hero script OptionsMenu
 		return 0;
 	}
 	
+	void menu_init()
+	{
+		menu = Game->CreateBitmap(MENU_BITMAP_HEIGHT, MENU_BITMAP_WIDTH);
+	}
+	
 	void run() //start
 	{
-		bitmap menu = Game->CreateBitmap(MENU_BITMAP_HEIGHT, MENU_BITMAP_WIDTH);
 		int frame = 0;
 		while(1)
 		{
@@ -1165,6 +1208,7 @@ hero script OptionsMenu
 				reloadBitmap(menu);
 				while(getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL))
 				{
+					Waitdraw();
 					if(cooldown>0)--cooldown;
 					++inputTimer;
 					inputTimer %= opt[OPT_MENU_HOLD_DELAY];
@@ -1193,7 +1237,7 @@ hero script OptionsMenu
 						case STATE_MAIN: //start
 						{
 							//Scroll the menu visual based on currently selected option
-							if(!mainOption) scroll = 0;
+							unless(mainOption) scroll = 0;
 							else if(mainOption == STATE_MENU_MAX - 1) scroll = MAX_SCROLL;
 							else if(optionScrollCheck(mainOption, scroll) != 0)
 							{
@@ -1252,7 +1296,7 @@ hero script OptionsMenu
 								--mainOption;
 							else if(down)
 								++mainOption;
-							else if(!cooldown)
+							else unless(cooldown)
 							{
 								if(left)
 								{
@@ -1468,8 +1512,8 @@ hero script OptionsMenu
 					//
 					TotalNoAction();
 					Waitframe();
-					Waitdraw();
 				}
+				TotalNoAction();
 				reloadOptions();
 				Screen_Freeze(0);
 			}
@@ -1893,14 +1937,20 @@ namespace Debug //start
 {
 	void printPoint(int num)
 	{
-		if(!__DEBUG)return;
+		unless(__DEBUG)return;
 		printf("[MM2D] [Debug] Point %d\n", num);
 	}
 	
 	void printPoint(int num, int data)
 	{
-		if(!__DEBUG)return;
+		unless(__DEBUG)return;
 		printf("[MM2D] [Debug] Point %d, data %d\n", num, data);
+	}
+	
+	void print(int str) //start
+	{
+		unless(__DEBUG) return;
+		printf("[MM2D Debug] %s\n",str);
 	}
 }//end
 

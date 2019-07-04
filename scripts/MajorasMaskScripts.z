@@ -9,47 +9,50 @@
 #option TRUNCATE_DIVISION_BY_LITERAL_BUG off
 #option NO_LOGGING off
 //#option RELATIONAL_OP_RETURN_DECIMAL on
-import "std.zh"
-import "scripts/MM2D Scripts/MM2D Constants and Global Vars.z"
+#include "std.zh"
+#include "scripts/MM2D Scripts/MM2D Constants and Global Vars.z"
 
 //start typedefs
 typedef const int GVAR;
 typedef const int DEFINE;
+typedef const bool DEFINEB;
 typedef const int CONFIG;
+typedef const bool CONFIGB;
 typedef untyped u;
+typedef const untyped U;
 //end typedefs
 //start bonus imports
-import "std_zh/idata.zh"
+#include "std_zh/std_shortcuts.zh"
+#include "std_zh/idata.zh"
 always using namespace idata;
 //end
 //start header imports
-import "scripts/ffcscript.zh"
-import "scripts/LinkMovement.zh"
+#include "scripts/ffcscript.zh"
+#include "scripts/LinkMovement.zh"
 import "tango.zh"
-import "tango/font/GUI.zh"
-import "tango/font/MajoraFont.zh"
-//import "ghost.zh"
-import "scripts/TypeAString.zh"
-import "scripts/Tint.zh"
+#include "tango/font/GUI.zh"
+#include "tango/font/MajoraFont.zh"
+//My Headers
+#include "VenrobMisc.zh"
+always using namespace Venrob;
+#include "scripts/TypeAString.zh"
+#include "scripts/Tint.zh"
 //end
 //start MM Imports
-import "scripts/MM2D Scripts/MM2D Drawing.z"
-import "scripts/MM2D Scripts/MM2D Environment.z"
-import "scripts/MM2D Scripts/MM2D Global Scripts.z"
-import "scripts/MM2D Scripts/MM2D Height.z"
-import "scripts/MM2D Scripts/MM2D Items.z"
-import "scripts/MM2D Scripts/MM2D Masks and Forms.z"
-import "scripts/MM2D Scripts/MM2D NPC-Cutscene.z"
-import "scripts/MM2D Scripts/MM2D Ocarina.z"
-import "scripts/MM2D Scripts/MM2D Subscreen.z"
-import "scripts/MM2D Scripts/MM2D Tango.z"
-import "scripts/MM2D Scripts/MM2D Time.z"
-import "scripts/MM2D Scripts/MM2D Minigames.z"
-import "scripts/MM2D Scripts/MM2D Misc.z"
-import "scripts/MM2D Scripts/MM2D Enemies.z"
-//end
-//start ghost imports
-//import "scripts/ghost/Skulltula.z"
+#include "scripts/MM2D Scripts/MM2D Drawing.z"
+#include "scripts/MM2D Scripts/MM2D Environment.z"
+#include "scripts/MM2D Scripts/MM2D Global Scripts.z"
+#include "scripts/MM2D Scripts/MM2D Height.z"
+#include "scripts/MM2D Scripts/MM2D Items.z"
+#include "scripts/MM2D Scripts/MM2D Masks and Forms.z"
+#include "scripts/MM2D Scripts/MM2D NPC-Cutscene.z"
+#include "scripts/MM2D Scripts/MM2D Ocarina.z"
+#include "scripts/MM2D Scripts/MM2D Subscreen.z"
+#include "scripts/MM2D Scripts/MM2D Tango.z"
+#include "scripts/MM2D Scripts/MM2D Time.z"
+#include "scripts/MM2D Scripts/MM2D Minigames.z"
+#include "scripts/MM2D Scripts/MM2D Misc.z"
+#include "scripts/MM2D Scripts/MM2D Enemies.z"
 //end
 
 //start AmmoRefiller
@@ -80,23 +83,23 @@ int hasQuestItem(int itemslot)
 	if(itemslot==1)
 	{
 		if(Hero->Item[182])return 5;
-		else if(Hero->Item[181])return 4;
-		else if(Hero->Item[180])return 3;
-		else if(Hero->Item[179])return 2;
-		else if(Hero->Item[178])return 1;
-		else return 0;
+		if(Hero->Item[181])return 4;
+		if(Hero->Item[180])return 3;
+		if(Hero->Item[179])return 2;
+		if(Hero->Item[178])return 1;
+		return 0;
 	}
 	else if(itemslot==2)
 	{
 		if(Hero->Item[186])return 1;
-		else return 0;
+		return 0;
 	}
 	else if(itemslot==3)
 	{
 		if(Hero->Item[184])return 3;
-		else if(Hero->Item[185])return 2;
-		else if(Hero->Item[183])return 1;
-		else return 0;
+		if(Hero->Item[185])return 2;
+		if(Hero->Item[183])return 1;
+		return 0;
 	}
 }
 

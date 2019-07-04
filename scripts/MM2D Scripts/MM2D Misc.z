@@ -4,75 +4,67 @@
 //                                    //
 ////////////////////////////////////////
 
+namespace MM2D
+{
+	//start CanWalkM
+	/**
+	* This function (and set of overloads) acts as CanWalk, but uses an arbitrary 
+	*      `mapdata` pointer for solidity, rather than the current screen.
+	* Related: `CurMapdata()`
+	*/
 
-//start CanWalkM
-//lweapon
-bool CanWalkM(lweapon weap, mapdata map, int dir, int step)
-{
-	return CanWalkM(weap, map, dir, step, false);
-}
-
-bool CanWalkM(lweapon weap, mapdata map, int dir, int step, bool useHit)
-{
-	if(!weap->isValid())return false;
-	return CanWalkM(weap->X, weap->Y, weap->X + Cond(useHit, weap->HitWidth, weap->TileWidth * 16) - 1, weap->Y + Cond(useHit, weap->HitHeight, weap->TileHeight * 16) - 1, map, dir, step);
-}
-//eweapon
-bool CanWalkM(eweapon weap, mapdata map, int dir, int step)
-{
-	return CanWalkM(weap, map, dir, step, false);
-}
-
-bool CanWalkM(eweapon weap, mapdata map, int dir, int step, bool useHit)
-{
-	if(!weap->isValid())return false;
-	return CanWalkM(weap->X, weap->Y, weap->X + Cond(useHit, weap->HitWidth, weap->TileWidth * 16) - 1, weap->Y + Cond(useHit, weap->HitHeight, weap->TileHeight * 16) - 1, map, dir, step);
-}
-//npc
-bool CanWalkM(npc n, mapdata map, int dir, int step)
-{
-	return CanWalkM(n, map, dir, step, false);
-}
-
-bool CanWalkM(npc n, mapdata map, int dir, int step, bool useHit)
-{
-	if(!n->isValid())return false;
-	return CanWalkM(n->X, n->Y, n->X + Cond(useHit, n->HitWidth, n->TileWidth * 16) - 1, n->Y + Cond(useHit, n->HitHeight, n->TileHeight * 16) - 1, map, dir, step);
-}
-//ffc
-bool CanWalkM(ffc f, mapdata map, int dir, int step)
-{
-	return CanWalkM(f, map, dir, step, false);
-}
-
-bool CanWalkM(ffc f, mapdata map, int dir, int step, bool useEffect)
-{
-	return CanWalkM(f->X, f->Y, f->X + Cond(useEffect, f->EffectWidth, f->TileWidth * 16) - 1, f->Y + Cond(useEffect, f->EffectHeight, f->TileHeight * 16) - 1, map, dir, step);
-}
-//Hero
-bool CanWalkM(mapdata map, int dir, int step, bool largeHitbox)
-{
-	return CanWalkM(Hero->X, Hero->Y + Cond(largeHitbox, 0, 8), Hero->X + 15, Hero->Y + 15, map, dir, step);
-}
-//Main
-bool CanWalkM(int x, int y, int xx, int yy, mapdata map, int dir, int step)
-{
-	int width = xx - x + 1;
-	int height = yy - y + 1;
-    switch(dir)
+	//lweapon
+	bool CanWalkM(lweapon weap, mapdata map, int dir, int step)
 	{
-		case DIR_UP: return !(y-step<0||map->isSolid(x,y-step)||map->isSolid(x+Floor(width/2),y-step)||map->isSolid(xx,y-step));
-		case DIR_DOWN: return !(yy+step>=176||map->isSolid(x,yy+step)||map->isSolid(x+Floor(width/2),yy+step)||map->isSolid(xx,yy+step));
-		case DIR_LEFT: return !(x-step<0||map->isSolid(x-step,y)||map->isSolid(x-step,y+Floor(height/2))||map->isSolid(x-step,yy));
-		case DIR_RIGHT: return !(xx+step>=256||map->isSolid(xx+step,y)||map->isSolid(xx+step,y+Floor(height/2))||map->isSolid(xx+step,yy));
-		case DIR_LEFTUP: return (CanWalkM(x, y, xx, yy, map, DIR_LEFT, step) && CanWalkM(x, y, xx, yy, map, DIR_UP, step));
-		case DIR_LEFTDOWN: return (CanWalkM(x, y, xx, yy, map, DIR_LEFT, step) && CanWalkM(x, y, xx, yy, map, DIR_DOWN, step));
-		case DIR_RIGHTUP: return (CanWalkM(x, y, xx, yy, map, DIR_RIGHT, step) && CanWalkM(x, y, xx, yy, map, DIR_UP, step));
-		case DIR_RIGHTDOWN: return (CanWalkM(x, y, xx, yy, map, DIR_RIGHT, step) && CanWalkM(x, y, xx, yy, map, DIR_DOWN, step));
+		return MM2D::CanWalkM(weap, map, dir, step, false);
 	}
-	return false; //invalid direction
+
+	bool CanWalkM(lweapon weap, mapdata map, int dir, int step, bool useHit)
+	{
+		if(!weap->isValid())return false;
+		return CanWalkM(weap->X + (useHit ? weap->Misc[SPRITE_MISC_HITXOFFSET] : 0), weap->Y + (useHit ? weap->HitYOffset : 0), weap->X + (useHit ?  weap->HitWidth + weap->Misc[SPRITE_MISC_HITXOFFSET] :  weap->TileWidth * 16) - 1, weap->Y + (useHit ?  weap->HitHeight + weap->HitYOffset :  weap->TileHeight * 16) - 1, map, dir, step);
+	}
+	//eweapon
+	bool CanWalkM(eweapon weap, mapdata map, int dir, int step)
+	{
+		return MM2D::CanWalkM(weap, map, dir, step, false);
+	}
+
+	bool CanWalkM(eweapon weap, mapdata map, int dir, int step, bool useHit)
+	{
+		if(!weap->isValid())return false;
+		return CanWalkM(weap->X + (useHit ? weap->Misc[SPRITE_MISC_HITXOFFSET] : 0), weap->Y + (useHit ? weap->HitYOffset : 0), weap->X + (useHit ?  weap->HitWidth + weap->Misc[SPRITE_MISC_HITXOFFSET] :  weap->TileWidth * 16) - 1, weap->Y + (useHit ?  weap->HitHeight + weap->HitYOffset :  weap->TileHeight * 16) - 1, map, dir, step);
+	}
+	//npc
+	bool CanWalkM(npc n, mapdata map, int dir, int step)
+	{
+		return MM2D::CanWalkM(n, map, dir, step, false);
+	}
+
+	bool CanWalkM(npc n, mapdata map, int dir, int step, bool useHit)
+	{
+		if(!n->isValid())return false;
+		return CanWalkM(n->X + (useHit ? n->Misc[SPRITE_MISC_HITXOFFSET] : 0), n->Y + (useHit ? n->HitYOffset : 0), n->X + (useHit ?  n->HitWidth + n->Misc[SPRITE_MISC_HITXOFFSET] :  n->TileWidth * 16) - 1, n->Y + (useHit ?  n->HitHeight + n->HitYOffset :  n->TileHeight * 16) - 1, map, dir, step);
+	}
+	//ffc
+	bool CanWalkM(ffc f, mapdata map, int dir, int step)
+	{
+		return MM2D::CanWalkM(f, map, dir, step, false);
+	}
+
+	bool CanWalkM(ffc f, mapdata map, int dir, int step, bool useEffect)
+	{
+		return CanWalkM(f->X, f->Y, f->X + (useEffect ?  f->EffectWidth :  f->TileWidth * 16) - 1, f->Y + (useEffect ?  f->EffectHeight :  f->TileHeight * 16) - 1, map, dir, step);
+	}
+	//Link
+	bool CanWalkM(mapdata map, int dir, int step, bool largeHitbox)
+	{
+		return CanWalkM(Hero->X, Hero->Y + (largeHitbox ?  0 :  8), Hero->X + 15, Hero->Y + 15, map, dir, step);
+	}
+	//Main
+	//Uses VenrobMisc.zh's version
+	//end CanWalkM
 }
-//end CanWalkM
 //start Misc Functions
 void saveTheGame()//start
 {
@@ -109,30 +101,6 @@ bool LinkOnFlag(int flag)//start
 	}
 	return false;
 }//end
-int dirX(int dir)//start
-{
-	switch(dir)
-	{
-		case DIR_RIGHT: case DIR_RIGHTUP: case DIR_RIGHTDOWN:
-			return 1;
-		case DIR_LEFT: case DIR_LEFTUP: case DIR_LEFTDOWN:
-			return -1;
-		default:
-			return 0;
-	}
-}//end
-int dirY(int dir)//start
-{
-	switch(dir)
-	{
-		case DIR_DOWN: case DIR_LEFTDOWN: case DIR_RIGHTDOWN:
-			return 1;
-		case DIR_UP: case DIR_LEFTUP: case DIR_RIGHTUP:
-			return -1;
-		default:
-			return 0;
-	}
-}//end
 void stopScreenTransition(int pxD,int pxR,int pxL, int pxU)//start
 {
 	if(Hero->Y>160-pxD)Input->Button[CB_DOWN]=false;
@@ -140,21 +108,13 @@ void stopScreenTransition(int pxD,int pxR,int pxL, int pxU)//start
 	if(Hero->X<0+pxL)Input->Button[CB_LEFT]=false;
 	if(Hero->Y<0+pxU)Input->Button[CB_UP]=false;
 }//end
-void NoActionButMoveAndEx4()//start
-{
-	Input->Button[CB_A]=false;Input->Press[CB_A]=false;
-	Input->Button[CB_B]=false;Input->Press[CB_B]=false;
-	Input->Button[CB_R]=false;Input->Press[CB_R]=false;
-	Input->Button[CB_L]=false;Input->Press[CB_L]=false;
-	Input->Button[CB_EX1]=false;Input->Press[CB_EX1]=false;
-	Input->Button[CB_EX2]=false;Input->Press[CB_EX2]=false;
-	Input->Button[CB_EX3]=false;Input->Press[CB_EX3]=false;
-}//end
 void TotalNoAction()//start
 {
-	NoAction();
-	Input->Press[CB_START]=false;
-	Input->Button[CB_START]=false;
+	for(int q = 0; q < CB_MAX; ++q)
+	{
+		Input->Button[q] = false;
+		Input->Press[q] = false;
+	}
 }//end
 void WaitTotalNoAction()//start
 {
@@ -168,27 +128,33 @@ void WaitTotalNoAction(int frames)//start
 		Waitframe();
 	}
 }//end
-void NoActionButA()//start
+void killActions(int actions)//start
 {
-	Input->Button[CB_DOWN]=false;Input->Press[CB_DOWN]=false;
-	Input->Button[CB_RIGHT]=false;Input->Press[CB_RIGHT]=false;
-	Input->Button[CB_LEFT]=false;Input->Press[CB_LEFT]=false;
-	Input->Button[CB_UP]=false;Input->Press[CB_UP]=false;
-	Input->Button[CB_B]=false;Input->Press[CB_B]=false;
-	Input->Button[CB_R]=false;Input->Press[CB_R]=false;
-	Input->Button[CB_L]=false;Input->Press[CB_L]=false;
-	Input->Button[CB_EX1]=false;Input->Press[CB_EX1]=false;
-	Input->Button[CB_EX2]=false;Input->Press[CB_EX2]=false;
-	Input->Button[CB_EX3]=false;Input->Press[CB_EX3]=false;
+	for(int q = SizeOfArray(actions) - 1; q >= 0; --q)
+	{
+		Input->Button[actions[q]] = false;
+		Input->Press[actions[q]] = false;
+	}
 }//end
-void NoActionButMoveAndEx4AndA()//start
+void killActionsBut(int actions)//start
 {
-	Input->Button[CB_B]=false;Input->Press[CB_B]=false;
-	Input->Button[CB_R]=false;Input->Press[CB_R]=false;
-	Input->Button[CB_L]=false;Input->Press[CB_L]=false;
-	Input->Button[CB_EX1]=false;Input->Press[CB_EX1]=false;
-	Input->Button[CB_EX2]=false;Input->Press[CB_EX2]=false;
-	Input->Button[CB_EX3]=false;Input->Press[CB_EX3]=false;
+	DEFINE SIZE = SizeOfArray(actions);
+	for(int q = 0; q < CB_MAX; ++q)
+	{
+		//Skip past any actions in the whitelist
+		for(int j = SIZE-1; j >= 0; --j)
+		{
+			unless(q < CB_MAX) return;
+			if(q == actions[j])
+			{
+				++q;
+				j = SIZE-1;
+			}
+		}
+		//Disable anything else
+		Input->Button[q] = false;
+		Input->Press[q] = false;
+	}
 }//end
 bool isTouchingCombo(int comboID)//start
 {
@@ -202,10 +168,7 @@ bool isTouchingCombo(int comboID)//start
 }//end
 void NoDirs()//start
 {
-	Input->Button[CB_DOWN]=false;Input->Press[CB_DOWN]=false;
-	Input->Button[CB_RIGHT]=false;Input->Press[CB_RIGHT]=false;
-	Input->Button[CB_LEFT]=false;Input->Press[CB_LEFT]=false;
-	Input->Button[CB_UP]=false;Input->Press[CB_UP]=false;
+	killActions({CB_DOWN,CB_UP,CB_LEFT,CB_RIGHT});
 }//end
 int countNPCInRange(int x, int y, int radius)//start
 {
@@ -278,126 +241,20 @@ int getNPCfromUID(npc n)//start
 	}
 	return -1;
 }//end
-void ffcSolid(ffc anFFC)//start
-{
-	int lspdboost = Ceiling(1.5+LinkMovement_GetLinkSpeedBoost());
-	int width = anFFC->EffectWidth;
-	int height = anFFC->EffectHeight;
-	int bottomheight=height;
-	if(!Hero->BigHitbox	)bottomheight-=8;
-	if(bottomheight<=0)return;
-	if(Hero->Y>=anFFC->Y-(16+lspdboost))//start inputdown
-	{
-		if(Hero->Y<=anFFC->Y-16)
-		{
-			if(Hero->X>=anFFC->X-15)
-			{
-				if(Hero->X<=anFFC->X+(width-1))
-				{
-					if(Input->Button[CB_DOWN])
-					{
-						if(Hero->Y!=anFFC->Y-16)Hero->Y=anFFC->Y-16;
-						Hero->Dir=DIR_DOWN;
-						if(Hero->X>=anFFC->X+(width-4))
-						{
-							if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(anFFC->X+width)),false))Hero->X=anFFC->X+width;
-						}
-						else if(Hero->X<=anFFC->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-anFFC->X-16),false))Hero->X=anFFC->X-16;
-					}
-					Input->Button[CB_DOWN]=false;
-					Input->Press[CB_DOWN]=false;
-					return;
-				}
-			}
-		}//end
-	}
-	if(Hero->Y<=anFFC->Y+(bottomheight+lspdboost))//start inputup
-	{
-		if(Hero->Y>=anFFC->Y+bottomheight)
-		{
-			if(Hero->X>=anFFC->X-15)
-			{
-				if(Hero->X<=anFFC->X+(width-1))
-				{
-					if(Input->Button[CB_UP])
-					{
-						if(Hero->Y!=anFFC->Y+bottomheight)Hero->Y=anFFC->Y+bottomheight;
-						Hero->Dir=DIR_UP;
-						if(Hero->X>=anFFC->X+(width-4))
-						{
-							if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(anFFC->X+width)),false))Hero->X=anFFC->X+width;
-						}
-						else if(Hero->X<=anFFC->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-anFFC->X-16),false))Hero->X=anFFC->X-16;
-					}
-					Input->Button[CB_UP]=false;
-					Input->Press[CB_UP]=false;
-					return;
-				}
-			}
-		}//end
-	}
-	if(Hero->X>=anFFC->X-(16+lspdboost))//start inputright
-	{
-		if(Hero->X<=anFFC->X-16)
-		{
-			if(Hero->Y<=anFFC->Y+(bottomheight-1))
-			{
-				if(Hero->Y>=anFFC->Y-15)
-				{
-					if(Input->Button[CB_RIGHT])
-					{
-						if(Hero->X!=anFFC->X-16)Hero->X=anFFC->X-16;
-						Hero->Dir=DIR_RIGHT;
-						if(Hero->Y>=anFFC->Y+(bottomheight-4))
-						{
-							if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(anFFC->Y+bottomheight)),false))Hero->Y=anFFC->Y+bottomheight;
-						}
-						else if(Hero->Y<=anFFC->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(anFFC->Y-16)),false))Hero->Y=anFFC->Y-16;
-					}
-					Input->Button[CB_RIGHT]=false;
-					Input->Press[CB_RIGHT]=false;
-					return;
-				}
-			}
-		}//end
-	}
-	if(Hero->X<=anFFC->X+(width+lspdboost))//start inputleft
-	{
-		if(Hero->X>=anFFC->X+width)
-		{
-			if(Hero->Y>=anFFC->Y-15)
-			{
-				if(Hero->Y<=anFFC->Y+(bottomheight-1))
-				{
-					if(Input->Button[CB_LEFT])
-					{
-						if(Hero->X!=anFFC->X+width)Hero->X=anFFC->X+width;
-						Hero->Dir=DIR_LEFT;
-						if(Hero->Y>=anFFC->Y+(bottomheight-4))
-						{
-							if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(anFFC->Y+bottomheight)),false))Hero->Y=anFFC->Y+bottomheight;
-						}
-						else if(Hero->Y<=anFFC->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(anFFC->Y-16)),false))Hero->Y=anFFC->Y-16;
-					}
-					Input->Button[CB_LEFT]=false;
-					Input->Press[CB_LEFT]=false;
-					return;
-				}
-			}
-		}//end
-	}
-}//end
 int LimitFPSStateSave = 00b;//start
 void saveFPSstate()
 {
-	/*if(!(LimitFPSStateSave & 10b)){
+	/*if(!(LimitFPSStateSave & 10b))
+	{
 		if(Game->CappedFPS)LimitFPSStateSave |= 11b;
 		else LimitFPSStateSave |= 10b;
 	}*/
 }
 
-void loadFPSstate(){
-	/*if((LimitFPSStateSave & 10b) == 10b){
+void loadFPSstate()
+{
+	/*if((LimitFPSStateSave & 10b) == 10b)
+	{
 		if((LimitFPSStateSave & 01b) == 01b)Game->CappedFPS = true;
 		else Game->CappedFPS = false;
 		LimitFPSStateSave = 0;
@@ -415,28 +272,6 @@ bool isOverworldScreen()//start
 	if(dm->Type%2)return true;
 	return false;
 }//end
-int SpinDir8(int dir){return SpinDir8(dir,1);} //Spin a dir clockwise by 45°. start SpinDir8
-int SpinDir8(int dir, int repeatCount) //Spin a dir clockwise by 45° * repeatCount. A negative will spin counterclockwise, as expected.
-{
-	while(repeatCount<0)repeatCount+=8;
-	repeatCount %= 8;
-	for(int q = 0; q < repeatCount; ++q)
-	{
-		switch(dir)
-		{
-			case DIR_UP: dir = DIR_RIGHTUP;
-			case DIR_RIGHTUP: dir = DIR_RIGHT;
-			case DIR_RIGHT: dir = DIR_RIGHTDOWN;
-			case DIR_RIGHTDOWN: dir = DIR_DOWN;
-			case DIR_DOWN: dir = DIR_LEFTDOWN;
-			case DIR_LEFTDOWN: dir = DIR_LEFT;
-			case DIR_LEFT: dir = DIR_LEFTUP;
-			case DIR_LEFTUP: dir = DIR_UP;
-			default: return -1;
-		}
-	}
-	return dir;
-}//end SpinDir8
 void FastLine(int layer, int x, int y, int x2, int y2, int color, int opacity)//start
 {
 	Screen->Line(layer, x, y, x2, y2, color, 0, 0, 0, 0, opacity);
@@ -457,13 +292,6 @@ void resumeAllSfx() //start
 {
 	for(int q = 1; q < 256; ++q) Audio->ResumeSound(q);
 }//end
-void DebugTrace(int str) //start
-{
-	if(!__DEBUG) return;
-	int buf[4096] = "[MM2D Debug] ";
-	strcat(buf, str);
-	TraceS(buf);
-}
 //end
 //end Misc Functions
 //start Keyboard

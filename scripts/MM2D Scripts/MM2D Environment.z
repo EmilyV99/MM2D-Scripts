@@ -5,14 +5,20 @@
 ////////////////////////////////////////
 
 //start MeltableIce
-void handleMeltableIce(){
-	for(int i=1;i<=Screen->NumLWeapons();i++){
+void handleMeltableIce()
+{
+	for(int i=1;i<=Screen->NumLWeapons();i++)
+	{
 		lweapon weap = Screen->LoadLWeapon(i);
-		if(weap->isValid()){
-			if((weap->ID==LW_ARROW&&arrowType==ARRTYPE_FIRE)||weap->ID==LW_HOTWATER){
+		if(weap->isValid())
+		{
+			if((weap->ID==LW_ARROW&&arrowType==ARRTYPE_FIRE)||weap->ID==LW_HOTWATER)
+			{
 				int combos[4] = {ComboAt(weap->X,weap->Y),ComboAt(weap->X+15,weap->Y),ComboAt(weap->X,weap->Y+15),ComboAt(weap->X+15,weap->Y+15)};
-				for(int i=0;i<4;i++){
-					if(Screen->ComboI[combos[i]]==CF_SCRIPT_ICE){
+				for(int i=0;i<4;i++)
+				{
+					if(Screen->ComboI[combos[i]]==CF_SCRIPT_ICE)
+					{
 						Screen->ComboD[combos[i]]--;
 					}
 				}
@@ -22,14 +28,20 @@ void handleMeltableIce(){
 }
 //end MeltableIce
 //start FreezableWater
-void handleFreezableWater(){
-	for(int i=1;i<=Screen->NumLWeapons();i++){
+void handleFreezableWater()
+{
+	for(int i=1;i<=Screen->NumLWeapons();i++)
+	{
 		lweapon weap = Screen->LoadLWeapon(i);
-		if(weap->isValid()){
-			if(weap->ID==LW_ARROW&&arrowType==ARRTYPE_ICE){
+		if(weap->isValid())
+		{
+			if(weap->ID==LW_ARROW&&arrowType==ARRTYPE_ICE)
+			{
 				int combos[4] = {ComboAt(weap->X,weap->Y),ComboAt(weap->X+15,weap->Y),ComboAt(weap->X,weap->Y+15),ComboAt(weap->X+15,weap->Y+15)};
-				for(int i=0;i<4;i++){
-					if(Screen->ComboI[combos[i]]==CF_SCRIPT1&&Screen->ComboT[combos[i]]==CT_WATER){
+				for(int i=0;i<4;i++)
+				{
+					if(Screen->ComboI[combos[i]]==CF_SCRIPT1&&Screen->ComboT[combos[i]]==CT_WATER)
+					{
 						Screen->ComboD[combos[i]]++;
 					}
 				}
@@ -40,15 +52,23 @@ void handleFreezableWater(){
 //end FreezableWater
 //start LedgeTooHighFromWater
 bool wasOnWaterLedge = false;
-void highLedgeFromWater(){
-	using namespace Misc;
-	if(!wasOnWaterLedge){
-		if(Hero->Action==LA_SWIMMING || Hero->Action==LA_DIVING){
-			if(LinkOnFlagMod(CF_NOWATERLEDGE2,0,LinkMovement[LM_STICKY]*3,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,0,LinkMovement[LM_STICKY]*3,0,true))){
-				if(LinkMovement[LM_STICKX]==0){
-					if(LinkMovement[LM_STICKY]==1){
+void highLedgeFromWater()
+{
+	//using namespace Misc;
+	if(!wasOnWaterLedge)
+	{
+		if(Hero->Action==LA_SWIMMING || Hero->Action==LA_DIVING)
+		{
+			if(LinkOnFlagMod(CF_NOWATERLEDGE2,0,LinkMovement[LM_STICKY]*3,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,0,LinkMovement[LM_STICKY]*3,0,true)))
+			{
+				if(LinkMovement[LM_STICKX]==0)
+				{
+					if(LinkMovement[LM_STICKY]==1)
+					{
 						Hero->Dir=DIR_DOWN;
-					} else if (LinkMovement[LM_STICKY]==-1){
+					}
+					else if (LinkMovement[LM_STICKY]==-1)
+					{
 						Hero->Dir=DIR_UP;
 					}
 				}
@@ -56,11 +76,16 @@ void highLedgeFromWater(){
 				Input->Button[CB_UP]=false;
 				LinkMovement_SetLinkSpeedBoost(0);
 			}
-			if(LinkOnFlagMod(CF_NOWATERLEDGE2,LinkMovement[LM_STICKX]*3,0,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,LinkMovement[LM_STICKX]*3,0,0,true))){
-				if(LinkMovement[LM_STICKY]==0){
-					if(LinkMovement[LM_STICKX]==1){
+			if(LinkOnFlagMod(CF_NOWATERLEDGE2,LinkMovement[LM_STICKX]*3,0,0,true)||(form!=1&&LinkOnFlagMod(CF_NOWATERLEDGE,LinkMovement[LM_STICKX]*3,0,0,true)))
+			{
+				if(LinkMovement[LM_STICKY]==0)
+				{
+					if(LinkMovement[LM_STICKX]==1)
+					{
 						Hero->Dir=DIR_RIGHT;
-					} else if (LinkMovement[LM_STICKX]==-1){
+					}
+					else if (LinkMovement[LM_STICKX]==-1)
+					{
 						Hero->Dir=DIR_LEFT;
 					}
 				}
@@ -68,36 +93,52 @@ void highLedgeFromWater(){
 				Input->Button[CB_RIGHT]=false;
 				LinkMovement_SetLinkSpeedBoost(0);
 			}
-		} else {
+		}
+		else
+		{
 			wasOnWaterLedge=LinkOnFlag(CF_NOWATERLEDGE)||LinkOnFlag(CF_NOWATERLEDGE2);
 		}
-	} else {
+	}
+	else
+	{
 		wasOnWaterLedge=LinkOnFlag(CF_NOWATERLEDGE)||LinkOnFlag(CF_NOWATERLEDGE2);
 	}
 }
 
 //end LedgeTooHighFromWater
 //start Climb
-ffc script climb{
-	void run(int dir, int blockheight){
+ffc script climb
+{
+	void run(int dir, int blockheight)
+	{
 		int lspdboost = Ceiling(1.5+LinkMovement_GetLinkSpeedBoost());
 		int width = this->EffectWidth;
 		int height = this->EffectHeight;
 		int bottomheight = height;
 		if(Hero->BigHitbox)bottomheight-=8;
-		while(true){
-			if(!isFrozen&&(blockheight>2||form==1||(blockheight==2&&(!form||form==2)))){
-				if(dir==DIR_UP||dir==4){
-					if(Hero->Y>=this->Y-(16+lspdboost)){//start inputdown
-						if(Hero->Y<=this->Y-16){
-							if(Hero->X>=this->X-15){
-								if(Hero->X<=this->X+(width-1)){
-									if(Input->Button[CB_DOWN]){
+		while(true)
+		{
+			if(!isFrozen&&(blockheight>2||form==1||(blockheight==2&&(!form||form==2))))
+			{
+				if(dir==DIR_UP||dir==4)
+				{
+					if(Hero->Y>=this->Y-(16+lspdboost))
+					{//start inputdown
+						if(Hero->Y<=this->Y-16)
+						{
+							if(Hero->X>=this->X-15)
+							{
+								if(Hero->X<=this->X+(width-1))
+								{
+									if(Input->Button[CB_DOWN])
+									{
 										if(Hero->Y!=this->Y-16)Hero->Y=this->Y-16;
 										Hero->Dir=DIR_DOWN;
-										if(Hero->X>=this->X+(width-4)){
+										if(Hero->X>=this->X+(width-4))
+										{
 											if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(this->X+width)),false))Hero->X=this->X+width;
-										} else if(Hero->X<=this->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-this->X-16),false))Hero->X=this->X-16;
+										}
+										else if(Hero->X<=this->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-this->X-16),false))Hero->X=this->X-16;
 									}
 									Input->Button[CB_DOWN]=false;
 									Input->Press[CB_DOWN]=false;
@@ -106,17 +147,25 @@ ffc script climb{
 						}//end
 					}
 				}
-				if(dir==DIR_DOWN||dir==4){
-					if(Hero->Y<=this->Y+(bottomheight+lspdboost)){//start inputup
-						if(Hero->Y>=this->Y+bottomheight){
-							if(Hero->X>=this->X-15){
-								if(Hero->X<=this->X+(width-1)){
-									if(Input->Button[CB_UP]){
+				if(dir==DIR_DOWN||dir==4)
+				{
+					if(Hero->Y<=this->Y+(bottomheight+lspdboost))
+					{//start inputup
+						if(Hero->Y>=this->Y+bottomheight)
+						{
+							if(Hero->X>=this->X-15)
+							{
+								if(Hero->X<=this->X+(width-1))
+								{
+									if(Input->Button[CB_UP])
+									{
 										if(Hero->Y!=this->Y+bottomheight)Hero->Y=this->Y+bottomheight;
 										Hero->Dir=DIR_UP;
-										if(Hero->X>=this->X+(width-4)){
+										if(Hero->X>=this->X+(width-4))
+										{
 											if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(this->X+width)),false))Hero->X=this->X+width;
-										} else if(Hero->X<=this->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-this->X-16),false))Hero->X=this->X-16;
+										}
+										else if(Hero->X<=this->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-this->X-16),false))Hero->X=this->X-16;
 									}
 									Input->Button[CB_UP]=false;
 									Input->Press[CB_UP]=false;
@@ -125,17 +174,25 @@ ffc script climb{
 						}//end
 					}
 				}
-				if(dir==DIR_LEFT||dir==4){
-					if(Hero->X>=this->X-(16+lspdboost)){//start inputright
-						if(Hero->X<=this->X-16){
-							if(Hero->Y<=this->Y+(bottomheight-1)){
-								if(Hero->Y>=this->Y-15){
-									if(Input->Button[CB_RIGHT]){
+				if(dir==DIR_LEFT||dir==4)
+				{
+					if(Hero->X>=this->X-(16+lspdboost))
+					{//start inputright
+						if(Hero->X<=this->X-16)
+						{
+							if(Hero->Y<=this->Y+(bottomheight-1))
+							{
+								if(Hero->Y>=this->Y-15)
+								{
+									if(Input->Button[CB_RIGHT])
+									{
 										if(Hero->X!=this->X-16)Hero->X=this->X-16;
 										Hero->Dir=DIR_RIGHT;
-										if(Hero->Y>=this->Y+(bottomheight-4)){
+										if(Hero->Y>=this->Y+(bottomheight-4))
+										{
 											if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(this->Y+bottomheight)),false))Hero->Y=this->Y+bottomheight;
-										} else if(Hero->Y<=this->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(this->Y-16)),false))Hero->Y=this->Y-16;
+										}
+										else if(Hero->Y<=this->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(this->Y-16)),false))Hero->Y=this->Y-16;
 									}
 									Input->Button[CB_RIGHT]=false;
 									Input->Press[CB_RIGHT]=false;
@@ -144,17 +201,25 @@ ffc script climb{
 						}//end
 					}
 				}
-				if(dir==DIR_RIGHT||dir==4){
-					if(Hero->X<=this->X+(width+lspdboost)){//start inputleft
-						if(Hero->X>=this->X+width){
-							if(Hero->Y>=this->Y-15){
-								if(Hero->Y<=this->Y+(bottomheight-1)){
-									if(Input->Button[CB_LEFT]){
+				if(dir==DIR_RIGHT||dir==4)
+				{
+					if(Hero->X<=this->X+(width+lspdboost))
+					{//start inputleft
+						if(Hero->X>=this->X+width)
+						{
+							if(Hero->Y>=this->Y-15)
+							{
+								if(Hero->Y<=this->Y+(bottomheight-1))
+								{
+									if(Input->Button[CB_LEFT])
+									{
 										if(Hero->X!=this->X+width)Hero->X=this->X+width;
 										Hero->Dir=DIR_LEFT;
-										if(Hero->Y>=this->Y+(bottomheight-4)){
+										if(Hero->Y>=this->Y+(bottomheight-4))
+										{
 											if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(this->Y+bottomheight)),false))Hero->Y=this->Y+bottomheight;
-										} else if(Hero->Y<=this->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(this->Y-16)),false))Hero->Y=this->Y-16;
+										}
+										else if(Hero->Y<=this->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(this->Y-16)),false))Hero->Y=this->Y-16;
 									}
 									Input->Button[CB_LEFT]=false;
 									Input->Press[CB_LEFT]=false;
@@ -170,14 +235,20 @@ ffc script climb{
 }
 //end
 //start Warp
-ffc script warpCustomReturn{
+ffc script warpCustomReturn
+{
 	//Dirs: 0=Tile, 1=Up, 2=Down, 3=Left, 4=Right
-	void run(int dmap, int screen, int X, int Y, int side){
+	void run(int dmap, int screen, int X, int Y, int side)
+	{
 		side-=1;
-		switch(side){
-			case DIR_UP:{
-				while(true){
-					if(!isFrozen&&Hero->Y<=1&&(Input->Press[CB_UP]||Input->Button[CB_UP])){
+		switch(side)
+		{
+			case DIR_UP:
+			{
+				while(true)
+				{
+					if(!isFrozen&&Hero->Y<=1&&(Input->Press[CB_UP]||Input->Button[CB_UP]))
+					{
 						Hero->X=X;
 						Hero->Y=Y;
 						Hero->PitWarp(dmap,screen);
@@ -185,9 +256,12 @@ ffc script warpCustomReturn{
 					Waitframe();
 				}
 			break;}
-			case DIR_DOWN:{
-				while(true){
-					if(!isFrozen&&Hero->Y>=159&&(Input->Press[CB_DOWN]||Input->Button[CB_DOWN])){
+			case DIR_DOWN:
+			{
+				while(true)
+				{
+					if(!isFrozen&&Hero->Y>=159&&(Input->Press[CB_DOWN]||Input->Button[CB_DOWN]))
+					{
 						Hero->X=X;
 						Hero->Y=Y;
 						Hero->PitWarp(dmap,screen);
@@ -195,9 +269,12 @@ ffc script warpCustomReturn{
 					Waitframe();
 				}
 			break;}
-			case DIR_LEFT:{
-				while(true){
-					if(!isFrozen&&Hero->X<=1&&(Input->Press[CB_LEFT]||Input->Button[CB_LEFT])){
+			case DIR_LEFT:
+			{
+				while(true)
+				{
+					if(!isFrozen&&Hero->X<=1&&(Input->Press[CB_LEFT]||Input->Button[CB_LEFT]))
+					{
 						Hero->X=X;
 						Hero->Y=Y;
 						Hero->PitWarp(dmap,screen);
@@ -205,9 +282,12 @@ ffc script warpCustomReturn{
 					Waitframe();
 				}
 			break;}
-			case DIR_RIGHT:{
-				while(true){
-					if(!isFrozen&&Hero->X>=239&&(Input->Press[CB_RIGHT]||Input->Button[CB_RIGHT])){
+			case DIR_RIGHT:
+			{
+				while(true)
+				{
+					if(!isFrozen&&Hero->X>=239&&(Input->Press[CB_RIGHT]||Input->Button[CB_RIGHT]))
+					{
 						Hero->X=X;
 						Hero->Y=Y;
 						Hero->PitWarp(dmap,screen);
@@ -215,9 +295,12 @@ ffc script warpCustomReturn{
 					Waitframe();
 				}
 			break;}
-			default:{
-				while(true){
-					if(!isFrozen&&(Abs(Hero->X-this->X)<=14&&Abs(Hero->Y-this->Y)<=14)){
+			default:
+			{
+				while(true)
+				{
+					if(!isFrozen&&(Abs(Hero->X-this->X)<=14&&Abs(Hero->Y-this->Y)<=14))
+					{
 						Hero->X=X;
 						Hero->Y=Y;
 						Hero->PitWarp(dmap,screen);
@@ -393,39 +476,56 @@ item script MagicBean
 
 //end SoftSoil
 //start ladder/vine
-ffc script LadderClimb{
-	void run(int climbtime, int dir, int floorsUp){
+ffc script LadderClimb
+{
+	void run(int climbtime, int dir, int floorsUp)
+	{
 		int ctime = 0;
-		while(true){
-			if(ctime>=climbtime){
+		while(true)
+		{
+			if(ctime>=climbtime)
+			{
 				Hero->X+=dirX(dir)*16;
 				Hero->Y+=dirY(dir)*16;
 				warpNumFloors=floorsUp;
 			}
-			switch(dir){
-				case DIR_UP:{
-					if(Hero->Y==this->Y){
+			switch(dir)
+			{
+				case DIR_UP:
+				{
+					if(Hero->Y==this->Y)
+					{
 						if(Input->Button[CB_UP])ctime++;
 						else ctime=0;
-					} else ctime=0;
+					}
+					else ctime=0;
 					break;}
-				case DIR_DOWN:{
-					if(Hero->Y==this->Y){
+				case DIR_DOWN:
+				{
+					if(Hero->Y==this->Y)
+					{
 						if(Input->Button[CB_DOWN])ctime++;
 						else ctime=0;
-					} else ctime=0;
+					}
+					else ctime=0;
 					break;}
-				case DIR_LEFT:{
-					if(Hero->X==this->X){
+				case DIR_LEFT:
+				{
+					if(Hero->X==this->X)
+					{
 						if(Input->Button[CB_LEFT])ctime++;
 						else ctime=0;
-					} else ctime=0;
+					}
+					else ctime=0;
 					break;}
-				case DIR_RIGHT:{
-					if(Hero->X==this->X){
+				case DIR_RIGHT:
+				{
+					if(Hero->X==this->X)
+					{
 						if(Input->Button[CB_RIGHT])ctime++;
 						else ctime=0;
-					} else ctime=0;
+					}
+					else ctime=0;
 					break;}
 			}
 		}
@@ -439,7 +539,8 @@ ffc script LadderClimb{
 //timer is the total timer for the puzzle completion.
 //puzzleNum is a unique number for each puzzle
 //defNum and timer and puzzleNum should be the same for all torches, thisNum should be different for every torch.
-ffc script TorchPuzzle{
+ffc script TorchPuzzle
+{
 	void run(int thisNum, int defNum, int unlitCombo, int litCombo, int timer, int puzzleNum, bool noSecretSFX)
 	{
 		int add = (4*Game->GetCurLevel());
@@ -504,7 +605,8 @@ int getTorchCombo(int torchnum, int unlitCombo, int litCombo, int puzzleNum)
 
 ffc script LitTorch
 {
-	void run(){
+	void run()
+	{
 		while(true)
 		{
 			stickLight(this);
@@ -530,8 +632,10 @@ bool torchLight(ffc torch)
 	}
 }
 
-void stickLight(ffc torch){
-	if(dekuStickLitTimer!=DEKU_MAX_TIMER){
+void stickLight(ffc torch)
+{
+	if(dekuStickLitTimer!=DEKU_MAX_TIMER)
+	{
 		for(int i = 1;i<=Screen->NumLWeapons();i++)
 		{
 			lweapon weap = Screen->LoadLWeapon(i);
@@ -544,7 +648,8 @@ void stickLight(ffc torch){
 			}
 			else if(weap->isValid()&&weap->ID==LW_ARROW&&!arrowType)
 			{
-				if(Collision(torch, weap)){
+				if(Collision(torch, weap))
+				{
 					arrowType=ARRTYPE_FIRE;
 					weap->UseSprite(SPRITE_FIREARROW);
 					if(weap->Dir==DIR_RIGHT)
@@ -744,7 +849,7 @@ ffc script chest
 	bool AgainstComboBase(int x, int y)
 	{
 		return Hero->Z == 0 && ((Hero->Dir == DIR_UP && Hero->Y == y+8 && Abs(Hero->X-x) < 8)||(Hero->Dir == DIR_DOWN && Hero->Y == y-16 && Abs(Hero->X-x) < 8)||(Hero->Dir == DIR_LEFT && Hero->X == x+16 && Abs(Hero->Y-y) < 8)||(Hero->Dir == DIR_RIGHT && Hero->X == x-16 && Abs(Hero->Y-y) < 8));
-    }
+	}
 }
 
 int getChestCombo(int data, int index)

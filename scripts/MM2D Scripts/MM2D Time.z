@@ -41,19 +41,24 @@ void resetTime()
 }//end
 
 //start Difficulty Settings
-void updateDifficulty(int dif){
-	switch(dif){
-		case 0:{
+void updateDifficulty(int dif)
+{
+	switch(dif)
+	{
+		case 0:
+		{
 			FRAMES_MINUTE=90*FRAMES_SECOND;
 			setGlobalVar(GVAR_DIFFICULTY,GV_MISC,0);
 			updateTimes();
 			break;}
-		case 1:{
+		case 1:
+		{
 			FRAMES_MINUTE=60*FRAMES_SECOND;
 			setGlobalVar(GVAR_DIFFICULTY,GV_MISC,1);
 			updateTimes();
 			break;}
-		case 2:{
+		case 2:
+		{
 			FRAMES_MINUTE=45*FRAMES_SECOND;
 			setGlobalVar(GVAR_DIFFICULTY,GV_MISC,2);
 			updateTimes();
@@ -61,7 +66,8 @@ void updateDifficulty(int dif){
 	}
 }
 
-void updateTimes(){
+void updateTimes()
+{
 	FRAMES_HOUR = 60*FRAMES_MINUTE;
 	TIME_MINUTE = FRAMES_MINUTE*FRAME;
 	TIME_HOUR = FRAMES_HOUR*FRAME;
