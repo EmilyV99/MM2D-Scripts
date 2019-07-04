@@ -55,6 +55,7 @@ global script Global
 		bool scrnChanged = false;
 		LinkMovement_Init();
 		TangoInit();
+		HeroDir8 = validateDir(getPressedDir8(), Hero->Dir);
 		//start Ocarina init
 		scarecrowMode = false;
 		scarecrowRecord = false;
@@ -272,6 +273,7 @@ global script Global
 			timePalette();
 			runTints();
 			runHeightBitmap();
+			HeroDir8 = validateDir(getPressedDir8(), (HeroDir8 & 4) ? HeroDir8 : Hero->Dir);
 			Waitdraw();			
 			passiveSubscreen();
 			if(!isFrozen||isBottleFrozen)

@@ -568,6 +568,7 @@ bool songOfStormsRain = false;
 bool owlSaved = false;
 int warpNumFloors = 0;
 bool arrowAimMode = false;
+int HeroDir8 = 0;
 //Debug Vars
 bool freezeTime = false;
 bool debug = false;

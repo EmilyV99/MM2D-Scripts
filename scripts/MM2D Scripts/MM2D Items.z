@@ -245,10 +245,11 @@ item script throwableBombs
 
 lweapon script throwableBombs_LW
 {
-	DEFINE BOMB_STEP = 150;
-	DEFINE BOMB_PIX = (((BOMB_STEP / 100) + .9999) /10000) *10000;
+	DEFINE BOMB_STEP_STILL = 150;
+	DEFINE BOMB_STEP_MOVING = 75;
 	void run()
 	{
+		int pix, dir;
 		while(this->isValid())
 		{
 			mapdata map = getLayerMapdata(getRelativeHeight(this));
@@ -265,7 +266,8 @@ lweapon script throwableBombs_LW
 					{
 						this->DrawYOffset = 0;
 						this->Dir = Hero->Dir;
-						this->Step = 150;
+						dir = HeroDir8;
+						pix = Hero->Action==LA_WALKING ? (BOMB_STEP_MOVING/100) + (1.5+LinkMovement_GetLinkSpeedBoost()) : BOMB_STEP_STILL/100;
 						this->Misc[BOMB_MISC_MOVINGTIME] = 60;
 						this->Misc[BOMB_MISC_MODE] = BOMB_STATE_MOVING;
 						Hero->SwordJinx=3;
@@ -305,22 +307,23 @@ lweapon script throwableBombs_LW
 				
 				case BOMB_STATE_MOVING:
 				{
-					unless(MM2D::CanWalkM(this, map, this->Dir, Ceiling(this->Step/100)))
+					unless(MM2D::CanWalkM(this, map, dir, Ceiling(pix)))
 						this->Misc[BOMB_MISC_MOVINGTIME] = 0;
-					printf("X: %f, Y: %f -- ",this->X,this->Y);
 					if(this->X != VBound(this->X, 238, 2) || this->Y != VBound(this->Y, 158, 2))
 					{
 						this->X = VBound(this->X, 238, 2);
 						this->Y = VBound(this->Y, 158, 2);
 						this->Misc[BOMB_MISC_MOVINGTIME] = 0;
 					}
-					if(this->Misc[BOMB_MISC_MOVINGTIME])--this->Misc[BOMB_MISC_MOVINGTIME];
-					else
+					if(this->Misc[BOMB_MISC_MOVINGTIME])
 					{
-						this->Misc[BOMB_MISC_MODE] = BOMB_STATE_STILL;
-						this->Step = 0;
+						--this->Misc[BOMB_MISC_MOVINGTIME];
+						this->X += dirX(dir) * pix;
+						this->Y += dirY(dir) * pix;
 					}
-					printf("X: %f, Y: %f, Step: %d\n", this->X, this->Y, this->Step);
+					else
+						this->Misc[BOMB_MISC_MODE] = BOMB_STATE_STILL;
+					
 					break;
 				}
 				
@@ -375,21 +378,18 @@ DEFINE LW_THRBOMBS = 31;
 lweapon loadLWeaponType(int type,int num)
 {
 	int weapCount = 0;
-	for(int i = 1;i<=Screen->NumLWeapons();i++)
+	for(int i = Screen->NumLWeapons();i>0;--i)
 	{
 		lweapon weap = Screen->LoadLWeapon(i);
-		if(weap->isValid())
+		if(weap->ID==type)
 		{
-			if(weap->ID==type)
+			if(weapCount==num)
 			{
-				if(weapCount==num)
-				{
-					return weap;
-				}
-				else
-				{
-					weapCount++;
-				}
+				return weap;
+			}
+			else
+			{
+				weapCount++;
 			}
 		}
 	}
@@ -398,15 +398,12 @@ lweapon loadLWeaponType(int type,int num)
 int countLWeaponType(int type)
 {
 	int weapCount = 0;
-	for(int i = 1;i<=Screen->NumLWeapons();i++)
+	for(int i = Screen->NumLWeapons();i>0;--i)
 	{
 		lweapon weap = Screen->LoadLWeapon(i);
-		if(weap->isValid())
+		if(weap->ID==type)
 		{
-			if(weap->ID==type)
-			{
-				weapCount++;
-			}
+			++weapCount;
 		}
 	}
 	return weapCount;
@@ -417,15 +414,6 @@ void stopScreenTransition(int pxAway)
 	stopScreenTransition(pxAway,pxAway,pxAway,pxAway);
 }
 //end throwableBombs
-//start ArrowChange
-item script arrowTypes
-{
-	void run(int type)
-	{
-		arrowType = type;
-	}
-}
-//end ArrowChange
 //start omniArrows
 item script omniArrows
 {
@@ -433,34 +421,13 @@ item script omniArrows
 	{
 		arrowType = type;
 		//Restore the spent magic cost; it should not be charged yet, though it has been already!
-		Game->DCounter[CR_MAGIC] += this->MagicCost * 2;
+		Game->DCounter[CR_MAGIC] += this->MagicCost * Game->Generic[GEN_MAGICDRAINRATE];
 		Audio->EndSound(this->UseSound);
 		unless(Game->Counter[CR_ARROWS]) return; //Do not proceed without the arrow cost being payable!
 		arrowAimMode = !arrowAimMode;
 		
 		if(arrowAimMode)
-		{
-			int angle;
-			if(Input->Button[CB_RIGHT] && Input->Button[CB_DOWN])     angle = 45;
-			else if(Input->Button[CB_LEFT] && Input->Button[CB_DOWN]) angle = 135;
-			else if(Input->Button[CB_LEFT] && Input->Button[CB_UP])   angle = 225;
-			else if(Input->Button[CB_RIGHT] && Input->Button[CB_UP])  angle = 315;
-			else switch(Hero->Dir)
-			{
-				case DIR_RIGHT:
-					angle = 0;
-					break;
-				case DIR_DOWN:
-					angle = 90;
-					break;
-				case DIR_LEFT:
-					angle = 180;
-					break;
-				case DIR_UP:
-					angle = 270;
-			}
-			setGlobalVar(GVAR_ARROWANGLE, GV_MISC, angle);
-		}
+			setGlobalVar(GVAR_ARROWANGLE, GV_MISC, DirAngle(HeroDir8));
 	}
 }
 
@@ -473,7 +440,7 @@ void runOmniArrows(int mult)
 {
 	unless(arrowAimMode) return; //Not aiming arrows
 	int angle = getGlobalVar(GVAR_ARROWANGLE, GV_MISC);
-	if(/*canShootArrow() && */((Input->Press[CB_B] && isArrow(B_item)) || (Input->Press[CB_EX1] && isArrow(EX1_item)) || (Input->Press[CB_EX2] && isArrow(EX2_item))))
+	if(((Input->Press[CB_B] && isArrow(B_item)) || (Input->Press[CB_EX1] && isArrow(EX1_item)) || (Input->Press[CB_EX2] && isArrow(EX2_item))))
 	{ //Fire arrow!
 		arrowAimMode = false;
 		Hero->ItemJinx = 3;
@@ -495,7 +462,7 @@ void runOmniArrows(int mult)
 		}
 		itemdata parentItem = Game->LoadItemData(arr->Parent);
 		Game->PlaySound(parentItem->UseSound);
-		int mcost = parentItem->MagicCost * 2;
+		int mcost = parentItem->MagicCost * Game->Generic[GEN_MAGICDRAINRATE];
 		arr->UseSprite(parentItem->Sprites[0]); //Set proper sprite
 		//Set Angle/Speed of projectile:
 		arr->Angular = true;
@@ -503,21 +470,6 @@ void runOmniArrows(int mult)
 		arr->Dir     = AngleDir4(WrapDegrees(angle));
 		arr->Step    = 250;
 		arr->Damage  = parentItem->Power;
-		/*//Ensure proper direction:
-		if(arr->Dir==DIR_RIGHT)
-		{
-			arr->Tile+=1;
-			arr->Flip=0;
-		}
-		else if(arr->Dir==DIR_LEFT)
-		{
-			arr->Tile+=1;
-			arr->Flip=1;
-		}
-		else if(arr->Dir==DIR_DOWN)
-		{
-			arr->Flip=2;
-		}*/
 		arr->OriginalTile = arr->Tile;
 		--Game->DCounter[CR_ARROWS]; //Charge the arrow cost
 		if(mcost) Game->DCounter[CR_MAGIC] -= mcost; //Charge the magic cost
@@ -527,78 +479,64 @@ void runOmniArrows(int mult)
 		if(Input->Press[CB_L]) {arrowAimMode = false; return;}
 		if(Input->Button[CB_R])
 		{
-			if(Input->Button[CB_RIGHT] && Input->Button[CB_DOWN]) angle = 45;
-			else if(Input->Button[CB_LEFT] && Input->Button[CB_DOWN]) angle = 135;
-			else if(Input->Button[CB_LEFT] && Input->Button[CB_UP]) angle = 225;
-			else if(Input->Button[CB_RIGHT] && Input->Button[CB_UP]) angle = 315;
-			else if(Input->Button[CB_RIGHT]) angle = 0;
-			else if(Input->Button[CB_DOWN]) angle = 90;
-			else if(Input->Button[CB_LEFT]) angle = 180;
-			else if(Input->Button[CB_UP]) angle = 270;
+			angle = DirAngle(getPressedDir8());
 		}
 		else
 		{
 			int startAngle = angle;
-			if(Input->Button[CB_RIGHT] && Input->Button[CB_DOWN])
+			switch(getPressedDir8())
 			{
-				if(startAngle != 45)
-				{
-					angle += (startAngle > 45 && startAngle < 225) ? -mult : mult;
-				}
+				case DIR_RIGHTDOWN:
+					if(startAngle != 45)
+					{
+						angle += (startAngle > 45 && startAngle < 225) ? -mult : mult;
+					}
+					break;
+				case DIR_LEFTDOWN:
+					if(startAngle != 135)
+					{
+						angle += (startAngle > 135 && startAngle < 315) ? -mult : mult;
+					}
+					break;
+				case DIR_LEFTUP:
+					if(startAngle != 225)
+					{
+						angle += (startAngle > 45 && startAngle < 225) ? mult : -mult;
+					}
+					break;
+				case DIR_RIGHTUP:
+					if(startAngle != 315)
+					{
+						angle += (startAngle > 135 && startAngle < 315) ? mult : -mult;
+					}
+					break;
+				case DIR_UP:
+					if(startAngle != 270)
+					{
+						angle += (startAngle > 90 && startAngle < 270) ? mult : -mult;
+					}
+					break;
+				case DIR_DOWN:
+					if(startAngle != 90)
+					{
+						angle += (startAngle > 90 && startAngle < 270) ? -mult : mult;
+					}
+					break;
+				case DIR_LEFT:
+					if(startAngle != 180)
+					{
+						angle += (startAngle < 180) ? mult : -mult;
+					}
+					break;
+				case DIR_RIGHT:
+					if(startAngle != 0)
+					{
+						angle += (startAngle < 180) ? -mult : mult;
+					}
+					break;
 			}
-			else if(Input->Button[CB_LEFT] && Input->Button[CB_DOWN])
-			{
-				if(startAngle != 135)
-				{
-					angle += (startAngle > 135 && startAngle < 315) ? -mult : mult;
-				}
-			}
-			else if(Input->Button[CB_LEFT] && Input->Button[CB_UP])
-			{
-				if(startAngle != 225)
-				{
-					angle += (startAngle > 45 && startAngle < 225) ? mult : -mult;
-				}
-			}
-			else if(Input->Button[CB_RIGHT] && Input->Button[CB_UP])
-			{
-				if(startAngle != 315)
-				{
-					angle += (startAngle > 135 && startAngle < 315) ? mult : -mult;
-				}
-			}
-			else if(Input->Button[CB_UP])
-			{
-				if(startAngle != 270)
-				{
-					angle += (startAngle > 90 && startAngle < 270) ? mult : -mult;
-				}
-			}
-			else if(Input->Button[CB_DOWN])
-			{
-				if(startAngle != 90)
-				{
-					angle += (startAngle > 90 && startAngle < 270) ? -mult : mult;
-				}
-			}
-			else if(Input->Button[CB_LEFT])
-			{
-				if(startAngle != 180)
-				{
-					angle += (startAngle < 180) ? mult : -mult;
-				}
-			}
-			else if(Input->Button[CB_RIGHT])
-			{
-				if(startAngle != 0)
-				{
-					angle += (startAngle < 180) ? -mult : mult;
-					if(startAngle < 180) angle -= mult;
-					else angle += mult;
-				}
-			}
-			if(angle < 0) angle += 360;
-			else if(angle >= 360) angle -= 360;
+			while(angle < 0) angle += 360;
+			while(angle >= 360) angle -= 360;
 			if(angle % mult) angle -= (angle % mult);
 		}
 		setGlobalVar(GVAR_ARROWANGLE, GV_MISC, angle);
@@ -606,6 +544,7 @@ void runOmniArrows(int mult)
 		int y = Hero->Y+8 + VectorY(16, angle);
 		MooshDrawTile(6, x, y, TILE_AIMARROW, 1, 1, 0, 16, 16, x, y, angle, 0, false, OP_OPAQUE);
 		Hero->Dir = AngleDir4(WrapDegrees(angle));
+		HeroDir8 = AngleDir8(WrapDegrees(angle));
 		TotalNoAction();
 	}
 }
@@ -619,7 +558,7 @@ item script DekuNuts
 		{
 			Game->PlaySound(SFX_DEKUNUT_SNAP);
 			bool freeze = false;
-			for(int i = 0;i<countNPCInRange(CenterLinkX(),CenterLinkY(),40);i++)
+			for(int i = countNPCInRange(CenterLinkX(),CenterLinkY(),40)-1;i>=0;--i)
 			{
 				npc n = getNthNPCInRange(CenterLinkX(),CenterLinkY(),40,i);
 				if((!n->Defense[NPCD_SCRIPT10]||n->Defense[NPCD_SCRIPT10]==3||n->Defense[NPCD_SCRIPT10]==4||n->Defense[NPCD_SCRIPT10]==5)&&!n->Stun)
@@ -1417,6 +1356,7 @@ item script Bombchu
 {
 	void run(int step, int sprite)
 	{
+		unless(Game->Counter[this->Counter])return;
 		if(countLWeaponType(LW_BOMBCHU))return;
 		--Game->Counter[this->Counter];
 		Game->PlaySound(SFX_PLACE);

@@ -20,7 +20,7 @@ npc script Skulltula
 		npcdata data = Game->LoadNPCData(this->ID);
 		for(int i = 0;i<41;i++)
 		{
-			if(i!=NPCD_HOOKSHOT)
+			if(this->Defense[i] != NPCDT_ONEHITKILL)
 				this->Defense[i]=NPCDT_BLOCK;
 		}
 		bool visible = false;
@@ -45,7 +45,7 @@ npc script Skulltula
 				visible=false;
 				for(int i = 0;i<41;i++)
 				{
-					if(i!=NPCD_HOOKSHOT)
+					if(this->Defense[i] != NPCDT_ONEHITKILL)
 						this->Defense[i]=NPCDT_BLOCK;
 				}
 			}
@@ -57,7 +57,7 @@ npc script Skulltula
 				this->CollDetection=true;
 				if(flipped||this->Stun)
 				{
-					this->OriginalTile = TILE_SKULLTULA + this->Dir;
+					this->OriginalTile = TILE_SKULLTULA + OppositeDir(this->Dir);
 					if(Hero->HitBy[0]==thisID||this->HitBy[2]>0)timer=119;
 					if(this->Stun)
 					{
@@ -74,7 +74,7 @@ npc script Skulltula
 						unless(this->Stun)
 							for(int i = 0;i<41;i++)
 							{
-								if(i!=NPCD_HOOKSHOT)
+								if(this->Defense[i] != NPCDT_ONEHITKILL)
 									this->Defense[i]=NPCDT_BLOCK;
 							}
 						timer=0;
@@ -82,7 +82,7 @@ npc script Skulltula
 				}
 				else
 				{
-					this->OriginalTile = TILE_SKULLTULA + OppositeDir(this->Dir);
+					this->OriginalTile = TILE_SKULLTULA + this->Dir;
 					if(Hero->HitBy[0]==thisID)timer=1;
 					if(timer==0)
 					{

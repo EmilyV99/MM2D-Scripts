@@ -735,7 +735,7 @@ ffc script owlStatue//start
 		{
 			unless(form)
 			{
-				for(int i=0;i<countLWeaponType(LW_SWORD);i++)
+				for(int i=countLWeaponType(LW_SWORD);i>0;--i)
 				{
 					lweapon weap = loadLWeaponType(LW_SWORD,i);
 					if(weap->isValid()&&Collision(weap,this))
