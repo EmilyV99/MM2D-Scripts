@@ -775,7 +775,8 @@ global script Global
 		}
 	}//end
 	
-	void debugSetup(){//start
+	void debugSetup()//start
+	{
 		dbsetup=true;
 		noSave=true;
 		Game->Cheat=4;
