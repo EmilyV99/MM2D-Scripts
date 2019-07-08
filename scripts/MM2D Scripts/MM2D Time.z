@@ -7,6 +7,7 @@
 //start OnTimeReset
 void resetTime()
 {
+	Hero->WarpEx({WT_IWARP,0,0x10,120,32,WARPEFFECT_NONE,0,WARPFLAGS_RESETTIME});
 	time=0;
 	trueTime=0;
 	hour=6;

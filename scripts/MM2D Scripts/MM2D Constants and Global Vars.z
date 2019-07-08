@@ -523,6 +523,9 @@ DEFINE BRANG_MISC_DEADTIMER = 2;
 DEFINE BRANG_MISC_OTHER = 3;
 DEFINE BRANG_MISC_MULT = 4;
 DEFINE SPRITE_MISC_HITXOFFSET = 30;
+//Warp Flags
+DEFINE WARPFLAGS_DESTRUCTION = WARP_FLAG_SETCONTINUESCREEN | WARP_FLAG_SETCONTINUEDMAP | WARP_FLAG_SCRIPTDRAW | WARP_FLAG_PLAYMUSIC | WARP_FLAG_PLAYSOUNDS;
+DEFINE WARPFLAGS_RESETTIME = WARP_FLAG_SETCONTINUESCREEN | WARP_FLAG_SETCONTINUEDMAP | WARP_FLAG_SCRIPTDRAW;
 //Torch puzzle vars
 bool torchPuzzleStates[4 * MAX_LEVEL];
 int torchPuzzle[4 * MAX_LEVEL];
@@ -598,7 +601,7 @@ namespace GVars
 {
 	#option BINARY_32BIT on
 	int gvars[MAX_INT];
-	int gbuf[MAX_INT];
+	char gbuf[MAX_INT];
 	//
 	DEFINE GV_MISC = 0;
 	enum GVAR_MISC
@@ -660,12 +663,12 @@ namespace GVars
 		GVAR_CHESTGAME
 	};
 	////
-	int getGlobalVar(int index, int add)
+	u getGlobalVar(int index, int add)
 	{
 		return gvars[index+add];
 	}
 
-	void setGlobalVar(int index, int add, int state)
+	void setGlobalVar(int index, int add, u state)
 	{
 		gvars[index+add]=state;
 	}
@@ -675,12 +678,12 @@ namespace GVars
 		gvars[index+add]+=inc;
 	}
 
-	void flagGlobalVar(int index, int add, int flag)
+	void flagGlobalVar(int index, int add, u flag)
 	{
 		gvars[index+add]|=flag;
 	}
 
-	bool getFlagGlobalVar(int index, int add, int flag)
+	bool getFlagGlobalVar(int index, int add, u flag)
 	{
 		return (gvars[index+add] & flag) > 0;
 	}
@@ -695,24 +698,24 @@ namespace GVars
 		setGlobalBool(index,GV_CHEST,state);
 	}
 
-	int getSoilState(int index)
+	u getSoilState(int index)
 	{
 		return getGlobalVar(index,GV_SOFTSOIL);
 	}
 
-	void setSoilState(int index, int state)
+	void setSoilState(int index, u state)
 	{
 		setGlobalVar(index,GV_SOFTSOIL,state);
 	}
 
 	bool getBNstate(int index)
 	{
-		return getGlobalVar(index, GV_BNOTEBOOK) > 0;
+		return getGlobalBool(index, GV_BNOTEBOOK);
 	}
 
 	void setBNstate(int index)
 	{
-		setGlobalVar(index, GV_BNOTEBOOK, 1);
+		setGlobalBool(index, GV_BNOTEBOOK, 1);
 	}
 
 	bool getNPCflag(int index, int flag)

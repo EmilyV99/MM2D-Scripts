@@ -623,6 +623,7 @@ lweapon script zoraBrang
 {
 	void run()
 	{
+		this->Weapon = LW_SWORD; //Allow cutting bushes!
 		lweapon other = this->Misc[BRANG_MISC_OTHER];
 		while(this->isValid())
 		{

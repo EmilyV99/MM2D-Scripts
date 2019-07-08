@@ -8,6 +8,11 @@ global script Init
 {
 	void run()
 	{
+		//Check debug mode
+		char saveName[16];
+		Game->GetSaveName(saveName);
+		unless(strcmp(saveName,"Link"))debugEnabled=false;
+		else debugEnabled=true;
 		onLaunch();
 		//Starting settings
 		Game->MCounter[CR_DEKUNUTS] = 20;
@@ -17,11 +22,6 @@ global script Init
 		//Make FFC tiles invisible
 		CopyTile(TILE_INVIS,19);
 		CopyTile(TILE_INVIS,39);
-		//Check debug mode
-		int saveName[16];
-		Game->GetSaveName(saveName);
-		unless(strcmp(saveName,"Link"))debugEnabled=false;
-		else debugEnabled=true;
 		//Set up tint palettes
 		setGlobalVar(TINT_DAY,GV_PAL,createTintPalette(0,0,0));
 		setGlobalVar(TINT_SUNSETORANGE,GV_PAL,createTintPalette(-3,-9,-14));
@@ -34,7 +34,7 @@ global script Init
 		setEnterEndsTyping(true);
 		setAllowBackspaceDelete(true);
 		setOverflowWraps(false);
-		
+		onLaunchEnd();
 	}
 }
 //end
@@ -43,35 +43,12 @@ global script Global
 {
 	void run()//start mainGlobal
 	{
-		//start init
-		Game->DisableActiveSubscreen = true; //Disable engine subscreen.
-		testrun();
-		initGame(); //Handle rando stuff here.
-		OptionsMenu.menu_init();
-		bool isLensTinted = false;
-		bool refreshTime = false;
-		arrowAimMode = false;
-		if(Hero->Item[81])Game->MCounter[CR_BOMBCHUS]=40;
-		bool scrnChanged = false;
-		LinkMovement_Init();
-		TangoInit();
-		HeroDir8 = validateDir(getPressedDir8(), Hero->Dir);
-		//start Ocarina init
-		scarecrowMode = false;
-		scarecrowRecord = false;
-		ocIndex = 0;
-		playedSong = -1;
-		songFrames = 0;
-		midiToReturn = 0;
-		//end Ocarina init
-		subscreen = false;
-		//end init
-		//start init bitmaps
-		clearBitmap(RT_BITMAP0);
-		//end init bitmaps
 		//start Global Script Scope Vars
 		int subskin = 1;
 		int lastskin = -1;
+		bool isLensTinted = false;
+		bool refreshTime = false;
+		bool scrnChanged = false;
 		//end
 		//Tango_ConvertVariableName("anpc");
 		//Tango_ConvertFunctionName("npcend");
@@ -242,13 +219,6 @@ global script Global
 			LinkMovement_Update1();
 			unless(isFrozen)
 				highLedgeFromWater();
-			unless(subscreen)
-			{
-				drawExtraLayerEffects();
-				lwLoop();
-				ewLoop();
-				itemLoop();
-			}
 			//end
 			if(UsingItem(53)&&fullCounter(CR_MAGIC)>2)
 			{
@@ -272,9 +242,16 @@ global script Global
 			handleTintPausing();
 			timePalette();
 			runTints();
-			runHeightBitmap();
 			HeroDir8 = validateDir(getPressedDir8(), (HeroDir8 & 4) ? HeroDir8 : Hero->Dir);
-			Waitdraw();			
+			unless(subscreen)
+			{
+				drawExtraLayerEffects();
+				lwLoop();
+				ewLoop();
+				itemLoop();
+			}	
+			Waitdraw();		
+			runHeightBitmap();
 			passiveSubscreen();
 			if(!isFrozen||isBottleFrozen)
 			{
@@ -287,7 +264,6 @@ global script Global
 		}
 	}//end mainGlobal
 	//start destruction
-	DEFINE DESTRUCTION_WARP_FLAGS = WARP_FLAG_SETCONTINUESCREEN | WARP_FLAG_SETCONTINUEDMAP | WARP_FLAG_SCRIPTDRAW | WARP_FLAG_PLAYMUSIC | WARP_FLAG_PLAYSOUNDS;
 	void destruction()
 	{
 		unless(!Game->GetCurDMap()&&Game->GetCurScreen()==32)
@@ -298,9 +274,9 @@ global script Global
 				Waitframe();
 			}
 			//Hero->Warp(0,32);
-			Hero->WarpEx({WT_IWARP,0,32,-1,WARP_A,WARPEFFECT_NONE,SFX_DESTRUCTION,DESTRUCTION_WARP_FLAGS});
+			Hero->WarpEx({WT_IWARP,0,32,-1,WARP_A,WARPEFFECT_NONE,SFX_DESTRUCTION,WARPFLAGS_DESTRUCTION});
 			Waitframes(2);
-			int args[8];
+			u args[8];
 			if(LEARNED_SONGS[SONG_SongOfTime]&&Hero->Item[31])
 			{
 				args[0]=3;
@@ -355,6 +331,7 @@ global script Global
 				{
 					dmapdata udmap = Game->LoadDMapData(updmap);
 					drawHeightLayerData(udmap->Map,screen,4);
+					//printf("map,screen: %d,%d\n",udmap->Map,screen);
 				}
 			}
 		}
@@ -525,7 +502,7 @@ global script Global
 					//Waitframe(); //Unneeded?
 				}
 				Rafting[RAFT_UP]=-1;
-				int args[8] = {Rafting[RAFT_DIR],0,0,2};
+				u args[8] = {Rafting[RAFT_DIR],0,0,2};
 				Rafting[RAFT_DIR] = -1;
 				Waitframe();
 				RunFFCScript(FFC_SOFTSOIL,args);
@@ -671,11 +648,10 @@ global script Global
 				drawDebugString(0,0,"DEBUG MODE",false);
 				drawDebugString(0,156,"   TDBG: ~ | TIME: UDLR | REF: = | FRZ: ENTER | WARP: NUMS             ",false);
 				drawDebugString(0,162," REFRESH: R | DBDRAW: \\ | CANFALL: F | UPDOWN: [] | NOSAV: N-         ",false);
-				canFall=false;
 				//Hour manipulation
 				if(Input->ReadKey[KEY_UP])
 				{
-					hour++;
+					++hour;
 					trueTime+=3600*FRAME;
 					if(hour>23)
 					{
@@ -683,7 +659,7 @@ global script Global
 					}
 					if(hour==6)
 					{
-						day++;
+						++day;
 						if(day>3)
 						{
 							day-=3;
@@ -695,7 +671,7 @@ global script Global
 				}
 				if(Input->ReadKey[KEY_DOWN])
 				{
-					hour--;
+					--hour;
 					trueTime-=3600*FRAME;
 					if(hour<0)
 					{
@@ -703,7 +679,7 @@ global script Global
 					}
 					if(hour==5)
 					{
-						day--;
+						--day;
 						if(day<1)
 						{
 							day+=3;
@@ -716,7 +692,7 @@ global script Global
 				//Day manipulation
 				if(Input->ReadKey[KEY_RIGHT])
 				{
-					day++;
+					++day;
 					trueTime+=(3600*24*FRAME);
 					if(day>3)
 					{
@@ -728,7 +704,7 @@ global script Global
 				}
 				if(Input->ReadKey[KEY_LEFT])
 				{
-					day--;
+					--day;
 					trueTime-=(3600*24*FRAME);
 					if(day<1)
 					{
@@ -770,9 +746,7 @@ global script Global
 				if(Input->ReadKey[KEY_F])debugCanFall = !debugCanFall;
 				if(Input->ReadKey[KEY_OPENBRACE])warpDown();
 				if(Input->ReadKey[KEY_CLOSEBRACE])warpUp();
-				if(Input->ReadKey[KEY_I]) CreateItemAt(0,Hero->X,Hero->Y - 32)->Pickup |= IP_TIMEOUT;
-				NoAction();
-				Input->Press[CB_START]=false;Input->Button[CB_START]=false;
+				TotalNoAction();
 			}
 		}
 	}//end
@@ -819,14 +793,14 @@ global script Global
 	{
 		if(itID!=0)
 		{
-			int str[256];
+			char str[256];
 			itemdata theItem = Game->LoadItemData(itID);
 			theItem->GetName(str);
 			drawDebugString(256,0,str,true);
 		}
 		if(itID>=146&&itID<=151)//BottleDebugger
 		{
-			int str[256];
+			char str[256];
 			int bstate = getBottleState(itID-145);
 			getBottleStateName(bstate,str);
 			drawDebugString(256,8,str,true);
@@ -835,7 +809,7 @@ global script Global
 	}//end
 	
 	//start dbDrawFuncs
-	void drawDebugString(int x, int y, int str,bool right)
+	void drawDebugString(int x, int y, char str,bool right)
 	{
 		int format = TF_NORMAL;
 		if(right)format = TF_RIGHT;
@@ -924,7 +898,7 @@ global script Global
 	
 	void itemLoop()
 	{
-		/*DEFINE THISDMAP = Game->GetCurDMap();
+		DEFINE THISDMAP = Game->GetCurDMap();
 		for(int i = Screen->NumItems(); i > 0; --i)
 		{
 			item it = Screen->LoadItem(i);
@@ -945,7 +919,7 @@ global script Global
 					else it->ScriptTile = -1;
 			}
 			it->HitXOffset = (300 * ((it->Misc[ITEMMISC_LAYERDMAP]-1)-THISDMAP)) + ITEMHITXOFFSET + it->Misc[SPRITE_MISC_HITXOFFSET];
-		}*/
+		}
 	}
 	//end loops
 	void runExtraControls()//start extraControls
@@ -1039,13 +1013,10 @@ global script onFileLoad
 		if(owlSaved)
 		{
 			owlSaved=false;
-			Game->ContinueDMap=0;
-			Game->ContinueScreen=0;
 			Game->Save();
 		}
 		else
 		{
-			Hero->Warp(0,0);
 			resetTime();
 			Game->ContinueDMap=0;
 			Game->ContinueScreen=0;
@@ -1053,6 +1024,7 @@ global script onFileLoad
 		}
 		tintOnContinue();
 		OptionsMenu.reloadOptions();
+		onLaunchEnd();
 	}
 }//end
 //start OnExit Script
@@ -1069,6 +1041,59 @@ void onLaunch() //Called from `Init` and `OnContinue`
 {
 	ClearTrace();
 	TraceS("[MM2D] Launching TLoZ: Majora's Mask 2D...\n");
+	Game->DisableActiveSubscreen = true; //Disable engine subscreen.
+	refreshDisable();
+	testrun();
+	initGame(); //Handle rando stuff here.
+	OptionsMenu.menu_init();
+	arrowAimMode = false;
+	Game->MCounter[CR_BOMBCHUS]=Hero->Item[81]?40:0;
+	LinkMovement_Init();
+	TangoInit();
+	HeroDir8 = validateDir(getPressedDir8(), Hero->Dir);
+	//start Ocarina init
+	scarecrowMode = false;
+	scarecrowRecord = false;
+	ocIndex = 0;
+	playedSong = -1;
+	songFrames = 0;
+	midiToReturn = 0;
+	//end Ocarina init
+	subscreen = false;
+	clearBitmap(RT_BITMAP0);
+	refreshDisable();
+}
+
+void onLaunchEnd()
+{
+	TraceS("[MM2D] Finished init\n");
+}
+
+void refreshDisable()
+{
+	Input->DisableButton[CB_L] = true;
+	Input->DisableButton[CB_R] = true;
+	Input->DisableButton[CB_MAP] = true;
+	for(int q = 0; q < 127; ++q)
+	{
+		switch(q)
+		{
+			//Always disable
+			case KEY_F6: //Custom F6 Menu
+			case KEY_ENTER: //OptionsMenu
+			case KEY_ENTER_PAD: //OptionsMenu
+			case KEY_BACKSPACE: //OptionsMenu
+				Input->DisableKey[q] = true;
+				continue;
+			//Only disable if debug mode
+			case KEY_TILDE:
+				Input->DisableKey[q] = debugEnabled;
+				continue;
+			default:
+				Input->DisableKey[q] = false;
+		}
+	}
+	Input->DisableKey[Controls[CONTROL_OPTIONS]] = true;
 }
 //end
 //start Game Init
@@ -1184,7 +1209,8 @@ hero script OptionsMenu
 	
 	void menu_init()
 	{
-		menu = Game->CreateBitmap(MENU_BITMAP_HEIGHT, MENU_BITMAP_WIDTH);
+		if(!menu->isAllocated()) menu = Game->CreateBitmap(MENU_BITMAP_HEIGHT, MENU_BITMAP_WIDTH);
+		else if(!menu->isValid()) menu->Create(0, MENU_BITMAP_HEIGHT, MENU_BITMAP_WIDTH);
 	}
 	
 	void run() //start
@@ -1329,15 +1355,16 @@ hero script OptionsMenu
 						
 						case STATE_OPTIONSKEY: //start
 						{
-							int buf0[64];
+							char buf0[64];
 							KeyToString(Controls[CONTROL_OPTIONS], buf0, true, true);
 							DrawMenuString(buf0, menu, 2, getTabPos(<OptState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptState>mainOption), MENU_TCOLOR_ACTIVE, TF_RIGHT);
 							if(Input->Button[CB_A]) break; //Don't take input while `A` is held
-							int key = getKeyPress();
+							char key = getKeyPress();
 							switch(isValidKey(key))
 							{
 								case 1:
 									Controls[CONTROL_OPTIONS] = key;
+									refreshDisable(); //Ensure that the new key is disabled in-engine, and the old is not
 									//Fall-through
 								case -1:
 									state = STATE_MAIN;
@@ -1382,7 +1409,7 @@ hero script OptionsMenu
 									break;
 									
 								case _RED:
-									int buf1[12] = "           ";
+									char buf1[12] = "           ";
 									itoa(buf1, (((__tintR[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintR[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintR[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0), __tintR[getGlobalVar(TINT_LENS, GV_PAL)]);
 									DrawMenuString(buf1, menu, 2, getTabPos(<OptState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptState>mainOption), RED, TF_RIGHT, true);
 									__tintR[getGlobalVar(TINT_LENS, GV_PAL)] += inc;
@@ -1390,7 +1417,7 @@ hero script OptionsMenu
 									break;
 									
 								case _GREEN:
-									int buf2[12] = "           ";
+									char buf2[12] = "           ";
 									itoa(buf2, (((__tintG[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintG[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintG[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 4, __tintG[getGlobalVar(TINT_LENS, GV_PAL)]);
 									DrawMenuString(buf2, menu, 2, getTabPos(<OptState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptState>mainOption), GREEN, TF_RIGHT, true);
 									__tintG[getGlobalVar(TINT_LENS, GV_PAL)] += inc;
@@ -1398,7 +1425,7 @@ hero script OptionsMenu
 									break;
 									
 								case _BLUE:
-									int buf3[12] = "           ";
+									char buf3[12] = "           ";
 									itoa(buf3, (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintB[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 8, __tintB[getGlobalVar(TINT_LENS, GV_PAL)]);
 									DrawMenuString(buf3, menu, 2, getTabPos(<OptState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptState>mainOption), BLUE, TF_RIGHT, true);
 									__tintB[getGlobalVar(TINT_LENS, GV_PAL)] += inc;
@@ -1418,7 +1445,7 @@ hero script OptionsMenu
 						
 						case STATE_MENU_SCROLL_SPEED:
 						{
-							int buf4[16] = "      x";
+							char buf4[16] = "      x";
 							if(opt[OPT_MENU_SCROLL_MULT]<1) strcat(buf4,"0.5");
 							else itoa(buf4, 7, opt[OPT_MENU_SCROLL_MULT]);
 							DrawMenuString(buf4, menu, 2, getTabPos(<OptState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptState>mainOption), MENU_TCOLOR_ACTIVE, TF_RIGHT);
@@ -1430,7 +1457,7 @@ hero script OptionsMenu
 						
 						case STATE_MENU_HOLD_DELAY:
 						{
-							int buf5[16] = "    ";
+							char buf5[16] = "    ";
 							itoa(buf5, 4, opt[OPT_MENU_HOLD_DELAY]);
 							DrawMenuString(buf5, menu, 1, getTabPos(<OptState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptState>mainOption), MENU_TCOLOR_ACTIVE, TF_RIGHT);
 							if(up) opt[OPT_MENU_HOLD_DELAY] += 10;
@@ -1502,7 +1529,7 @@ hero script OptionsMenu
 						Screen->Rectangle(MENU_LAYER, 0,                 176 - MENU_BOTTOM_MARGIN_HEIGHT, 256,                  176,                         BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
 					}
 					//Tab names
-					int buf1[32], buf2[32], buf3[32];
+					char buf1[32], buf2[32], buf3[32];
 					getTabName(buf1, wrapTab(tab-1));
 					getTabName(buf2, wrapTab(tab));
 					getTabName(buf3, wrapTab(tab+1));
@@ -1648,13 +1675,13 @@ hero script OptionsMenu
 		y += MENU_FONT_HEIGHT + MENU_SPACING;
 		//
 		DrawMenuString("Preview            ", menu, 1, x, y, MENU_TCOLOR_INACTIVE_TEMP, TF_RIGHT);
-		int buf1[12] = "           ";
+		char buf1[12] = "           ";
 		itoa(buf1, (((__tintR[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintR[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintR[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0), __tintR[getGlobalVar(TINT_LENS, GV_PAL)]);
 		DrawMenuString(buf1, menu, 1, x, y, DARKRED, TF_RIGHT, true);
-		int buf2[12] = "           ";
+		char buf2[12] = "           ";
 		itoa(buf2, (((__tintG[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintG[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintG[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 4, __tintG[getGlobalVar(TINT_LENS, GV_PAL)]);
 		DrawMenuString(buf2, menu, 1, x, y, DARKGREEN, TF_RIGHT, true);
-		int buf3[12] = "           ";
+		char buf3[12] = "           ";
 		itoa(buf3, (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] >= 0)) ? 1 : 0) + (((__tintB[getGlobalVar(TINT_LENS, GV_PAL)] < 10 && __tintB[getGlobalVar(TINT_LENS, GV_PAL)] > -10)) ? 1 : 0) + 8, __tintB[getGlobalVar(TINT_LENS, GV_PAL)]);
 		DrawMenuString(buf3, menu, 1, x, y, DARKBLUE, TF_RIGHT, true);
 		y += MENU_FONT_HEIGHT + MENU_SPACING;
@@ -1662,13 +1689,13 @@ hero script OptionsMenu
 		DrawMenuString(opt[OPT_HIDE_TINT_IN_MENU] ? "  On" : "Off", menu, 2, x, y, opt[OPT_HIDE_TINT_IN_MENU] ? DARKGREEN : DARKRED, TF_RIGHT);
 		y += MENU_FONT_HEIGHT + MENU_SPACING;
 		//
-		int buf4[16] = "      x";
+		char buf4[16] = "      x";
 		if(opt[OPT_MENU_SCROLL_MULT]<1) strcat(buf4,"0.5");
 		else itoa(buf4, 7, opt[OPT_MENU_SCROLL_MULT]);
 		DrawMenuString(buf4, menu, 1, x, y, MENU_TCOLOR_INACTIVE_TEMP, TF_RIGHT);
 		y += MENU_FONT_HEIGHT + MENU_SPACING;
 		//
-		int buf5[16] = "    ";
+		char buf5[16] = "    ";
 		itoa(buf5, 4, opt[OPT_MENU_HOLD_DELAY]);
 		DrawMenuString(buf5, menu, 1, x, y, MENU_TCOLOR_INACTIVE_TEMP, TF_RIGHT);
 		//
@@ -1676,7 +1703,7 @@ hero script OptionsMenu
 		//
 		x += MENU_SCREEN_WIDTH;
 		y = TOP_Y;
-		int buf0[64] = "                              ";
+		char buf0[64] = "                              ";
 		KeyToString(Controls[CONTROL_OPTIONS], buf0, true, true);
 		DrawMenuString(buf0, menu, 1, x, y, MENU_TCOLOR_INACTIVE_TEMP, TF_RIGHT);
 		y += MENU_FONT_HEIGHT + MENU_SPACING;
@@ -1690,12 +1717,12 @@ hero script OptionsMenu
 		//Empty module; no temp bitmap for this slot. Last slot.
 	}//end
 	
-	void DrawMenuString(int str, bitmap menu, int layer, int x, int y, int color, int format)
+	void DrawMenuString(char str, bitmap menu, int layer, int x, int y, int color, int format)
 	{
 		DrawMenuString(str, menu, layer, x, y, color, format, false);
 	}
 	
-	void DrawMenuString(int str, bitmap menu, int layer, int x, int y, int color, int format, bool transbg)
+	void DrawMenuString(char str, bitmap menu, int layer, int x, int y, int color, int format, bool transbg)
 	{
 		menu->DrawString(layer, x, y, MENU_FONT, color, transbg ? TRANSBG : BLACK, format, str, OP_OPAQUE);
 	}//end
@@ -1739,7 +1766,7 @@ hero script OptionsMenu
 		return MENU_START_TABS_X + (MENU_SCREEN_WIDTH * tab);
 	}
 	
-	void getTabName(int buf, Tab tab)
+	void getTabName(char buf, Tab tab)
 	{
 		switch(tab)
 		{
@@ -1898,7 +1925,7 @@ namespace GameOverMenu
 		{
 			case CONTINUE:
 				Hero->HP = Hero->MaxHP;
-				if(Hero->MP < (Hero->MaxMP / 2)) Hero->MP = Hero->MaxMP / 2;
+				Hero->MP = Clamp(Hero->MP, (Hero->MaxMP / 2), Hero->MaxMP);
 				Screen_Freeze(0);
 				Game->Continue();
 				break;
@@ -1914,9 +1941,6 @@ namespace GameOverMenu
 				}
 				Screen_Freeze(0);
 				saveTheGame();
-				Hero->PitWarp(0,0x10);
-				Hero->X = 120;
-				Hero->Y = 32;
 				resetTime();
 				break;
 			case QUIT:
@@ -1950,7 +1974,7 @@ namespace Debug //start
 		printf("[MM2D] [Debug] Point %d, data %d\n", num, data);
 	}
 	
-	void print(int str) //start
+	void print(char str) //start
 	{
 		unless(__DEBUG) return;
 		printf("[MM2D Debug] %s\n",str);

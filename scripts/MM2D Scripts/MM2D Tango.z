@@ -8,37 +8,37 @@ DEFINE TANGO_DEBUG = 0;
 int subscreenTangoSlot = TANGO_INVALID;
 bool subscreenCursorChanged = false;
 
-void ShowMessageAndWait(int msg)
+void ShowMessageAndWait(char msg)
 {
 	ShowMessageAndWait(msg,false,false);
 }
 
-void ShowMessageAndWait(int msg, bool menu4way)
+void ShowMessageAndWait(char msg, bool menu4way)
 {
 	ShowMessageAndWait(msg,menu4way,false);
 }
 
-void ShowMessageAndWait(int msg, bool menu4way, bool isNPC)
+void ShowMessageAndWait(char msg, bool menu4way, bool isNPC)
 {
 	int slot = ShowMessage(msg,TSTYLE_MAJORAS);
 	handleMessageSlot(slot,menu4way,isNPC);
 }
 
-void getNPCName(int buf, int NPCid)
+void getNPCName(char buf, int NPCid)
 {
 	remchr(buf,0);
 	strcpy(buf,NPCNames[NPCid]);
 	strcat(buf,"@waituntil(@npcend())@close()"); //Literal here is Tango function to wait for MAINSLOT to be finished / UNFINISHED /
 }
 
-void ShowNPCStringAndWait(int str, int NPCid, bool menu4way)
+void ShowNPCStringAndWait(char str, int NPCid, bool menu4way)
 {
 	setGlobalVar(GVAR_ACTIVENPCID,GV_MISC,NPCid);
 	ShowStringAndWait(str,menu4way,true);
 	setGlobalVar(GVAR_ACTIVENPCID,GV_MISC,0);
 }
 
-void ShowNPCMessageAndWait(int str, int NPCid, bool menu4way)
+void ShowNPCMessageAndWait(char str, int NPCid, bool menu4way)
 {
 	setGlobalVar(GVAR_ACTIVENPCID,GV_MISC,NPCid);
 	ShowMessageAndWait(str,menu4way,true);
@@ -46,33 +46,33 @@ void ShowNPCMessageAndWait(int str, int NPCid, bool menu4way)
 }
 
 //start Overloads
-void ShowNPCMessageAndWait(int str, int NPCid)
+void ShowNPCMessageAndWait(char str, int NPCid)
 {
 	ShowNPCMessageAndWait(str,NPCid,false);
 }
 
-void ShowNPCStringAndWait(int str, int NPCid)
+void ShowNPCStringAndWait(char str, int NPCid)
 {
 	ShowNPCStringAndWait(str,NPCid,false);
 }//end
 
-void ShowStringAndWait(int str)
+void ShowStringAndWait(char str)
 {
 	ShowStringAndWait(str,false,false);
 }
 
-void ShowStringAndWait(int str, bool menu4way)
+void ShowStringAndWait(char str, bool menu4way)
 {
 	ShowStringAndWait(str,menu4way,false);
 }
 
-void ShowStringAndWait(int str, bool menu4way, bool isNPC)
+void ShowStringAndWait(char str, bool menu4way, bool isNPC)
 {
 	int slot = ShowString(str,TSTYLE_MAJORAS);
 	handleMessageSlot(slot,menu4way,isNPC);
 }
 
-void SignShowMessageAndWait(int msg)
+void SignShowMessageAndWait(char msg)
 {
 	int slot = ShowMessage(msg,TSTYLE_SIGNS);
 	while(Tango_SlotIsActive(slot)&&Tango_SlotIsFinished(slot))Waitframe();
@@ -93,7 +93,7 @@ void handleMessageSlot(int slot)
 void handleMessageSlot(int slot, bool menu4way, bool isNPC)//start handleMessageSlot
 {
 	int delay = 0;
-	int NPCname[MAXNAMELENGTH];
+	char NPCname[MAXNAMELENGTH];
 	int lastid = 0;
 	if(isNPC)initNPCSlot();
 	while(Tango_SlotIsActive(slot))
@@ -188,7 +188,7 @@ void VTango_ChoiceShift(int shift)
 	Tango_SetMenuCursorPosition(pos);
 }
 
-int ShowMessage(int msg, int style)
+int ShowMessage(char msg, int style)
 {
 	int slot = getGlobalVar(GVAR_MAINTANGOSLOT,GV_MISC);
 	if(slot==TANGO_INVALID)
@@ -207,7 +207,7 @@ int ShowMessage(int msg, int style)
 	return slot;
 }
 
-int ShowString(int str, int style)
+int ShowString(char str, int style)
 {
 	int slot = getGlobalVar(GVAR_MAINTANGOSLOT,GV_MISC);
 	if(slot==TANGO_INVALID)
@@ -255,7 +255,7 @@ void closeNPC()
 	Tango_ClearSlot(slot);
 }
 
-void showItemCaption(int str)
+void showItemCaption(char str)
 {
 	if(subscreenTangoSlot==TANGO_INVALID)
 	{
@@ -383,7 +383,7 @@ void setupStyles()//start styles
 }//end
 
 //start customtracers
-void tTraceS(int str)
+void tTraceS(char str)
 {
 	if(TANGO_DEBUG)TraceS(str);
 }

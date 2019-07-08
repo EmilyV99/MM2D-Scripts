@@ -199,7 +199,7 @@ void runSubscreen()
 	int cursorRow = locToRow(cursorPos);
 	int cursorCol = locToCol(cursorPos);
 	//start DrawThings
-	int itemDescStr[512];
+	char itemDescStr[512];
 	unless(subState)
 	{
 		drawBase(SCRN_SUBSCREEN_ITEM);
@@ -447,8 +447,7 @@ void runSubscreen()
 				cursorNotes[1]=SONGNOTES_SongOfTime;
 				if(cursorIndex==1)
 				{
-					int cpystr[] = "Song of Time";
-					strcpy(itemDescStr,cpystr);
+					strcpy(itemDescStr,"Song of Time");
 					if(pressA)
 					{
 						fakeSong = true;
@@ -463,8 +462,7 @@ void runSubscreen()
 				cursorNotes[2]=SONGNOTES_SongOfHealing;
 				if(cursorIndex==2)
 				{
-					int cpystr[] = "Song of Healing";
-					strcpy(itemDescStr,cpystr);
+					strcpy(itemDescStr,"Song of Healing");
 					if(pressA)
 					{
 						fakeSong = true;
@@ -479,8 +477,7 @@ void runSubscreen()
 				cursorNotes[3]=SONGNOTES_SongOfStorms;
 				if(cursorIndex==3)
 				{
-					int cpystr[] = "Song of Storms";
-					strcpy(itemDescStr,cpystr);
+					strcpy(itemDescStr,"Song of Storms");
 					if(pressA)
 					{
 						fakeSong = true;
@@ -495,8 +492,7 @@ void runSubscreen()
 				cursorNotes[4]=SONGNOTES_EponasSong;
 				if(cursorIndex==4)
 				{
-					int cpystr[] = "Epona's Song";
-					strcpy(itemDescStr,cpystr);
+					strcpy(itemDescStr,"Epona's Song");
 					if(pressA)
 					{
 						fakeSong = true;
@@ -511,8 +507,7 @@ void runSubscreen()
 				cursorNotes[5]=SONGNOTES_SongOfSoaring;
 				if(cursorIndex==5)
 				{
-					int cpystr[] = "Song of Soaring";
-					strcpy(itemDescStr,cpystr);
+					strcpy(itemDescStr,"Song of Soaring");
 					if(pressA)
 					{
 						fakeSong = true;
@@ -527,8 +522,7 @@ void runSubscreen()
 				cursorNotes[8]=SONGNOTES_SonataOfAwakening;
 				if(cursorIndex==8)
 				{
-					int cpystr[] = "Sonata Of Awakening";
-					strcpy(itemDescStr,cpystr);
+					strcpy(itemDescStr,"Sonata Of Awakening");
 					if(pressA)
 					{
 						fakeSong = true;
@@ -543,8 +537,7 @@ void runSubscreen()
 				cursorNotes[9]=SONGNOTES_GoronsLullaby;
 				if(cursorIndex==9)
 				{
-					int cpystr[] = "Goron's Lullaby";
-					strcpy(itemDescStr,cpystr);
+					strcpy(itemDescStr,"Goron's Lullaby");
 					if(pressA)
 					{
 						fakeSong = true;
@@ -559,8 +552,7 @@ void runSubscreen()
 				cursorNotes[10]=SONGNOTES_NewWaveBossaNova;
 				if(cursorIndex==10)
 				{
-					int cpystr[] = "New Wave Bossa Nova";
-					strcpy(itemDescStr,cpystr);
+					strcpy(itemDescStr,"New Wave Bossa Nova");
 					if(pressA)
 					{
 						fakeSong = true;
@@ -575,8 +567,7 @@ void runSubscreen()
 				cursorNotes[11]=SONGNOTES_ElegyOfEmptiness;
 				if(cursorIndex==11)
 				{
-					int cpystr[] = "Elegy Of Emptiness";
-					strcpy(itemDescStr,cpystr);
+					strcpy(itemDescStr,"Elegy Of Emptiness");
 					if(pressA)
 					{
 						fakeSong = true;
@@ -591,8 +582,7 @@ void runSubscreen()
 				cursorNotes[12]=SONGNOTES_OathToOrder;
 				if(cursorIndex==12)
 				{
-					int cpystr[] = "Oath To Order";
-					strcpy(itemDescStr,cpystr);
+					strcpy(itemDescStr,"Oath To Order");
 					if(pressA)
 					{
 						fakeSong = true;
@@ -742,23 +732,19 @@ void runSubscreen()
 		{
 			unless(Game->Generic[GEN_HEARTPIECES])
 			{
-				int cpystr[] = "Heart Pieces";
-				strcpy(itemDescStr,cpystr);
+				strcpy(itemDescStr,"Heart Pieces");
 			}
 			else if(Game->Generic[GEN_HEARTPIECES]==1)
 			{
-				int cpystr[] = "Piece of Heart";
-				strcpy(itemDescStr,cpystr);
+				strcpy(itemDescStr,"Piece of Heart");
 			}
 			else if(Game->Generic[GEN_HEARTPIECES]==2)
 			{
-				int cpystr[] = "2 Pieces of Heart";
-				strcpy(itemDescStr,cpystr);
+				strcpy(itemDescStr,"2 Pieces of Heart");
 			}
 			else if(Game->Generic[GEN_HEARTPIECES]==3)
 			{
-				int cpystr[] = "3 Pieces of Heart";
-				strcpy(itemDescStr,cpystr);
+				strcpy(itemDescStr,"3 Pieces of Heart");
 			}
 		}
 		//Draw song notes

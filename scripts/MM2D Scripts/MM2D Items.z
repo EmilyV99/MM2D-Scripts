@@ -309,10 +309,8 @@ lweapon script throwableBombs_LW
 				{
 					unless(MM2D::CanWalkM(this, map, dir, Ceiling(pix)))
 						this->Misc[BOMB_MISC_MOVINGTIME] = 0;
-					if(this->X != VBound(this->X, 238, 2) || this->Y != VBound(this->Y, 158, 2))
+					if(offscreen(this->X + (dirX(dir) * pix), this->Y + (dirY(dir) * pix)))
 					{
-						this->X = VBound(this->X, 238, 2);
-						this->Y = VBound(this->Y, 158, 2);
 						this->Misc[BOMB_MISC_MOVINGTIME] = 0;
 					}
 					if(this->Misc[BOMB_MISC_MOVINGTIME])
@@ -785,7 +783,7 @@ void EmptyBottleGlobal()//start defaultBottleCode
 				{
 					BottleState[i]=BS_WATER;
 					RefreshBottles();
-					int args[8] = {STR_WATERCOOLED};
+					u args[8] = {STR_WATERCOOLED};
 					RunFFCScript(FFC_SHOWSTRING,args);
 				}
 			}
@@ -892,9 +890,8 @@ void EmptyBottleGlobal()//start defaultBottleCode
 			bool refresh = BottleState[bottle]!=BS_EMPTY;
 			if(BottleState[bottle]==BS_EMPTY)
 			{
-				int scriptname[] = "Bottle_Empty";
-				int scriptid = Game->GetFFCScript(scriptname);
-				int Args[8] = {bottle};
+				int scriptid = Game->GetFFCScript("Bottle_Empty");
+				u Args[8] = {bottle};
 				RunFFCScript(scriptid, Args);
 			} 
 			else if(BottleState[bottle]==BS_POTIONRED)
@@ -1168,13 +1165,13 @@ item script ShopBottleFill
 
 item script BottleFill
 {
-	void run(int str, int state)
+	void run(char str, int state)
 	{
 		unless(CanFillBottle())str = STR_NOBOTTLE;
 		BottleStateForTango = state;
 		remchr(shopString,0);
 		getBottleStateName(state,shopString);
-		int args[8] = {str};
+		u args[8] = {str};
 		RunFFCScript(FFC_SHOWSTRING,args);
 	}
 }
@@ -1248,96 +1245,96 @@ bool ClearBottle(int state)
 	return false;
 }
 //start bottleStateNames
-void getBottleStateName(int state, int deststr)//start
+void getBottleStateName(int state, char deststr)//start
 {
 	unless(state)
 	{
-		int str[] = "Empty Bottle";
+		char str[] = "Empty Bottle";
 		strcpy(deststr,str);
 	}
 	else if(state==1)
 	{
-		int str[] = "Red Potion";
+		char str[] = "Red Potion";
 		strcpy(deststr,str);
 	}
 	else if(state==2)
 	{
-		int str[] = "Green Potion";
+		char str[] = "Green Potion";
 		strcpy(deststr,str);
 	}
 	else if(state==3)
 	{
-		int str[] = "Blue Potion";
+		char str[] = "Blue Potion";
 		strcpy(deststr,str);
 	}
 	else if(state==4)
 	{
-		int str[] = "Water";
+		char str[] = "Water";
 		strcpy(deststr,str);
 	}
 	else if(state==5)
 	{
-		int str[] = "Fairy";
+		char str[] = "Fairy";
 		strcpy(deststr,str);
 	}
 	else if(state==6)
 	{
-		int str[] = "Milk (2/2)";
+		char str[] = "Milk (2/2)";
 		strcpy(deststr,str);
 	}
 	else if(state==7)
 	{
-		int str[] = "Milk (1/2)";
+		char str[] = "Milk (1/2)";
 		strcpy(deststr,str);
 	}
 	else if(state==8)
 	{
-		int str[] = "Bugs";
+		char str[] = "Bugs";
 		strcpy(deststr,str);
 	}
 	else if(state==9)
 	{
-		int str[] = "Chateau Romani";
+		char str[] = "Chateau Romani";
 		strcpy(deststr,str);
 	}
 	else if(state==10)
 	{
-		int str[] = "Poe";
+		char str[] = "Poe";
 		strcpy(deststr,str);
 	}
 	else if(state==11)
 	{
-		int str[] = "Big Poe";
+		char str[] = "Big Poe";
 		strcpy(deststr,str);
 	}
 	else if(state==12)
 	{
-		int str[] = "Hot Spring Water";
+		char str[] = "Hot Spring Water";
 		strcpy(deststr,str);
 	}
 	else if(state==13)
 	{
-		int str[] = "Mushroom";
+		char str[] = "Mushroom";
 		strcpy(deststr,str);
 	}
 	else if(state==14)
 	{
-		int str[] = "Gold Dust";
+		char str[] = "Gold Dust";
 		strcpy(deststr,str);
 	}
 	else if(state==15)
 	{
-		int str[] = "Fish";
+		char str[] = "Fish";
 		strcpy(deststr,str);
 	}
 	else if(state==16)
 	{
-		int str[] = "Deku Princess";
+		char str[] = "Deku Princess";
 		strcpy(deststr,str);
 	}
 	else if(state==17)
 	{
-		int str[] = "Seahorse";
+		char str[] = "Seahorse";
 		strcpy(deststr,str);
 	}
 }//end
@@ -1372,10 +1369,17 @@ item script Bombchu
 		switch(bombchu->Dir)
 		{
 			case DIR_RIGHT:
+				bombchu->HitHeight = 8;
+				bombchu->HitYOffset = 4;
+				bombchu->Y += 4;
+				bombchu->HitWidth = 12;
+				break;
 			case DIR_LEFT:
 				bombchu->HitHeight = 8;
 				bombchu->HitYOffset = 4;
 				bombchu->Y += 4;
+				bombchu->HitXOffset = bombchu->Misc[SPRITE_MISC_HITXOFFSET] = 4;
+				bombchu->HitWidth = 12;
 				break;
 			case DIR_UP:
 			case DIR_DOWN:
@@ -1389,26 +1393,11 @@ lweapon script Bombchu_LW
 {
 	void run(int damage)
 	{
+		int stepPix = Ceiling(this->Step/100);
 		while(this->isValid())
 		{
 			unless(gameframe%6)Game->PlaySound(SFX_BOMBCHU);
-			bool contact;
-			switch(this->Dir)
-			{
-				case DIR_UP:
-					contact = (this->Y - Ceiling(this->Step/100) <= 2);
-					break;
-				case DIR_DOWN:
-					contact = (this->Y + Ceiling(this->Step/100) >= 158);
-					break;
-				case DIR_LEFT:
-					contact = (this->X - Ceiling(this->Step/100) <= 2);
-					break;
-				case DIR_RIGHT:
-					contact = (this->X + Ceiling(this->Step/100) >= 238);
-			}
-			mapdata map = getLayerMapdata(getRelativeHeight(this));
-			unless(contact) contact = !MM2D::CanWalkM(this, map, this->Dir, 0, true);
+			bool contact = offscreen(this->X + (stepPix*dirX(this->Dir)), this->Y + (stepPix*dirY(this->Dir)));
 			//If the bombchu collided with a npc expode.
 			for(int q = Screen->NumNPCs(); q > 0 && !contact; --q)
 			{
@@ -1422,17 +1411,18 @@ lweapon script Bombchu_LW
 			//If the bombchu is about to hit something solid according to bombchu solidity explode.
 			int x = this->X + AtFrontX(this->Dir);
 			int y = this->Y + AtFrontY(this->Dir);
-			int combo = ComboAt(x,y);
+			int centerCombo = ComboAt(x,y);
 			while(true)
 			{
-				map = getLayerMapdata(getRelativeHeight(this));
+				mapdata map = getLayerMapdata(getRelativeHeight(this));
 				unless(contact)
 				{
-					int ct = map->ComboT[combo];
-					if(ct==CT_BOMBCHU&&ct==CF_BOMBCHU1&&ct==CF_BOMBCHU2) contact = MM2D::CanWalkM(this, map, this->Dir, Ceiling(this->Step/100), true);
-					else contact = !MM2D::CanWalkM(this, map, this->Dir, Ceiling(this->Step/100), true);
-					if(ct==CT_PIT || ct == CT_PITR || ct == CT_PITB || ct == CT_PITD || ct == CT_WATER || ct ==CT_SWIMWARP || ct == CT_DIVEWARP  || (ct >= CT_SWIMWARPB && ct <= CT_DIVEWARPD))
+					int ct = map->ComboT[centerCombo];
+					if(ct==CT_PIT || ct == CT_PITR || ct == CT_PITB || ct == CT_PITD || ct == CT_WATER || ct == CT_SHALLOWWATER || ct ==CT_SWIMWARP || ct == CT_DIVEWARP  || (ct >= CT_SWIMWARPB && ct <= CT_DIVEWARPD))
+					{
 						contact = true;
+						break;
+					}
 					else if(ct == CT_PITFALL)
 					{
 						--this->Misc[LWMISC_LAYERDMAP];
@@ -1440,7 +1430,6 @@ lweapon script Bombchu_LW
 					}
 					else
 					{
-						int centerCombo = ComboAt(this->X+8,this->Y+8);
 						int ci = map->ComboI[centerCombo];
 						int cf = map->ComboF[centerCombo];
 						if(ci == CI_RAMP)
@@ -1457,6 +1446,8 @@ lweapon script Bombchu_LW
 							}
 						}
 					}
+					if(ct==CT_BOMBCHU&&ct==CF_BOMBCHU1&&ct==CF_BOMBCHU2) contact = MM2D::CanWalkM(this, map, this->Dir, stepPix, true);
+					else contact = !MM2D::CanWalkM(this, map, this->Dir, stepPix, true);
 				}
 				break;
 			}

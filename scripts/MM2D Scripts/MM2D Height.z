@@ -194,7 +194,7 @@ void linkPitfall()
 				//
 				warpHeight(dmap,scr);
 				//
-				/*int msg[] = "Pitwarping! Dmap, Scr:";
+				/*char msg[] = "Pitwarping! Dmap, Scr:";
 				TraceS(msg);
 				Trace(dmap);
 				Trace(scr);*/

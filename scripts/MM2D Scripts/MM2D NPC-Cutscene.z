@@ -5,7 +5,7 @@
 ////////////////////////////////////////
 
 //start NPC	
-int NPCNames[1000] = {"Tatl","Happy Mask Salesman","Banker","Bremor","Brac","ERROR","Tatl","Guard","Guard","Guard","Guard","ERROR","ERROR"};
+char NPCNames[1000] = {"Tatl","Happy Mask Salesman","Banker","Bremor","Brac","ERROR","Tatl","Guard","Guard","Guard","Guard","ERROR","ERROR"};
 
 ffc script NPC
 {
@@ -238,12 +238,12 @@ ffc script NPC
 		interact(person,NPCid,0);
 	}
 	
-	void interact(ffc person, int NPCid,int NPCsound)
+	void interact(ffc person, int NPCid, int NPCsound)
 	{
 		interact(person,NPCid,0,-1);
 	}
 
-	void interact(ffc person, int NPCid,int NPCsound,int args) //args is int[], misc size
+	void interact(ffc person, int NPCid, int NPCsound, u args) //args is int[], misc size
 	{
 		Game->PlaySound(NPCsound);
 		switch(NPCid)
@@ -377,12 +377,11 @@ ffc script NPC
 					}
 					tangoTempI = 1;
 					ShowStringAndWait("Select a difficulty. You are presently on @string(@shopstr). Changing this will cause time to reset. @26<<@choice(1)EASY@choice(2)NORMAL@26@choice(3)HARD>>@domenu()@set(@ttempi @chosen)@close()",true);
-					tangoTempI--;
+					--tangoTempI;
 					if(tangoTempI!=getGlobalVar(GVAR_DIFFICULTY,GV_MISC))
 					{
 						updateDifficulty(tangoTempI);
 						saveTheGame();
-						Hero->Warp(0,0x10);
 						resetTime();
 					}
 				}
@@ -793,7 +792,6 @@ ffc script cutscene
 			bool waiting2 = true;
 			while(waiting)
 			{
-				Waitframe();
 				unless(arg1) // Floor 2
 				{
 					if(day>=2)
@@ -835,7 +833,7 @@ ffc script cutscene
 					}
 					if(day==3)
 					{
-						int args[8] = {39,1};
+						u args[8] = {39,1};
 						ffc f = Screen->LoadFFC(RunFFCScript(FFC_CHEST,args));
 						f->X=this->X+16;
 						f->Y=this->Y;
@@ -854,6 +852,7 @@ ffc script cutscene
 						if(isBefore(3,18,false))HeightFastCombo(4,this->X+32,this->Y,31761,0,OP_OPAQUE);//Draw Bremor from the third layer
 					}
 				}
+				Waitframe();
 			}
 			//end
 		}
@@ -863,7 +862,7 @@ ffc script cutscene
 //start Signpost
 ffc script Signpost
 {
-	void run(int m,int input,bool largeHitbox,bool anySide)
+	void run(int m, int input, bool largeHitbox, bool anySide)
 	{
 		int loc = ComboAt(this->X,this->Y);
 		while(true)

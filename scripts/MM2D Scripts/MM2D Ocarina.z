@@ -215,7 +215,7 @@ void activateSong(int song)//start Song Functions
 	if(song==SONG_SongOfTime)
 	{
 		tangoTemp=false;
-		int args[8] = {44,1};
+		u args[8] = {44,1};
 		RunFFCScript(FFC_SHOWSTRING,args);
 	}
 	else if(song==SONG_EponasSong)
@@ -264,13 +264,13 @@ void activateSong(int song)//start Song Functions
 	else if(song==SONG_SongOfDoubleTime)
 	{
 		tangoTemp=false;
-		int args[8] = {47,2};
+		u args[8] = {47,2};
 		RunFFCScript(FFC_SHOWSTRING,args);
 	}
 	else if(song==SONG_SongOfInvertedTime)
 	{
 		tangoTemp=false;
-		int args[8] = {46,3};
+		u args[8] = {46,3};
 		RunFFCScript(FFC_SHOWSTRING,args);
 	}
 	else if(song==SONG_SonataOfAwakening)

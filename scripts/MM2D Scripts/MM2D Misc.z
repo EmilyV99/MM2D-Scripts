@@ -16,7 +16,7 @@ namespace MM2D
 	//lweapon
 	bool CanWalkM(lweapon weap, mapdata map, int dir, int step)
 	{
-		return MM2D::CanWalkM(weap, map, dir, step, false);
+		return CanWalkM(weap, map, dir, step, false);
 	}
 
 	bool CanWalkM(lweapon weap, mapdata map, int dir, int step, bool useHit)
@@ -27,7 +27,7 @@ namespace MM2D
 	//eweapon
 	bool CanWalkM(eweapon weap, mapdata map, int dir, int step)
 	{
-		return MM2D::CanWalkM(weap, map, dir, step, false);
+		return CanWalkM(weap, map, dir, step, false);
 	}
 
 	bool CanWalkM(eweapon weap, mapdata map, int dir, int step, bool useHit)
@@ -38,7 +38,7 @@ namespace MM2D
 	//npc
 	bool CanWalkM(npc n, mapdata map, int dir, int step)
 	{
-		return MM2D::CanWalkM(n, map, dir, step, false);
+		return CanWalkM(n, map, dir, step, false);
 	}
 
 	bool CanWalkM(npc n, mapdata map, int dir, int step, bool useHit)
@@ -49,7 +49,7 @@ namespace MM2D
 	//ffc
 	bool CanWalkM(ffc f, mapdata map, int dir, int step)
 	{
-		return MM2D::CanWalkM(f, map, dir, step, false);
+		return CanWalkM(f, map, dir, step, false);
 	}
 
 	bool CanWalkM(ffc f, mapdata map, int dir, int step, bool useEffect)
@@ -309,19 +309,23 @@ int validateDir(int dir, int defaultdir)
 	if(dir<0||dir>7)return defaultdir;
 	return dir;
 }
+bool offscreen(int x, int y)
+{
+	return x <= 3 || x >= 237 || y <= 1 || y >= 157;
+}
 //end Misc Functions
 //start Keyboard
-void KeyToString(int key, int buf)
+void KeyToString(int key, char buf)
 {
 	KeyToString(key, buf, false);
 }
 
-void KeyToString(int key, int buf, bool ShowPad)
+void KeyToString(int key, char buf, bool ShowPad)
 {
 	KeyToString(key, buf, ShowPad, false);
 }
 
-void KeyToString(int key, int buf, bool ShowPad, bool AllCaps)
+void KeyToString(int key, char buf, bool ShowPad, bool AllCaps)
 {
 	switch(key)
 	{
@@ -464,8 +468,8 @@ void KeyToString(int key, int buf, bool ShowPad, bool AllCaps)
 			break;
 			
 		default:
-			int keyChar = KeyToChar(key, false, false);
-			strcat(buf, (int[2]){AllCaps ? LowerToUpper(keyChar) : keyChar});
+			char keyChar = KeyToChar(key, false, false);
+			strcat(buf, (char[2]){AllCaps ? LowerToUpper(keyChar) : keyChar});
 			if(ShowPad)
 			{
 				switch(key)

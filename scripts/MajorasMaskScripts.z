@@ -18,6 +18,8 @@ typedef const int DEFINE;
 typedef const bool DEFINEB;
 typedef const int CONFIG;
 typedef const bool CONFIGB;
+typedef char32 char;
+typedef const char32 CHAR;
 typedef untyped u;
 typedef const untyped U;
 //end typedefs
@@ -36,7 +38,9 @@ import "tango.zh"
 #include "VenrobMisc.zh"
 always using namespace Venrob;
 #include "scripts/TypeAString.zh"
+always using namespace TypeAString;
 #include "scripts/Tint.zh"
+always using namespace TintZH;
 //end
 //start MM Imports
 #include "scripts/MM2D Scripts/MM2D Drawing.z"
@@ -129,7 +133,7 @@ ffc script renameLink
 	void run()
 	{
 		DEFINE CHAR0 = 11260;
-		DEFINE BORDERTILE = 11196;
+		DEFINE BORDERTILE = 11193;
 		DEFINE CURSORTILE = 11200;
 		DEFINE FIRSTX = 64;
 		DEFINE FIRSTY = 64;
@@ -138,7 +142,7 @@ ffc script renameLink
 		DEFINE X_OFFSET = 0;
 		Screen_Freeze(1);
 		startTypingMode(8,true);
-		int buf[9];
+		char buf[9];
 		int cursor = 0;
 		while(true)
 		{
@@ -184,7 +188,7 @@ ffc script renameLink
 //start ShowString
 ffc script ShowString
 {
-	void run(int str, int doAfter, bool string)
+	void run(char str, int doAfter, bool string)
 	{
 		if(string)
 		{
