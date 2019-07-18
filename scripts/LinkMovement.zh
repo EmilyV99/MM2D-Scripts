@@ -255,12 +255,12 @@ void __LinkMovement_UpdatePush(int indexX, int indexY, bool noEdge){
 	
 	//Left
 	for(int i=0; i<MAX_PUSH&&LinkMovement[indexX]<=-1; i++){
-		if(__LinkMovement_CanWalk(Link->X, Link->Y, DIR_LEFT, 1, false, noEdge)){
+		if(__LinkMovement_CanWalk(Link->X, Link->Y, DIR_LEFT, 1, Hero->BigHitbox, noEdge)){
 			Link->X--;
 			LinkMovement[indexX]++;
 		}
 		//This is unused, but would snap Link to the grid if he's close enough to aligned
-		else if(Imprecision>0&&Abs(GridY(Link->Y+8)-Link->Y)<Imprecision&&__LinkMovement_CanWalk(Link->X, GridY(Link->Y+8), DIR_LEFT, 1, false, noEdge)){
+		else if(Imprecision>0&&Abs(GridY(Link->Y+8)-Link->Y)<Imprecision&&__LinkMovement_CanWalk(Link->X, GridY(Link->Y+8), DIR_LEFT, 1, Hero->BigHitbox, noEdge)){
 			Link->Y = GridY(Link->Y+8);
 			Link->X--;
 			LinkMovement[indexX]++;
@@ -272,12 +272,12 @@ void __LinkMovement_UpdatePush(int indexX, int indexY, bool noEdge){
 	}
 	//Right
 	for(int i=0; i<MAX_PUSH&&LinkMovement[indexX]>=1; i++){
-		if(__LinkMovement_CanWalk(Link->X, Link->Y, DIR_RIGHT, 1, false, noEdge)){
+		if(__LinkMovement_CanWalk(Link->X, Link->Y, DIR_RIGHT, 1, Hero->BigHitbox, noEdge)){
 			Link->X++;
 			LinkMovement[indexX]--;
 		}
 		//This is unused, but would snap Link to the grid if he's close enough to aligned
-		else if(Imprecision>0&&Abs(GridY(Link->Y+8)-Link->Y)<Imprecision&&__LinkMovement_CanWalk(Link->X, GridY(Link->Y+8), DIR_RIGHT, 1, false, noEdge)){
+		else if(Imprecision>0&&Abs(GridY(Link->Y+8)-Link->Y)<Imprecision&&__LinkMovement_CanWalk(Link->X, GridY(Link->Y+8), DIR_RIGHT, 1, Hero->BigHitbox, noEdge)){
 			Link->Y = GridY(Link->Y+8);
 			Link->X++;
 			LinkMovement[indexX]--;
@@ -289,12 +289,12 @@ void __LinkMovement_UpdatePush(int indexX, int indexY, bool noEdge){
 	}
 	//Up
 	for(int i=0; i<MAX_PUSH&&LinkMovement[indexY]<=-1; i++){
-		if(__LinkMovement_CanWalk(Link->X, Link->Y, DIR_UP, 1, false, noEdge)){
+		if(__LinkMovement_CanWalk(Link->X, Link->Y, DIR_UP, 1, Hero->BigHitbox, noEdge)){
 			Link->Y--;
 			LinkMovement[indexY]++;
 		}
 		//This is unused, but would snap Link to the grid if he's close enough to aligned
-		else if(Imprecision>0&&Abs(GridX(Link->X+8)-Link->X)<Imprecision&&__LinkMovement_CanWalk(GridX(Link->X+8), Link->Y, DIR_UP, 1, false, noEdge)){
+		else if(Imprecision>0&&Abs(GridX(Link->X+8)-Link->X)<Imprecision&&__LinkMovement_CanWalk(GridX(Link->X+8), Link->Y, DIR_UP, 1, Hero->BigHitbox, noEdge)){
 			Link->X = GridX(Link->X+8);
 			Link->Y--;
 			LinkMovement[indexY]++;
@@ -306,12 +306,12 @@ void __LinkMovement_UpdatePush(int indexX, int indexY, bool noEdge){
 	}
 	//Down
 	for(int i=0; i<MAX_PUSH&&LinkMovement[indexY]>=1; i++){
-		if(__LinkMovement_CanWalk(Link->X, Link->Y, DIR_DOWN, 1, false, noEdge)){
+		if(__LinkMovement_CanWalk(Link->X, Link->Y, DIR_DOWN, 1, Hero->BigHitbox, noEdge)){
 			Link->Y++;
 			LinkMovement[indexY]--;
 		}
 		//This is unused, but would snap Link to the grid if he's close enough to aligned
-		else if(Imprecision>0&&Abs(GridX(Link->X+8)-Link->X)<Imprecision&&__LinkMovement_CanWalk(GridX(Link->X+8), Link->Y, DIR_DOWN, 1, false, noEdge)){
+		else if(Imprecision>0&&Abs(GridX(Link->X+8)-Link->X)<Imprecision&&__LinkMovement_CanWalk(GridX(Link->X+8), Link->Y, DIR_DOWN, 1, Hero->BigHitbox, noEdge)){
 			Link->X = GridX(Link->X+8);
 			Link->Y++;
 			LinkMovement[indexY]--;
