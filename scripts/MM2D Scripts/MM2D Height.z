@@ -57,10 +57,12 @@ bool warpDown()
 	return false;
 }
 
+DEFINE WARPFLAG_HEIGHTWARP = 0x100|WARP_FLAG_SCRIPTDRAW|WARP_FLAG_PLAYMUSIC|WARP_FLAG_PLAYSOUNDS;
 void warpHeight(int dmap, int scr)
 {
 	handleSpriteLayers1();
-	Hero->WarpEx({WT_IWARP,dmap,scr,Hero->X,Hero->Y,WARPEFFECT_NONE,0,0x100});
+	setGlobalBool(GVAR_DID_HEIGHTWARP, GV_MISC_BOOL, true);
+	Hero->WarpEx({WT_IWARP,dmap,scr,Hero->X,Hero->Y,WARPEFFECT_NONE,0,WARPFLAG_HEIGHTWARP});
 	handleSpriteLayers2(dmap);
 }
 
@@ -79,6 +81,28 @@ int getDownScreen(bool mod)
 	return Screen->LayerScreen(3);
 }
 
+int getBottomDMap()
+{
+	int dmap = Game->GetCurDMap();
+	if(GetCurDMap() >= SizeOfArray(DMAP_DOWN))return dmap;
+	while(DMAP_DOWN[dmap] != -1)
+		dmap = DMAP_DOWN[dmap];
+	return dmap;
+}
+
+int getBottomScreen(bool mod)
+{
+	int dmap = Game->GetCurDMap();
+	mapdata map = CurMapdata();
+	if(dmap >= SizeOfArray(DMAP_DOWN))return mod ? MapToDMap(map->Screen,dmap) : map->Screen;
+	while(DMAP_DOWN[dmap] != -1)
+	{
+		dmap = DMAP_DOWN[dmap];
+		map = Game->LoadMapData(map->LayerMap[3], map->LayerScreen[3]);
+	}
+	return mod ? MapToDMap(map->Screen,dmap) : map->Screen;
+}
+
 int getUpDMap()
 {
 	if(GetCurDMap() >= SizeOfArray(DMAP_UP))return -1;
@@ -92,6 +116,28 @@ int getUpScreen(bool mod)
 	if(mod)
 		return MapToDMap(Screen->LayerScreen(4),dmap);
 	return Screen->LayerScreen(4);
+}
+
+int getTopDMap()
+{
+	int dmap = Game->GetCurDMap();
+	if(GetCurDMap() >= SizeOfArray(DMAP_UP))return dmap;
+	while(DMAP_UP[dmap] != -1)
+		dmap = DMAP_UP[dmap];
+	return dmap;
+}
+
+int getTopScreen(bool mod)
+{
+	int dmap = Game->GetCurDMap();
+	mapdata map = CurMapdata();
+	if(dmap >= SizeOfArray(DMAP_UP))return mod ? MapToDMap(map->Screen,dmap) : map->Screen;
+	while(DMAP_UP[dmap] != -1)
+	{
+		dmap = DMAP_UP[dmap];
+		map = Game->LoadMapData(map->LayerMap[4], map->LayerScreen[4]);
+	}
+	return mod ? MapToDMap(map->Screen,dmap) : map->Screen;
 }
 
 bool isCenteredOnPlacedFlag(int flag, bool notType, bool yesType, int type, bool notInherent, bool yesInherent, int inherent)
@@ -208,7 +254,7 @@ void linkPitfall()
 //start Jump
 void checkJump()
 {
-	if(form!=2)
+	if(form!=FORM_GORON)
 	{
 		if(canFall&&!floating&&!Deku_flying)
 		{
@@ -221,7 +267,7 @@ void checkJump()
 			}
 		}
 	}
-	else unless(floating||form!=2)
+	else unless(floating)
 	{
 		rampJump();
 	}
@@ -241,22 +287,18 @@ void setFloating()
 
 int getFloating()
 {
-	if(!form || form==4)
+	switch(form)
 	{
-		if(mask==12)return 32;
-		return 24;
-	}
-	else if(form==1)
-	{
-		return 16;
-	}
-	else if(form==3)
-	{
-		return 32;
-	}
-	else if(form==2)
-	{
-		return 0;
+		case FORM_HUMAN:
+			return mask==MASK_BUNNY ? 32 : 24;
+		case FORM_FIERCE_DEITY:
+			return 24;
+		case FORM_DEKU:
+			return 16;
+		case FORM_ZORA:
+			return 32;
+		case FORM_GORON:
+			return 0;
 	}
 	return -1;
 }
@@ -274,7 +316,7 @@ void jump()//start jump
 			}
 			Hero->X+=dirX(floatDir)*movPix;
 			Hero->Y+=dirY(floatDir)*movPix;
-			floating--;
+			--floating;
 		}
 		if(floating<=0)
 		{
@@ -290,16 +332,15 @@ void jump()//start jump
 			int jumpDir = wouldJump();
 			while(jumpDir!=-1&&timeOut>0)
 			{
-				if(jumpDir==DIR_DOWN)Hero->Y--;
-				if(jumpDir==DIR_RIGHT)Hero->X--;
-				if(jumpDir==DIR_LEFT)Hero->X++;
-				if(jumpDir==DIR_UP)Hero->Y++;
+				Hero->Y -= dirY(jumpDir);
+				Hero->X -= dirX(jumpDir);
 				jumpDir=wouldJump();
-				timeOut--;
+				--timeOut;
 			}
 			canFall=true;
 			Hero->Invisible=false;
 			floating=0;
+			Hero->Action = LA_NONE;
 		}
 		else
 		{
@@ -350,14 +391,14 @@ void replaceLinkTile(int mod, int aframes, int aspeed,int xOffSet,int yOffSet,bo
 
 int getLinkTileModifier()
 {
-	if(Hero->Item[FORM1])return idata::GetLinkTileModifier(FORM1);
-	else if(Hero->Item[FORM2])return idata::GetLinkTileModifier(FORM2);
-	else if(Hero->Item[FORM3])return idata::GetLinkTileModifier(FORM3);
-	else if(Hero->Item[FORM4])return idata::GetLinkTileModifier(FORM4);
-	else if(Hero->Item[FORM2CURLED])return idata::GetLinkTileModifier(FORM2CURLED);
-	else if(Hero->Item[FORM_SHIELD])return idata::GetLinkTileModifier(FORM_SHIELD);
-	else if(Hero->Item[FORM_M_SHIELD])return idata::GetLinkTileModifier(FORM_M_SHIELD);
-	else if(Hero->Item[FORM2SPIKED])return idata::GetLinkTileModifier(FORM2SPIKED);
+	if(Hero->Item[FORMITEM_DEKU])return idata::GetLinkTileModifier(FORMITEM_DEKU);
+	else if(Hero->Item[FORMITEM_GORON])return idata::GetLinkTileModifier(FORMITEM_GORON);
+	else if(Hero->Item[FORMITEM_ZORA])return idata::GetLinkTileModifier(FORMITEM_ZORA);
+	else if(Hero->Item[FORMITEM_FIERCE_DEITY])return idata::GetLinkTileModifier(FORMITEM_FIERCE_DEITY);
+	else if(Hero->Item[FORMITEM_GORON_CURLED])return idata::GetLinkTileModifier(FORMITEM_GORON_CURLED);
+	else if(Hero->Item[FORMITEM_SHIELD])return idata::GetLinkTileModifier(FORMITEM_SHIELD);
+	else if(Hero->Item[FORMITEM_M_SHIELD])return idata::GetLinkTileModifier(FORMITEM_M_SHIELD);
+	else if(Hero->Item[FORMITEM_GORON_SPIKED])return idata::GetLinkTileModifier(FORMITEM_GORON_SPIKED);
 	else return 0;
 }//end tilemods
 
@@ -485,7 +526,6 @@ void rampWarpUp(int theCombo)
 //end RampJump
 //end Jump
 //start Sprite Height Handling
-//start Global Weapons Arrays
 DEFINE LWMISC_LAYERDMAP = 31;
 DEFINE EWMISC_LAYERDMAP = 31;
 DEFINE NPCMISC_LAYERDMAP = 31;
@@ -630,25 +670,29 @@ mapdata getLayerMapdata(int relativeHeight)
 	return Game->LoadMapData(dmap->Map,Game->GetCurScreen());
 }
 
-/*mapdata getBottomMapdata()
+mapdata getBottomMapdata()
 {
-	int dmap = Game->GetCurDMap();
-	if(dmap > SizeOfArray(DMAP_DOWN)) return NULL;
-	while(DMAP_DOWN[dmap] != -1)
-		dmap = DMAP_DOWN[dmap];
-	return Game->LoadMapData(Game->LoadDMapData(dmap)->Map, Game->GetCurScreen());
+	return Game->LoadMapData(Game->LoadDMapData(getBottomDMap())->Map, getBottomScreen(false));
 }
 
 mapdata getTopMapdata()
 {
-	int dmap = Game->GetCurDMap();
-	if(dmap > SizeOfArray(DMAP_UP)) return NULL;
-	while(DMAP_UP[dmap] != -1)
-		dmap = DMAP_UP[dmap];
-	return Game->LoadMapData(Game->LoadDMapData(dmap)->Map, Game->GetCurScreen());
+	return Game->LoadMapData(Game->LoadDMapData(getTopDMap())->Map, getTopScreen(false));
 }
 
-mapdata getMapdataIndex(int offset)
+mapdata upMapdata(mapdata m)
+{
+	if(!m || !m->LayerMap[4]) return NULL;
+	return Game->LoadMapData(m->LayerMap[4], m->LayerScreen[4]);
+}
+
+mapdata downMapdata(mapdata m)
+{
+	if(!m || !m->LayerMap[3]) return NULL;
+	return Game->LoadMapData(m->LayerMap[3], m->LayerScreen[3]);
+}
+
+/*mapdata getMapdataIndex(int offset)
 {
 	int dmap = Game->GetCurDMap();
 	if(dmap > SizeOfArray(DMAP_DOWN)) return NULL;

@@ -14,7 +14,7 @@ void HeightFastCombo(int layer, int x, int y, int combo, int cset, int opacity)
 	if(layer>=4)x+=256;
 	if(opacity!=OP_OPAQUE)y+=176;
 	Screen->SetRenderTarget(RT_BITMAP0);
-	Screen->FastCombo(4, x, y, combo, cset, OP_OPAQUE);
+	Screen->FastCombo(layer, x, y, combo, cset, OP_OPAQUE);
 	Screen->SetRenderTarget(RT_SCREEN);
 }
 
@@ -26,7 +26,7 @@ void HeightFastTile(int layer, int x, int y, int tile, int cset, int opacity)
 	if(layer>=4)x+=256;
 	if(opacity!=OP_OPAQUE)y+=176;
 	Screen->SetRenderTarget(RT_BITMAP0);
-	Screen->FastTile(4, x, y, tile, cset, OP_OPAQUE);
+	Screen->FastTile(layer, x, y, tile, cset, OP_OPAQUE);
 	Screen->SetRenderTarget(RT_SCREEN);
 }
 
@@ -49,7 +49,7 @@ void HeightFastComboScreen(int layer, int x, int y, int combo, int cset, int opa
 	if(layer>=4)x+=256;
 	if(opacity!=OP_OPAQUE)y+=176;
 	Screen->SetRenderTarget(RT_BITMAP0);
-	Screen->FastCombo(1, x, y, combo, cset, OP_OPAQUE);
+	Screen->FastCombo(layer, x, y, combo, cset, OP_OPAQUE);
 	Screen->SetRenderTarget(RT_SCREEN);
 }
 
@@ -81,15 +81,30 @@ void runHeightBitmap()
 	Screen->DrawBitmapEx(4,RT_BITMAP0,256,0,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
 	Screen->DrawBitmapEx(3,RT_BITMAP0,0,176,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
 	Screen->DrawBitmapEx(4,RT_BITMAP0,256,176,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
-	//Clearing the bitmap here causes issues; clearBitmap() has been moved to the beginning of global while(true)
-	//Clear the bitmap
-	//clearBitmap(RT_BITMAP0);
 }
 
-void clearBitmap(int bitmap)
+void clearBitmap(int bmp)
 {
-	Screen->SetRenderTarget(bitmap);
+	Screen->SetRenderTarget(bmp);
 	Screen->Rectangle(0,0,0,512,512,0,1,0,0,0,true,OP_OPAQUE);
 	Screen->SetRenderTarget(RT_SCREEN);
 }
 //end BitmapDraw
+//start LayerOverhead
+//Layer drawing
+void DrawLayer3_4()
+{
+	for(int layer = 3; layer <= 4; ++layer)
+	{
+		if(layer==4&&hideLayer4) return;
+		unless(Screen->LayerMap(layer)>0) continue;
+		mapdata m = Game->LoadMapData(Screen->LayerMap(layer),Screen->LayerScreen(layer));
+		for(int pos = 0; pos < 176; ++pos)
+		{
+			if(m->ComboD[pos])
+				HeightFastComboScreen(layer, ComboX(pos), ComboY(pos),
+							m->ComboD[pos], m->ComboC[pos], OP_OPAQUE);
+		}
+	}
+}
+//end LayerOverhead

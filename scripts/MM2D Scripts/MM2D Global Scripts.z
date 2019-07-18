@@ -90,28 +90,6 @@ global script Global
 			handleTyping();
 			if(debugEnabled)testingMenu();
 			//start
-			if(scrnChanged)
-			{
-				scrnChanged=false;
-				layer4check();
-			}
-			if(lastMap!=Game->GetCurMap()||lastScreen!=Game->GetCurScreen())
-			{
-				scrnChanged=true;
-				changedScreens();
-				lastScreen = Game->GetCurScreen();
-				lastMap = Game->GetCurMap();
-			}
-			if(lastDMap!=Game->GetCurDMap())
-			{
-				changedDMap();
-				lastDMap = Game->GetCurDMap();
-				if(lastLevel!=Game->GetCurLevel())
-				{
-					changedLevel();
-					lastLevel = Game->GetCurLevel();
-				}
-			}
 			if(Hero->HP!=lastHP)
 			{
 				if(Hero->HP < lastHP)
@@ -142,7 +120,7 @@ global script Global
 				gameframe=0;
 			}//end FrameCounters
 			//start Time passing
-			if(freezeTime||(isFrozen||(slowTime&&(gameframe%2))||ScreenFlag(SF_MISC,SFM_SCRIPT1)||songFrames))
+			unless(freezeTime||(isFrozen||(slowTime&&(gameframe%2))||ScreenFlag(SF_MISC,SFM_SCRIPT1)||songFrames))
 			{
 				++time;
 				trueTime += FRAME;
@@ -170,11 +148,12 @@ global script Global
 				pauseGradient();
 			}
 			//end Time Passing
-			unless(getGlobalVar(GVAR_MGSTATE,GV_MISC))runOmniArrows();
+			unless(getGlobalVar(GVAR_MGSTATE,GV_MISC)==MG_SHOOTING)
+				runOmniArrows();
 			Tango_Update1();
 			handleOcarina();
 			//start Subscreen
-			if((!isFrozen||subscreen)&&Input->Press[CB_START]&&!ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN))
+			if((!(getGlobalVar(GVAR_MGSTATE,GV_MISC)||isFrozen)||subscreen)&&Input->Press[CB_START]&&!ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN))
 			{
 				toggleSubscreen();
 			}
@@ -220,7 +199,7 @@ global script Global
 			unless(isFrozen)
 				highLedgeFromWater();
 			//end
-			if(UsingItem(53)&&fullCounter(CR_MAGIC)>2)
+			if(UsingItem(I_LENS_TRUTH)&&fullCounter(CR_MAGIC)>2)
 			{
 				unless(isLensTinted || (getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL)))
 				{
@@ -243,15 +222,38 @@ global script Global
 			timePalette();
 			runTints();
 			HeroDir8 = validateDir(getPressedDir8(), (HeroDir8 & 4) ? HeroDir8 : Hero->Dir);
+			Waitdraw();
+			scrnChanged=false;
+			if(lastMap!=Game->GetCurMap()||lastScreen!=Game->GetCurScreen())
+			{
+				scrnChanged=true;
+				changedScreens();
+				lastScreen = Game->GetCurScreen();
+				lastMap = Game->GetCurMap();
+			}
+			if(lastDMap!=Game->GetCurDMap())
+			{
+				changedDMap();
+				lastDMap = Game->GetCurDMap();
+				if(lastLevel!=Game->GetCurLevel())
+				{
+					changedLevel();
+					lastLevel = Game->GetCurLevel();
+				}
+			}
 			unless(subscreen)
 			{
+				if(scrnChanged)
+					layer4check();
+				DrawLayer3_4();
 				drawExtraLayerEffects();
 				lwLoop();
 				ewLoop();
 				itemLoop();
+				npcLoop();
 			}	
-			Waitdraw();		
 			runHeightBitmap();
+			//Waitdraw();
 			passiveSubscreen();
 			if(!isFrozen||isBottleFrozen)
 			{
@@ -301,7 +303,8 @@ global script Global
 	
 	void layer4check()
 	{
-		Screen->LayerInvisible[4] = hideLayer4;
+		Screen->LayerInvisible[3] = true; //Drawn by `DrawLayer3_4()`
+		Screen->LayerInvisible[4] = true; //Drawn by `DrawLayer3_4()`
 		Screen->LayerOpacity[4] = OP_TRANS;
 	}
 	
@@ -318,7 +321,7 @@ global script Global
 			if(screen>-1)
 			{
 				dmapdata ddmap = Game->LoadDMapData(downdmap);
-				drawHeightLayerData(ddmap->Map,screen,2);
+				drawHeightLayerData(ddmap->Map,screen,3);
 			}
 		}
 		unless(hideLayer4)
@@ -402,8 +405,30 @@ global script Global
 	{
 		songOfStormsRain = false;
 		unless(floating)Hero->Invisible=false;
-		setGlobalVar(GVAR_MGSTATE,GV_MISC,0);
+		setGlobalVar(GVAR_MGSTATE,GV_MISC,MG_NONE);
+		Hero->BigHitbox = false;
 		Items::updateItemMapdata();
+		if(getGlobalBool(GVAR_DID_HEIGHTWARP, GV_MISC_BOOL))
+		{
+			setGlobalBool(GVAR_DID_HEIGHTWARP, GV_MISC_BOOL, false);
+			CurMapdata()->Pattern = PATTERN_NO_SPAWNING;
+		}
+		else
+		{
+			mapdata map = getBottomMapdata();
+			for(int q = 0; q < MAX_MAPDATA_HEIGHT; ++q)
+			{
+				if(!heightData[q]) break;
+				heightData[q]->Pattern = heightPattern[q];
+			}
+			for(int q = 0; q < MAX_MAPDATA_HEIGHT; ++q)
+			{
+				heightData[q] = map;
+				heightPattern[q] = <EnemyPattern>(map->Pattern);
+				map = upMapdata(map);
+			}
+			CurMapdata()->Pattern = PATTERN_NO_SPAWNING;
+		}
 	}
 	
 	void changedLevel()
@@ -723,6 +748,7 @@ global script Global
 					Game->Counter[CR_BOMBCHUS]=Game->MCounter[CR_BOMBCHUS];
 					Game->Counter[CR_DEKUNUTS]=Game->MCounter[CR_DEKUNUTS];
 					Game->Counter[CR_MAGICBEANS]=Game->MCounter[CR_MAGICBEANS];
+					Game->Counter[CR_MAGIC]=Game->MCounter[CR_MAGIC];
 					Game->DCounter[CR_BOMBS]=0;
 					Game->DCounter[CR_RUPEES]=0;
 					Game->DCounter[CR_ARROWS]=0;
@@ -730,6 +756,7 @@ global script Global
 					Game->DCounter[CR_BOMBCHUS]=0;
 					Game->DCounter[CR_DEKUNUTS]=0;
 					Game->DCounter[CR_MAGICBEANS]=0;
+					Game->DCounter[CR_MAGIC]=0;
 				}
 				if(Input->ReadKey[KEY_ENTER])//Freeze time
 				{
@@ -754,6 +781,7 @@ global script Global
 	void debugSetup()//start
 	{
 		dbsetup=true;
+		//dbdraw=true;
 		noSave=true;
 		Game->Cheat=4;
 		for(int i = 0;i<22;i++)
@@ -782,11 +810,11 @@ global script Global
 		Game->MCounter[CR_BOMBS]=40;
 		Game->MCounter[CR_SBOMBS]=1;
 		//extra
-		form=0;
-		mask=12;
-		currMaskTile=FIRST_MASK_TILE+12;
-		HMS_visible=true;
-		CS1_seen=true;
+		form=FORM_HUMAN;
+		mask=MASK_BUNNY;
+		currMaskTile=maskTile(MASK_BUNNY);
+		HMS_Cutscene.HMS_visible=true;
+		HMS_Cutscene.CS1_seen=true;
 	}//end
 	
 	void drawDebugInfo(int itID)//start
@@ -919,6 +947,32 @@ global script Global
 					else it->ScriptTile = -1;
 			}
 			it->HitXOffset = (300 * ((it->Misc[ITEMMISC_LAYERDMAP]-1)-THISDMAP)) + ITEMHITXOFFSET + it->Misc[SPRITE_MISC_HITXOFFSET];
+		}
+	}
+	
+	void npcLoop()
+	{
+		DEFINE THISDMAP = Game->GetCurDMap();
+		for(int i = Screen->NumNPCs(); i > 0; --i)
+		{
+			npc n = Screen->LoadNPC(i);
+			unless(n->Misc[NPCMISC_LAYERDMAP]) n->Misc[NPCMISC_LAYERDMAP] = THISDMAP + 1;
+			switch(n->ID)
+			{
+				default:
+					if((n->Misc[NPCMISC_LAYERDMAP]-1)>THISDMAP)
+					{
+						HeightFastTile(4,n->X,n->Y,n->Tile,n->CSet,OP_OPAQUE);
+						n->ScriptTile = TILE_INVIS;
+					}
+					else if((n->Misc[NPCMISC_LAYERDMAP]-1)<THISDMAP)
+					{
+						HeightFastTile(3,n->X,n->Y,n->Tile,n->CSet,OP_OPAQUE);
+						n->ScriptTile = TILE_INVIS;
+					}
+					else n->ScriptTile = -1;
+			}
+			n->HitXOffset = (300 * ((n->Misc[NPCMISC_LAYERDMAP]-1)-THISDMAP)) + n->Misc[SPRITE_MISC_HITXOFFSET];
 		}
 	}
 	//end loops
@@ -1074,6 +1128,7 @@ void refreshDisable()
 	Input->DisableButton[CB_L] = true;
 	Input->DisableButton[CB_R] = true;
 	Input->DisableButton[CB_MAP] = true;
+	Input->DisableButton[CB_START] = true;
 	for(int q = 0; q < 127; ++q)
 	{
 		switch(q)
@@ -1209,13 +1264,14 @@ hero script OptionsMenu
 	
 	void menu_init()
 	{
-		if(!menu->isAllocated()) menu = Game->CreateBitmap(MENU_BITMAP_HEIGHT, MENU_BITMAP_WIDTH);
-		else if(!menu->isValid()) menu->Create(0, MENU_BITMAP_HEIGHT, MENU_BITMAP_WIDTH);
+		unless(menu->isAllocated()) menu = Game->CreateBitmap(MENU_BITMAP_HEIGHT, MENU_BITMAP_WIDTH);
+		else unless(menu->isValid()) menu->Create(0, MENU_BITMAP_HEIGHT, MENU_BITMAP_WIDTH);
 	}
 	
 	void run() //start
 	{
 		int frame = 0;
+		menu_init();
 		while(1)
 		{
 			Waitframe();
@@ -1359,14 +1415,14 @@ hero script OptionsMenu
 							KeyToString(Controls[CONTROL_OPTIONS], buf0, true, true);
 							DrawMenuString(buf0, menu, 2, getTabPos(<OptState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptState>mainOption), MENU_TCOLOR_ACTIVE, TF_RIGHT);
 							if(Input->Button[CB_A]) break; //Don't take input while `A` is held
-							char key = getKeyPress();
+							int key = getKeyPress();
 							switch(isValidKey(key))
 							{
-								case 1:
+								case KV_VALID:
 									Controls[CONTROL_OPTIONS] = key;
 									refreshDisable(); //Ensure that the new key is disabled in-engine, and the old is not
 									//Fall-through
-								case -1:
+								case KV_QUIT:
 									state = STATE_MAIN;
 									Game->TypingMode = false;
 									break;
@@ -1537,8 +1593,8 @@ hero script OptionsMenu
 					Screen->DrawString(MENU_LAYER, 128, MENU_TABLABEL_Y + yoffs, MENU_FONT, MENU_TCOLOR_TABS, TRANSBG, TF_CENTERED, buf2, OP_OPAQUE);
 					Screen->DrawString(MENU_LAYER, 192, MENU_TABLABEL_Y + yoffs, MENU_FONT, MENU_TCOLOR_TABS, TRANSBG, TF_CENTERED, buf3, OP_OPAQUE);
 					//Controls
-					Screen->DrawString(MENU_LAYER, 128, MENU_BOTTOM_MARGIN + MENU_FONT_HEIGHT, MENU_FONT, MENU_TCOLOR_CONTROLS, -1, TF_CENTERED, "ENTER: Confirm  |  BACKSPACE: Back  |  START: Info", OP_OPAQUE);
-					Screen->DrawString(MENU_LAYER, 128, MENU_BOTTOM_MARGIN + (MENU_FONT_HEIGHT * 2) + 1, MENU_FONT, MENU_TCOLOR_CONTROLS, -1, TF_CENTERED, "UP/DOWN: Switch options  |  LEFT/RIGHT: Switch tabs", OP_OPAQUE);
+					Screen->DrawString(MENU_LAYER, 128, MENU_BOTTOM_MARGIN + MENU_FONT_HEIGHT, MENU_FONT, MENU_TCOLOR_CONTROLS, -1, TF_CENTERED, "ENTER/(A): Confirm  |  BACKSPACE/(B): Back  |  (START): Info", OP_OPAQUE);
+					Screen->DrawString(MENU_LAYER, 128, MENU_BOTTOM_MARGIN + (MENU_FONT_HEIGHT * 2) + 1, MENU_FONT, MENU_TCOLOR_CONTROLS, -1, TF_CENTERED, "(UP)/(DOWN): Switch options  |  (LEFT)/(RIGHT): Switch tabs", OP_OPAQUE);
 					//
 					TotalNoAction();
 					Waitframe();
@@ -1727,19 +1783,32 @@ hero script OptionsMenu
 		menu->DrawString(layer, x, y, MENU_FONT, color, transbg ? TRANSBG : BLACK, format, str, OP_OPAQUE);
 	}//end
 	
-	int isValidKey(int key)
+	
+	enum KeyValidation
+	{
+		KV_QUIT = -1,
+		KV_INVALID,
+		KV_VALID
+	};
+	
+	KeyValidation isValidKey(int key)
 	{
 		switch(key)
 		{
 			case 0:
 			case KEY_ENTER:
 			case KEY_ENTER_PAD:
-				return 0;
+				return KV_INVALID;
 			case KEY_BACKSPACE:
 			case KEY_ESC:
-				return -1;
+				return KV_QUIT;
 				
-			default: return 1;
+			default:
+				for(int q = 0; q < 14; ++q)
+				{
+					if(key==Input->KeyBindings[q]) return (q==CB_B ? KV_QUIT : KV_INVALID);
+				}
+				return KV_VALID;
 		}
 	}
 	
@@ -1979,5 +2048,53 @@ namespace Debug //start
 		unless(__DEBUG) return;
 		printf("[MM2D Debug] %s\n",str);
 	}
+	
+	void print(char str, u q)
+	{
+		unless(__DEBUG) return;
+		char buf[1024];
+		sprintf(buf,"[MM2D Debug] %s\n",str);
+		printf(buf,q);
+	}
+	
+	void print(char str, u q, u q2)
+	{
+		unless(__DEBUG) return;
+		char buf[1024];
+		sprintf(buf,"[MM2D Debug] %s\n",str);
+		printf(buf,q,q2);
+	}
+	
+	void print(char str, u q, u q2, u q3)
+	{
+		unless(__DEBUG) return;
+		char buf[1024];
+		sprintf(buf,"[MM2D Debug] %s\n",str);
+		printf(buf,q,q2,q3);
+	}
+	
+	void print(char str, u q, u q2, u q3, u q4)
+	{
+		unless(__DEBUG) return;
+		char buf[1024];
+		sprintf(buf,"[MM2D Debug] %s\n",str);
+		printf(buf,q,q2,q3,q4);
+	}
+	
+	void print(char str, u q, u q2, u q3, u q4, u q5)
+	{
+		unless(__DEBUG) return;
+		char buf[1024];
+		sprintf(buf,"[MM2D Debug] %s\n",str);
+		printf(buf,q,q2,q3,q4,q5);
+	}
+	
+	void print(char str, u q, u q2, u q3, u q4, u q5, u q6)
+	{
+		unless(__DEBUG) return;
+		char buf[1024];
+		sprintf(buf,"[MM2D Debug] %s\n",str);
+		printf(buf,q,q2,q3,q4,q5,q6);
+	}//end
 }//end
 

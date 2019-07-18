@@ -41,6 +41,7 @@ void handleEXItems()
 {
 	unless(subscreen)
 	{
+		if(isFrozen) return;
 		if(useItem>0)
 		{
 			Hero->ItemJinx=0;
@@ -56,7 +57,7 @@ void handleEXItems()
 				Input->Button[CB_B]=false;Input->Press[CB_B]=false;
 			}
 		}
-		else if(Input->Button[CB_B]&&B_item!=0)
+		else if(Input->Button[CB_B]&&B_item)
 		{
 			if(isArrow(B_item)&&!canShootArrow())
 			{
@@ -73,7 +74,7 @@ void handleEXItems()
 				Input->Button[CB_B]=false;Input->Press[CB_B]=false;
 			}
 		}
-		else if(Input->Button[CB_EX1]&&EX1_item!=0)
+		else if(Input->Button[CB_EX1]&&EX1_item)
 		{
 			if(isArrow(EX1_item)&&!canShootArrow())
 			{
@@ -90,7 +91,7 @@ void handleEXItems()
 				Input->Button[CB_B]=false;Input->Press[CB_B]=false;
 			}
 		}
-		else if(Input->Button[CB_EX2]&&EX2_item!=0)
+		else if(Input->Button[CB_EX2]&&EX2_item)
 		{
 			if(isArrow(EX2_item)&&!canShootArrow())
 			{
@@ -114,12 +115,12 @@ void handleEXItems()
 	}
 	else if(subState == SUBSTATE_ITEMS && (!Input->Button[CB_EX3]&&(Input->Press[CB_EX1]||Input->Press[CB_EX2]||Input->Press[CB_B]||pressA)))
 	{
-		int itID = ItemIDs[cursorIndex];
+		ItemID itID = ItemIDs[cursorIndex];
 		if(canEquip(itID))
 		{
-			if(itID==211)
+			if(itID==I_SWORD_GFAIRY_HAS)
 			{
-				if(!form&&pressA)
+				if(form==FORM_HUMAN&&pressA)
 				{
 					Hero->Item[210] = !Hero->Item[210];
 					Game->PlaySound(83);
@@ -131,9 +132,9 @@ void handleEXItems()
 				int snd = 83;
 				switch(itID)
 				{
-					case 14:{snd=84;break;}
-					case 57:{snd=85;break;}
-					case 137:{snd=86;break;}
+					case I_FIREARROWS:{snd=84;break;}
+					case I_ICEARROWS:{snd=85;break;}
+					case I_LIGHTARROWS:{snd=86;break;}
 				}
 				Audio->EndSound(83);
 				Audio->EndSound(84);
@@ -143,39 +144,39 @@ void handleEXItems()
 				{
 					Game->PlaySound(snd);
 					EX1_item = itID;
-					if(EX2_item==itID||(isArrow(EX2_item)&&arrow))EX2_item=0;
-					if(B_item==itID||(isArrow(B_item)&&arrow))B_item=0;
+					if(EX2_item==itID||(isArrow(EX2_item)&&arrow))EX2_item=NULL;
+					if(B_item==itID||(isArrow(B_item)&&arrow))B_item=NULL;
 				}
 				else if(Input->Press[CB_EX2])
 				{
 					Game->PlaySound(snd);
 					EX2_item = itID;
-					if(EX1_item==itID||(isArrow(EX1_item)&&arrow))EX1_item=0;
-					if(B_item==itID||(isArrow(B_item)&&arrow))B_item=0;
+					if(EX1_item==itID||(isArrow(EX1_item)&&arrow))EX1_item=NULL;
+					if(B_item==itID||(isArrow(B_item)&&arrow))B_item=NULL;
 				}
 				else if(Input->Press[CB_B])
 				{
 					Game->PlaySound(snd);
 					B_item = itID;
 					SetBItem(itID);
-					if(EX1_item==itID||(isArrow(EX1_item)&&arrow))EX1_item=0;
-					if(EX2_item==itID||(isArrow(EX2_item)&&arrow))EX2_item=0;
+					if(EX1_item==itID||(isArrow(EX1_item)&&arrow))EX1_item=NULL;
+					if(EX2_item==itID||(isArrow(EX2_item)&&arrow))EX2_item=NULL;
 				}
 			}
 		}
 	}
 	else
 	{
-		if(Input->Press[CB_B])B_item=0;
-		if(Input->Press[CB_EX1])EX1_item=0;
-		if(Input->Press[CB_EX2])EX2_item=0;
+		if(Input->Press[CB_B])B_item=NULL;
+		if(Input->Press[CB_EX1])EX1_item=NULL;
+		if(Input->Press[CB_EX2])EX2_item=NULL;
 	}
 	
 }
 
-bool isArrow(int itID)
+bool isArrow(ItemID itID)
 {
-	return (itID==13||itID==14||itID==57||itID==137);
+	return (itID==I_BOWARROW||itID==I_FIREARROWS||itID==I_ICEARROWS||itID==I_LIGHTARROWS);
 }
 
 bool canShootArrow()

@@ -8,7 +8,7 @@ void handleMasks()
 {
 	switch(mask)
 	{
-		case 7:
+		case MASK_BLAST:
 		{
 			unless(getGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC))
 			{
@@ -25,7 +25,7 @@ void handleMasks()
 				incGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC,-1);
 			}
 			break;}
-		case 12:
+		case MASK_BUNNY:
 		{
 			if(Hero->Action==LA_SWIMMING)
 				LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_BUNNY_WATER);
@@ -37,17 +37,17 @@ void handleMasks()
 item script Mask //start
 {
 	//0 is no mask, 1-4 are transformation masks.
-	void run(int maskID)
+	void run(Mask maskID)
 	{
-		if(mask>0&&mask<=4||maskID>0&&maskID<=4)
+		if(isForm(mask)||isForm(maskID))
 		{
-			if(maskID>0&&maskID<=4)
+			if(isForm(maskID))
 			{
-				if(form==maskID)
+				if(mask==maskID)
 				{
-					form = 0;
-					mask = 0;
-					currMaskTile = FIRST_MASK_TILE;
+					form = FORM_HUMAN;
+					mask = MASK_NONE;
+					currMaskTile = maskTile(MASK_NONE);
 					NOTESOUND_A = 200;
 					NOTESOUND_DOWN = 201;
 					NOTESOUND_RIGHT = 202;
@@ -57,8 +57,8 @@ item script Mask //start
 				else
 				{
 					mask = maskID;
-					form = maskID;
-					currMaskTile = FIRST_MASK_TILE + maskID;
+					form = <Form>maskID;
+					currMaskTile = maskTile(mask);
 					NOTESOUND_A = 200 + (5*maskID);
 					NOTESOUND_DOWN = 201 + (5*maskID);
 					NOTESOUND_RIGHT = 202 + (5*maskID);
@@ -71,31 +71,27 @@ item script Mask //start
 		{
 			if(mask==maskID)
 			{
-				mask = 0;
-				currMaskTile = FIRST_MASK_TILE;
+				mask = MASK_NONE;
+				currMaskTile = maskTile(MASK_NONE);
 			}
 			else
 			{
 				mask = maskID;
-				currMaskTile = FIRST_MASK_TILE + maskID;
+				currMaskTile = maskTile(maskID);
 			}
 		}
-		/*switch(mask)
-		{
-			
-		}*/
 	}
 }//end
 
 void handleTransformations()//start
 {
 	//start Form setup
-	Hero->Item[FORM1] = (form==1);
-	Hero->Item[FORM2] = (form==2&&!curled);
-	Hero->Item[FORM2CURLED] = (form==2&&curled&&!spikedRolling);
-	Hero->Item[FORM2SPIKED] = (form==2&&spikedRolling);
-	Hero->Item[FORM3] = (form==3);
-	Hero->Item[FORM4] = (form==4);
+	Hero->Item[FORMITEM_DEKU] = (form==FORM_DEKU);
+	Hero->Item[FORMITEM_GORON] = (form==FORM_GORON&&!curled);
+	Hero->Item[FORMITEM_GORON_CURLED] = (form==FORM_GORON&&curled&&!spikedRolling);
+	Hero->Item[FORMITEM_GORON_SPIKED] = (form==FORM_GORON&&spikedRolling);
+	Hero->Item[FORMITEM_ZORA] = (form==FORM_ZORA);
+	Hero->Item[FORMITEM_FIERCE_DEITY] = (form==FORM_FIERCE_DEITY);
 	//end Form setup
 	if(Input->Button[CB_B])
 	{//start ItemJinxing
@@ -119,139 +115,146 @@ void handleTransformations()//start
 		}
 	}//end
 	unless(isFrozen)
-	{//start Form notPaused
-		unless(form)
-		{//start human
-			if(Input->Press[CB_R]&&Hero->Action!=LA_SWIMMING&&!Hero->Item[210])
-			{
-				Game->PlaySound(SFX_SHIELD);
-			}
-			if(Input->Button[CB_R]&&Hero->Action!=LA_SWIMMING&&!Input->Button[CB_A]&&!Input->Button[CB_B]&&!Input->Button[CB_EX1]&&!Input->Button[CB_EX2]&&!Hero->Item[210])
-			{
-				Hero->Item[8]=true;
-				Hero->Item[37]=hasMirrorShield;
-				Hero->Item[FORM_SHIELD] = !hasMirrorShield;
-				Hero->Item[FORM_M_SHIELD] = hasMirrorShield;
-			}
-			else
-			{
-				Hero->Item[8]=false;
-				Hero->Item[37]=false;
-				Hero->Item[FORM_SHIELD] = false;
-				Hero->Item[FORM_M_SHIELD] = false;
-			}
-			//end human
-		}
-		else if(form==1)
-		{//start deku
-			unless(Deku_flying)
-			{
+	{
+		switch(form)
+		{
+			case FORM_HUMAN: //start
+				if(Input->Press[CB_R]&&Hero->Action!=LA_SWIMMING&&!Hero->Item[210])
+				{
+					Game->PlaySound(SFX_SHIELD);
+				}
+				if(Input->Button[CB_R]&&Hero->Action!=LA_SWIMMING&&!Input->Button[CB_A]&&!Input->Button[CB_B]&&!Input->Button[CB_EX1]&&!Input->Button[CB_EX2]&&!Hero->Item[210])
+				{
+					Hero->Item[8]=true;
+					Hero->Item[37]=hasMirrorShield;
+					Hero->Item[FORMITEM_SHIELD] = !hasMirrorShield;
+					Hero->Item[FORMITEM_M_SHIELD] = hasMirrorShield;
+				}
+				else
+				{
+					Hero->Item[8]=false;
+					Hero->Item[37]=false;
+					Hero->Item[FORMITEM_SHIELD] = false;
+					Hero->Item[FORMITEM_M_SHIELD] = false;
+				}
+				break;//end
+			case FORM_DEKU: //start
+				unless(Deku_flying)
+				{
+					if(Input->Press[CB_R])
+					{
+						useItem = I_DEKU_BUBBLE;
+						Input->Press[CB_R]=false;
+						Input->Button[CB_R]=false;
+					}
+				}
+				else
+				{
+					dekuFly();
+				}
+				int linkcombot = Screen->ComboT[ComboAt(Hero->X+8,Hero->Y+12)];
+				if(!Deku_flying&&(linkcombot==CT_WATER||linkcombot==CT_SHALLOWWATER))
+				{
+					--Deku_floating;
+					if(isTouchingComboBy(COMBO_LILYPAD,8))
+					{
+						Deku_floating=60;
+					}
+					else if(Deku_floating>0&&Hero->Action!=LA_DROWNING&&!(Deku_floating%20))
+					{//Play every 20 frames
+						Game->PlaySound(SFX_DEKUHOP);
+					}
+				}
+				else
+				{
+					Deku_floating = 60;
+					Hero->Item[51] = true;
+				}
+				unless(Deku_floating)
+				{
+					Hero->Item[51]=false;
+					Hero->Action=LA_DROWNING;
+				}
+				break;//end
+			case FORM_GORON: //start
 				if(Input->Press[CB_R])
 				{
-					useItem = ITEM_BUBBLE;
-					Input->Press[CB_R]=false;
-					Input->Button[CB_R]=false;
+					if(curled)Game->PlaySound(SFX_GORONUNCURL);
+					else Game->PlaySound(SFX_GORONCURL);
+					curled=!curled;
+					Hero->ItemJinx=3;
 				}
-			}
-			else
-			{
-				dekuFly();
-			}
-			int linkcombot = Screen->ComboT[ComboAt(Hero->X+8,Hero->Y+12)];
-			if(!Deku_flying&&(linkcombot==CT_WATER||linkcombot==CT_SHALLOWWATER))
-			{
-				--Deku_floating;
-				if(isTouchingComboBy(COMBO_LILYPAD,8))
+				if(curled)
 				{
-					Deku_floating=60;
-				}
-				else if(Deku_floating>0&&Hero->Action!=LA_DROWNING&&!(Deku_floating%20))
-				{//Play every 20 frames
-					Game->PlaySound(SFX_DEKUHOP);
-				}
-			}
-			else
-			{
-				Deku_floating = 60;
-				Hero->Item[51] = true;
-			}
-			unless(Deku_floating)
-			{
-				Hero->Item[51]=false;
-				Hero->Action=LA_DROWNING;
-			}
-			//end deku
-		}
-		else if(form==2)
-		{//start Goron
-			if(Input->Press[CB_R])
-			{
-				if(curled)Game->PlaySound(SFX_GORONUNCURL);
-				else Game->PlaySound(SFX_GORONCURL);
-				curled=!curled;
-				Hero->ItemJinx=3;
-			}
-			if(curled)
-			{
-				Hero->SwordJinx = 10;
-				if(Input->Press[CB_A])
-				{
-					useItem = ITEM_POUND;
-					Input->Press[CB_A]=false;
-					Input->Button[CB_A]=false;
-				}
-				Hero->Item[36]=false;
-				Hero->Item[54]=true;
-				if((Input->Button[CB_DOWN]||Input->Button[CB_RIGHT]||Input->Button[CB_LEFT]||Input->Button[CB_UP])&&(Hero->Action==LA_NONE||Hero->Action==LA_WALKING||Hero->Action==LA_GOTHURTLAND))
-				{
-					if(timeRolling<84)
+					Hero->SwordJinx = 10;
+					if(Input->Press[CB_A])
 					{
-						LinkMovement_SetLinkSpeedBoost(-1.5);
-						unless(timeRolling)
-						{
-							Game->PlaySound(SFX_GORONROLL_BEGIN);
-						}
-						spikedRolling=false;
+						useItem = I_GORON_POUND;
+						Input->Press[CB_A]=false;
+						Input->Button[CB_A]=false;
 					}
-					else if(timeRolling<100)
+					Hero->Item[36]=false;
+					Hero->Item[54]=true;
+					if((Input->Button[CB_DOWN]||Input->Button[CB_RIGHT]||Input->Button[CB_LEFT]||Input->Button[CB_UP])&&(Hero->Action==LA_NONE||Hero->Action==LA_WALKING||Hero->Action==LA_GOTHURTLAND))
 					{
-						unless((timeRolling-84)%14)
+						if(timeRolling<84)
 						{
-							Game->PlaySound(SFX_GORONROLL_LOOP);
+							LinkMovement_SetLinkSpeedBoost(-1.5);
+							unless(timeRolling)
+							{
+								Game->PlaySound(SFX_GORONROLL_BEGIN);
+							}
+							spikedRolling=false;
 						}
-						LinkMovement_SetLinkSpeedBoost(-0.5);
-						spikedRolling=false;
-					}
-					else if(timeRolling<200||Game->Counter[CR_MAGIC]<MAGICCOST_SPIKEROLL)
-					{
-						unless((timeRolling-84)%16)
+						else if(timeRolling<100)
 						{
-							Game->PlaySound(SFX_GORONROLL_LOOP);
+							unless((timeRolling-84)%14)
+							{
+								Game->PlaySound(SFX_GORONROLL_LOOP);
+							}
+							LinkMovement_SetLinkSpeedBoost(-0.5);
+							spikedRolling=false;
 						}
-						LinkMovement_SetLinkSpeedBoost(1);
-						spikedRolling=false;
-					}
-					else
-					{
-						unless(spikedRolling)
+						else if(timeRolling<200||Game->Counter[CR_MAGIC]<MAGICCOST_SPIKEROLL)
 						{
-							spikeStartTime=timeRolling;
-							Game->PlaySound(SFX_GORONROLL_SPEEDUP);
+							unless((timeRolling-84)%16)
+							{
+								Game->PlaySound(SFX_GORONROLL_LOOP);
+							}
+							LinkMovement_SetLinkSpeedBoost(1);
+							spikedRolling=false;
 						}
 						else
 						{
-							int time = timeRolling-(spikeStartTime+60);
-							if(time>=0&&!(time%23))
+							unless(spikedRolling)
 							{
-								Game->PlaySound(SFX_GORONROLL_SPEEDLOOP);
+								spikeStartTime=timeRolling;
+								Game->PlaySound(SFX_GORONROLL_SPEEDUP);
 							}
+							else
+							{
+								int time = timeRolling-(spikeStartTime+60);
+								if(time>=0&&!(time%23))
+								{
+									Game->PlaySound(SFX_GORONROLL_SPEEDLOOP);
+								}
+							}
+							LinkMovement_SetLinkSpeedBoost(2.5);
+							unless(gameframe%EVERYXFRAMES_SPIKEROLL)
+								Game->DCounter[CR_MAGIC]-=MAGICCOST_SPIKEROLL;
+							spikedRolling=true;
 						}
-						LinkMovement_SetLinkSpeedBoost(2.5);
-						unless(gameframe%EVERYXFRAMES_SPIKEROLL)
-							Game->DCounter[CR_MAGIC]-=MAGICCOST_SPIKEROLL;
-						spikedRolling=true;
+						timeRolling++;
 					}
-					timeRolling++;
+					else
+					{
+						Audio->EndSound(SFX_GORONROLL_BEGIN);
+						Audio->EndSound(SFX_GORONROLL_LOOP);
+						Audio->EndSound(SFX_GORONROLL_SPEEDLOOP);
+						Audio->EndSound(SFX_GORONROLL_SPEEDUP);
+						timeRolling = 0;
+						spikedRolling=false;
+					}
 				}
 				else
 				{
@@ -259,184 +262,184 @@ void handleTransformations()//start
 					Audio->EndSound(SFX_GORONROLL_LOOP);
 					Audio->EndSound(SFX_GORONROLL_SPEEDLOOP);
 					Audio->EndSound(SFX_GORONROLL_SPEEDUP);
+					Audio->EndSound(SFX_GORONPOUND);
+					Hero->Item[36]=true;
+					Hero->Item[54]=false;
 					timeRolling = 0;
 					spikedRolling=false;
 				}
-			}
-			else
-			{
-				Audio->EndSound(SFX_GORONROLL_BEGIN);
-				Audio->EndSound(SFX_GORONROLL_LOOP);
-				Audio->EndSound(SFX_GORONROLL_SPEEDLOOP);
-				Audio->EndSound(SFX_GORONROLL_SPEEDUP);
-				Audio->EndSound(SFX_GORONPOUND);
-				Hero->Item[36]=true;
-				Hero->Item[54]=false;
-				timeRolling = 0;
-				spikedRolling=false;
-			}
-			if(spikedRolling)
-			{
-				goronSpikeRoll();
-			}//end Goron
+				if(spikedRolling)
+				{
+					goronSpikeRoll();
+				}
+				break;//end
+			case FORM_ZORA: //start
+				if(Input->Press[CB_R])
+				{
+					fireZoraBoomerang();
+					Input->Press[CB_R]=false;
+					Input->Button[CB_R]=false;
+				}
+				break;//end
+			case FORM_FIERCE_DEITY: //start
+				if(Input->Press[CB_R]&&Hero->Action!=LA_SWIMMING)
+				{
+					Game->PlaySound(SFX_SHIELD);
+				}
+				if(Input->Button[CB_R]&&Hero->Action!=LA_SWIMMING&&!Input->Button[CB_A])
+				{
+					Hero->Item[8]=true;
+					Hero->Item[37]=hasMirrorShield;
+					killActionsBut({CB_RIGHT,CB_LEFT,CB_UP,CB_DOWN,CB_EX4,CB_A});
+				}
+				else
+				{
+					Hero->Item[8]=false;
+					Hero->Item[37]=false;
+				}
+				break;//end
 		}
-		else if(form==3)
-		{//start zora
-			if(Input->Press[CB_R])
-			{
-				fireZoraBoomerang();
-				Input->Press[CB_R]=false;
-				Input->Button[CB_R]=false;
-			}
-			//end
-		}
-		else if(form==4)
-		{//start Deity
-			if(Input->Press[CB_R]&&Hero->Action!=LA_SWIMMING)
-			{
-				Game->PlaySound(SFX_SHIELD);
-			}
-			if(Input->Button[CB_R]&&Hero->Action!=LA_SWIMMING&&!Input->Button[CB_A])
-			{
-				Hero->Item[8]=true;
-				Hero->Item[37]=hasMirrorShield;
-				killActionsBut({CB_RIGHT,CB_LEFT,CB_UP,CB_DOWN,CB_EX4,CB_A});
-			}
-			else
-			{
-				Hero->Item[8]=false;
-				Hero->Item[37]=false;
-			}
-		}//end
-	}//end Form notonsubscreen	
-	if(form)
-	{//start Not-form-x
-		Hero->Item[FORM_SHIELD] = false;
-		Hero->Item[FORM_M_SHIELD] = false;
+	}
+	if(form!=FORM_HUMAN)//start
+	{
+		Hero->Item[FORMITEM_SHIELD] = false;
+		Hero->Item[FORMITEM_M_SHIELD] = false;
 		Hero->Item[210] = false;
-		if(form!=4)
+		if(form!=FORM_FIERCE_DEITY)
 		{
 			Hero->Item[8]=false;
 			Hero->Item[37]=false;
 		}
-	}
-	if(form!=1)
+	}//end
+	if(form!=FORM_DEKU)//start
 	{
 		Hero->Item[133] = false;
 		Hero->Item[134] = false;
 		Hero->Item[135] = false;
-		Hero->Item[ITEM_BUBBLE] = false;
-	}
-	if(form!=2)
+		Hero->Item[I_DEKU_BUBBLE] = false;
+	}//end
+	if(form!=FORM_GORON)//start
 	{
 		curled=false;
 		spikedRolling=false;
 		Hero->Item[36]=false;
 		Hero->Item[54]=false;
-	}
-	if(form!=3)
+	}//end
+	if(form!=FORM_ZORA)//start
 	{
 		Hero->Item[136] = false;
-	}
-	if(form!=4)
+	}//end
+	if(form!=FORM_FIERCE_DEITY)//start
 	{
 		Hero->Item[208]=false;
 		Hero->Item[209]=false;
-	}
-	//end Not-form-x
-	unless(form)
-	{//start HUMAN
-		Hero->Item[51] = true;
-		Hero->Item[214]=false;
-		//end HUMAN
-	}
-	else if(form==1)
-	{//start DEKU
-		Hero->Item[51] = true;
-		Hero->Item[214]=false;
-		Hero->Item[133] = true;
-		Hero->Item[134] = true;
-		Hero->Item[135] = true;
-		Hero->Item[ITEM_BUBBLE] = true;
-		Hero->Item[8]=false;
-		Hero->Item[37]=false;
-		//end DEKU
-	}
-	else if(form==2)
-	{//start GORON
-		Hero->Item[51]=false;
-		Hero->Item[214]=false;
-		Hero->Item[8]=false;
-		Hero->Item[37]=false;
-		//end GORON
-	}
-	else if(form==3)
-	{//start ZORA
-		Hero->Item[214]=true;
-		Hero->Item[8]=false;
-		Hero->Item[37]=false;
-		Hero->Item[136] = true;
-		if(Hero->Action==LA_SWIMMING)LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_ZORA_WATER);
-		handleZoraScreenChange();
-		//end ZORA
-	}
-	else if(form==4)
-	{//start DEITY
-		Hero->Item[208]=true;
-		Hero->Item[209]=true;
-		//end DEITY
+	}//end
+	switch(form)
+	{
+		case FORM_HUMAN: //start
+			Hero->Item[51] = true;
+			Hero->Item[214]=false;
+			break;//end
+		case FORM_DEKU: //start
+			Hero->Item[51] = true;
+			Hero->Item[214]=false;
+			Hero->Item[133] = true;
+			Hero->Item[134] = true;
+			Hero->Item[135] = true;
+			Hero->Item[I_DEKU_BUBBLE] = true;
+			Hero->Item[8]=false;
+			Hero->Item[37]=false;
+			break;//end
+		case FORM_GORON: //start
+			Hero->Item[51]=false;
+			Hero->Item[214]=false;
+			Hero->Item[8]=false;
+			Hero->Item[37]=false;
+			break;//end
+		case FORM_ZORA: //start
+			Hero->Item[214]=true;
+			Hero->Item[8]=false;
+			Hero->Item[37]=false;
+			Hero->Item[136] = true;
+			if(Hero->Action==LA_SWIMMING)LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_ZORA_WATER);
+			handleZoraScreenChange();
+			break;//end
+		case FORM_FIERCE_DEITY: //start
+			Hero->Item[208]=true;
+			Hero->Item[209]=true;
+			break;//end
 	}
 }//end
 //start formFunctions
 //For default form, check if item is not on blacklist, else check if item is on whitelist
-bool itemAllowed(int form, int itemID)
+bool itemAllowed(Form form, ItemID itemID)
 {
-	unless(form)
+	switch(form)
 	{
-		int F0_items[] = {48};//This is blacklist, others below are whitelist
-		for(int i = 0;i<SizeOfArray(F0_items);i++)
-		{
-			if(F0_items[i]==itemID)return false;
-		}
-		return true;
-	}
-	else if(form==1)
-	{
-		int F1_items[] = {31,144,127,131,25,207,53};
-		for(int i = 0;i<SizeOfArray(F1_items);i++)
-		{
-			if(F1_items[i]==itemID)return true;
-		}
-		return false;
-	}
-	else if(form==2)
-	{
-		if(curled)return false;
-		int F2_items[] = {31,144,127,131,207,53,48};
-		//if(itemID==48)return true;//PATCHWORK//
-		for(int i = 0;i<SizeOfArray(F2_items);i++)
-		{
-			if(F2_items[i]==itemID)return true;
-		}
-		return false;
-	}
-	else if(form==3)
-	{
-		int F3_items[] = {31,48,144,127,ITEM_POUND,131,207,53};	
-		for(int i = 0;i<SizeOfArray(F3_items);i++)
-		{
-			if(F3_items[i]==itemID)return true;
-		}
-		return false;
-	}
-	else if(form==4)
-	{
-		int F4_items[] = {144,127,131,207,53};
-		for(int i = 0;i<SizeOfArray(F4_items);i++)
-		{
-			if(F4_items[i]==itemID)return true;
-		}
-		return false;
+		case FORM_HUMAN:
+			switch(itemID)
+			{
+				case I_POWDERKEG:
+					return false;
+				default:
+					return true;
+			}
+		case FORM_DEKU:
+			switch(itemID)
+			{
+				case I_OCARINA:
+				case I_MASK_DEKU:
+				case I_MASK_GORON:
+				case I_MASK_ZORA:
+				case I_MASK_DEITY:
+				case I_LENS_TRUTH:
+				case I_DEKU_BUBBLE:
+				case I_DEKUNUTS:
+					return true;
+				default:
+					return false;
+			}
+		case FORM_GORON:
+			if(curled) return false;
+			switch(itemID)
+			{
+				case I_OCARINA:
+				case I_MASK_DEKU:
+				case I_MASK_GORON:
+				case I_MASK_ZORA:
+				case I_MASK_DEITY:
+				case I_LENS_TRUTH:
+				case I_POWDERKEG:
+				case I_GORON_POUND:
+					return true;
+				default:
+					return false;
+			}
+		case FORM_ZORA:
+			switch(itemID)
+			{
+				case I_OCARINA:
+				case I_MASK_DEKU:
+				case I_MASK_GORON:
+				case I_MASK_ZORA:
+				case I_MASK_DEITY:
+				case I_LENS_TRUTH:
+					return true;
+				default:
+					return false;
+			}
+		case FORM_FIERCE_DEITY:
+			switch(itemID)
+			{
+				case I_MASK_DEKU:
+				case I_MASK_GORON:
+				case I_MASK_ZORA:
+				case I_MASK_DEITY:
+				case I_LENS_TRUTH:
+					return true;
+				default:
+					return false;
+			}
 	}
 }
 
@@ -533,7 +536,7 @@ void dekuFly()//start DekuFly
 	}
 	else if((!(gameframe%6)&&Deku_flying>180)||(!(gameframe%12)&&Deku_flying>91)||(!(gameframe%24)||gameframe%24==6))
 		Game->PlaySound(69);
-	if(Input->Press[CB_A])useItem=ITEM_DEKUNUT;
+	if(Input->Press[CB_A])useItem=I_DEKUNUTS;
 	killActionsBut({CB_RIGHT,CB_LEFT,CB_UP,CB_DOWN,CB_EX4});
 	LinkMovement_SetLinkSpeedBoost(DekuFlightSpeedMod);
 }//end

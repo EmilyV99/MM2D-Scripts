@@ -304,15 +304,21 @@ int getPressedDir8() //start
 	if(Input->Button[CB_UP]) return DIR_UP;
 	return -1;
 }//end
-int validateDir(int dir, int defaultdir)
+int validateDir(int dir, int defaultdir) //start
 {
 	if(dir<0||dir>7)return defaultdir;
 	return dir;
-}
-bool offscreen(int x, int y)
+}//end
+bool offscreen(int x, int y) //start
 {
 	return x <= 3 || x >= 237 || y <= 1 || y >= 157;
-}
+}//end
+void resetMusic() //start
+{
+	int midi = CurMapdata()->MIDI;
+	if(midi==-4) midi = Game->LoadDMapData(Game->GetCurDMap())->MIDI;
+	unless(midi==Game->GetMIDI()) Audio->PlayMIDI(midi);
+}//end
 //end Misc Functions
 //start Keyboard
 void KeyToString(int key, char buf)

@@ -803,7 +803,8 @@ void runSubscreen()
 
 void passiveSubscreen()//start PassiveSubscreen
 {
-	if(getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL)) return; //No subscreen in the options menu
+	//printf("Passive subscr %d\n",gameframe);
+	//if(getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL)) return; //No subscreen in the options menu
 	//Inventory
 	int A_tile = TILE_INVIS;
 	int R_tile = TILE_INVIS;
@@ -821,67 +822,68 @@ void passiveSubscreen()//start PassiveSubscreen
 	{
 		RUPEE_cset = 0;
 	}
-	if(!form||form==4)
+	switch(form)
 	{
-		A_tile = loadItemTile(Hero->ItemA);
-		A_cset = loadItemCSet(Hero->ItemA);
-		if(form==4||!Hero->Item[210])
-		{
-			if(hasMirrorShield)
+		case FORM_HUMAN:
+		case FORM_FIERCE_DEITY:
+			A_tile = loadItemTile(Hero->ItemA);
+			A_cset = loadItemCSet(Hero->ItemA);
+			if(form==FORM_FIERCE_DEITY||!Hero->Item[210])
 			{
-				R_tile = loadItemTile(37);
-				R_cset = loadItemCSet(37);
+				if(hasMirrorShield)
+				{
+					R_tile = loadItemTile(37);
+					R_cset = loadItemCSet(37);
+				}
+				else
+				{
+					R_tile = loadItemTile(8);
+					R_cset = loadItemCSet(8);
+				}
+			}
+			break;
+		case FORM_DEKU:
+			A_tile = loadItemTile(Hero->ItemA);
+			A_cset = loadItemCSet(Hero->ItemA);
+			if(Game->MCounter[CR_MAGIC]>0)
+			{
+				R_tile = loadItemTile(I_DEKU_BUBBLE);
+				R_cset = loadItemCSet(I_DEKU_BUBBLE);
+			}
+			break;
+		case FORM_GORON:
+			if(curled)
+			{
+				A_tile = loadItemTile(I_GORON_POUND);
+				A_cset = loadItemCSet(I_GORON_POUND);
 			}
 			else
 			{
-				R_tile = loadItemTile(8);
-				R_cset = loadItemCSet(8);
+				A_tile = loadItemTile(Hero->ItemA);
+				A_cset = loadItemCSet(Hero->ItemA);
 			}
-		}
-	}
-	else if(form==1)
-	{
-		A_tile = loadItemTile(Hero->ItemA);
-		A_cset = loadItemCSet(Hero->ItemA);
-		if(Game->MCounter[CR_MAGIC]>0)
-		{
-			R_tile = loadItemTile(ITEM_BUBBLE);
-			R_cset = loadItemCSet(ITEM_BUBBLE);
-		}
-	}
-	else if(form==2)
-	{
-		if(curled)
-		{
-			A_tile = loadItemTile(ITEM_POUND);
-			A_cset = loadItemCSet(ITEM_POUND);
-		}
-		else
-		{
+			R_tile = TILE_CURL;
+			R_cset = 0;
+			break;
+		case FORM_ZORA:
 			A_tile = loadItemTile(Hero->ItemA);
 			A_cset = loadItemCSet(Hero->ItemA);
-		}
-		R_tile = TILE_CURL;
-		R_cset = 0;
+			R_tile = loadItemTile(23);
+			R_cset = loadItemCSet(23);
+			break;
 	}
-	else if(form==3)
-	{
-		A_tile = loadItemTile(Hero->ItemA);
-		A_cset = loadItemCSet(Hero->ItemA);
-		R_tile = loadItemTile(23);
-		R_cset = loadItemCSet(23);
-	}
-	unless(form)switch(mask)
-	{
-		case 7:
+	unless(form)
+		switch(mask)
 		{
-			unless(getGlobalVar(GVAR_BLASTMASKCOOLDOWN,0))
+			case MASK_BLAST:
 			{
-				L_tile=loadItemTile(189);
-				L_cset=loadItemCSet(189);
-			}
-		break;}
-	}
+				unless(getGlobalVar(GVAR_BLASTMASKCOOLDOWN,0))
+				{
+					L_tile=loadItemTile(189);
+					L_cset=loadItemCSet(189);
+				}
+			break;}
+		}
 	int EX1_tile = loadItemTile(EX1_item);
 	int EX2_tile = loadItemTile(EX2_item);
 	int B_tile = loadItemTile(B_item);
@@ -891,9 +893,9 @@ void passiveSubscreen()//start PassiveSubscreen
 	if(EX1_item==I_DEKUSTICK&&dekuStickLitTimer>0)EX1_tile+=20;
 	if(EX2_item==I_DEKUSTICK&&dekuStickLitTimer>0)EX2_tile+=20;
 	if(B_item==I_DEKUSTICK&&dekuStickLitTimer>0)B_tile+=20;
-	if(isArrow(B_item)&&B_item!=13)B_tile++;
-	if(isArrow(EX1_item)&&EX1_item!=13)EX1_tile++;
-	if(isArrow(EX2_item)&&EX2_item!=13)EX2_tile++;
+	if(isArrow(B_item)&&B_item!=I_BOWARROW)++B_tile;
+	if(isArrow(EX1_item)&&EX1_item!=I_BOWARROW)++EX1_tile;
+	if(isArrow(EX2_item)&&EX2_item!=I_BOWARROW)++EX2_tile;
 	if(holdingBomb)
 	{
 		EX1_tile=TILE_INVIS;
@@ -909,8 +911,8 @@ void passiveSubscreen()//start PassiveSubscreen
 		EX1_tile=TILE_INVIS;
 		EX2_tile=TILE_INVIS;
 		B_tile=TILE_INVIS;
-		A_tile=loadItemTile(ITEM_DEKUNUT);
-		A_cset=loadItemCSet(ITEM_DEKUNUT);
+		A_tile=loadItemTile(I_DEKUNUTS);
+		A_cset=loadItemCSet(I_DEKUNUTS);
 		R_tile=TILE_DROP;
 		R_cset=CSET_DROP;
 	}
@@ -933,7 +935,7 @@ void passiveSubscreen()//start PassiveSubscreen
 	Screen->FastTile(7,LX,LY,L_tile,L_cset,OP_OPAQUE);
 	//Mask
 	int maskx = MASKX;
-	if(mask==24)
+	if(mask==MASK_GIANTS)
 	{
 		Screen->FastTile(7,MASKX+8,MASKY,currMaskTile+1,6,OP_OPAQUE);
 		maskx-=8;

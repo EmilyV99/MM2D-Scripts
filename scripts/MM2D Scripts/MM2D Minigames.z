@@ -4,12 +4,20 @@
 //                                    //
 ////////////////////////////////////////
 
+enum MGState
+{
+	MG_NONE,
+	MG_MISC,
+	MG_SHOOTING
+};
+
 //start Octorok Shooting Game
 ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when you pay the fee
 {
 	void run()
 	{
-		setGlobalVar(GVAR_MGSTATE,GV_MISC,1);
+		setGlobalVar(GVAR_MGSTATE,GV_MISC,MG_SHOOTING);
+		Audio->PlayMIDI(MIDI_MINIGAME);
 		DEFINE LEFT = 48;
 		DEFINE MID_X = 120;
 		DEFINE RIGHT = 192;
@@ -19,10 +27,10 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 		DEFINE COOLDOWN = 20;
 		DEFINE FRAMES_ROUND = 6 * FRAMES_MINUTE;
 		int startArrows = Game->Counter[CR_ARROWS];
-		int items[] = {B_item, EX1_item, EX2_item};
+		ItemID items[] = {B_item, EX1_item, EX2_item};
 		B_item = I_BOWARROW;
-		EX1_item = 0;
-		EX2_item = 0;
+		EX1_item = NULL;
+		EX2_item = NULL;
 		int timer = 15 * FRAMES_ROUND;
 		int phaseTimer = FRAMES_ROUND;
 		npc r1 = CreateNPCAt(TARGET_OCTO_RED, MID_X, BOTTOM);
@@ -491,7 +499,7 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 				if(cooldown==-1)
 				{
 					cooldown = COOLDOWN;
-					B_item = 0;
+					B_item = NULL;
 				}
 				arrowAimMode = true;
 			}
@@ -511,12 +519,12 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 			Screen->FastTile(6,0,136,loadItemTile(I_BOWARROW),loadItemCSet(I_BOWARROW),OP_OPAQUE);
 			Screen->FastTile(6,0,152,loadItemTile(I_CLOCK),loadItemCSet(I_CLOCK),OP_OPAQUE);
 			int buf[] = "  :  :  ";
-			buf[0] = Div(Div(timer,FRAMES_HOUR),10) + 48;
-			buf[1] = Div(timer,FRAMES_HOUR)%10 + 48;
-			buf[3] = Div(Div((timer%FRAMES_HOUR),FRAMES_MINUTE),10) + 48;
-			buf[4] = Div((timer%FRAMES_HOUR),FRAMES_MINUTE)%10 + 48;
-			buf[6] = Div((timer%FRAMES_MINUTE),10) + 48;
-			buf[7] = (timer%FRAMES_MINUTE)%10 + 48;
+			buf[0] = Div(Div(timer,FRAMES_HOUR),10) + '0';
+			buf[1] = Div(timer,FRAMES_HOUR)%10 + '0';
+			buf[3] = Div(Div((timer%FRAMES_HOUR),FRAMES_MINUTE),10) + '0';
+			buf[4] = Div((timer%FRAMES_HOUR),FRAMES_MINUTE)%10 + '0';
+			buf[6] = Div((timer%FRAMES_MINUTE),10) + '0';
+			buf[7] = (timer%FRAMES_MINUTE)%10 + '0';
 			Screen->DrawString(6,16,152,FONT_DSPHANTOMP,0x0F,0x01,TF_NORMAL,buf,OP_OPAQUE);
 			//
 			Screen->DrawInteger(6,16,136,FONT_DSPHANTOMP,0x0F,0x01,0,0,kills,0,OP_OPAQUE);
@@ -541,8 +549,9 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 		B_item = items[0];
 		EX1_item = items[1];
 		EX2_item = items[2];
-		setGlobalVar(GVAR_MGSTATE,GV_MISC,0);
+		setGlobalVar(GVAR_MGSTATE,GV_MISC,MG_NONE);
 		tangoTempI = kills;
+		resetMusic();
 	}
 }
 //end
@@ -550,42 +559,115 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 int invisMazeLayout[88];
 ffc script invisMazeGame
 {
-	void run(int chestFFC)
+	CONFIG MAZEGAME_MINUTES_TIMER = 15;
+	void run(ffc chest, bool goodprize, ffc mazegirl)
 	{
-		int timer = 30 * FRAMES_MINUTE;
+		Hero->BigHitbox = true;
+		setGlobalVar(GVAR_MGSTATE,GV_MISC,MG_MISC);
+		int timer = MAZEGAME_MINUTES_TIMER * FRAMES_MINUTE;
+		int map = Game->GetCurMap(), layerscreen = Screen->LayerScreen(5);
 		for(int x = 0; x < 11; ++x)
+		{
 			for(int y = 0; y < 8; ++y)
 			{
-				Screen->ComboD[(x+1) + (16*(2+y))] += invisMazeLayout[x + (11*y)];
+				DEFINE combo = (x+1) + (16*(2+y));
+				if(invisMazeLayout[x + (11*y)])
+				{
+					++Screen->ComboD[combo];
+					Game->SetComboData(map, layerscreen, combo, COMBO_GRAY);
+					//Screen->ComboF[combo] = CF_LENSMARKER;
+				}
 			}
+		}
+		int freeframes = 2; //Frames that the NPC is still talking to you
 		while(timer > 0)
 		{
+			if(getChestState(IL_INVISMAZE_CHEST))
+			{
+				if(goodprize) flagGlobalVar(GVAR_CHESTGAME,GV_MINIGAME,FLAG1);
+				break;
+			}
+			unless(isFrozen)
+			{
+				if(freeframes)
+				{
+					unless(--freeframes) Audio->PlayMIDI(MIDI_MINIGAME);
+				}
+				else --timer;
+			}
+			//Draw timer
+			Screen->FastTile(6,0,8,loadItemTile(I_CLOCK),loadItemCSet(I_CLOCK),OP_OPAQUE);
+			int buf[] = "  :  ";
+			buf[0] = Div(Div((timer%FRAMES_HOUR),FRAMES_MINUTE),10) + '0';
+			buf[1] = Div((timer%FRAMES_HOUR),FRAMES_MINUTE)%10 + '0';
+			buf[3] = Div((timer%FRAMES_MINUTE),10) + '0';
+			buf[4] = (timer%FRAMES_MINUTE)%10 + '0';
+			Screen->DrawString(6,16,8,FONT_DSPHANTOMP,0x0F,0x01,TF_NORMAL,buf,OP_OPAQUE);
 			Waitframe();
-			if(getChestState(3))break;
-			--timer;
 		}
-		ffc chest = Screen->LoadFFC(chestFFC);
-		Screen->ComboD[32] = Screen->ComboD[48];
-		chest->Script = 0;
-		chest->Data = COMBO_INVIS;
+		if(timer) mazegirl->Misc[0] = 2;
+		else
+		{
+			mazegirl->Misc[0] = 1;
+			ShowStringAndWait("All right. Time's up!");
+		}
+		Screen->ComboD[32] = Screen->ComboD[48]; //Reset the combo under the chest
 		for(int x = 0; x < 11; ++x)
+		{
 			for(int y = 0; y < 8; ++y)
 			{
-				Screen->ComboD[(x+1) + (16*(2+y))] -= invisMazeLayout[x + (11*y)];
+				DEFINE combo = (x+1) + (16*(2+y));
+				if(invisMazeLayout[x + (11*y)])
+				{
+					--Screen->ComboD[combo];
+					Game->SetComboData(map, layerscreen, combo, 0);
+					//Screen->ComboF[combo] = CF_NONE;
+				}
 			}
+		}
+		chest->Data = COMBO_INVIS;
+		chest->Script = 0;
+		setGlobalVar(GVAR_MGSTATE,GV_MISC,MG_NONE);
+		Hero->BigHitbox = false;
+		do Waitframe(); while(Hero->Action==LA_HOLD2LAND);
+		Hero->X = 208;
+		Hero->Y = 112;
+		Hero->Dir = DIR_DOWN;
+		Input->Press[CB_A] = true;
+		resetMusic();
+		Quit();
 	}
 }
 
-bool startMazeGame(int cost, int prize)
+screendata script clearMazeGameHint
 {
-	if(fullCounter(CR_RUPEES) < cost)return false;
-	invisMazeLayout[88]=0;
-	setChestState(3, false);
-	int chestFFC = RunFFCScript(FFC_CHEST,{prize,3});
+	void run()
+	{
+		int map = Game->GetCurMap(), layerscreen = Screen->LayerScreen(5);
+		for(int x = 0; x < 11; ++x)
+		{
+			for(int y = 0; y < 8; ++y)
+			{
+				DEFINE combo = (x+1) + (16*(2+y));
+				Game->SetComboData(map, layerscreen, combo, 0);
+			}
+		}
+	}
+}
+
+bool startMazeGame(int cost, ItemID prize, bool goodprize, ffc mazegirl)
+{
+	if(fullCounter(CR_RUPEES) < cost) return false;
+	int chestindex = IL_INVISMAZE_CHEST;
+	setChestState(chestindex, false);
+	int chestFFC = RunFFCScript(FFC_CHEST,{chestindex,false,prize});
+	Debug::print("Chest FFC: %d",chestFFC);
 	ffc chest = Screen->LoadFFC(chestFFC);
 	chest->X = 0;
 	chest->Y = 32;
-	RunFFCScript(FFC_INVISMAZE,{chestFFC});
+	generateMazeLayout();
+	Game->DCounter[CR_RUPEES] -= cost;
+	RunFFCScript(FFC_INVISMAZE,{chest,goodprize,mazegirl});
 	return true;
 }
 
@@ -606,15 +688,6 @@ void generateMazeLayout()
 		int activeLeft = 6;
 		while(active[0] != -1)
 		{
-			/*for(int i = 0; i < 1; ++i)
-			{
-				for(int q = 0; q < 88; ++q)
-				{
-					Screen->FastTile(6,16*(q%11),16*(Div(q,11)),TILE_COLOR+15+Cond(mazeLayout[q]>0,-1*(mazeLayout[q]-1),-5),0,OP_OPAQUE);
-				}
-				if(success)Screen->FastTile(6,TILE_COLOR+6,0,16*11,0,OP_OPAQUE);
-				Waitframe();
-			}*/
 			for(int q = 0; active[q] != -1; ++q)
 			{
 				if(mazeLayout[active[q]]!=0)
@@ -644,17 +717,17 @@ void generateMazeLayout()
 			for(int q = 0; active[q] != -1; ++q)
 			{
 				if(active[q]<-1)continue;
-				if(active[q]+1<88)if((active[q] % 11) != 10)if(mazeLayout[active[q]+1]==0)
+				if(active[q]+1<88&&(active[q] % 11) != 10&&mazeLayout[active[q]+1]==0)
 				{
 					new[index] = active[q]+1;
 					++index;
 				}
-				if(active[q]-1>=0)if((active[q] % 11) != 0)if(mazeLayout[active[q]-1]==0)
+				if(active[q]-1>=0&&(active[q] % 11) != 0&&mazeLayout[active[q]-1]==0)
 				{
 					new[index] = active[q]-1;
 					++index;
 				}
-				if(active[q]+11<88)if(mazeLayout[active[q]+11]==0)
+				if(active[q]+11<88&&mazeLayout[active[q]+11]==0)
 				{
 					new[index] = active[q]+11;
 					++index;
@@ -687,11 +760,9 @@ void generateMazeLayout()
 			active[q] = 0;
 		}
 		continue;
-		/*TraceS("Maze generation failed! Quitting!\n");
-		invisMazeLayout[0] = -1;
-		return;*/
 	}
 	//TraceS("Maze generated!\n");
+	Debug::print("Generated maze layout... Moving to global array...");
 	for(int q = 0; q < 88; ++q)invisMazeLayout[q]=Clamp(mazeLayout[q]-1,0,1);
 }
 //end

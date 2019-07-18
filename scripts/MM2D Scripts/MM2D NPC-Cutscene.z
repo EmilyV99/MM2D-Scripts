@@ -5,8 +5,23 @@
 ////////////////////////////////////////
 
 //start NPC	
-char NPCNames[1000] = {"Tatl","Happy Mask Salesman","Banker","Bremor","Brac","ERROR","Tatl","Guard","Guard","Guard","Guard","ERROR","ERROR"};
-
+char NPCNames[1000] = {"Tatl","Happy Mask Salesman","Banker","Bremor","Brac","","","Guard","Guard","Guard","Guard","",""};
+enum NPCID
+{
+	N_TATL,
+	N_HAPPYMASK,
+	N_BANKER,
+	N_BREMOR,
+	N_BRAC,
+	N_NAMECHANGE,
+	N_DIFFCHANGE,
+	N_GUARD_EAST,
+	N_GUARD_WEST,
+	N_GUARD_NORTH,
+	N_GUARD_SOUTH,
+	N_SHOOTING_GALLERY_TOWN,
+	N_INVIS_MAZE_GIRL
+};
 ffc script NPC
 {
 	//
@@ -57,11 +72,11 @@ ffc script NPC
 		{
 			switch(NPCid)
 			{
-				case 1:
+				case N_HAPPYMASK:
 				{
 					while(true)
 					{
-						while(HMS_visible==false)
+						until(HMS_Cutscene.HMS_visible)
 						{
 							Waitframe();
 						}
@@ -80,9 +95,9 @@ ffc script NPC
 						}
 					}
 				}
-				case 2:
-				case 5:
-				case 6:
+				case N_BANKER:
+				case N_NAMECHANGE:
+				case N_DIFFCHANGE:
 				{
 					this->Data=NPCcombo;
 					while(true)
@@ -96,10 +111,10 @@ ffc script NPC
 						Waitframe();
 					}
 				}
-				case 7:
-				case 8:
-				case 9:
-				case 10:
+				case N_GUARD_EAST:
+				case N_GUARD_WEST:
+				case N_GUARD_NORTH:
+				case N_GUARD_SOUTH:
 				{
 					int xoff = Cond(NPCid>8,8,0);
 					int yoff = Cond(NPCid>8,0,-8);
@@ -192,7 +207,7 @@ ffc script NPC
 						Waitframe();
 					}
 				}
-				case 11:
+				case N_SHOOTING_GALLERY_TOWN:
 				{
 					while(true)
 					{
@@ -210,7 +225,7 @@ ffc script NPC
 						Waitframe();
 					}
 				}
-				case 12:
+				case N_INVIS_MAZE_GIRL:
 				{
 					while(true)
 					{
@@ -248,12 +263,12 @@ ffc script NPC
 		Game->PlaySound(NPCsound);
 		switch(NPCid)
 		{
-			case 1://Happy Mask Salesman start
+			case N_HAPPYMASK: //Happy Mask Salesman start
 			{
-				unless(CS1_seen)
+				unless(HMS_Cutscene.CS1_seen)
 				{
 					ShowNPCMessageAndWait(6,NPCid);
-					CS1_seen=true;
+					HMS_Cutscene.CS1_seen=true;
 				}
 				else
 				{
@@ -262,7 +277,7 @@ ffc script NPC
 				break;
 			}
 			//end
-			case 2://Banker start
+			case N_BANKER: //Banker start
 			{
 				if(fullCounter(CR_BANKBAL))
 				{
@@ -301,7 +316,7 @@ ffc script NPC
 				break;
 			}
 			//end
-			case 3://Bremor, Carpenter (Red Pants) start
+			case N_BREMOR: //Bremor, Carpenter (Red Pants) start
 			{
 				if(isBefore(2,6,false))
 				{
@@ -318,7 +333,7 @@ ffc script NPC
 				break;
 			}
 			//end
-			case 4://Brac, Carpenter (Green Pants) start
+			case N_BRAC: //Brac, Carpenter (Green Pants) start
 			{
 				if(isBefore(2,6,false))
 				{
@@ -335,7 +350,7 @@ ffc script NPC
 				break;
 			}
 			//end
-			case 5://Name-Changing Tablet start
+			case N_NAMECHANGE: //Name-Changing Tablet start
 			{
 				tangoTemp=false;
 				ShowStringAndWait("{{@savename()}}, would you like to change your name?@26<<@choice(1)Yes@choice(2)No>>@domenu()@append(45)");
@@ -346,7 +361,7 @@ ffc script NPC
 				break;
 			}
 			//end
-			case 6://Difficulty-Changing Tablet start
+			case N_DIFFCHANGE: //Difficulty-Changing Tablet start
 			{
 				unless(Hero->Item[I_OCARINA])
 				{
@@ -388,10 +403,10 @@ ffc script NPC
 				break;
 			}
 			//end
-			case 7:  //Guard East
-			case 8:  //Guard West
-			case 9:  //Guard North 
-			case 10: //Guard South start
+			case N_GUARD_EAST:  //Guard East
+			case N_GUARD_WEST:  //Guard West
+			case N_GUARD_NORTH:  //Guard North 
+			case N_GUARD_SOUTH: //Guard South start
 			{
 				if(args[0])
 				{
@@ -471,11 +486,12 @@ ffc script NPC
 				}
 			}
 			//end
-			case 11://start Town Shooting Gallery Guy
+			case N_SHOOTING_GALLERY_TOWN: //start Town Shooting Gallery Guy
 			{
+				tangoTempI=0;
 				unless(form)
 				{
-					if(getNPCflag(11, FLAG2))
+					if(getNPCflag(N_SHOOTING_GALLERY_TOWN, FLAG2))
 					{
 						if(day<3)ShowStringAndWait("Wanna try?");
 						else ShowStringAndWait("How about it?@char(26)Wanna try?");
@@ -484,7 +500,7 @@ ffc script NPC
 					{
 						if(day<3)ShowStringAndWait("If you think you can do it, why don'tcha give it a try, sonny?");
 						else ShowStringAndWait("If you still have time, why don'tcha try it, sonny?");
-						setNPCflag(11, FLAG2);
+						setNPCflag(N_SHOOTING_GALLERY_TOWN, FLAG2);
 					}
 					ShowStringAndWait("One game is 20 rupees.@char(26)<<@choice(1)OK@choice(2)No thanks>>@domenu()@set(@ttempi @chosen)@close()");
 					if(tangoTempI==2)
@@ -541,7 +557,7 @@ ffc script NPC
 									ShowStringAndWait("Well look at that! You hit @number(@ttempi)! Well, here ya go!");
 									if(getFlagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG1))
 									{
-										item itm = CreateItemAt(I_RUPEE50,Hero->X,Hero->Y);
+										item itm = CreateItemAt(I_RUP_50,Hero->X,Hero->Y);
 										itm->Pickup = IP_HOLDUP;
 									}
 									else
@@ -559,7 +575,7 @@ ffc script NPC
 									ShowStringAndWait("Well, here ya go!");
 									if(getFlagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG2))
 									{
-										item itm = CreateItemAt(I_RUPEE200,Hero->X,Hero->Y);
+										item itm = CreateItemAt(I_RUP_200,Hero->X,Hero->Y);
 										itm->Pickup = IP_HOLDUP;
 									}
 									else
@@ -586,7 +602,7 @@ ffc script NPC
 				{
 					switch(form)
 					{
-						case 1:
+						case FORM_DEKU:
 							unless(getNPCflag(11,FLAG3))
 							{
 								ShowStringAndWait("Oh! When I saw that fairy, I thought you were that troublemakin' brat with the mask.");
@@ -595,7 +611,7 @@ ffc script NPC
 							if(Hero->Item[I_BOWARROW])ShowStringAndWait("Sorry, but you can't play if you can't shoot a bow.");
 							else ShowStringAndWait("Sorry, but you can't play if you don't have a bow.");
 							break;
-						case 2:
+						case FORM_GORON:
 							unless(getNPCflag(11,FLAG4))
 							{
 								ShowStringAndWait("Well, look at you! You've got quite a build! I betcha can lift anything!");
@@ -605,7 +621,7 @@ ffc script NPC
 							if(Hero->Item[I_BOWARROW])ShowStringAndWait("Sorry...If you can't shoot a bow, you can't play.");
 							else ShowStringAndWait("Sorry...If you don't have a bow, you can't play.");
 							break;
-						case 3:
+						case FORM_ZORA:
 							unless(getNPCflag(11,FLAG5))
 							{
 								ShowStringAndWait("I swear I've seen you somewhere before...");
@@ -620,13 +636,121 @@ ffc script NPC
 				break;
 			}
 			//end
-			case 12://start invis chest maze lady
+			case N_INVIS_MAZE_GIRL: //start invis chest maze lady
 			{
-				
+				if(getGlobalVar(GVAR_MGSTATE,GV_MISC)) return;
+				int price;
+				ItemID prize;
+				bool skip;
+				if(person->Misc[0]) //Just played
+				{
+					if(person->Misc[0]==2) //Just won
+						ShowStringAndWait("Did you have fun?");
+					ShowStringAndWait("Umm...Won't you try again?");
+					person->Misc[0] = 0;
+					skip=true;
+				}
+				tangoTempI=0;
+				switch(form)
+				{
+					case FORM_DEKU: //start
+						price = 10;
+						prize = I_DEKUNUTS_10;
+						unless(skip)ShowStringAndWait("Oh, what a cute little customer! So, do you want to play?");
+						ShowStringAndWait("For you, it's only ((10 Rupees)).@char(26)<<@choice(1)OK@choice(2)No thanks>>@domenu()@set(@ttempi @chosen)@close()");
+						if(tangoTempI==2)
+						{
+							ShowStringAndWait("Oh really? Too bad!@char(26)...Come again.");
+						}
+						else if(tangoTempI)
+						{
+							if(startMazeGame(price,prize,false,person))
+							{
+								ShowStringAndWait("If you can make it all the way to the ((treasure chest)) and ((open)) it within the ((time limit)), I'll give you a special prize.");
+								ShowStringAndWait("Finding out what's inside is half the fun!");
+								ShowStringAndWait("Are you ready?");
+							}
+							else
+							{
+								ShowStringAndWait("Oh, no...I'm sorry...@char(26)You don't have enough ((Rupees))...");
+							}
+						}
+						break;//end
+					case FORM_GORON: //start
+						price = 30;
+						prize = getFlagGlobalVar(GVAR_CHESTGAME,GV_MINIGAME,FLAG1) ? I_RUP_50 : Items::getItem(IL_INVISMAZE_CHEST);
+						unless(skip)ShowStringAndWait("Well, aren't you a fit fellow! Wanna play?");
+						ShowStringAndWait("For you, it's ((30 Rupees)).@char(26)<<@choice(1)OK@choice(2)No thanks>>@domenu()@set(@ttempi @chosen)@close()");
+						if(tangoTempI==2)
+						{
+							ShowStringAndWait("Oh...really?");
+						}
+						else
+						{
+							if(startMazeGame(price,prize,true,person))
+							{
+								ShowStringAndWait("If you can make it all the way to the ((treasure chest)) and ((open)) it within the ((time limit)), I'll give you a special prize.");
+								ShowStringAndWait("Finding out what's inside is half the fun!");
+								ShowStringAndWait("Are you ready?");
+							}
+							else
+							{
+								ShowStringAndWait("Oh, no...I'm sorry...@char(26)You don't have enough ((Rupees))...");
+							}
+						}
+						break;//end
+					case FORM_ZORA: //start
+						price = 5;
+						prize = I_RUP_20;
+						unless(skip)ShowStringAndWait("Well, hello there, handsome! Wanna play?");
+						ShowStringAndWait("Hey...For you, it's only ((5 Rupees)).@char(26)<<@choice(1)OK@choice(2)No thanks>>@domenu()@set(@ttempi @chosen)@close()");
+						if(tangoTempI==2)
+						{
+							ShowStringAndWait("Oh really? That's too bad! And you're just my type, too...");
+						}
+						else
+						{
+							if(startMazeGame(price,prize,false,person))
+							{
+								ShowStringAndWait("If you can make it all the way to the ((treasure chest)) and ((open)) it within the ((time limit)), I'll give you a special prize.");
+								ShowStringAndWait("Finding out what's inside is half the fun!");
+								ShowStringAndWait("Are you ready?");
+							}
+							else
+							{
+								ShowStringAndWait("Oh, no...I'm sorry...@char(26)You don't have enough ((Rupees))...");
+							}
+						}
+						break;//end
+					default: //start
+						price = 20;
+						prize = I_RUP_50;
+						unless(skip)ShowStringAndWait("Come in! Oh, is the kid collecting masks? How about it? Wanna play?");
+						ShowStringAndWait("For you, it's ((20 Rupees)).@char(26)<<@choice(1)OK@choice(2)No thanks>>@domenu()@set(@ttempi @chosen)@close()");
+						if(tangoTempI==2)
+						{
+							ShowStringAndWait("Oh really? Too bad!@char(26)...Come again.");
+						}
+						else
+						{
+							if(startMazeGame(price,prize,false,person))
+							{
+								ShowStringAndWait("If you can make it all the way to the ((treasure chest)) and ((open)) it within the ((time limit)), I'll give you a special prize.");
+								ShowStringAndWait("Finding out what's inside is half the fun!");
+								ShowStringAndWait("Are you ready?");
+							}
+							else
+							{
+								ShowStringAndWait("Oh, no...I'm sorry...@char(26)You don't have enough ((Rupees))...");
+							}
+						}
+						//end
+				}
+				if(day!=1)startMazeGame(price,prize,form==FORM_GORON,person);
 				break;
 			}
 			//end
-			case -1://  start
+			case -1: //  start
 			{
 				
 				break;
@@ -634,7 +758,7 @@ ffc script NPC
 			//end
 			default:
 			{
-				TraceS("[NPC][void interact()] NPC id is not assigned! Something is wrong!");TraceNL();
+				Debug::print("[NPC][void interact()] NPC id is not assigned! Something is wrong!");
 				tangoTempI = NPCid;
 				ShowStringAndWait("ERROR: NPC_DIALOGUE NOT FOUND FOR NPC ID @number(@ttempi)");
 			}
@@ -724,137 +848,204 @@ int getNPCCombo(int data, int id, int NPCcombo, int startday, int starthour, int
 }
 
 //end NPC
-//start FFC Cutscene 
+//start Cutscenes
 //Key: 1 = One-Time, R = Repeating (resets each cycle)
-bool HMS_visible = false;
-bool CS1_seen = false;
-ffc script cutscene
+screendata script HMS_Cutscene //start HMS appears behind you (1)
 {
-	void run(int cutsceneID, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7)
+	bool HMS_visible = false;
+	bool CS1_seen = false;
+	DEFINE X = 120;
+	DEFINE Y = 128;
+	void run()
 	{
-		this->Data = COMBO_INVIS;
-		bool waiting = true;
-		if(cutsceneID==1)//start Happy Mask Salesman appears behind you! (1)
+		if(CS1_seen)
 		{
-			if(CS1_seen)
-			{
-				HMS_visible = true;
-				Quit();
-			}
-			until(CS1_seen)
-			{
-				while(waiting)
-				{
-					if(Hero->X>this->X-32&&Hero->X<this->X+32&&Hero->Y>this->Y-8)
-					{
-						waiting=false;
-					}
-					Waitframe();
-				}
-				if(CS1_seen)
-				{
-					Quit();
-				}
-				HMS_visible = true;
-				NoAction();
-				Waitframe();
-				Game->PlaySound(220);
-				ShowMessageAndWait(5);
-				Hero->Y=this->Y-16;
-				waiting=true;
-			}
-			//end 1
+			HMS_visible = true;
+			Quit();
 		}
-		else if(cutsceneID==2)//start Opening the Festival Door (R)
+		bool waiting = true;
+		until(CS1_seen)
 		{
 			while(waiting)
 			{
-				if(day==3&&!hour&&!time)
+				if(Hero->X>X-32&&Hero->X<X+32&&Hero->Y>Y-8)
 				{
-					//Play SFX for festival door opening //UNFINISHED//
-				}
-				if(isAfter(3,24,true))
-				{
-					Waitframe();
-					Screen->ComboD[ComboAt(this->X+15,this->Y+15)]+=2;
-					Screen->ComboD[ComboAt(this->X,this->Y+15)]+=2;
-					Screen->ComboD[ComboAt(this->X+15,this->Y)]+=2;
-					Screen->ComboD[ComboAt(this->X,this->Y)]+=2;
 					waiting=false;
 				}
 				Waitframe();
 			}
-			//end 2
-		}
-		else if(cutsceneID==3)//start SCT Tower building & chest (R)
-		{
-			int combos[] = {ComboAt(this->X,this->Y),ComboAt(this->X+16,this->Y),ComboAt(this->X+32,this->Y),ComboAt(this->X,this->Y+16),ComboAt(this->X+16,this->Y+16),ComboAt(this->X+32,this->Y+16)};
-			bool waiting2 = true;
-			while(waiting)
+			if(CS1_seen)
 			{
-				unless(arg1) // Floor 2
+				Quit();
+			}
+			HMS_visible = true;
+			NoAction();
+			Waitframe();
+			Game->PlaySound(220);
+			ShowMessageAndWait(5);
+			Hero->Y=Y-16;
+			waiting=true;
+		}
+	}
+}//end
+screendata script Festival_Door_Open //start FestivalDoor(R)
+{
+	DEFINE COMBO_UL = 38392;
+	void run(int level)
+	{
+		mapdata m = Game->LoadMapData(2,0x6B); //Festival door screen
+		if(isBefore(3,24,false))
+		{
+			if(level==2)
+			{
+				Screen->ComboD[71]=COMBO_UL;
+				Screen->ComboD[72]=COMBO_UL+1;
+				Screen->ComboD[87]=COMBO_UL+4;
+				Screen->ComboD[88]=COMBO_UL+5;
+			}
+			else
+			{
+				Game->SetComboData(2, 0x6B, 71, COMBO_UL);
+				Game->SetComboData(2, 0x6B, 72, COMBO_UL+1);
+				Game->SetComboData(2, 0x6B, 87, COMBO_UL+4);
+				Game->SetComboData(2, 0x6B, 88, COMBO_UL+5);
+			}
+		}
+		else
+		{
+			if(level==2)
+			{
+				Screen->ComboD[71]=COMBO_UL+2;
+				Screen->ComboD[72]=COMBO_UL+3;
+				Screen->ComboD[87]=COMBO_UL+6;
+				Screen->ComboD[88]=COMBO_UL+7;
+			}
+			else
+			{
+				Game->SetComboData(2, 0x6B, 71, COMBO_UL+2);
+				Game->SetComboData(2, 0x6B, 72, COMBO_UL+3);
+				Game->SetComboData(2, 0x6B, 87, COMBO_UL+6);
+				Game->SetComboData(2, 0x6B, 88, COMBO_UL+7);
+			}
+			Quit();
+		}
+		
+		if(level==2)
+		{
+			while(true)
+			{
+				if(day==3&&!hour&&!time)
+				{
+					//Play SFX for festival door opening // UNFINISHED //
+				}
+				if(isAfter(3,24,true))
+				{
+					Screen->ComboD[71]=COMBO_UL+2;
+					Screen->ComboD[72]=COMBO_UL+3;
+					Screen->ComboD[87]=COMBO_UL+6;
+					Screen->ComboD[88]=COMBO_UL+7;
+					Quit();
+				}
+				Waitframe();
+			}
+		}
+		else
+		{
+			while(true)
+			{
+				if(day==3&&!hour&&!time)
+				{
+					//Play SFX for festival door opening // UNFINISHED //
+				}
+				if(isAfter(3,24,true))
+				{
+					Game->SetComboData(2, 0x6B, 71, COMBO_UL+2);
+					Game->SetComboData(2, 0x6B, 72, COMBO_UL+3);
+					Game->SetComboData(2, 0x6B, 87, COMBO_UL+6);
+					Game->SetComboData(2, 0x6B, 88, COMBO_UL+7);
+					Quit();
+				}
+				Waitframe();
+			}
+		}
+	}
+}//end
+screendata script SCTTower //start South Clock Town tower building (R)
+{
+	DEFINE X = 112;
+	DEFINE Y = 80;
+	void run(int level)
+	{
+		int combos[] = {87,88,89,103,104,105};
+		switch(level)
+		{
+			case 1:
+				while(true)
+				{
+					if(day==2)
+						HeightFastCombo(4,X,Y+16,COMBO_BREMOR,0,OP_OPAQUE);//Draw Bremor from the third layer
+					else if(day==3)
+					{
+						HeightFastCombo(4,X+16,Y,getChestCombo(COMBO_CHEST,IL_CTTOWERMONEY_CHEST),0,OP_OPAQUE); //Draw the chest on the third layer
+						if(isBefore(3,18,false))
+							HeightFastCombo(4,X+32,Y,COMBO_BREMOR,0,OP_OPAQUE);//Draw Bremor from the third layer
+					}
+					Waitframe();
+				}
+			case 2:
+				while(true)
 				{
 					if(day>=2)
 					{
 						for(int i=0;i<6;i++)
 						{
-							Screen->ComboD[combos[i]]=38402;
+							Screen->ComboD[combos[i]]=COMBO_CT_TAN_WALL;
 						}
-						if(Hero->X>=this->X-8&&Hero->X<this->X+48&&Hero->Y>=this->Y-8&&Hero->Y<this->Y+32)
+						if(Hero->X>=X-8&&Hero->X<X+48&&Hero->Y>=Y-8&&Hero->Y<Y+32)
 						{
-							Hero->X=this->X+16;
-							Hero->Y=this->Y+32;
+							Hero->X=X+16;
+							Hero->Y=Y+32;
 						}
 						while(true)
 						{
 							for(int i=0;i<6;i++)
 							{
-								HeightFastCombo(4,ComboX(combos[i]),ComboY(combos[i]),38400,2,OP_OPAQUE);
+								HeightFastCombo(4,ComboX(combos[i]),ComboY(combos[i]),COMBO_PLANKS,2,OP_OPAQUE);
 							}
 							if(day==3)
 							{
-								HeightFastCombo(4,this->X+16,this->Y,getChestCombo(COMBO_CHEST,1),0,OP_OPAQUE);
+								HeightFastCombo(4,X+16,Y,getChestCombo(COMBO_CHEST,IL_CTTOWERMONEY_CHEST),0,OP_OPAQUE);
 							}
 							Waitframe();
 						}
 					}
+					Waitframe();
 				}
-				else if(arg1==1) // Floor 3
+			case 3:
+				while(true)
 				{
-					if(day>=2&&waiting2)
+					if(day>=2)
 					{
 						for(int i=0;i<6;i++)
 						{
 							//if((i==2 && day == 3 && hour < 18) || (i==3 && day == 2))continue;
-							Screen->ComboD[combos[i]]=38404;
+							Screen->ComboD[combos[i]]=COMBO_PLANKS_SOLID;
 							Screen->ComboC[combos[i]]=2;
 						}
-						waiting2=false;
+						while(true)
+						{
+							if(day==3)
+							{
+								ffc f = Screen->LoadFFC(RunFFCScript(FFC_CHEST,{IL_CTTOWERMONEY_CHEST}));
+								f->X=X+16;
+								f->Y=Y;
+								Quit();
+							}
+							Waitframe();
+						}
 					}
-					if(day==3)
-					{
-						u args[8] = {39,1};
-						ffc f = Screen->LoadFFC(RunFFCScript(FFC_CHEST,args));
-						f->X=this->X+16;
-						f->Y=this->Y;
-						waiting=false;
-					}
+					Waitframe();
 				}
-				else if(arg1==2) // Floor 1
-				{
-					if(day==2)
-					{
-						HeightFastCombo(4,this->X,this->Y+16,31761,0,OP_OPAQUE);//Draw Bremor from the third layer
-					}
-					if(day==3)
-					{
-						HeightFastCombo(4,this->X+16,this->Y,getChestCombo(COMBO_CHEST,1),0,OP_OPAQUE); //Draw the chest on the third layer
-						if(isBefore(3,18,false))HeightFastCombo(4,this->X+32,this->Y,31761,0,OP_OPAQUE);//Draw Bremor from the third layer
-					}
-				}
-				Waitframe();
-			}
-			//end
 		}
 	}
 }

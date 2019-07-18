@@ -72,18 +72,7 @@ DEFINE SONG_SongOfInvertedTime = 19;
 DEFINE SONG_SonataOfAwakening = 20;
 DEFINE SONG_ScarecrowsSong = 21;
 //Song MIDI IDs -- set these to the number of the MIDI you want to play, which should be the song played.
-DEFINE SONGMIDI_SongOfTime = 213;
-DEFINE SONGMIDI_EponasSong = 225;
-DEFINE SONGMIDI_SongOfStorms = 221;
-DEFINE SONGMIDI_GoronsLullaby = 237;
-DEFINE SONGMIDI_OathToOrder = 249;
-DEFINE SONGMIDI_SongOfSoaring = 229;
-DEFINE SONGMIDI_SongOfHealing = 217;
-DEFINE SONGMIDI_ElegyOfEmptiness = 245;
-DEFINE SONGMIDI_NewWaveBossaNova = 241;
-DEFINE SONGMIDI_SongOfDoubleTime = 205;
-DEFINE SONGMIDI_SongOfInvertedTime = 209;
-DEFINE SONGMIDI_SonataOfAwakening = 233;
+//Moved to MIDI enum! 13-Jul-19
 //ScarecrowsSong has no SONGSOUND! This is intentional, though other songs should all have one!
 bool LEARNED_SONGS[22];
 //Constants
@@ -134,7 +123,15 @@ DEFINE ITEM_MAX_INDEX = 48;
 DEFINE KEY_MAX_INDEX = 19;
 DEFINE MAP_MAX_INDEX = 0;
 DEFINE DUNGMAP_MAX_INDEX = 0;
-int ItemIDs[] = {187,188,189,190,191,144,31,13,14,57,137,0,192,193,194,195,196,127,3,139,138,140,153,0,197,198,199,200,201,131,48,0,53,52,211,0,202,203,204,205,206,207,146,147,148,149,150,151};
+ItemID ItemIDs[] =
+	{I_MASK_POSTMANSHAT,I_MASK_ALLNIGHT,I_MASK_BLAST,I_MASK_STONE,I_MASK_GFAIRY,I_MASK_DEKU,
+	I_OCARINA,I_BOWARROW,I_FIREARROWS,I_ICEARROWS,I_LIGHTARROWS,I_NULL,
+	I_MASK_KEATON,I_MASK_BREMEN,I_MASK_BUNNYHOOD,I_MASK_DONGERO,I_MASK_SCENTS,I_MASK_GORON,
+	I_BOMBS,I_BOMBCHUS,I_DEKUSTICK,I_DEKUNUTS,I_MAGICBEANS,I_NULL,
+	I_MASK_ROMANI,I_MASK_CIRCUS,I_MASK_KAFEI,I_MASK_COUPLES,I_MASK_TRUTH,I_MASK_ZORA,
+	I_POWDERKEG,I_NULL,I_LENS_TRUTH,I_HOOKSHOT,I_SWORD_GFAIRY_HAS,I_NULL,
+	I_MASK_KAMARO,I_MASK_GIBDO,I_MASK_GARO,I_MASK_CAPTAINHAT,I_MASK_GIANT,I_MASK_DEITY,
+	I_EMPTYBOTTLE_1,I_EMPTYBOTTLE_2,I_EMPTYBOTTLE_3,I_EMPTYBOTTLE_4,I_EMPTYBOTTLE_5,I_EMPTYBOTTLE_6};
 //Passive:
 DEFINE PASSIVE_TOP = -56;
 DEFINE AX = 123;
@@ -174,24 +171,11 @@ bool rafting = false;
 DEFINE SFX_JUMPING = 45;
 //end Pit Global Variables
 //start EX Item Button Global Variables
-int EX1_item = 0;
-int EX2_item = 0;
-int B_item = 0;
+ItemID EX1_item = NULL;
+ItemID EX2_item = NULL;
+ItemID B_item = NULL;
 //end EX Item Button Global Variables
 //start FormVars
-//Hero Tile Modifier items
-DEFINE FORM1 = 123;
-DEFINE FORM2 = 124;
-DEFINE FORM3 = 125;
-DEFINE FORM4 = 126;
-DEFINE FORM2CURLED = 128;
-DEFINE FORM_SHIELD = 129;
-DEFINE FORM_M_SHIELD = 130;
-DEFINE FORM2SPIKED = 132;
-//
-DEFINE ITEM_POUND = 54;
-DEFINE ITEM_BUBBLE = 25;
-DEFINE ITEM_DEKUNUT = 140;
 DEFINE COMBO_LILYPAD = 7372;
 DEFINE MAGICCOST_SPIKEROLL = 1;
 DEFINE EVERYXFRAMES_SPIKEROLL = 10;
@@ -213,8 +197,30 @@ DEFINE SPEEDBOOST_BUNNY_WATER = 0.51;
 DEFINE SPEEDBOOST_BUNNY_LAND = 1.02;
 DEFINE SPEEDBOOST_ZORA_WATER = 1.5;
 DEFINE FIRST_MASK_TILE = 65220;
-int form = 1;
-int mask = 1;
+//
+enum Form
+{
+	FORM_HUMAN, FORM_DEKU, FORM_GORON, FORM_ZORA, FORM_FIERCE_DEITY
+};
+enum Mask
+{
+	MASK_NONE, MASK_DEKU, MASK_GORON, MASK_ZORA, MASK_FIERCE_DEITY,
+	MASK_POSTMAN, MASK_ALLNIGHT, MASK_BLAST, MASK_STONE, MASK_GREATFAIRY,
+	MASK_KEATON, MASK_BREMEN, MASK_BUNNY, MASK_DONGERO, MASK_SCENTS,
+	MASK_ROMANI, MASK_CIRCUS, MASK_KAFEI, MASK_COUPLES, MASK_TRUTH,
+	MASK_KAMARO, MASK_GIBDO, MASK_GARO, MASK_CAPTAIN, MASK_GIANTS
+};
+int maskTile(Mask mask)
+{
+	return FIRST_MASK_TILE + mask;
+}
+bool isForm(Mask mask)
+{
+	return mask>MASK_NONE && mask<=MASK_FIERCE_DEITY;
+}
+//
+Form form = FORM_DEKU;
+Mask mask = MASK_DEKU;
 int currMaskTile = 65221;
 int Deku_floating = 60;
 int Deku_flying = 0;
@@ -233,7 +239,28 @@ DEFINE RAFT_X = 2;
 DEFINE RAFT_Y = 3;
 //end Rafting vars
 //start Sound Constants
-DEFINE MIDI_THESTORM = 204;
+enum MIDI
+{
+	MIDI_NULL,
+	MIDI_OVERWORLD,
+	MIDI_CLOCK_TOWER,
+	MIDI_CLOCK_TOWN,
+	MIDI_MINIGAME,
+	MIDI_MINIGAME_HOUSE,
+	MIDI_THESTORM = 204,
+	SONGMIDI_SongOfDoubleTime = 205,
+	SONGMIDI_SongOfInvertedTime = 209,
+	SONGMIDI_SongOfTime = 213,
+	SONGMIDI_SongOfHealing = 217,
+	SONGMIDI_SongOfStorms = 221,
+	SONGMIDI_EponasSong = 225,
+	SONGMIDI_SongOfSoaring = 229,
+	SONGMIDI_SonataOfAwakening = 233,
+	SONGMIDI_GoronsLullaby = 237,
+	SONGMIDI_NewWaveBossaNova = 241,
+	SONGMIDI_ElegyOfEmptiness = 245,
+	SONGMIDI_OathToOrder = 249
+};
 DEFINE SFX_SHIELD = 63;
 DEFINE SFX_DEKUNUT_SNAP = 79;
 DEFINE SFX_DEKUNUT_FREEZE = 80;
@@ -253,10 +280,13 @@ int TIME_MINUTE = FRAMES_MINUTE*FRAME;
 int TIME_HOUR = FRAMES_HOUR*FRAME;
 //end
 //start Item Constants
-enum ItemID      //start Item Constants
+enum ItemID
 {
 	I_INVALID = -1,
-	I_MIN,
+	I_MIN = 0,
+	I_NULL = NULL,
+	I_RUP_1 = 0,
+	I_RUP_5 = 1,
 	I_BOMBS = 3,
 	I_SWORD_KOKIRI = 5,
 	I_SWORD_RAZOR = 6,
@@ -265,11 +295,19 @@ enum ItemID      //start Item Constants
 	I_BOWARROW = 13,
 	I_FIREARROWS = 14,
 	I_ZORABRANG = 23,
+	I_DEKU_BUBBLE = 25,
 	I_OCARINA = 31,
 	I_MIRRORSHIELD = 37,
+	I_RUP_20 = 38,
+	I_RUP_50 = 39,
+	I_RUP_200 = 40,
 	I_WALLET = 41,
 	I_WALLET_BIG = 42,
 	I_POWDERKEG = 48,
+	I_HEARTPIECE = 49,
+	I_HOOKSHOT = 52,
+	I_LENS_TRUTH = 53,
+	I_GORON_POUND = 54,
 	I_ICEARROWS = 57,
 	I_QUIVER = 74,
 	I_QUIVER_BIG = 75,
@@ -277,9 +315,19 @@ enum ItemID      //start Item Constants
 	I_BOMBBAG = 81,
 	I_BOMBBAG_BIG = 82,
 	I_BOMBBAG_BIGGEST = 83,
+	I_RUP_10 = 86,
+	I_RUP_100 = 87,
 	I_BOMBBAG_POWDERKEG = 106,
+	FORMITEM_DEKU = 123,
+	FORMITEM_GORON = 124,
+	FORMITEM_ZORA = 125,
+	FORMITEM_FIERCE_DEITY = 126,
 	I_MASK_GORON = 127,
+	FORMITEM_GORON_CURLED = 128,
+	FORMITEM_SHIELD = 129,
+	FORMITEM_M_SHIELD = 130,
 	I_MASK_ZORA = 131,
+	FORMITEM_GORON_SPIKED = 132,
 	I_DEKUSPINCHARGE = 135,
 	I_LIGHTARROWS = 137,
 	I_SWORD_ZORA_BLADE = 136,
@@ -287,8 +335,15 @@ enum ItemID      //start Item Constants
 	I_BOMBCHUS = 139,
 	I_DEKUNUTS = 140,
 	I_MASK_DEKU = 144,
+	I_EMPTYBOTTLE_1 = 146,
+	I_EMPTYBOTTLE_2 = 147,
+	I_EMPTYBOTTLE_3 = 148,
+	I_EMPTYBOTTLE_4 = 149,
+	I_EMPTYBOTTLE_5 = 150,
+	I_EMPTYBOTTLE_6 = 151,
 	I_INFMAG = 152,
 	I_MAGICBEANS = 153,
+	I_DEKUNUTS_10 = 155,
 	I_REMAINS1 = 158,
 	I_REMAINS2 = 159,
 	I_REMAINS3 = 160,
@@ -336,7 +391,6 @@ ItemID castItem(int id)
 {
 	return (id < I_MIN || id >= I_MAX) ? I_INVALID : <ItemID>id;
 }
-//end
 //end
 //start Palette
 DEFINE MULT_SUNRISE = 2;
@@ -414,6 +468,11 @@ DEFINE COMBO_OWLOFF = 38380;
 DEFINE COMBO_OWLON = 38384;
 DEFINE COMBO_FRZ1 = 13826;
 DEFINE COMBO_FRZ2 = 13827;
+DEFINE COMBO_GRAY = 38416;
+DEFINE COMBO_PLANKS = 38400;
+DEFINE COMBO_PLANKS_SOLID = 38404;
+DEFINE COMBO_CT_TAN_WALL = 38402;
+DEFINE COMBO_BREMOR = 31761;
 //Tiles
 DEFINE TILE_INVIS = 5;
 DEFINE TILE_DEKUSTICK_UNLIT = 64180;
@@ -572,6 +631,9 @@ bool owlSaved = false;
 int warpNumFloors = 0;
 bool arrowAimMode = false;
 int HeroDir8 = 0;
+DEFINE MAX_MAPDATA_HEIGHT = 8;
+mapdata heightData[MAX_MAPDATA_HEIGHT];
+EnemyPattern heightPattern[MAX_MAPDATA_HEIGHT];
 //Debug Vars
 bool freezeTime = false;
 bool debug = false;
@@ -626,7 +688,8 @@ namespace GVars
 		GVAR_B_SPECTHEME,
 		GVAR_B_SPECTHEME_ACTIVE,
 		GVAR_OPTIONS_MENU,
-		GVAR_GAMEINITIALIZED
+		GVAR_GAMEINITIALIZED,
+		GVAR_DID_HEIGHTWARP
 	};
 	//
 	GVAR GV_PAL = GV_MISC_BOOL + 1000;
@@ -779,36 +842,37 @@ namespace GVars
 }
 //end
 //start Global Items Array
+enum ItemLoc
+{
+	IL_MIN,
+	//Chest locations; equivalent to chest ID #
+	IL_CHEST = IL_MIN,
+	IL_CTLEDGE20_CHEST = IL_CHEST,
+	IL_CTTOWERMONEY_CHEST,
+	IL_CTLEDGE100_CHEST,
+	IL_INVISMAZE_CHEST,
+	//Loose items; for existing in the world
+	IL_CHEST_END = 500,
+	IL_LOOSE = IL_CHEST_END,
+	IL_CTTOWERHEARTPIECE = IL_LOOSE,
+	IL_CTSLIDEHEARTPIECE,
+	//
+	IL_LOOSE_END = 700,
+	IL_SCRIPT_ACCESS = IL_LOOSE_END,
+	IL_BANKER1 = IL_SCRIPT_ACCESS,
+	IL_BANKER2,
+	IL_BANKER3,
+	IL_TCSHOOTING1,
+	IL_TCSHOOTING2,
+	
+	//
+	IL_SCRIPT_END,
+	IL_MAX = IL_SCRIPT_END
+};
 namespace Items
 {
-	enum ItemLoc
-	{
-		IL_MIN,
-		//Chest locations; equivalent to chest ID #
-		IL_CHEST = IL_MIN,
-		IL_CTLEDGE20_CHEST = IL_CHEST,
-		IL_CTTOWERMONEY_CHEST,
-		IL_CTLEDGE100_CHEST,
-		//Loose items; for existing in the world
-		IL_CHEST_END = 500,
-		IL_LOOSE = IL_CHEST_END,
-		IL_CTTOWERHEARTPIECE = IL_LOOSE,
-		IL_CTSLIDEHEARTPIECE,
-		//
-		IL_LOOSE_END = 700,
-		IL_SCRIPT_ACCESS = IL_LOOSE_END,
-		IL_BANKER1 = IL_SCRIPT_ACCESS,
-		IL_BANKER2,
-		IL_BANKER3,
-		IL_TCSHOOTING1,
-		IL_TCSHOOTING2,
-		
-		//
-		IL_SCRIPT_END,
-		IL_MAX = IL_SCRIPT_END
-	};
-	int items[MAX_INT];
-	int itUpgrade[512];
+	ItemID items[MAX_INT];
+	ItemID itUpgrade[512];
 	
 	void initUpgrade()
 	{
@@ -825,33 +889,34 @@ namespace Items
 	{
 		defaultItemInit(items);
 	}
-	void defaultItemInit(int items)
+	void defaultItemInit(ItemID items)
 	{
-		items[IL_CTLEDGE20_CHEST] = I_RUPEE20;
-		items[IL_CTTOWERMONEY_CHEST] = I_RUPEE50;
-		items[IL_CTLEDGE100_CHEST] = I_RUPEE100;
+		items[IL_CTLEDGE20_CHEST] = I_RUP_20;
+		items[IL_CTTOWERMONEY_CHEST] = I_RUP_50;
+		items[IL_CTLEDGE100_CHEST] = I_RUP_100;
+		items[IL_INVISMAZE_CHEST] = I_HEARTPIECE;
 		//
-		items[IL_CTTOWERHEARTPIECE] = I_HCPIECE;
-		items[IL_CTSLIDEHEARTPIECE] = I_HCPIECE;
+		items[IL_CTTOWERHEARTPIECE] = I_HEARTPIECE;
+		items[IL_CTSLIDEHEARTPIECE] = I_HEARTPIECE;
 		items[IL_BANKER1] = I_WALLET;
-		items[IL_BANKER2] = I_RUPEE5;
-		items[IL_BANKER3] = I_HCPIECE;
+		items[IL_BANKER2] = I_RUP_5;
+		items[IL_BANKER3] = I_HEARTPIECE;
 		items[IL_TCSHOOTING1] = I_QUIVER;
-		items[IL_TCSHOOTING2] = I_HCPIECE;
+		items[IL_TCSHOOTING2] = I_HEARTPIECE;
 	}
 	void updateItemMapdata() //Handle free-standing items
 	{
 		Game->LoadMapData(2,0x5B)->Item = getItem(IL_CTSLIDEHEARTPIECE);
 		Game->LoadMapData(2,0x6B)->Item = getItem(IL_CTTOWERHEARTPIECE);
 	}
-	int getItem(ItemLoc location)
+	ItemID getItem(ItemLoc location)
 	{
-		unless(location > -1 && location < IL_MAX)
+		unless(location >= IL_MIN && location < IL_MAX)
 		{
-			Debug::print("ItemLoc invalid! Returning -1... @`Items::getItem(ItemLoc location)`");
-			return -1;
+			Debug::print("ItemLoc %d invalid! Returning -1... @`Items::getItem(ItemLoc location)`",location);
+			return I_INVALID;
 		}
-		int it = items[location];
+		ItemID it = items[location];
 		while(itUpgrade[it] && Hero->Item[it]) it = itUpgrade[it]; //Upgrade if Hero already has the item, and it has an upgrade
 		return it;
 	}
