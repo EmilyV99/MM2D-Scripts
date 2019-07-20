@@ -10,6 +10,7 @@ void HeightFastCombo(int layer, int x, int y, int combo, int cset, int opacity)
 	if(combo==0)return;
 	if(combo==COMBO_INVIS)return;
 	if(hideLayer4 && layer>=4)return;
+	Debug::print("Drawing %d at %d,%d to layer %d",combo,x,y,layer);
 	//Screen->FastCombo(layer, x, y, combo, cset, OP_TRANS);
 	if(layer>=4)x+=256;
 	if(opacity!=OP_OPAQUE)y+=176;
@@ -76,6 +77,7 @@ void HeightAngularTile(int layer, int cx, int cy, int tile, int blockw, int bloc
 
 void runHeightBitmap()
 {
+	Debug::print("Running Height Bitmap");
 	//Draw bitmaps to the screen
 	Screen->DrawBitmapEx(3,RT_BITMAP0,0,0,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
 	Screen->DrawBitmapEx(4,RT_BITMAP0,256,0,256,176,0,0,256,176,0,0,0,BITDX_TRANS,0,true);
@@ -85,8 +87,12 @@ void runHeightBitmap()
 
 void clearBitmap(int bmp)
 {
+	clearBitmap(bmp, 0);
+}
+void clearBitmap(int bmp, int layer)
+{
 	Screen->SetRenderTarget(bmp);
-	Screen->Rectangle(0,0,0,512,512,0,1,0,0,0,true,OP_OPAQUE);
+	Screen->Rectangle(layer,0,0,512,512,0,1,0,0,0,true,OP_OPAQUE);
 	Screen->SetRenderTarget(RT_SCREEN);
 }
 //end BitmapDraw

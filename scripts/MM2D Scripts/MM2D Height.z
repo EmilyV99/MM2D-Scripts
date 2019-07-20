@@ -661,6 +661,26 @@ int getRelativeHeight(eweapon o1, npc o2)
 	unless(o2->Misc[NPCMISC_LAYERDMAP])o2->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
 	return o1->Misc[EWMISC_LAYERDMAP] - o2->Misc[NPCMISC_LAYERDMAP];
 }
+
+int getRelativeHeight(mapdata map)
+{
+	mapdata curMap = CurMapdata();
+	mapdata m = getBottomMapdata();
+	mapdata temp = m;
+	int count1, count2;
+	until(temp==curMap)
+	{
+		temp = upMapdata(temp);
+		++count1;
+	}
+	temp = m;
+	until(temp==map)
+	{
+		temp = upMapdata(temp);
+		++count2;
+	}
+	return count2 - count1;
+}
 //end relativeHeight
 
 //start mapdata

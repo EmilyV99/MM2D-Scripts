@@ -39,8 +39,41 @@ void resetTime()
 	{
 		torchPuzzleStates[i] = false;
 	}
+	resetScreenItems();
 }//end
+//start Special Reset Functions
+void resetScreenItems()
+{
+	int mapcount = Game->MapCount();
+	for(int map = 1; map <= mapcount; ++map)
+	{
+		for(int screen = 0; screen < 0x80; ++screen)
+		{
+			mapdata m = Game->LoadMapData(map, screen);
+			if(m->State[ST_ITEM])
+			{
+				if(onetimeitem(<ItemID>(m->Item)))
+				{
+					m->Item = I_RUP_5; //Blue-rupeeify single-grab items
+				}
+				m->State[ST_ITEM] = false; //Reset item state
+			}
+		}
+	}
+}
 
+bool onetimeitem(ItemID itm)
+{
+	switch(itm)
+	{
+		case I_HEART_CONTAINER:
+		case I_HEARTPIECE:
+			return true;
+		default:
+			return Game->LoadItemData(itm)->Keep;
+	}
+}
+//end
 //start Difficulty Settings
 void updateDifficulty(int dif)
 {

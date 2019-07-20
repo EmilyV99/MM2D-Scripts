@@ -346,6 +346,10 @@ void runSubscreen()
 		{//Powder Keg (item is 48,check is for bomb bag)
 			drawTileToLoc(loadItemTile(48),loadItemCSet(48),4,9,6);
 		}
+		if(Hero->Item[I_PICTOGRAPH])
+		{
+			drawTileToLoc(loadItemTile(I_PICTOGRAPH),loadItemCSet(I_PICTOGRAPH),4,10,6);
+		}
 		if(Hero->Item[53])
 		{//Lens of Truth
 			drawTileToLoc(loadItemTile(53),loadItemCSet(53),4,11,6);
@@ -996,19 +1000,22 @@ int noteToCSet(int note)
 
 int loadItemTile(int itID)
 {
-	if(itID == 0)return TILE_INVIS;
+	unless(itID) return TILE_INVIS;
 	itemdata i = Game->LoadItemData(itID);
 	int frameNum = 0;
 	if(i->ASpeed>0&&i->AFrames>0)
-		frameNum = Floor((gameframe%(i->ASpeed*i->AFrames))/i->ASpeed);
+	{
+		int temp = (gameframe%((i->ASpeed*i->AFrames)+(i->ASpeed*i->Delay)))-(i->Delay*i->ASpeed);
+		if(temp>=0)
+			frameNum = Floor(temp/i->ASpeed);
+	}
 	return i->Tile+frameNum;
 }
 
 int loadItemCSet(int itID)
 {
-	if(itID == 0)return 0;
-	itemdata i = Game->LoadItemData(itID);
-	return i->CSet;
+	unless(itID) return 0;
+	return Game->LoadItemData(itID)->CSet;
 }
 
 void drawTileToLoc(int tile, int cset, int row, int col, int layer)

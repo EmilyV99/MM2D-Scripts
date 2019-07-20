@@ -4,8 +4,43 @@
 //                                    //
 ////////////////////////////////////////
 
-//start NPC	
+//start NPC
 char NPCNames[1000] = {"Tatl","Happy Mask Salesman","Banker","Bremor","Brac","","","Guard","Guard","Guard","Guard","",""};
+
+void getNPCName(char buf, int index)
+{
+	switch(index)
+	{
+		case N_TATL:
+			strcpy(buf,"Tatl");
+			break;
+		case N_HAPPYMASK:
+			strcpy(buf,"Happy Mask Salesman");
+			break;
+		case N_BANKER:
+			strcpy(buf,"Banker");
+			break;
+		case N_BREMOR:
+			strcpy(buf,"Bremor");
+			break;
+		case N_BRAC:
+			strcpy(buf,"Brac");
+			break;
+		/*case N_NAMECHANGE:
+		case N_DIFFCHANGE:
+			break;*/
+		case N_GUARD_EAST:
+		case N_GUARD_WEST:
+		case N_GUARD_NORTH:
+		case N_GUARD_SOUTH:
+			strcpy(buf,"Guard");
+			break;
+		/*case N_SHOOTING_GALLERY_TOWN:
+		case N_INVIS_MAZE_GIRL:
+			break;*/
+	}
+}
+
 enum NPCID
 {
 	N_TATL,
@@ -211,7 +246,7 @@ ffc script NPC
 				{
 					while(true)
 					{
-						if(hour>22||hour<6)
+						if(hour>=22||hour<6)
 						{
 							ShowStringAndWait("OK, it's closing time.@char(26)See ya!");
 							Hero->PitWarp(1,0x7C);
@@ -229,7 +264,7 @@ ffc script NPC
 				{
 					while(true)
 					{
-						if(hour<6||hour>22)
+						if(hour<6||hour>=22)
 						{
 							ShowStringAndWait("Oh, I'm sorry. It's already time to close up shop. Come again.");
 							Hero->PitWarp(1,0x7C);
@@ -1050,6 +1085,49 @@ screendata script SCTTower //start South Clock Town tower building (R)
 	}
 }
 //end
+screendata script SpawnStrayFairy //start A stray fairy appeared! (R)
+{
+	void run(int itemID, int x, int y, bool day, int offset)
+	{
+		item it;
+		mapdata map = CurMapdata();
+		for(int q = offset; q > 0; --q)
+		{
+			map = upMapdata(map);
+		}
+		for(int q = offset; q < 0; ++q)
+		{
+			map = downMapdata(map);
+		}
+		if(map->State[ST_ITEM]) Quit(); //Don't re-spawn a grabbed fairy
+		for(int q = 1; q <= Screen->NumItems(); ++q)
+		{
+			item temp = Screen->LoadItem(q);
+			if(temp->Type == IC_STRAYFAIRY)
+			{
+				it = temp;
+				break;
+			}
+		}
+		while(true)
+		{
+			if(this->State[ST_ITEM]) Quit();
+			if(day==isDay() && !it)
+			{
+				it = CreateItemAt(itemID, x, y);
+				it->Misc[ITEMMISC_LAYERDMAP] = Game->GetCurDMap() + 1 + offset;
+				it->Misc[FAIRYMISC_TYPE] = FAIRY_MAPDATA;
+				it->Misc[FAIRYMISC_VALUE] = map;
+			}
+			while(day==isDay())
+				Waitframe();
+			Remove(it);
+			it = NULL;
+			until(day==isDay())
+				Waitframe();
+		}
+	}
+} //end
 //start Signpost
 ffc script Signpost
 {
@@ -1277,6 +1355,11 @@ int chooseTripleDigitNum(int max, int sfx)
 }
 //end bank
 //start Locked Door
+enum LockedDoors
+{
+	LD_SHOOTINGGALLERY,
+	LD_INVISMAZE
+};
 ffc script lockedDoor
 {
 	void run(int id, int undercombo)
@@ -1285,7 +1368,7 @@ ffc script lockedDoor
 		int basecombo = Screen->ComboD[loc];
 		switch(id)
 		{
-			case 0:
+			case LD_SHOOTINGGALLERY:
 			{
 				while(true)
 				{
@@ -1309,8 +1392,27 @@ ffc script lockedDoor
 				break;
 			}
 			
-			case 1:
+			case LD_INVISMAZE:
 			{
+				while(true)
+				{
+					while(hour>=22||hour<6)
+					{
+						Screen->ComboD[loc] = undercombo;
+						if(Input->Press[CB_A])
+						{
+							if(AgainstFFCBase(this))
+							{
+								Input->Press[CB_A]=false;Input->Button[CB_A]=false;
+								ShowStringAndWait("Treasure Chest Shop@char(26)((6 a.m. to 10 p.m.))");
+								
+							}
+						}
+						Waitframe();
+					}
+					Screen->ComboD[loc] = basecombo;
+					while(hour<22&&hour>=6)Waitframe();
+				}
 				break;
 			}
 			

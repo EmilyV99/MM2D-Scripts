@@ -24,10 +24,10 @@ void ShowMessageAndWait(char msg, bool menu4way, bool isNPC)
 	handleMessageSlot(slot,menu4way,isNPC);
 }
 
-void getNPCName(char buf, int NPCid)
+void loadNPCName(char buf, int NPCid)
 {
 	remchr(buf,0);
-	strcpy(buf,NPCNames[NPCid]);
+	getNPCName(buf, NPCid);
 	strcat(buf,"@waituntil(@npcend())@close()"); //Literal here is Tango function to wait for MAINSLOT to be finished / UNFINISHED /
 }
 
@@ -105,8 +105,10 @@ void handleMessageSlot(int slot, bool menu4way, bool isNPC)//start handleMessage
 			if(getGlobalVar(GVAR_ACTIVENPCID,GV_MISC)!=lastid)
 			{
 				lastid = getGlobalVar(GVAR_ACTIVENPCID,GV_MISC);
-				getNPCName(NPCname, lastid);
-				NPCTileSetup(Tango_GetStringWidth(NPCNames[lastid],Tango_GetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_TEXT_FONT)));
+				loadNPCName(NPCname, lastid);
+				char tempbuf[32];
+				getNPCName(tempbuf, lastid);
+				NPCTileSetup(Tango_GetStringWidth(tempbuf,Tango_GetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_TEXT_FONT)));
 				initNPCSlot();
 				Tango_LoadString(slot,NPCname);
 			}

@@ -1467,12 +1467,159 @@ lweapon script Bombchu_LW
 //start Pictograph
 item script Pictograph
 {
+	bitmap picto;
+	DEFINE PICTO_HEIGHT = 168;// + (56*2);
+	DEFINE PICTO_WIDTH = 256;
 	void run()
 	{
+		unless(picto->isAllocated()) picto = Game->CreateBitmap(PICTO_HEIGHT,PICTO_WIDTH);
+		else unless(picto->isValid()) picto->Create(0, PICTO_HEIGHT, PICTO_WIDTH);
 		
+		do 
+		{
+			
+			Waitframe();
+		} until(Input->Press[CB_R]);
+		
+		picto->BlitTo(7, RT_SCREEN, 0, 0, PICTO_WIDTH, PICTO_HEIGHT, 0, 0, PICTO_WIDTH, PICTO_HEIGHT, 0, 0, 0, BITDX_NORMAL, 0, false);
+		picto->Write(7, "PictoImage.png", true);
 	}
 }
 //end Pictograph
+//start Stray Fairy
+itemsprite script StrayFairy
+{
+	void run(int dungeon, bool bubbled)
+	{
+		this->Pickup &= ~IP_ST_ITEM; //Don't allow this to be considered a normal screen item (deleted on heightwarp)
+		int animtimer;
+		DEFINE delay = 10;
+		bool up;
+		this->Pickup |= IP_DUMMY;
+		if(this->Misc[FAIRYMISC_TYPE] == FAIRY_NULL)
+		{
+			this->Misc[FAIRYMISC_TYPE] = FAIRY_MAPDATA;
+			this->Misc[FAIRYMISC_VALUE] = CurMapdata();
+		}
+		Waitframe();
+		while(true)
+		{
+			//Animation stuff
+			this->DrawYOffset = Div(animtimer%(5*delay),delay)-2; //Float slightly up and down; -2 to 2 frames
+			unless(up)
+			{
+				++animtimer;
+				if(animtimer==5*delay-1)
+					up=true;
+			}
+			else
+			{
+				--animtimer;
+				unless(animtimer)
+					up=false;
+			}
+			//Hit calc stuff
+			this->HitXOffset+=8;
+			if(bubbled)
+			{
+				for(int q = 1; q <= Screen->NumLWeapons(); ++q)
+				{
+					lweapon weap = Screen->LoadLWeapon(q);
+					switch(weap->ID)
+					{
+						case LW_BOMBBLAST:
+							if(Collision(this,weap))
+							{
+								bubbled = false;
+							}
+							break;
+						case LW_SWORD:
+							if(Collision(this,weap))
+							{
+								bubbled = false;
+								this->X = Hero->X;
+								this->Y = Hero->Y;
+							}
+							break;
+						case LW_BRANG:
+						case LW_HOOKSHOT:
+							if(HeightCollision(this,weap))
+							{
+								bubbled = false;
+								this->X = Hero->X;
+								this->Y = Hero->Y;
+							}
+							break;
+						case LW_MAGIC:
+						case LW_BEAM:
+						case LW_ARROW:
+							if(HeightCollision(this,weap))
+							{
+								bubbled = false;
+								Remove(weap);
+							}
+							break;
+					}
+					unless(bubbled)
+					{
+						this->OriginalTile+=20; //un-bubble visually
+						this->Tile = this->OriginalTile;
+						break;
+					}
+				}
+			}
+			else if(mask == MASK_GREATFAIRY)
+			{
+				this->Misc[ITEMMISC_LAYERDMAP] = Game->GetCurDMap() + 1; //Force to current layer
+				int degrees = RadtoDeg(TurnTowards(CenterX(this), CenterY(this), CenterLinkX(), CenterLinkY(), 0, 1));
+				this->X += VectorX(1, degrees);
+				this->Y += VectorY(1, degrees);
+			}
+			
+			unless(bubbled || !LinkCollision(this))
+			{
+				while(true)
+				{
+					int degrees = 0;
+					this->DrawYOffset=0;
+					incGlobalVar(GVAR_FAIRY_START + dungeon, GV_MISCRESETTABLE, 1);
+					switch(this->Misc[FAIRYMISC_TYPE])
+					{
+						case FAIRY_POT:
+							//UNFINISHED no pot handling
+							break;
+						case FAIRY_CHEST: //Fairies from chests are automatically collected, so, the chest can set the cheststate.
+							break;
+						case FAIRY_MAPDATA: //Mark the item collected, so it won't respawn
+							(<mapdata>(this->Misc[FAIRYMISC_VALUE]))->State[ST_ITEM] = true;
+							break;
+					}
+					for(int q = 0; q < 360; ++q)
+					{
+						this->X = CenterLinkX() + VectorX(16, degrees) - 8;
+						this->Y = CenterLinkY() + VectorY(16, degrees) - 8;
+						degrees += 5;
+						this->Misc[ITEMMISC_LAYERDMAP] = Game->GetCurDMap() + 1; //Force to current layer
+						Waitframe();
+					}
+					Remove(this);
+					Quit();
+				}
+			}
+			this->HitXOffset-=8;
+			Waitframe();
+		}
+	}
+	
+	bool HeightCollision(item this, lweapon weap)
+	{
+		return RectCollision(this->X, this->Y, this->X+this->HitWidth, this->Y+this->HitHeight,
+			weap->X, weap->Y, weap->X+weap->HitWidth, weap->Y+weap->HitHeight)
+			&& (this->Z + this->HitZHeight >= weap->Z)
+			&& (this->Z <= weap->Z + weap->HitZHeight);
+	}
+}
+//end
 //start misc
 lweapon script obeyGravity
 {
