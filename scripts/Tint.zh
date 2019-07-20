@@ -1,12 +1,22 @@
 ///////////////////////////////////
 //         Tint.zh Header        //
 //             Venrob            //
-//         Version: 1.0          //
-//           23 Jun 19           //
+//        Version: 1.01          //
+//           19 Jul 19           //
 ///////////////////////////////////
 
 #option HEADER_GUARD on
 import "std.zh"
+
+//Typed Enum listed outside of namespace due to some issues with namespaces and types
+enum Base
+{
+	BASE_MIN,
+	BASE_TINTED = BASE_MIN,
+	BASE_UNIFORM,
+	BASE_DISTRIBUTED,
+	BASE_MAX = BASE_DISTRIBUTED
+};
 
 namespace TintZH
 {
@@ -17,11 +27,6 @@ namespace TintZH
 	//end
 	//start Constants
 	//Definitions:
-	DEFINE BASE_TINTED = 0;
-	DEFINE BASE_UNIFORM = 1;
-	DEFINE BASE_DISTRIBUTED = 2;
-	DEFINE BASE_MIN = 0;
-	DEFINE BASE_MAX = 2;
 	DEFINE DATA_SIZE = 2000;
 	DEFINE STATE_HIDDEN = 00000001b;
 	DEFINE STATE_PAUSED = 00000010b;
@@ -34,7 +39,7 @@ namespace TintZH
 	CONFIGB DEBUG = false; //Set to true to enable debug traces
 	//end
 	//start Internal Array Indexes
-	enum
+	enum TintDataIndex
 	{
 		//Misc
 		DATA_UPDATED, 			//Has the runTints() updated the screen since the last modification?
@@ -194,14 +199,34 @@ namespace TintZH
 		
 		ON INVALID: Return, doing nothing.
 	*/
-	void changeBase(int base)
+	void changeBase(Base base)
 	{
 		if(base < BASE_MIN || base > BASE_MAX)return;
 		Tint_Debug_Trace("Changing base...");
 		setTintVar(DATA_BASE, base);
 		setTintVar(DATA_UPDATED, 0);
 	}
+	
+	Base getBase()
+	{
+		return <Base>(getTintVar(DATA_BASE));
+	}
 
+	/*
+		Get if a particular tint is currently active or not
+		
+		PARAMETER: int palID, the palette ID of the palette you wish to get.
+		
+		INVALID IF: (palID < 0 || palID >= getTintVar(DATA_NEXT_PALETTE))
+		
+		ON INVALID: Return false
+	*/
+	bool getTint(int palID)
+	{
+		if(palID < 0 || palID >= getTintVar(DATA_NEXT_PALETTE)) return false;
+		return getTintVar(getPalIndex(palID));
+	}
+	
 	/*
 		Set if a particular tint should currently be displayed.
 		If the tint was already active, and you try to activate it, or inactive and you try to deactivate it, it will do nothing.
@@ -217,10 +242,10 @@ namespace TintZH
 	void setTint(int palID, bool active)
 	{
 		if(palID < 0 || palID >= getTintVar(DATA_NEXT_PALETTE))return;
-		if((getTintVar(DATA_SIZE + palID)>0) == active)return;
+		if((getTintVar(getPalIndex(palID))>0) == active)return;
 		if(getTintVar(DATA_GRADIENT_KEEP) == palID)return;
 		Tint_Debug_Trace("Setting tint condition....");
-		setTintVar(DATA_SIZE + palID, Cond(active,1,0));
+		setTintVar(getPalIndex(palID), Cond(active,1,0));
 		if(active)
 		{
 			incTintVar(DATA_R_CHANGED,__tintR[palID]);
@@ -250,7 +275,7 @@ namespace TintZH
 	bool tintIsActive(int palID)
 	{
 		if(palID < 0 || palID >= getTintVar(DATA_NEXT_PALETTE))return false;
-		return (getTintVar(DATA_SIZE + palID)>0);
+		return (getTintVar(getPalIndex(palID))>0);
 	}
 
 	/*
@@ -270,7 +295,7 @@ namespace TintZH
 		Graphics->ClearTint();
 		for(int palID = 0; palID < MAX_TINT_PALETTES; palID++)
 		{
-			setTintVar(DATA_SIZE + palID,0);
+			setTintVar(getPalIndex(palID),0);
 		}
 	}
 
@@ -291,7 +316,7 @@ namespace TintZH
 		Graphics->ClearTint();
 		for(int palID = 0; palID < MAX_TINT_PALETTES; palID++)
 		{
-			if(getTintVar(DATA_SIZE + palID))
+			if(getTintVar(getPalIndex(palID)))
 			{
 				incTintVar(DATA_R_CHANGED,__tintR[palID]);
 				incTintVar(DATA_G_CHANGED,__tintG[palID]);
@@ -470,7 +495,7 @@ namespace TintZH
 		
 		ON INVALID: Script errors!
 	*/
-	int getTintVar(int index)
+	int getTintVar(TintDataIndex index)
 	{
 		return __tintData[index];
 	}
@@ -485,7 +510,7 @@ namespace TintZH
 		
 		ON INVALID: Script errors!
 	*/
-	void setTintVar(int index, int value)
+	void setTintVar(TintDataIndex index, int value)
 	{
 		__tintData[index] = value;
 	}
@@ -500,7 +525,7 @@ namespace TintZH
 		
 		ON INVALID: Script errors!
 	*/
-	void incTintVar(int index, int value)
+	void incTintVar(TintDataIndex index, int value)
 	{
 		__tintData[index] += value;
 	}
@@ -515,7 +540,7 @@ namespace TintZH
 		
 		ON INVALID: Script errors!
 	*/
-	void orTintFlag(int index, int value)
+	void orTintFlag(TintDataIndex index, int value)
 	{
 		__tintData[index] |= value;
 	}
@@ -530,7 +555,7 @@ namespace TintZH
 		
 		ON INVALID: Script errors!
 	*/
-	void andnotTintFlag(int index, int value)
+	void andnotTintFlag(TintDataIndex index, int value)
 	{
 		__tintData[index] &= ~value;
 	}
@@ -547,7 +572,7 @@ namespace TintZH
 		
 		RETURN: True if the flag is set
 	*/
-	bool readTintFlag(int index, int value)
+	bool readTintFlag(TintDataIndex index, int value)
 	{
 		return (__tintData[index] & value)>0;
 	}
@@ -566,6 +591,11 @@ namespace TintZH
 	bool isActiveGradient()
 	{
 		return getTintVar(DATA_GRADIENT_COUNTER)>0;
+	}
+	
+	TintDataIndex getPalIndex(int palID)
+	{
+		return <TintDataIndex>(DATA_SIZE + palID);
 	}
 
 	/*
