@@ -271,17 +271,6 @@ namespace Venrob
 		return Game->LoadMapData(Game->GetCurMap(), Game->GetCurScreen());
 	}
 
-	//As the name of the function implies, this was stolen from Moosh.
-	void MooshDrawTile(int layer, int cx, int cy, int tile, int blockw, int blockh, int cset, int xscale, int yscale, int rx, int ry, int rangle, int flip, bool transparency, int opacity){
-		int w = xscale;
-		if(xscale==-1)
-			w = blockw*16;
-		int h = yscale;
-		if(yscale==-1)
-			h = blockh*16;
-		Screen->DrawTile(layer, cx-w/2, cy-h/2, tile, blockw, blockh, cset, xscale, yscale, rx-w/2, ry-h/2, rangle, flip, transparency, opacity);
-	}
-
 	/**
 	 * Returns the length of the line which has an angle of `angle`, and results in a change in x of `deltax`
 	 */
@@ -524,4 +513,116 @@ namespace Venrob
 		f->Vx = 0; f->Vy = 0;
 		f->Ax = 0; f->Ay = 0;
 	}
+	
+	//start Drawing Functions
+
+	//As the name of the function implies, this was stolen from Moosh.
+	void MooshDrawTile(int layer, int cx, int cy, int tile, int blockw, int blockh, int cset, int xscale, int yscale, int rx, int ry, int rangle, int flip, bool transparency, int opacity){
+		int w = xscale;
+		if(xscale==-1)
+			w = blockw*16;
+		int h = yscale;
+		if(yscale==-1)
+			h = blockh*16;
+		Screen->DrawTile(layer, cx-w/2, cy-h/2, tile, blockw, blockh, cset, xscale, yscale, rx-w/2, ry-h/2, rangle, flip, transparency, opacity);
+	}
+	
+	/**
+	 * This will work as DrawString, but, it can draw over multiple vertical lines.
+	 * Text over the Max Width, as well as newline characters ('\n'), will break to the next line.
+	 * New params:
+	 *	'verticalSpacing' is the extra space to include between lines.
+	 *	'MaxWidth' is the width at which text will be forced onto the next line.
+	 */
+	void DrawStrings(int layer, int x, int y, int font, int color, int background_color, int format, char32 ptr, int opacity, int verticalSpacing, int MaxWidth)
+	{
+		int cpyptr[2048];
+		strcpy(cpyptr,ptr);
+		int fontHeight = Text->FontHeight(font);
+		while(true)
+		{
+			int nlpos = ContainsCharPos(CHAR_NEWLINE, cpyptr);
+			int width = 0;
+			int lastEmptyPos = -1;
+			int length = strlen(cpyptr);
+			for(int q = 0; cpyptr[q] != 0; ++q)
+			{
+				char32 chr = cpyptr[q];
+				if(chr==CHAR_SPACE) lastEmptyPos = q;
+				if(chr==CHAR_NEWLINE)
+				{
+					lastEmptyPos = q;
+					break;
+				}
+				width += Text->CharWidth(chr, font);
+				if(width>=MaxWidth && lastEmptyPos!=-1) break;
+				if(cpyptr[q+1]==0) lastEmptyPos = -1;
+			}
+			int pos;
+			if(nlpos==-1)pos=lastEmptyPos;
+			else if(lastEmptyPos==-1)pos=nlpos;
+			else pos = Min(lastEmptyPos,nlpos);
+			if(pos==-1) //No newline
+			{
+				Screen->DrawString(layer, x, y, font, color, background_color, format, cpyptr, opacity);
+				return;
+			}
+			int buf[256];
+			memcpy(buf, 0, cpyptr, 0, pos); //Copy first string
+			Screen->DrawString(layer, x, y, font, color, background_color, format, buf, opacity);
+			remnchr(cpyptr, 0, pos+1); //Shift back the string, deleting what was already drawn
+			y+=fontHeight+verticalSpacing;
+		}
+	}
+
+	
+	/**
+	 * This will work as DrawString, but, it can draw over multiple vertical lines.
+	 * Text over the Max Width, as well as newline characters ('\n'), will break to the next line.
+	 * New params:
+	 *  'b' is the bitmap to render to.
+	 *	'verticalSpacing' is the extra space to include between lines.
+	 *	'MaxWidth' is the width at which text will be forced onto the next line.
+	 */
+	void DrawStringsBitmap(bitmap b, int layer, int x, int y, int font, int color, int background_color, int format, char32 ptr, int opacity, int verticalSpacing, int MaxWidth)
+	{
+		int cpyptr[2048];
+		strcpy(cpyptr,ptr);
+		int fontHeight = Text->FontHeight(font);
+		while(true)
+		{
+			int nlpos = ContainsCharPos(CHAR_NEWLINE, cpyptr);
+			int width = 0;
+			int lastEmptyPos = -1;
+			int length = strlen(cpyptr);
+			for(int q = 0; cpyptr[q] != 0; ++q)
+			{
+				char32 chr = cpyptr[q];
+				if(chr==CHAR_SPACE) lastEmptyPos = q;
+				if(chr==CHAR_NEWLINE)
+				{
+					lastEmptyPos = q;
+					break;
+				}
+				width += Text->CharWidth(chr, font);
+				if(width>=MaxWidth && lastEmptyPos!=-1) break;
+				if(cpyptr[q+1]==0) lastEmptyPos = -1;
+			}
+			int pos;
+			if(nlpos==-1)pos=lastEmptyPos;
+			else if(lastEmptyPos==-1)pos=nlpos;
+			else pos = Min(lastEmptyPos,nlpos);
+			if(pos==-1) //No newline
+			{
+				b->DrawString(layer, x, y, font, color, background_color, format, cpyptr, opacity);
+				return;
+			}
+			int buf[256];
+			memcpy(buf, 0, cpyptr, 0, pos); //Copy first string
+			b->DrawString(layer, x, y, font, color, background_color, format, buf, opacity);
+			remnchr(cpyptr, 0, pos+1); //Shift back the string, deleting what was already drawn
+			y+=fontHeight+verticalSpacing;
+		}
+	}
+	//end Drawing Functions
 }
