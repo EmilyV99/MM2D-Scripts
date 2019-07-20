@@ -41,7 +41,7 @@ void ocarina()//start ocMode
 		songFrames = 0;
 		ocarina_mode = false;
 		OC_doItemJinx = true;
-		unless(subscreen)Screen_Freeze(0);
+		unless(subscreen)Screen_Freeze(FREEZE_NONE);
 	}
 	
 	if(ocIndex!=8 && ocIndex>0 && playSong(currSong))
@@ -61,7 +61,7 @@ void ocarina()//start ocMode
 			ocarina_mode = false;
 			Game->PlaySound(SFX_ERROR);
 			playedSong = -1;
-			unless(subscreen)Screen_Freeze(0);
+			unless(subscreen)Screen_Freeze(FREEZE_NONE);
 		}
 	}
 	drawNotes();

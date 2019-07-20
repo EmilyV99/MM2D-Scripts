@@ -10,12 +10,12 @@ void toggleSubscreen()//start
 	subscreen=!subscreen;
 	if(subscreen)
 	{
-		Screen_Freeze(2);
+		Screen_Freeze(FREEZE_ACTION);
 		Game->PlaySound(81);
 	}
 	else
 	{
-		Screen_Freeze(0);
+		Screen_Freeze(FREEZE_NONE);
 		Game->PlaySound(82);
 		hideItemCaption();
 	}
@@ -810,6 +810,8 @@ void passiveSubscreen()//start PassiveSubscreen
 	//printf("Passive subscr %d\n",gameframe);
 	//if(getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL)) return; //No subscreen in the options menu
 	//Inventory
+	if(getGlobalBool(GVAR_HIDE_PASSIVESUB,GV_MISC_BOOL))
+		return;
 	int A_tile = TILE_INVIS;
 	int R_tile = TILE_INVIS;
 	int A_cset = 0;
@@ -910,7 +912,7 @@ void passiveSubscreen()//start PassiveSubscreen
 		R_tile=TILE_DROP;
 		R_cset=CSET_DROP;
 	}
-	if(Deku_flying>0)
+	else if(Deku_flying>0)
 	{
 		EX1_tile=TILE_INVIS;
 		EX2_tile=TILE_INVIS;
@@ -920,7 +922,7 @@ void passiveSubscreen()//start PassiveSubscreen
 		R_tile=TILE_DROP;
 		R_cset=CSET_DROP;
 	}
-	if(arrowAimMode)
+	else if(arrowAimMode)
 	{
 		L_tile = TILE_QUIT;
 		L_cset=0;
@@ -930,6 +932,15 @@ void passiveSubscreen()//start PassiveSubscreen
 		unless(isArrow(EX1_item))EX1_tile = TILE_INVIS;
 		unless(isArrow(EX2_item))EX2_tile = TILE_INVIS;
 		A_tile = TILE_INVIS;
+	}
+	else if(getGlobalBool(GVAR_PICTURE_MODE,GV_MISC_BOOL))
+	{
+		L_tile = TILE_BANDW;
+		R_tile = TILE_SNAP;
+		B_tile = TILE_QUIT;
+		EX1_tile = TILE_QUIT;
+		EX2_tile = TILE_QUIT;
+		A_tile = TILE_VIEW;
 	}
 	Screen->FastTile(7,BX,BY,B_tile,B_cset,OP_OPAQUE);
 	Screen->FastTile(7,EX1X,EX1Y,EX1_tile,EX1_cset,OP_OPAQUE);

@@ -165,12 +165,12 @@ global script Global
 			//start
 			if(Tango_AnySlotIsActive())
 			{
-				Screen_Freeze(1);
+				Screen_Freeze(FREEZE_ACTION_BUT_FFC);
 				slotWasDisplayed=true;
 			}
 			else if(slotWasDisplayed)
 			{
-				Screen_Freeze(0);
+				Screen_Freeze(FREEZE_NONE);
 				slotWasDisplayed=false;
 			}
 			razorSwordCheck();
@@ -253,7 +253,7 @@ global script Global
 				npcLoop();
 			}	
 			runHeightBitmap();
-			clearBitmap(RT_BITMAP0,4);
+			clearBitmap(RT_BITMAP0,6);
 			//Waitdraw();
 			passiveSubscreen();
 			if(!isFrozen||isBottleFrozen)
@@ -322,7 +322,7 @@ global script Global
 			if(screen>-1)
 			{
 				dmapdata ddmap = Game->LoadDMapData(downdmap);
-				drawHeightLayerData(ddmap->Map,screen,3);
+				drawHeightLayerData(ddmap->Map,screen,false);
 			}
 		}
 		unless(hideLayer4)
@@ -334,14 +334,14 @@ global script Global
 				if(screen>-1)
 				{
 					dmapdata udmap = Game->LoadDMapData(updmap);
-					drawHeightLayerData(udmap->Map,screen,4);
+					drawHeightLayerData(udmap->Map,screen,true);
 					//printf("map,screen: %d,%d\n",udmap->Map,screen);
 				}
 			}
 		}
 	}
 	
-	void drawHeightLayerData(int map, int screen, int layer)
+	void drawHeightLayerData(int map, int screen, bool upper)
 	{
 		mapdata m = Game->LoadMapData(map,screen);
 		unless(m->State[ST_ITEM])
@@ -349,7 +349,7 @@ global script Global
 			if(m->HasItem)
 			{
 				unless(Game->LoadItemData(m->Item)->Type == IC_STRAYFAIRY)
-					HeightFastTile(layer,m->ItemX,m->ItemY,loadItemTile(m->Item),loadItemTile(m->Item),OP_TRANS);
+					HeightFastTile(upper,upper?2:3,m->ItemX,m->ItemY,loadItemTile(m->Item),loadItemTile(m->Item),OP_TRANS);
 			}
 		}
 		for(int i = MIN_FFC; i < MAX_NONRESERVED_FFC; i++)
@@ -358,10 +358,10 @@ global script Global
 			switch(m->FFCScript[i])
 			{
 				case FFC_CHEST:
-					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getChestCombo(data,m->GetFFCInitD(i, 0)),m->FFCCSet[i],OP_OPAQUE);
+					HeightFastCombo(upper,upper?2:3,m->FFCX[i],m->FFCY[i],getChestCombo(data,m->GetFFCInitD(i, 0)),m->FFCCSet[i],OP_OPAQUE);
 					break;
 				case FFC_OWL:
-					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getOwlCombo(m->GetFFCInitD(i, 0)),m->FFCCSet[i],OP_OPAQUE);
+					HeightFastCombo(upper,upper?2:3,m->FFCX[i],m->FFCY[i],getOwlCombo(m->GetFFCInitD(i, 0)),m->FFCCSet[i],OP_OPAQUE);
 					break;
 				case FFC_NPC:
 					int cmbo = getNPCCombo(m->FFCData[i], m->GetFFCInitD(i, 0)+0, m->GetFFCInitD(i, 1)+0, m->GetFFCInitD(i, 2)+0, m->GetFFCInitD(i, 3)+0, m->GetFFCInitD(i, 4)+0, m->GetFFCInitD(i, 5)+0, (m->GetFFCInitD(i, 7))>0);
@@ -372,20 +372,20 @@ global script Global
 						{
 							for(int y = 0; y < m->FFCTileHeight[i]; ++y)
 							{
-								HeightFastTile(layer,m->FFCX[i] + (16*x),m->FFCY[i] + (16*y),cmbod->Tile + (x) + (20*y) + (gameframe % Max(cmbod->Frames,1)),m->FFCCSet[i],OP_OPAQUE);
+								HeightFastTile(upper,upper?2:3,m->FFCX[i] + (16*x),m->FFCY[i] + (16*y),cmbod->Tile + (x) + (20*y) + (gameframe % Max(cmbod->Frames,1)),m->FFCCSet[i],OP_OPAQUE);
 							}
 						}
 					}
 					else
 					{
-						HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],cmbo,m->FFCCSet[i],OP_OPAQUE);
+						HeightFastCombo(upper,upper?2:3,m->FFCX[i],m->FFCY[i],cmbo,m->FFCCSet[i],OP_OPAQUE);
 					}
 					break;
 				case FFC_SOFTSOIL:
-					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getSoilCombo(m->GetFFCInitD(i,4)),m->FFCCSet[i],OP_OPAQUE);
+					HeightFastCombo(upper,upper?2:3,m->FFCX[i],m->FFCY[i],getSoilCombo(m->GetFFCInitD(i,4)),m->FFCCSet[i],OP_OPAQUE);
 					break;
 				case FFC_TORCH:
-					HeightFastCombo(layer,m->FFCX[i],m->FFCY[i],getTorchCombo(m->GetFFCInitD(i,0),m->GetFFCInitD(i,2),m->GetFFCInitD(i,3),m->GetFFCInitD(i,5)),m->FFCCSet[i],OP_OPAQUE);
+					HeightFastCombo(upper,upper?2:3,m->FFCX[i],m->FFCY[i],getTorchCombo(m->GetFFCInitD(i,0),m->GetFFCInitD(i,2),m->GetFFCInitD(i,3),m->GetFFCInitD(i,5)),m->FFCCSet[i],OP_OPAQUE);
 					break;
 				default:
 					if(data==0)break;
@@ -398,7 +398,7 @@ global script Global
 					{
 						for(int height = 0; height < ffheight; height++)
 						{
-							HeightFastTile(layer,m->FFCX[i]+(width*16),m->FFCY[i]+(height*16),tile+(width)+(height*20),m->FFCCSet[i],Cond((m->FFCFlags[i] & FFCBF_TRANS)>0,OP_TRANS,OP_OPAQUE));
+							HeightFastTile(upper,upper?2:3,m->FFCX[i]+(width*16),m->FFCY[i]+(height*16),tile+(width)+(height*20),m->FFCCSet[i],Cond((m->FFCFlags[i] & FFCBF_TRANS)>0,OP_TRANS,OP_OPAQUE));
 						}
 					}
 			}
@@ -505,8 +505,7 @@ global script Global
 			canFall=false;
 			rafting=true;
 		}
-		
-		if(debugCanFall)canFall=false;
+		if(getGlobalBool(GVAR_PICTURE_MODE,GV_MISC_BOOL)||debugCanFall)canFall=false;
 	}//end
 	void raftingCheck()//start rafting
 	{
@@ -539,11 +538,7 @@ global script Global
 			NoAction();
 			if(Rafting[RAFT_UP]>0)
 			{
-				for(int i = 0;i<Rafting[RAFT_UP];Rafting[RAFT_UP]--)
-				{
-					warpUp();
-					//Waitframe(); //Unneeded?
-				}
+				warpUps(Rafting[RAFT_UP]);
 				Rafting[RAFT_UP]=-1;
 				u args[8] = {Rafting[RAFT_DIR],0,0,2};
 				Rafting[RAFT_DIR] = -1;
@@ -586,13 +581,11 @@ global script Global
 	{
 		if(warpNumFloors>0)
 		{
-			unless(warpUp())warpNumFloors=0;
-			else --warpNumFloors;
+			warpUps(warpNumFloors);
 		}
 		else if(warpNumFloors<0)
 		{
-			unless(warpDown())warpNumFloors=0;
-			else ++warpNumFloors;
+			warpDowns(-warpNumFloors);
 		}
 	}//end
 	void timePalette()//start
@@ -898,12 +891,12 @@ global script Global
 				default:
 					if((weap->Misc[LWMISC_LAYERDMAP]-1)>THISDMAP)
 					{
-						HeightFastTile(4,weap->X+weap->DrawXOffset,weap->Y+weap->DrawYOffset,weap->OriginalTile + weap->Frame,weap->CSet,OP_OPAQUE);
+						HeightFastTile(true,4,weap->X+weap->DrawXOffset,weap->Y+weap->DrawYOffset,weap->OriginalTile + weap->Frame,weap->CSet,OP_OPAQUE);
 						weap->ScriptTile = TILE_INVIS;
 					}
 					else if((weap->Misc[LWMISC_LAYERDMAP]-1)<THISDMAP)
 					{
-						HeightFastTile(3,weap->X+weap->DrawXOffset,weap->Y+weap->DrawYOffset,weap->OriginalTile + weap->Frame,weap->CSet,OP_OPAQUE);
+						HeightFastTile(false,3,weap->X+weap->DrawXOffset,weap->Y+weap->DrawYOffset,weap->OriginalTile + weap->Frame,weap->CSet,OP_OPAQUE);
 						weap->ScriptTile = TILE_INVIS;
 					}
 					else weap->ScriptTile = -1;
@@ -924,12 +917,12 @@ global script Global
 				default:
 					if((weap->Misc[EWMISC_LAYERDMAP]-1)>THISDMAP)
 					{
-						HeightFastTile(4,weap->X+weap->DrawXOffset,weap->Y+weap->DrawYOffset,weap->Tile,weap->CSet,OP_OPAQUE);
+						HeightFastTile(true,4,weap->X+weap->DrawXOffset,weap->Y+weap->DrawYOffset,weap->Tile,weap->CSet,OP_OPAQUE);
 						weap->ScriptTile = TILE_INVIS;
 					}
 					else if((weap->Misc[EWMISC_LAYERDMAP]-1)<THISDMAP)
 					{
-						HeightFastTile(3,weap->X+weap->DrawXOffset,weap->Y+weap->DrawYOffset,weap->Tile,weap->CSet,OP_OPAQUE);
+						HeightFastTile(false,3,weap->X+weap->DrawXOffset,weap->Y+weap->DrawYOffset,weap->Tile,weap->CSet,OP_OPAQUE);
 						weap->ScriptTile = TILE_INVIS;
 					}
 					else weap->ScriptTile = -1;
@@ -950,12 +943,12 @@ global script Global
 				default:
 					if((it->Misc[ITEMMISC_LAYERDMAP]-1)>THISDMAP)
 					{
-						HeightFastTile(4,it->X+it->DrawXOffset,it->Y+it->DrawYOffset,it->Tile,it->CSet,OP_OPAQUE);
+						HeightFastTile(true,4,it->X+it->DrawXOffset,it->Y+it->DrawYOffset,it->Tile,it->CSet,OP_OPAQUE);
 						it->ScriptTile = TILE_INVIS;
 					}
 					else if((it->Misc[ITEMMISC_LAYERDMAP]-1)<THISDMAP)
 					{
-						HeightFastTile(3,it->X+it->DrawXOffset,it->Y+it->DrawYOffset,it->Tile,it->CSet,OP_OPAQUE);
+						HeightFastTile(false,3,it->X+it->DrawXOffset,it->Y+it->DrawYOffset,it->Tile,it->CSet,OP_OPAQUE);
 						it->ScriptTile = TILE_INVIS;
 					}
 					else it->ScriptTile = -1;
@@ -976,12 +969,12 @@ global script Global
 				default:
 					if((n->Misc[NPCMISC_LAYERDMAP]-1)>THISDMAP)
 					{
-						HeightFastTile(4,n->X,n->Y,n->Tile,n->CSet,OP_OPAQUE);
+						HeightFastTile(true,4,n->X,n->Y,n->Tile,n->CSet,OP_OPAQUE);
 						n->ScriptTile = TILE_INVIS;
 					}
 					else if((n->Misc[NPCMISC_LAYERDMAP]-1)<THISDMAP)
 					{
-						HeightFastTile(3,n->X,n->Y,n->Tile,n->CSet,OP_OPAQUE);
+						HeightFastTile(false,3,n->X,n->Y,n->Tile,n->CSet,OP_OPAQUE);
 						n->ScriptTile = TILE_INVIS;
 					}
 					else n->ScriptTile = -1;
@@ -1022,7 +1015,7 @@ global script Global
 				playedSong=-1;
 				fakeSong=false;
 				unless(subscreen)
-					Screen_Freeze(0);
+					Screen_Freeze(FREEZE_NONE);
 			}
 		}
 		else
@@ -1042,7 +1035,7 @@ global script Global
 		}
 		if(ocarina_mode)
 		{
-			Screen_Freeze(2);
+			Screen_Freeze(FREEZE_ACTION);
 			ocarina();
 			Input->Press[CB_START]=false;
 			Input->Button[CB_START]=false;
@@ -1129,7 +1122,7 @@ void onLaunch() //Called from `Init` and `OnContinue`
 	//end Ocarina init
 	subscreen = false;
 	clearBitmap(RT_BITMAP0);
-	refreshDisable();
+	setGlobalBool(GVAR_PICTURE_MODE,GV_MISC_BOOL,false);
 }
 
 void onLaunchEnd()
@@ -1719,20 +1712,20 @@ hero script OptionsMenu
 					//Controls
 					DrawStrings(MENU_LAYER, 128, MENU_BOTTOM_MARGIN + FONT_Z3SMALL_HEIGHT, FONT_Z3SMALL, MENU_TCOLOR_CONTROLS, -1, TF_CENTERED, "ENTER/(A): Confirm | BACKSPACE/(B): Back\n(START): Info | (UP)/(DOWN): Switch options\n(LEFT)/(RIGHT): Switch tabs", OP_OPAQUE, 2, 256-(MENU_RIGHT_MARGIN_WIDTH + MENU_LEFT_MARGIN_WIDTH));
 					//
-					if(debugEnabled && PressControl() && Input->ReadKey[KEY_W]) menu->Write(7, "MenuBitmap.png", true);
+					if(debugEnabled && PressControl() && Input->ReadKey[KEY_W]) menu->Write(7, "MM2D/MenuBitmap.png", true);
 					TotalNoAction();
 					Waitframe();
 				}
 				TotalNoAction();
 				reloadOptions();
-				Screen_Freeze(0);
+				Screen_Freeze(FREEZE_NONE);
 			}
 			else
 			{
 				if(Input->ReadKey[Controls[CONTROL_OPTIONS]])
 				{
 					setGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL, true);
-					Screen_Freeze(2);
+					Screen_Freeze(FREEZE_ACTION);
 				}
 			}
 		}
@@ -2068,8 +2061,8 @@ namespace GameOverMenu
 	{
 		if(Input->ReadKey[KEY_F6])
 		{
-			int frz = Get_Freeze();
-			Screen_Freeze(2);
+			FreezeState frz = Get_Freeze();
+			Screen_Freeze(FREEZE_ACTION);
 			pauseAllSfx();
 			setGlobalBool(GVAR_F6_MENU, GV_MISC_BOOL, true);
 			QuitState state = runGameOverMenu(true);
@@ -2152,7 +2145,7 @@ namespace GameOverMenu
 			case CONTINUE:
 				Hero->HP = Hero->MaxHP;
 				Hero->MP = Clamp(Hero->MP, (Hero->MaxMP / 2), Hero->MaxMP);
-				Screen_Freeze(0);
+				Screen_Freeze(FREEZE_NONE);
 				Game->Continue();
 				break;
 			case RESET_TIME:
@@ -2165,16 +2158,16 @@ namespace GameOverMenu
 					playedSong = -1;
 					Waitframe();
 				}
-				Screen_Freeze(0);
+				Screen_Freeze(FREEZE_NONE);
 				saveTheGame();
 				resetTime();
 				break;
 			case QUIT:
-				Screen_Freeze(0);
+				Screen_Freeze(FREEZE_NONE);
 				Game->End();
 				break;
 			case CANCEL: //Do nothing! Just leave!
-				Screen_Freeze(0);
+				Screen_Freeze(FREEZE_NONE);
 				break;
 		}
 	}

@@ -140,7 +140,7 @@ ffc script renameLink
 		DEFINE CHAR_OFFSET = -32;// The CHAR0 tile points to the "Spacebar" character, which is character 32; thus a character must be offset by -32 to get the correct tile.
 		DEFINE Y_OFFSET = -1;
 		DEFINE X_OFFSET = 0;
-		Screen_Freeze(1);
+		Screen_Freeze(FREEZE_ACTION_BUT_FFC);
 		startTypingMode(8,true);
 		char buf[9];
 		int cursor = 0;
@@ -174,7 +174,7 @@ ffc script renameLink
 				{
 					Game->SetSaveName(buf);
 					clearTypedInput();
-					Screen_Freeze(0);
+					Screen_Freeze(FREEZE_NONE);
 					Quit();
 				}
 				else

@@ -879,7 +879,7 @@ void EmptyBottleGlobal()//start defaultBottleCode
 			}
 			BottleState[BSI_BOTTLEUSED] = -1;
 			RefreshBottles();
-			Screen_Freeze(0);
+			Screen_Freeze(FREEZE_NONE);
 			isBottleFrozen=false;
 		}
 	}
@@ -905,7 +905,7 @@ void EmptyBottleGlobal()//start defaultBottleCode
 				{
 					BottleState[BSI_BOTTLEUSED] = bottle;
 					BottleState[BSI_BOTTLETIMER] = FREQ_HEARTREFILL*POTION_HEARTS;
-					Screen_Freeze(2);
+					Screen_Freeze(FREEZE_ACTION);
 					isBottleFrozen=true;
 				}
 			}
@@ -919,7 +919,7 @@ void EmptyBottleGlobal()//start defaultBottleCode
 				{
 					BottleState[BSI_BOTTLEUSED] = bottle;
 					BottleState[BSI_BOTTLETIMER] = POTION_MP/2;
-					Screen_Freeze(2);
+					Screen_Freeze(FREEZE_ACTION);
 					isBottleFrozen=true;
 				}
 			}
@@ -935,7 +935,7 @@ void EmptyBottleGlobal()//start defaultBottleCode
 					BottleState[BSI_BOTTLETIMER] = Max(FREQ_HEARTREFILL*POTION_HEARTS, POTION_MP/2);
 					BottleState[BSI_OLDHP] = Hero->HP;
 					BottleState[BSI_OLDMP] = Hero->MP;
-					Screen_Freeze(2);
+					Screen_Freeze(FREEZE_ACTION);
 					isBottleFrozen=true;
 				}
 			}
@@ -963,7 +963,7 @@ void EmptyBottleGlobal()//start defaultBottleCode
 					BottleState[BSI_FAIRYTIMER] = 0;
 					BottleState[BSI_FAIRYREVIVE] = 0;
 					Game->PlaySound(SFX_FAIRY);
-					Screen_Freeze(2);
+					Screen_Freeze(FREEZE_ACTION);
 					isBottleFrozen=true;
 				}//end
 			}
@@ -977,7 +977,7 @@ void EmptyBottleGlobal()//start defaultBottleCode
 				{
 					BottleState[BSI_BOTTLEUSED] = bottle;
 					BottleState[BSI_BOTTLETIMER] = FREQ_HEARTREFILL*MILK_HEARTS;
-					Screen_Freeze(2);
+					Screen_Freeze(FREEZE_ACTION);
 					isBottleFrozen=true;
 				}
 			}
@@ -985,7 +985,7 @@ void EmptyBottleGlobal()//start defaultBottleCode
 			{
 				BottleState[BSI_BOTTLEUSED] = bottle;
 				BottleState[BSI_BOTTLETIMER] = Max(FREQ_HEARTREFILL*POTION_HEARTS, POTION_MP/2);
-				Screen_Freeze(2);
+				Screen_Freeze(FREEZE_ACTION);
 				isBottleFrozen=true;
 				Hero->Item[INF_MAGIC]=true;
 			}
@@ -1006,7 +1006,7 @@ void EmptyBottleGlobal()//start defaultBottleCode
 				{
 						BottleState[BSI_BOTTLEUSED] = bottle;
 						BottleState[BSI_BOTTLETIMER] = FREQ_HEARTREFILL*(rand*2);
-						Screen_Freeze(2);
+						Screen_Freeze(FREEZE_ACTION);
 						isBottleFrozen=true;
 					}
 				}
@@ -1059,7 +1059,7 @@ void EmptyBottleGlobal()//start defaultBottleCode
 			BottleState[BSI_FAIRYTIMER] = 0;
 			BottleState[BSI_FAIRYREVIVE] = 1;
 			Game->PlaySound(SFX_FAIRY);
-			Screen_Freeze(2);
+			Screen_Freeze(FREEZE_ACTION);
 			isBottleFrozen=true;
 		}//end
 	}
@@ -1470,19 +1470,139 @@ item script Pictograph
 	bitmap picto;
 	DEFINE PICTO_HEIGHT = 168;// + (56*2);
 	DEFINE PICTO_WIDTH = 256;
+	DEFINE FRAME_SPACING = 16;
+	DEFINE FRAME_WIDTH = 2;
+	DEFINE FRAME_LENGTH = 24;
 	void run()
 	{
 		unless(picto->isAllocated()) picto = Game->CreateBitmap(PICTO_HEIGHT,PICTO_WIDTH);
-		else unless(picto->isValid()) picto->Create(0, PICTO_HEIGHT, PICTO_WIDTH);
-		
-		do 
+		picto->Read(0,"MM2D/PictoImage.png");
+		setGlobalBool(GVAR_PICTURE_MODE,GV_MISC_BOOL,true);
+		Hero->ScriptTile = TILE_INVIS;
+		Hero->CollDetection = false;
+		int x = Hero->X, y = Hero->Y;
+		Hero->X = 0; Hero->Y = 0;
+		int warps = 0;
+		ForceUnfreeze(susptITEMSCRIPTENGINE,true);
+		Screen_Freeze(FREEZE_ACTION);
+		bool snap;
+		bool psub = getGlobalBool(GVAR_HIDE_PASSIVESUB,GV_MISC_BOOL);
+		bool color = true;
+		dmapdata thisDMAP = Game->LoadDMapData(Game->GetCurDMap());
+		int viewDMpal = getGlobalVar(GVAR_PICTO_LAST_DMAPPAL,GV_MISC);
+		int thisDMpal = thisDMAP->Palette;
+		printf("LastGray == %s\n",getGlobalBool(GVAR_PICTO_LAST_GRAY, GV_MISC_BOOL)?"true":"false");
+		while(true) 
 		{
-			
-			Waitframe();
-		} until(Input->Press[CB_R]);
-		
-		picto->BlitTo(7, RT_SCREEN, 0, 0, PICTO_WIDTH, PICTO_HEIGHT, 0, 0, PICTO_WIDTH, PICTO_HEIGHT, 0, 0, 0, BITDX_NORMAL, 0, false);
-		picto->Write(7, "PictoImage.png", true);
+			if(getGlobalBool(GVAR_F6_MENU, GV_MISC_BOOL))
+			{
+				while(getGlobalBool(GVAR_F6_MENU, GV_MISC_BOOL)) Waitframe();
+				TotalNoAction();
+			}
+			if(Input->Press[CB_L])
+				color = !color;
+			if(color)
+			{
+				setTint(TINT_GREYSCALE, false);
+				changeBase(BASE_TINTED);
+			}
+			else
+			{
+				setTint(TINT_GREYSCALE, true);
+				changeBase(BASE_DISTRIBUTED);
+			}
+			if(Input->Press[CB_UP])
+			{
+				if(warpUp())
+				{
+					++warps;
+				}
+			}
+			else if(Input->Press[CB_DOWN])
+			{
+				if(warpDown())
+				{
+					--warps;
+				}
+			}
+			if(Input->Button[CB_A])
+			{
+				thisDMAP->Palette = viewDMpal;
+				if(getGlobalBool(GVAR_PICTO_LAST_GRAY, GV_MISC_BOOL))
+				{
+					setTint(TINT_GREYSCALE, true);
+					changeBase(BASE_DISTRIBUTED);
+				}
+				else
+				{
+					setTint(TINT_GREYSCALE, false);
+					changeBase(BASE_TINTED);
+				}
+				setGlobalBool(GVAR_HIDE_PASSIVESUB,GV_MISC_BOOL,true);
+				//Show current image
+				FastRect(7,0,-56,255,175,BLACK,OP_OPAQUE);
+				picto->Blit(7, RT_SCREEN, 0, 0, PICTO_WIDTH, PICTO_HEIGHT, 0, 0, PICTO_WIDTH, PICTO_HEIGHT, 0, 0, 0, BITDX_NORMAL, 0, false);
+			}
+			else
+			{
+				thisDMAP->Palette = thisDMpal;
+				setGlobalBool(GVAR_HIDE_PASSIVESUB,GV_MISC_BOOL,psub);
+				FastRect(7, 0+(FRAME_SPACING), 0+(FRAME_SPACING), 0+(FRAME_SPACING+FRAME_LENGTH),0+(FRAME_SPACING+FRAME_WIDTH), WHITE, OP_OPAQUE);
+				FastRect(7, PICTO_WIDTH-(FRAME_SPACING), 0+(FRAME_SPACING), PICTO_WIDTH-(FRAME_SPACING+FRAME_LENGTH),0+(FRAME_SPACING+FRAME_WIDTH), WHITE, OP_OPAQUE);
+				FastRect(7, PICTO_WIDTH-(FRAME_SPACING), PICTO_HEIGHT-(FRAME_SPACING), PICTO_WIDTH-(FRAME_SPACING+FRAME_LENGTH),PICTO_HEIGHT-(FRAME_SPACING+FRAME_WIDTH), WHITE, OP_OPAQUE);
+				FastRect(7, 0+(FRAME_SPACING), PICTO_HEIGHT-(FRAME_SPACING), 0+(FRAME_SPACING+FRAME_LENGTH),PICTO_HEIGHT-(FRAME_SPACING+FRAME_WIDTH), WHITE, OP_OPAQUE);
+				FastRect(7, 0+(FRAME_SPACING), 0+(FRAME_SPACING), 0+(FRAME_SPACING+FRAME_WIDTH),0+(FRAME_SPACING+FRAME_LENGTH), WHITE, OP_OPAQUE);
+				FastRect(7, PICTO_WIDTH-(FRAME_SPACING), 0+(FRAME_SPACING), PICTO_WIDTH-(FRAME_SPACING+FRAME_WIDTH),0+(FRAME_SPACING+FRAME_LENGTH), WHITE, OP_OPAQUE);
+				FastRect(7, PICTO_WIDTH-(FRAME_SPACING), PICTO_HEIGHT-(FRAME_SPACING), PICTO_WIDTH-(FRAME_SPACING+FRAME_WIDTH),PICTO_HEIGHT-(FRAME_SPACING+FRAME_LENGTH), WHITE, OP_OPAQUE);
+				FastRect(7, 0+(FRAME_SPACING), PICTO_HEIGHT-(FRAME_SPACING), 0+(FRAME_SPACING+FRAME_WIDTH),PICTO_HEIGHT-(FRAME_SPACING+FRAME_LENGTH), WHITE, OP_OPAQUE);
+			}
+			WaitTotalNoAction();
+			if(Input->Press[CB_R])
+			{
+				snap = true; break;
+			}
+			else if(Input->Press[CB_B] || Input->Press[CB_EX1] || Input->Press[CB_EX2]) break;
+		}
+		setGlobalBool(GVAR_HIDE_PASSIVESUB,GV_MISC_BOOL,psub);
+		if(snap)
+		{
+			if(color)
+			{
+				setTint(TINT_GREYSCALE, false);
+				changeBase(BASE_TINTED);
+			}
+			else
+			{
+				setTint(TINT_GREYSCALE, true);
+				changeBase(BASE_DISTRIBUTED);
+			}
+			WaitTotalNoAction();
+			picto->BlitTo(7, RT_SCREEN, 0, 0, PICTO_WIDTH, PICTO_HEIGHT, 0, 0, PICTO_WIDTH, PICTO_HEIGHT, 0, 0, 0, BITDX_NORMAL, 0, false);
+			picto->Write(7, "MM2D/PictoImage.png", true);
+			setGlobalBool(GVAR_PICTO_LAST_GRAY, GV_MISC_BOOL, !color);
+			setGlobalVar(GVAR_PICTO_LAST_DMAPPAL, GV_MISC, thisDMpal);
+		}
+		WaitTotalNoAction();
+		setTint(TINT_GREYSCALE, false);
+		changeBase(BASE_TINTED);
+		thisDMAP->Palette = thisDMpal;
+		if(warps<0)
+		{
+			warpUps(-warps);
+		}
+		if(warps>0)
+		{
+			warpDowns(warps);
+		}
+		WaitTotalNoAction();
+		ForceUnfreeze(susptITEMSCRIPTENGINE,false);
+		Screen_Freeze(FREEZE_NONE);
+		Hero->X = x; Hero->Y = y;
+		Hero->ScriptTile = -1;
+		Hero->CollDetection = true;
+		canFall = true;
+		setGlobalBool(GVAR_PICTURE_MODE,GV_MISC_BOOL,false);
+		while(Input->Button[CB_B] || Input->Button[CB_EX1] || Input->Button[CB_EX2]) Waitframe(); //Prevent re-running of script until button release
 	}
 }
 //end Pictograph

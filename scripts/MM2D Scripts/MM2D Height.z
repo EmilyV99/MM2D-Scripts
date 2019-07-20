@@ -45,6 +45,23 @@ bool warpUp()
 	return false;
 }
 
+bool warpUps(int num)
+{
+	int dmap = Game->GetCurDMap();
+	int screen = Game->GetCurScreen();
+	for(int q = 0; q < num; ++q)
+	{
+		screen = getUpScreen(dmap, true);
+		dmap = getUpDMap(dmap);
+	}
+	if(dmap!=-1)
+	{
+		warpHeight(dmap,screen);
+		return true;
+	}
+	return false;
+}
+
 bool warpDown()
 {
 	int dmap = getDownDMap();
@@ -52,6 +69,23 @@ bool warpDown()
 	{
 		int scr = getDownScreen(true);
 		warpHeight(dmap,scr);
+		return true;
+	}
+	return false;
+}
+
+bool warpDowns(int num)
+{
+	int dmap = Game->GetCurDMap();
+	int screen = Game->GetCurScreen();
+	for(int q = 0; q < num; ++q)
+	{
+		screen = getDownScreen(dmap, true);
+		dmap = getDownDMap(dmap);
+	}
+	if(dmap!=-1)
+	{
+		warpHeight(dmap,screen);
 		return true;
 	}
 	return false;
@@ -68,13 +102,28 @@ void warpHeight(int dmap, int scr)
 
 int getDownDMap()
 {
-	if(GetCurDMap() >= SizeOfArray(DMAP_DOWN))return -1;
+	if(Game->GetCurDMap() >= SizeOfArray(DMAP_DOWN))return -1;
 	return DMAP_DOWN[Game->GetCurDMap()];
+}
+
+int getDownDMap(int dmap)
+{
+	if(dmap >= SizeOfArray(DMAP_DOWN))return -1;
+	return DMAP_DOWN[dmap];
 }
 
 int getDownScreen(bool mod)
 {
 	int dmap = getDownDMap();
+	if(dmap==-1)return -1;
+	if(mod)
+		return MapToDMap(Screen->LayerScreen(3),dmap);
+	return Screen->LayerScreen(3);
+}
+
+int getDownScreen(int dmap, bool mod)
+{
+	dmap = getDownDMap(dmap);
 	if(dmap==-1)return -1;
 	if(mod)
 		return MapToDMap(Screen->LayerScreen(3),dmap);
@@ -105,13 +154,28 @@ int getBottomScreen(bool mod)
 
 int getUpDMap()
 {
-	if(GetCurDMap() >= SizeOfArray(DMAP_UP))return -1;
+	if(Game->GetCurDMap() >= SizeOfArray(DMAP_UP))return -1;
 	return DMAP_UP[Game->GetCurDMap()];
+}
+
+int getUpDMap(int dmap)
+{
+	if(dmap >= SizeOfArray(DMAP_UP))return -1;
+	return DMAP_UP[dmap];
 }
 
 int getUpScreen(bool mod)
 {
 	int dmap = getUpDMap();
+	if(dmap==-1)return -1;
+	if(mod)
+		return MapToDMap(Screen->LayerScreen(4),dmap);
+	return Screen->LayerScreen(4);
+}
+
+int getUpScreen(int dmap, bool mod)
+{
+	dmap = getUpDMap(dmap);
 	if(dmap==-1)return -1;
 	if(mod)
 		return MapToDMap(Screen->LayerScreen(4),dmap);
@@ -516,11 +580,7 @@ void rampWarpUp(int theCombo)
 	}
 	else if(Screen->ComboF[theCombo]==CF_SCRIPT2)
 	{
-		if(warpUp())
-		{
-			Waitframe();
-			warpUp();
-		}
+		warpUps(2);
 	}
 }
 //end RampJump

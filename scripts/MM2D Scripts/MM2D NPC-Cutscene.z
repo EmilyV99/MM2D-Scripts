@@ -390,7 +390,7 @@ ffc script NPC
 				tangoTemp=false;
 				ShowStringAndWait("{{@savename()}}, would you like to change your name?@26<<@choice(1)Yes@choice(2)No>>@domenu()@append(45)");
 				unless(tangoTemp)return;
-				Screen_Freeze(1);
+				Screen_Freeze(FREEZE_ACTION_BUT_FFC);
 				Waitframes(6);
 				RunFFCScript(FFC_CHANGENAME,{0});
 				break;
@@ -1018,12 +1018,12 @@ screendata script SCTTower //start South Clock Town tower building (R)
 				while(true)
 				{
 					if(day==2)
-						HeightFastCombo(4,X,Y+16,COMBO_BREMOR,0,OP_OPAQUE);//Draw Bremor from the third layer
+						HeightFastCombo(true,4,X,Y+16,COMBO_BREMOR,0,OP_OPAQUE);//Draw Bremor from the third layer
 					else if(day==3)
 					{
-						HeightFastCombo(4,X+16,Y,getChestCombo(COMBO_CHEST,IL_CTTOWERMONEY_CHEST),0,OP_OPAQUE); //Draw the chest on the third layer
+						HeightFastCombo(true,4,X+16,Y,getChestCombo(COMBO_CHEST,IL_CTTOWERMONEY_CHEST),0,OP_OPAQUE); //Draw the chest on the third layer
 						if(isBefore(3,18,false))
-							HeightFastCombo(4,X+32,Y,COMBO_BREMOR,0,OP_OPAQUE);//Draw Bremor from the third layer
+							HeightFastCombo(true,4,X+32,Y,COMBO_BREMOR,0,OP_OPAQUE);//Draw Bremor from the third layer
 					}
 					Waitframe();
 				}
@@ -1045,11 +1045,13 @@ screendata script SCTTower //start South Clock Town tower building (R)
 						{
 							for(int i=0;i<6;i++)
 							{
-								HeightFastCombo(4,ComboX(combos[i]),ComboY(combos[i]),COMBO_PLANKS,2,OP_OPAQUE);
+								HeightFastCombo(true,4,ComboX(combos[i]),ComboY(combos[i]),COMBO_PLANKS,2,OP_OPAQUE);
 							}
 							if(day==3)
 							{
-								HeightFastCombo(4,X+16,Y,getChestCombo(COMBO_CHEST,IL_CTTOWERMONEY_CHEST),0,OP_OPAQUE);
+								HeightFastCombo(true,4,X+16,Y,getChestCombo(COMBO_CHEST,IL_CTTOWERMONEY_CHEST),0,OP_OPAQUE);
+								if(isBefore(3,18,false))
+									HeightFastCombo(true,4,X+32,Y,COMBO_BREMOR,0,OP_OPAQUE);//Draw Bremor from the third layer
 							}
 							Waitframe();
 						}
@@ -1297,7 +1299,7 @@ int chooseTripleDigitNum(int max, int sfx)
 	int nums[3];
 	int num = 0;
 	int cursor = 2;
-	Screen_Freeze(1);
+	Screen_Freeze(FREEZE_ACTION_BUT_FFC);
 	while(running)
 	{
 		Screen->FastTile(6,FIRSTX,FIRSTY,BORDERTILE,2,OP_OPAQUE);
@@ -1350,7 +1352,7 @@ int chooseTripleDigitNum(int max, int sfx)
 		TotalNoAction();
 		Waitframe();
 	}
-	Screen_Freeze(0);
+	Screen_Freeze(FREEZE_NONE);
 	return num;
 }
 //end bank

@@ -209,7 +209,7 @@ enum FreezeState
 	FREEZE_NONE,
 	FREEZE_ACTION_BUT_FFC,
 	FREEZE_ACTION
-}
+};
 FreezeState curFrz = FREEZE_NONE;
 bool indivFreeze[susptLAST];
 bool forceActive[susptLAST];
@@ -249,6 +249,9 @@ void Screen_Freeze(FreezeState frz)
 					case susptUPDATEFFC:
 					case susptFFCSCRIPTS:
 					case susptSCREENDRAW:
+					case susptSCRIPDRAWCLEAR:
+					case susptLINK:
+					case susptONEFRAMECONDS:
 						Game->Suspend[q] = indivFreeze[q];
 						break;
 					default:
@@ -267,6 +270,9 @@ void Screen_Freeze(FreezeState frz)
 					case susptGLOBALGAME:
 					case susptLINKACTIVE:
 					case susptSCREENDRAW:
+					case susptSCRIPDRAWCLEAR:
+					case susptLINK:
+					case susptONEFRAMECONDS:
 						Game->Suspend[q] = indivFreeze[q] && !forceActive[q];
 						break;
 					default:
@@ -276,6 +282,7 @@ void Screen_Freeze(FreezeState frz)
 			break;
 		}
 	}
+	isFrozen = curFrz!=FREEZE_NONE;
 }
 
 FreezeState Get_Freeze()
