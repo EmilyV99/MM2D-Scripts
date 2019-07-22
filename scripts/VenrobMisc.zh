@@ -164,60 +164,41 @@ namespace Venrob
 	}
 	
 	//start CanWalkM
+	/** If true, then calling CanWalkM with the current screen's mapdata will use `Screen->` instead of the provided `mapdata->` */
+	CONFIGB MAPDATA_USECURSCREEN = true;
+	//start Standard (only checks ahead)
 	/**
 	* This function (and set of overloads) acts as CanWalk, but uses an arbitrary 
 	*      `mapdata` pointer for solidity, rather than the current screen.
 	* Related: `CurMapdata()`
 	*/
-	/** If true, then calling CanWalkM with the current screen's mapdata will use `Screen->` instead of the provided `mapdata->` */
-	CONFIGB MAPDATA_USECURSCREEN = true;
 	//lweapon
-	bool CanWalkM(lweapon weap, mapdata map, int dir, int step)
-	{
-		return CanWalkM(weap, map, dir, step, false);
-	}
-
 	bool CanWalkM(lweapon weap, mapdata map, int dir, int step, bool useHit)
 	{
 		if(!weap->isValid())return false;
 		return CanWalkM(weap->X + (useHit ? weap->HitXOffset : 0), weap->Y + (useHit ? weap->HitYOffset : 0), weap->X + (useHit ?  weap->HitWidth + weap->HitXOffset :  weap->TileWidth * 16) - 1, weap->Y + (useHit ?  weap->HitHeight + weap->HitYOffset :  weap->TileHeight * 16) - 1, map, dir, step);
 	}
 	//eweapon
-	bool CanWalkM(eweapon weap, mapdata map, int dir, int step)
-	{
-		return CanWalkM(weap, map, dir, step, false);
-	}
-
 	bool CanWalkM(eweapon weap, mapdata map, int dir, int step, bool useHit)
 	{
 		if(!weap->isValid())return false;
 		return CanWalkM(weap->X + (useHit ? weap->HitXOffset : 0), weap->Y + (useHit ? weap->HitYOffset : 0), weap->X + (useHit ?  weap->HitWidth + weap->HitXOffset :  weap->TileWidth * 16) - 1, weap->Y + (useHit ?  weap->HitHeight + weap->HitYOffset :  weap->TileHeight * 16) - 1, map, dir, step);
 	}
 	//npc
-	bool CanWalkM(npc n, mapdata map, int dir, int step)
-	{
-		return CanWalkM(n, map, dir, step, false);
-	}
-
 	bool CanWalkM(npc n, mapdata map, int dir, int step, bool useHit)
 	{
 		if(!n->isValid())return false;
 		return CanWalkM(n->X + (useHit ? n->HitXOffset : 0), n->Y + (useHit ? n->HitYOffset : 0), n->X + (useHit ?  n->HitWidth + n->HitXOffset :  n->TileWidth * 16) - 1, n->Y + (useHit ?  n->HitHeight + n->HitYOffset :  n->TileHeight * 16) - 1, map, dir, step);
 	}
 	//ffc
-	bool CanWalkM(ffc f, mapdata map, int dir, int step)
-	{
-		return CanWalkM(f, map, dir, step, false);
-	}
-
 	bool CanWalkM(ffc f, mapdata map, int dir, int step, bool useEffect)
 	{
 		return CanWalkM(f->X, f->Y, f->X + (useEffect ?  f->EffectWidth :  f->TileWidth * 16) - 1, f->Y + (useEffect ?  f->EffectHeight :  f->TileHeight * 16) - 1, map, dir, step);
 	}
 	//Link
-	bool CanWalkM(mapdata map, int dir, int step, bool largeHitbox)
+	bool CanWalkM(mapdata map, int dir, int step)
 	{
-		return CanWalkM(Hero->X, Hero->Y + (largeHitbox ?  0 :  8), Hero->X + 15, Hero->Y + 15, map, dir, step);
+		return CanWalkM(Hero->X, Hero->Y + (Hero->BigHitbox ?  0 :  8), Hero->X + 15, Hero->Y + 15, map, dir, step);
 	}
 	//Main
 	bool CanWalkM(int x, int y, int xx, int yy, mapdata map, int dir, int step)
@@ -229,10 +210,10 @@ namespace Venrob
 		int midy = y + Floor(height/2);
 		switch(dir)
 		{
-			case DIR_UP: return !(y-step<0||map->isSolid(x,y-step)||map->isSolid(midx,y-step)||map->isSolid(xx,y-step)||map->isSolid(x,yy-step)||map->isSolid(midx,yy-step)||map->isSolid(xx,yy-step));
-			case DIR_DOWN: return !(yy+step>=176||map->isSolid(x,yy+step)||map->isSolid(midx,yy+step)||map->isSolid(xx,yy+step)||map->isSolid(x,y+step)||map->isSolid(midx,y+step)||map->isSolid(xx,y+step));
-			case DIR_LEFT: return !(x-step<0||map->isSolid(x-step,y)||map->isSolid(x-step,midy)||map->isSolid(x-step,yy)||map->isSolid(xx-step,y)||map->isSolid(xx-step,midy)||map->isSolid(xx-step,yy));
-			case DIR_RIGHT: return !(xx+step>=256||map->isSolid(xx+step,y)||map->isSolid(xx+step,midy)||map->isSolid(xx+step,yy)||map->isSolid(x+step,y)||map->isSolid(x+step,midy)||map->isSolid(x+step,yy));
+			case DIR_UP: return !(y-step<0||map->isSolid(x,y-step)||map->isSolid(midx,y-step)||map->isSolid(xx,y-step));
+			case DIR_DOWN: return !(yy+step>=176||map->isSolid(x,yy+step)||map->isSolid(midx,yy+step)||map->isSolid(xx,yy+step));
+			case DIR_LEFT: return !(x-step<0||map->isSolid(x-step,y)||map->isSolid(x-step,midy)||map->isSolid(x-step,yy));
+			case DIR_RIGHT: return !(xx+step>=256||map->isSolid(xx+step,y)||map->isSolid(xx+step,midy)||map->isSolid(xx+step,yy));
 			case DIR_LEFTUP: return (CanWalkM(x, y, xx, yy, map, DIR_LEFT, step) && CanWalkM(x, y, xx, yy, map, DIR_UP, step));
 			case DIR_LEFTDOWN: return (CanWalkM(x, y, xx, yy, map, DIR_LEFT, step) && CanWalkM(x, y, xx, yy, map, DIR_DOWN, step));
 			case DIR_RIGHTUP: return (CanWalkM(x, y, xx, yy, map, DIR_RIGHT, step) && CanWalkM(x, y, xx, yy, map, DIR_UP, step));
@@ -243,6 +224,78 @@ namespace Venrob
 	
 	//Current Screen
 	bool CanWalkS(int x, int y, int xx, int yy, int dir, int step)
+	{
+		int width = xx - x + 1;
+		int height = yy - y + 1;
+		int midx = x + Floor(width/2);
+		int midy = y + Floor(height/2);
+		switch(dir)
+		{
+			case DIR_UP: return !(y-step<0||Screen->isSolid(x,y-step)||Screen->isSolid(midx,y-step)||Screen->isSolid(xx,y-step));
+			case DIR_DOWN: return !(yy+step>=176||Screen->isSolid(x,yy+step)||Screen->isSolid(midx,yy+step)||Screen->isSolid(xx,yy+step));
+			case DIR_LEFT: return !(x-step<0||Screen->isSolid(x-step,y)||Screen->isSolid(x-step,midy)||Screen->isSolid(x-step,yy));
+			case DIR_RIGHT: return !(xx+step>=256||Screen->isSolid(xx+step,y)||Screen->isSolid(xx+step,midy)||Screen->isSolid(xx+step,yy));
+			case DIR_LEFTUP: return (CanWalkS(x, y, xx, yy, DIR_LEFT, step) && CanWalkS(x, y, xx, yy, DIR_UP, step));
+			case DIR_LEFTDOWN: return (CanWalkS(x, y, xx, yy, DIR_LEFT, step) && CanWalkS(x, y, xx, yy, DIR_DOWN, step));
+			case DIR_RIGHTUP: return (CanWalkS(x, y, xx, yy, DIR_RIGHT, step) && CanWalkS(x, y, xx, yy, DIR_UP, step));
+			case DIR_RIGHTDOWN: return (CanWalkS(x, y, xx, yy, DIR_RIGHT, step) && CanWalkS(x, y, xx, yy, DIR_DOWN, step));
+		}
+		return false; //invalid direction
+	}
+	//end Standard
+	//start Full (Checks the FULL hitbox, not just where you are moving into)
+	//lweapon
+	bool CanWalkMFull(lweapon weap, mapdata map, int dir, int step, bool useHit)
+	{
+		if(!weap->isValid())return false;
+		return CanWalkMFull(weap->X + (useHit ? weap->HitXOffset : 0), weap->Y + (useHit ? weap->HitYOffset : 0), weap->X + (useHit ?  weap->HitWidth + weap->HitXOffset :  weap->TileWidth * 16) - 1, weap->Y + (useHit ?  weap->HitHeight + weap->HitYOffset :  weap->TileHeight * 16) - 1, map, dir, step);
+	}
+	//eweapon
+	bool CanWalkMFull(eweapon weap, mapdata map, int dir, int step, bool useHit)
+	{
+		if(!weap->isValid())return false;
+		return CanWalkMFull(weap->X + (useHit ? weap->HitXOffset : 0), weap->Y + (useHit ? weap->HitYOffset : 0), weap->X + (useHit ?  weap->HitWidth + weap->HitXOffset :  weap->TileWidth * 16) - 1, weap->Y + (useHit ?  weap->HitHeight + weap->HitYOffset :  weap->TileHeight * 16) - 1, map, dir, step);
+	}
+	//npc
+	bool CanWalkMFull(npc n, mapdata map, int dir, int step, bool useHit)
+	{
+		if(!n->isValid())return false;
+		return CanWalkMFull(n->X + (useHit ? n->HitXOffset : 0), n->Y + (useHit ? n->HitYOffset : 0), n->X + (useHit ?  n->HitWidth + n->HitXOffset :  n->TileWidth * 16) - 1, n->Y + (useHit ?  n->HitHeight + n->HitYOffset :  n->TileHeight * 16) - 1, map, dir, step);
+	}
+	//ffc
+	bool CanWalkMFull(ffc f, mapdata map, int dir, int step, bool useEffect)
+	{
+		return CanWalkMFull(f->X, f->Y, f->X + (useEffect ?  f->EffectWidth :  f->TileWidth * 16) - 1, f->Y + (useEffect ?  f->EffectHeight :  f->TileHeight * 16) - 1, map, dir, step);
+	}
+	//Link
+	bool CanWalkMFull(mapdata map, int dir, int step)
+	{
+		return CanWalkMFull(Hero->X, Hero->Y + (Hero->BigHitbox ?  0 :  8), Hero->X + 15, Hero->Y + 15, map, dir, step);
+	}
+	//Main
+	bool CanWalkMFull(int x, int y, int xx, int yy, mapdata map, int dir, int step)
+	{
+		if(MAPDATA_USECURSCREEN && map==CurMapdata()) return CanWalkSFull(x,y,xx,yy,dir,step);
+		int width = xx - x + 1;
+		int height = yy - y + 1;
+		int midx = x + Floor(width/2);
+		int midy = y + Floor(height/2);
+		switch(dir)
+		{
+			case DIR_UP: return !(y-step<0||map->isSolid(x,y-step)||map->isSolid(midx,y-step)||map->isSolid(xx,y-step)||map->isSolid(x,yy-step)||map->isSolid(midx,yy-step)||map->isSolid(xx,yy-step));
+			case DIR_DOWN: return !(yy+step>=176||map->isSolid(x,yy+step)||map->isSolid(midx,yy+step)||map->isSolid(xx,yy+step)||map->isSolid(x,y+step)||map->isSolid(midx,y+step)||map->isSolid(xx,y+step));
+			case DIR_LEFT: return !(x-step<0||map->isSolid(x-step,y)||map->isSolid(x-step,midy)||map->isSolid(x-step,yy)||map->isSolid(xx-step,y)||map->isSolid(xx-step,midy)||map->isSolid(xx-step,yy));
+			case DIR_RIGHT: return !(xx+step>=256||map->isSolid(xx+step,y)||map->isSolid(xx+step,midy)||map->isSolid(xx+step,yy)||map->isSolid(x+step,y)||map->isSolid(x+step,midy)||map->isSolid(x+step,yy));
+			case DIR_LEFTUP: return (CanWalkMFull(x, y, xx, yy, map, DIR_LEFT, step) && CanWalkMFull(x, y, xx, yy, map, DIR_UP, step));
+			case DIR_LEFTDOWN: return (CanWalkMFull(x, y, xx, yy, map, DIR_LEFT, step) && CanWalkMFull(x, y, xx, yy, map, DIR_DOWN, step));
+			case DIR_RIGHTUP: return (CanWalkMFull(x, y, xx, yy, map, DIR_RIGHT, step) && CanWalkMFull(x, y, xx, yy, map, DIR_UP, step));
+			case DIR_RIGHTDOWN: return (CanWalkMFull(x, y, xx, yy, map, DIR_RIGHT, step) && CanWalkMFull(x, y, xx, yy, map, DIR_DOWN, step));
+		}
+		return false; //invalid direction
+	}
+	
+	//Current Screen
+	bool CanWalkSFull(int x, int y, int xx, int yy, int dir, int step)
 	{
 		int width = xx - x + 1;
 		int height = yy - y + 1;
@@ -261,6 +314,7 @@ namespace Venrob
 		}
 		return false; //invalid direction
 	}
+	//end Full
 	//end CanWalkM
 	
 	/**
