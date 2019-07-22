@@ -519,12 +519,12 @@ DEFINE CF_RAMP_UP = CF_SCRIPT9;
 DEFINE CF_RAMP_DOWN = CF_SCRIPT10;
 DEFINE CF_NOWATERLEDGE = CF_SCRIPT11; //Can only get out by using deku or freezing water
 DEFINE CF_NOWATERLEDGE2 = CF_SCRIPT12; //Can only get out by freezing water
-DEFINE CF_BOMBCHU1 = 98; //Combo solidity on combos locations with this flag will be treated opposite by the bombchu.
-DEFINE CF_BOMBCHU2 = 102;
+DEFINE CF_BOMBCHU1 = CF_SCRIPT1; //Combo solidity on combos locations with this flag will be treated opposite by the bombchu.
+DEFINE CF_BOMBCHU2 = CF_SCRIPT5;
 //Combo Types
 DEFINE CT_PITFALL = CT_SCRIPT1;
 DEFINE CT_LEDGE = CT_SCRIPT2;
-DEFINE CT_BOMBCHU = 143;
+DEFINE CT_BOMBCHU = CT_SCRIPT3;
 //LW Types
 DEFINE LW_DEKUSTICK = 34;
 DEFINE LW_BOMBCHU = 40; //The weapon ID of the bombchu, must be unique and between 31 and 40.
@@ -584,11 +584,14 @@ DEFINE FFC_INVISMAZE = 27;
 //Scripts (LW)
 DEFINE LWSCR_ZORABRANG = 1;
 //Soft Soil States
-DEFINE SSSTATE_UNDEFINED = 0;
-DEFINE SSSTATE_WAITING = 1;
-DEFINE SSSTATE_PLANTED = 2;
-DEFINE SSSTATE_GROWN = 3;
-DEFINE SSSTATE_ACTIVE = 4;
+enum
+{
+	SSSTATE_UNDEFINED = -1,
+	SSSTATE_WAITING,
+	SSSTATE_PLANTED,
+	SSSTATE_GROWN,
+	SSSTATE_ACTIVE
+};
 //
 DEFINE BITS_INT = 32;
 DEFINE DAYS_TO_HINT_RESET = 7;

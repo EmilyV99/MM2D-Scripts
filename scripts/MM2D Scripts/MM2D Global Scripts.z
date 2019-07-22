@@ -165,8 +165,11 @@ global script Global
 			//start
 			if(Tango_AnySlotIsActive())
 			{
-				Screen_Freeze(FREEZE_ACTION_BUT_FFC);
-				slotWasDisplayed=true;
+				unless(slotWasDisplayed)
+				{
+					Screen_Freeze(FREEZE_ACTION_BUT_FFC);
+					slotWasDisplayed=true;
+				}
 			}
 			else if(slotWasDisplayed)
 			{
@@ -458,7 +461,7 @@ global script Global
 		torchPuzzleTimer=0;
 		for(int soilindex = 0; soilindex < 10; soilindex++)
 		{
-			setSoilState(soilindex,SSSTATE_UNDEFINED); //Reset soft soil to default state
+			setSoilState(soilindex,SSSTATE_WAITING); //Reset soft soil to default state
 		}
 	}
 	
@@ -549,11 +552,12 @@ global script Global
 			{
 				//
 				Hero->Dir=Rafting[RAFT_DIR];
-				if(Rafting[RAFT_X]!=-1&&Rafting[RAFT_Y]!=-1&&!(gameframe%10))
+				if(Rafting[RAFT_X]!=-1&&Rafting[RAFT_Y]!=-1&&!(gameframe%5))
 				{
 					Hero->X = Rafting[RAFT_X];
 					Hero->Y = Rafting[RAFT_Y];
 				}
+				Hero->Action = LA_RAFTING;
 				if(Rafting[RAFT_DIR]==DIR_DOWN)
 				{
 					Input->Press[CB_DOWN]=true;
@@ -582,10 +586,12 @@ global script Global
 		if(warpNumFloors>0)
 		{
 			warpUps(warpNumFloors);
+			warpNumFloors = 0;
 		}
 		else if(warpNumFloors<0)
 		{
 			warpDowns(-warpNumFloors);
+			warpNumFloors = 0;
 		}
 	}//end
 	void timePalette()//start
@@ -666,6 +672,7 @@ global script Global
 			drawDebugString(256, 6*2, "Stray Fairies:",true);
 			for(int q = 0; q < 5; ++q)
 				drawDebugInt(256,6*(3+q),getGlobalVar(GVAR_FAIRY_START + q, GV_MISCRESETTABLE),true);
+			drawDebugInt(256,6*8,Hero->Action,true);
 		}
 		unless(isFrozen)
 		{
@@ -780,6 +787,11 @@ global script Global
 				if(Input->ReadKey[KEY_F])debugCanFall = !debugCanFall;
 				if(Input->ReadKey[KEY_OPENBRACE])warpDown();
 				if(Input->ReadKey[KEY_CLOSEBRACE])warpUp();
+				if(Input->ReadKey[KEY_Y])
+				{
+					Hero->Action = LA_RAFTING;
+					debug = false;
+				}
 				TotalNoAction();
 			}
 		}
@@ -1005,6 +1017,7 @@ global script Global
 			unless(fakeSong)
 				drawNotes();
 			--songFrames;
+			if(songFrames==1) Screen_Freeze(FREEZE_ACTION_BUT_FFC);
 			unless(songFrames)
 			{
 				loadFPSstate();
@@ -1127,6 +1140,12 @@ void onLaunch() //Called from `Init` and `OnContinue`
 
 void onLaunchEnd()
 {
+	for(int q = 0; q < susptLAST; ++q)
+	{
+		Game->Suspend[q] = false;
+		indivFreeze[q] = false;
+		forceActive[q] = false;
+	}
 	TraceS("[MM2D] Finished init\n");
 }
 

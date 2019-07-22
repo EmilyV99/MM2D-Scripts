@@ -39,8 +39,11 @@ bool warpUp()
 	if(dmap!=-1)
 	{
 		int scr = getUpScreen(true);
-		warpHeight(dmap,scr);
-		return true;
+		if(scr!=-1)
+		{
+			warpHeight(dmap,scr);
+			return true;
+		}
 	}
 	return false;
 }
@@ -54,7 +57,7 @@ bool warpUps(int num)
 		screen = getUpScreen(dmap, true);
 		dmap = getUpDMap(dmap);
 	}
-	if(dmap!=-1)
+	if(dmap!=-1&&screen!=-1)
 	{
 		warpHeight(dmap,screen);
 		return true;
@@ -68,8 +71,11 @@ bool warpDown()
 	if(dmap!=-1)
 	{
 		int scr = getDownScreen(true);
-		warpHeight(dmap,scr);
-		return true;
+		if(scr!=-1)
+		{
+			warpHeight(dmap,scr);
+			return true;
+		}
 	}
 	return false;
 }
@@ -83,7 +89,7 @@ bool warpDowns(int num)
 		screen = getDownScreen(dmap, true);
 		dmap = getDownDMap(dmap);
 	}
-	if(dmap!=-1)
+	if(dmap!=-1&&screen!=-1)
 	{
 		warpHeight(dmap,screen);
 		return true;

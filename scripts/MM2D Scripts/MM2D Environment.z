@@ -429,7 +429,7 @@ ffc script SoftSoil
 				}
 				if(waitTime>0)
 				{
-					waitTime--;
+					--waitTime;
 				}
 				else if(Hero->Action!=LA_RAFTING)
 				{
@@ -444,8 +444,8 @@ ffc script SoftSoil
 						Rafting[RAFT_UP] = -1;
 					}
 				}
-				setSoilState(index,state);
 			}
+			setSoilState(index,state);
 			Waitframe();
 		}
 	}

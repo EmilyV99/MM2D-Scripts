@@ -7,6 +7,7 @@
 namespace MM2D
 {
 	//start CanWalkM
+	//start Standard
 	/**
 	* This function (and set of overloads) acts as CanWalk, but uses an arbitrary 
 	*      `mapdata` pointer for solidity, rather than the current screen.
@@ -14,44 +15,24 @@ namespace MM2D
 	*/
 
 	//lweapon
-	bool CanWalkM(lweapon weap, mapdata map, int dir, int step)
-	{
-		return CanWalkM(weap, map, dir, step, false);
-	}
-
 	bool CanWalkM(lweapon weap, mapdata map, int dir, int step, bool useHit)
 	{
 		unless(weap->isValid())return false;
 		return CanWalkM(weap->X + (useHit ? weap->Misc[SPRITE_MISC_HITXOFFSET] : 0), weap->Y + (useHit ? weap->HitYOffset : 0), weap->X + (useHit ?  weap->HitWidth + weap->Misc[SPRITE_MISC_HITXOFFSET] :  weap->TileWidth * 16) - 1, weap->Y + (useHit ?  weap->HitHeight + weap->HitYOffset :  weap->TileHeight * 16) - 1, map, dir, step);
 	}
 	//eweapon
-	bool CanWalkM(eweapon weap, mapdata map, int dir, int step)
-	{
-		return CanWalkM(weap, map, dir, step, false);
-	}
-
 	bool CanWalkM(eweapon weap, mapdata map, int dir, int step, bool useHit)
 	{
 		unless(weap->isValid())return false;
 		return CanWalkM(weap->X + (useHit ? weap->Misc[SPRITE_MISC_HITXOFFSET] : 0), weap->Y + (useHit ? weap->HitYOffset : 0), weap->X + (useHit ?  weap->HitWidth + weap->Misc[SPRITE_MISC_HITXOFFSET] :  weap->TileWidth * 16) - 1, weap->Y + (useHit ?  weap->HitHeight + weap->HitYOffset :  weap->TileHeight * 16) - 1, map, dir, step);
 	}
 	//npc
-	bool CanWalkM(npc n, mapdata map, int dir, int step)
-	{
-		return CanWalkM(n, map, dir, step, false);
-	}
-
 	bool CanWalkM(npc n, mapdata map, int dir, int step, bool useHit)
 	{
 		unless(n->isValid())return false;
 		return CanWalkM(n->X + (useHit ? n->Misc[SPRITE_MISC_HITXOFFSET] : 0), n->Y + (useHit ? n->HitYOffset : 0), n->X + (useHit ?  n->HitWidth + n->Misc[SPRITE_MISC_HITXOFFSET] :  n->TileWidth * 16) - 1, n->Y + (useHit ?  n->HitHeight + n->HitYOffset :  n->TileHeight * 16) - 1, map, dir, step);
 	}
 	//ffc
-	bool CanWalkM(ffc f, mapdata map, int dir, int step)
-	{
-		return CanWalkM(f, map, dir, step, false);
-	}
-
 	bool CanWalkM(ffc f, mapdata map, int dir, int step, bool useEffect)
 	{
 		return CanWalkM(f->X, f->Y, f->X + (useEffect ?  f->EffectWidth :  f->TileWidth * 16) - 1, f->Y + (useEffect ?  f->EffectHeight :  f->TileHeight * 16) - 1, map, dir, step);
@@ -63,6 +44,45 @@ namespace MM2D
 	}
 	//Main
 	//Uses VenrobMisc.zh's version
+	//end Standard
+	//start Full
+	/**
+	* This function (and set of overloads) acts as CanWalk, but uses an arbitrary 
+	*      `mapdata` pointer for solidity, rather than the current screen.
+	* Related: `CurMapdata()`
+	*/
+
+	//lweapon
+	bool CanWalkMFull(lweapon weap, mapdata map, int dir, int step, bool useHit)
+	{
+		unless(weap->isValid())return false;
+		return CanWalkMFull(weap->X + (useHit ? weap->Misc[SPRITE_MISC_HITXOFFSET] : 0), weap->Y + (useHit ? weap->HitYOffset : 0), weap->X + (useHit ?  weap->HitWidth + weap->Misc[SPRITE_MISC_HITXOFFSET] :  weap->TileWidth * 16) - 1, weap->Y + (useHit ?  weap->HitHeight + weap->HitYOffset :  weap->TileHeight * 16) - 1, map, dir, step);
+	}
+	//eweapon
+	bool CanWalkMFull(eweapon weap, mapdata map, int dir, int step, bool useHit)
+	{
+		unless(weap->isValid())return false;
+		return CanWalkMFull(weap->X + (useHit ? weap->Misc[SPRITE_MISC_HITXOFFSET] : 0), weap->Y + (useHit ? weap->HitYOffset : 0), weap->X + (useHit ?  weap->HitWidth + weap->Misc[SPRITE_MISC_HITXOFFSET] :  weap->TileWidth * 16) - 1, weap->Y + (useHit ?  weap->HitHeight + weap->HitYOffset :  weap->TileHeight * 16) - 1, map, dir, step);
+	}
+	//npc
+	bool CanWalkMFull(npc n, mapdata map, int dir, int step, bool useHit)
+	{
+		unless(n->isValid())return false;
+		return CanWalkMFull(n->X + (useHit ? n->Misc[SPRITE_MISC_HITXOFFSET] : 0), n->Y + (useHit ? n->HitYOffset : 0), n->X + (useHit ?  n->HitWidth + n->Misc[SPRITE_MISC_HITXOFFSET] :  n->TileWidth * 16) - 1, n->Y + (useHit ?  n->HitHeight + n->HitYOffset :  n->TileHeight * 16) - 1, map, dir, step);
+	}
+	//ffc
+	bool CanWalkMFull(ffc f, mapdata map, int dir, int step, bool useEffect)
+	{
+		return CanWalkMFull(f->X, f->Y, f->X + (useEffect ?  f->EffectWidth :  f->TileWidth * 16) - 1, f->Y + (useEffect ?  f->EffectHeight :  f->TileHeight * 16) - 1, map, dir, step);
+	}
+	//Link
+	bool CanWalkMFull(mapdata map, int dir, int step, bool largeHitbox)
+	{
+		return CanWalkMFull(Hero->X, Hero->Y + (largeHitbox ?  0 :  8), Hero->X + 15, Hero->Y + 15, map, dir, step);
+	}
+	//Main
+	//Uses VenrobMisc.zh's version
+	//end Full
 	//end CanWalkM
 }
 //start Misc Functions
@@ -205,10 +225,11 @@ npc getNthNPCInRange(int x, int y, int radius, int num)//start
 //start Screen Freezing
 enum FreezeState
 {
-	FREEZE_FORCE_NONE,
+	FREEZE_FORCE_NONE = -1,
 	FREEZE_NONE,
 	FREEZE_ACTION_BUT_FFC,
-	FREEZE_ACTION
+	FREEZE_ACTION,
+	FREEZE_PICTOGRAPH
 };
 FreezeState curFrz = FREEZE_NONE;
 bool indivFreeze[susptLAST];
@@ -216,6 +237,7 @@ bool forceActive[susptLAST];
 void Screen_Freeze(FreezeState frz)
 {
 	curFrz = frz;
+	isFrozen = frz>FREEZE_NONE;
 	switch(frz)
 	{
 		case FREEZE_FORCE_NONE:
@@ -250,12 +272,11 @@ void Screen_Freeze(FreezeState frz)
 					case susptFFCSCRIPTS:
 					case susptSCREENDRAW:
 					case susptSCRIPDRAWCLEAR:
-					case susptLINK:
 					case susptONEFRAMECONDS:
-						Game->Suspend[q] = indivFreeze[q];
+						Game->Suspend[q] = indivFreeze[q] && !forceActive[q];
 						break;
 					default:
-						Game->Suspend[q] = !forceActive[q] && !forceActive[q];
+						Game->Suspend[q] = !forceActive[q];
 				}
 			}
 			break;
@@ -271,7 +292,6 @@ void Screen_Freeze(FreezeState frz)
 					case susptLINKACTIVE:
 					case susptSCREENDRAW:
 					case susptSCRIPDRAWCLEAR:
-					case susptLINK:
 					case susptONEFRAMECONDS:
 						Game->Suspend[q] = indivFreeze[q] && !forceActive[q];
 						break;
@@ -281,8 +301,31 @@ void Screen_Freeze(FreezeState frz)
 			}
 			break;
 		}
+		case FREEZE_PICTOGRAPH:
+		{
+			for(int q = 0; q < susptLAST; ++q)
+			{
+				switch(q)
+				{
+					case susptCONTROLSTATE:
+					case susptGLOBALGAME:
+					case susptLINKACTIVE:
+					case susptSCREENDRAW:
+					case susptSCRIPDRAWCLEAR:
+					case susptONEFRAMECONDS:
+						Game->Suspend[q] = indivFreeze[q] && !forceActive[q];
+						break;
+					case susptLINK:
+					case susptITEMSCRIPTENGINE:
+						Game->Suspend[q] = false;
+						break;
+					default:
+						Game->Suspend[q] = !forceActive[q];
+				}
+			}
+			break;
+		}
 	}
-	isFrozen = curFrz!=FREEZE_NONE;
 }
 
 FreezeState Get_Freeze()

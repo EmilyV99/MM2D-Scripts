@@ -101,7 +101,6 @@ void handleMessageSlot(int slot, bool menu4way, bool isNPC)//start handleMessage
 		bool menuActive = Tango_MenuIsActive();
 		if(isNPC)
 		{
-			int slot = getGlobalVar(GVAR_NPCTANGOSLOT,GV_MISC);
 			if(getGlobalVar(GVAR_ACTIVENPCID,GV_MISC)!=lastid)
 			{
 				lastid = getGlobalVar(GVAR_ACTIVENPCID,GV_MISC);
@@ -110,7 +109,7 @@ void handleMessageSlot(int slot, bool menu4way, bool isNPC)//start handleMessage
 				getNPCName(tempbuf, lastid);
 				NPCTileSetup(Tango_GetStringWidth(tempbuf,Tango_GetStyleAttribute(TSTYLE_NPCNAME,TANGO_STYLE_TEXT_FONT)));
 				initNPCSlot();
-				Tango_LoadString(slot,NPCname);
+				Tango_LoadString(getGlobalVar(GVAR_NPCTANGOSLOT,GV_MISC),NPCname);
 			}
 		}
 		if(Tango_SlotIsFinished(slot)||menuActive||waitingForA)
@@ -232,8 +231,8 @@ void TangoInit()
 {
 	setupStyles();
 	Tango_Start();
-	setGlobalVar(GVAR_MAINTANGOSLOT,GV_MISC,Tango_GetFreeSlot(TANGO_SLOT_ANY));
-	setGlobalVar(GVAR_NPCTANGOSLOT,GV_MISC,Tango_GetFreeSlot(TANGO_SLOT_ANY));
+	setGlobalVar(GVAR_MAINTANGOSLOT,GV_MISC,TANGO_INVALID);
+	setGlobalVar(GVAR_NPCTANGOSLOT,GV_MISC,TANGO_INVALID);
 	setGlobalVar(GVAR_ACTIVENPCID,GV_MISC,0);
 }
 

@@ -308,7 +308,7 @@ lweapon script throwableBombs_LW
 				
 				case BOMB_STATE_MOVING:
 				{
-					unless(MM2D::CanWalkM(this, map, dir, Ceiling(pix)))
+					unless(MM2D::CanWalkM(this, map, dir, Ceiling(pix),true))
 						this->Misc[BOMB_MISC_MOVINGTIME] = 0;
 					if(offscreen(this->X + (dirX(dir) * pix), this->Y + (dirY(dir) * pix)))
 					{
@@ -1399,7 +1399,7 @@ lweapon script Bombchu_LW
 		{
 			unless(gameframe%6)Game->PlaySound(SFX_BOMBCHU);
 			bool contact = offscreen(this->X + (stepPix*dirX(this->Dir)), this->Y + (stepPix*dirY(this->Dir)));
-			//If the bombchu collided with a npc expode.
+			//If the bombchu collided with a npc, explode.
 			for(int q = Screen->NumNPCs(); q > 0 && !contact; --q)
 			{
 				npc n = Screen->LoadNPC(q);
@@ -1409,16 +1409,18 @@ lweapon script Bombchu_LW
 				if(n->Defense[NPCD_SCRIPT] == NPCDT_IGNORE) continue;
 				if(Collision(n, this)) contact = true;
 			}
-			//If the bombchu is about to hit something solid according to bombchu solidity explode.
-			int x = this->X + AtFrontX(this->Dir);
-			int y = this->Y + AtFrontY(this->Dir);
+			//If the bombchu is about to hit something solid according to bombchu solidity, explode.
+			int x = this->X + InFrontCenteredX(this->Dir,stepPix);
+			int y = this->Y + InFrontCenteredY(this->Dir,stepPix);
 			int centerCombo = ComboAt(x,y);
 			while(true)
 			{
 				mapdata map = getLayerMapdata(getRelativeHeight(this));
 				unless(contact)
 				{
-					int ct = map->ComboT[centerCombo];
+					int ct = map->ComboT[centerCombo],
+					    ci = map->ComboI[centerCombo],
+					    cf = map->ComboF[centerCombo];
 					if(ct==CT_PIT || ct == CT_PITR || ct == CT_PITB || ct == CT_PITD || ct == CT_WATER || ct == CT_SHALLOWWATER || ct ==CT_SWIMWARP || ct == CT_DIVEWARP  || (ct >= CT_SWIMWARPB && ct <= CT_DIVEWARPD))
 					{
 						contact = true;
@@ -1431,8 +1433,6 @@ lweapon script Bombchu_LW
 					}
 					else
 					{
-						int ci = map->ComboI[centerCombo];
-						int cf = map->ComboF[centerCombo];
 						if(ci == CI_RAMP)
 						{
 							if(cf == CF_RAMP_UP)
@@ -1447,7 +1447,8 @@ lweapon script Bombchu_LW
 							}
 						}
 					}
-					if(ct==CT_BOMBCHU&&ct==CF_BOMBCHU1&&ct==CF_BOMBCHU2) contact = MM2D::CanWalkM(this, map, this->Dir, stepPix, true);
+					printf("Combo %d, CT %d, CF %d, CI %d\n",centerCombo, ct,cf,ci);
+					if(ct==CT_BOMBCHU&&(cf==CF_BOMBCHU1||cf==CF_BOMBCHU2||ci==CF_BOMBCHU1||ci==CF_BOMBCHU2)) contact = MM2D::CanWalkM(this, map, this->Dir, stepPix, true);
 					else contact = !MM2D::CanWalkM(this, map, this->Dir, stepPix, true);
 				}
 				break;
@@ -1483,8 +1484,7 @@ item script Pictograph
 		int x = Hero->X, y = Hero->Y;
 		Hero->X = 0; Hero->Y = 0;
 		int warps = 0;
-		ForceUnfreeze(susptITEMSCRIPTENGINE,true);
-		Screen_Freeze(FREEZE_ACTION);
+		Screen_Freeze(FREEZE_PICTOGRAPH);
 		bool snap;
 		bool psub = getGlobalBool(GVAR_HIDE_PASSIVESUB,GV_MISC_BOOL);
 		bool color = true;
@@ -1595,7 +1595,6 @@ item script Pictograph
 			warpDowns(warps);
 		}
 		WaitTotalNoAction();
-		ForceUnfreeze(susptITEMSCRIPTENGINE,false);
 		Screen_Freeze(FREEZE_NONE);
 		Hero->X = x; Hero->Y = y;
 		Hero->ScriptTile = -1;
