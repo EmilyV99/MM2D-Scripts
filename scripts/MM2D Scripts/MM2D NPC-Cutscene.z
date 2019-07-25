@@ -1130,6 +1130,93 @@ screendata script SpawnStrayFairy //start A stray fairy appeared! (R)
 		}
 	}
 } //end
+screendata script GreatFairyFountain //start A great fairy's fountain! (R)
+{
+	enum
+	{
+		INDEX_MIN,
+		INDEX_TOWN = INDEX_MIN,
+		INDEX_SWAMP,
+		INDEX_MOUNTAIN,
+		INDEX_OCEAN,
+		INDEX_CANYON,
+		INDEX_MAX
+	};
+	void run(int index, int numStrays)
+	{
+		if(index < INDEX_MIN || index >= INDEX_MAX)
+		{
+			printf("ERROR: BAD GREATFAIRY INDEX %d\n", index);
+		}
+		DEFINEB CANACTIVE = getGlobalVar(GVAR_FAIRY_START + index, GV_MISCRESETTABLE)==numStrays;
+		ffc greatFairy = LoadUnusedFFC();
+		//greatFairy->Data = //set combo
+		unless(getGlobalBool(GVAR_GFAIRY_START+index, GV_MISCRESETTABLEBOOL))
+		{
+			ffcInvis(greatFairy, true);
+			bool pleaded;
+			while(true)
+			{
+				if(Hero->Y <= 128)
+				{
+					if(CANACTIVE)
+						break;
+					else unless(pleaded)
+					{
+						//Plead for help
+						pleaded = true;
+					}
+				}
+				//Draw stray fairies circling
+				Waitframe();
+			}
+			setGlobalBool(GVAR_GFAIRY_START+index, GV_MISCRESETTABLEBOOL, true);
+			//Draw strays leaving Link, into center
+			ffcInvis(greatFairy, false);
+			//Thank Link
+			unless(getGlobalBool(GVAR_GFAIRY_REW_START+index, GV_MISC_BOOL))
+			{
+				switch(index)
+				{
+					case INDEX_TOWN:
+						//Magic Meter + Deku Bubble
+						break;
+					case INDEX_SWAMP:
+						//Extended magic meter
+						break;
+					case INDEX_MOUNTAIN:
+						//Magic Spin Attack? Perhaps charge ring?
+						break;
+					case INDEX_OCEAN:
+						//Double Defense (needs special handling for Fierce Deity)
+						break;
+					case INDEX_CANYON:
+						//Great Fairy's Sword
+						break;
+				}
+				setGlobalBool(GVAR_GFAIRY_REW_START+index, GV_MISC_BOOL,true);
+			}
+			else unless(index!=INDEX_TOWN || getGlobalBool(GVAR_GFAIRY_TOWN_REW2, GV_MISC_BOOL))
+			{
+				//Give Great Fairy Mask
+				setGlobalBool(GVAR_GFAIRY_TOWN_REW2, GV_MISC_BOOL, true);
+			}
+			else
+			{
+				//No reward to give
+			}
+		}
+		while(true)
+		{
+			if(Hero->Y <= 128)
+			{
+				//Heal
+				Quit();
+			}
+			Waitframe();
+		}
+	}
+}//end
 //start Signpost
 ffc script Signpost
 {
@@ -1420,7 +1507,7 @@ ffc script lockedDoor
 			
 			default:
 			{
-				TraceS("ERROR: UNDEFINED LOCKED DOOR");
+				printf("ERROR: UNDEFINED LOCKED DOOR %d\n", id);
 				ShowStringAndWait("ERROR: UNDEFINED LOCKED DOOR");
 				break;
 			}

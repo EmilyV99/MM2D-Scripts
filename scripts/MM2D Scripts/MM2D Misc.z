@@ -384,25 +384,6 @@ int getNPCfromUID(npc n)//start
 	}
 	return -1;
 }//end
-int LimitFPSStateSave = 00b;//start
-void saveFPSstate()
-{
-	/*unless(LimitFPSStateSave & 10b)
-	{
-		if(Game->CappedFPS)LimitFPSStateSave |= 11b;
-		else LimitFPSStateSave |= 10b;
-	}*/
-}
-
-void loadFPSstate()
-{
-	/*if((LimitFPSStateSave & 10b) == 10b)
-	{
-		if((LimitFPSStateSave & 01b) == 01b)Game->CappedFPS = true;
-		else Game->CappedFPS = false;
-		LimitFPSStateSave = 0;
-	}*/
-}//end
 int fullCounter(int counter)//start
 {
 	return Game->Counter[counter]+Game->DCounter[counter];
@@ -747,6 +728,26 @@ void getFontName(char32 buf, int font) //start
 			break;
 	}
 } //end
+void ffcInvis(ffc f, bool invis) //start
+{
+	f->Flags[FFCF_LENSVIS] = invis;
+	f->Flags[FFCF_LENSINVIS] = invis;
+}//end
+ffc LoadUnusedFFC() //start
+{
+	for(int i=FFCS_MIN_FFC; i<=FFCS_MAX_FFC; ++i)
+	{
+		ffc f = Screen->LoadFFC(i);
+		
+		if(f->Script!=0 ||
+		 (f->Data!=0 && f->Data!=FFCS_INVISIBLE_COMBO) ||
+		 f->Flags[FFCF_CHANGER])
+			continue;
+			
+		return f;
+	}
+	return NULL;
+}//end
 //end Misc Functions
 //start Keyboard
 void KeyToString(int key, char buf)
