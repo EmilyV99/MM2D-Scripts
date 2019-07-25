@@ -214,6 +214,40 @@ namespace TintZH
 	{
 		return <Base>(getTintVar(DATA_BASE));
 	}
+	
+	/*
+		Set if a particular tint should currently be displayed.
+		If the tint was already active, and you try to activate it, or inactive and you try to deactivate it, it will do nothing.
+		
+		PARAMETER: int palID, the palette ID of the palette you wish to set. Palette ID's are returned from createTintPalette() when it is called.
+		PARAMETER: bool active, whether or not this should be displayed.
+		
+		INVALID IF: (palID < 0 || palID >= getTintVar(DATA_NEXT_PALETTE))
+		INVALID IF: palID was passed to runGradient as end_pal, with keep==true, and is still running
+		
+		ON INVALID: Return, doing nothing
+	*/
+	void setTint(int palID, bool active)
+	{
+		if(palID < 0 || palID >= getTintVar(DATA_NEXT_PALETTE))return;
+		if((getTintVar(getPalIndex(palID))>0) == active)return;
+		if(getTintVar(DATA_GRADIENT_KEEP) == palID)return;
+		Tint_Debug_Trace("Setting tint condition....");
+		setTintVar(getPalIndex(palID), Cond(active,1,0));
+		if(active)
+		{
+			incTintVar(DATA_R_CHANGED,__tintR[palID]);
+			incTintVar(DATA_G_CHANGED,__tintG[palID]);
+			incTintVar(DATA_B_CHANGED,__tintB[palID]);
+		}
+		else
+		{
+			incTintVar(DATA_R_CHANGED,-__tintR[palID]);
+			incTintVar(DATA_G_CHANGED,-__tintG[palID]);
+			incTintVar(DATA_B_CHANGED,-__tintB[palID]);
+		}
+		setTintVar(DATA_UPDATED, 0);
+	}
 
 	/*
 		Checks if a given palette is active.
