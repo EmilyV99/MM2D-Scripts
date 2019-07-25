@@ -1007,11 +1007,7 @@ global script Global
 	{
 		if(songFrames>0)
 		{
-			/*if(Game->CappedFPS)
-			{
-				saveFPSstate();
-				Game->CappedFPS=false;
-			}*/
+			Game->FFRules[qr_NOFASTMODE] = true;
 			TotalNoAction();
 			ocarina_mode = false;
 			unless(fakeSong)
@@ -1020,7 +1016,7 @@ global script Global
 			if(songFrames==1) Screen_Freeze(FREEZE_ACTION_BUT_FFC);
 			unless(songFrames)
 			{
-				loadFPSstate();
+				Game->FFRules[qr_NOFASTMODE] = false;
 				if(midiToReturn!=-6&&midiToReturn<205)
 					Audio->PlayMIDI(midiToReturn);
 				unless(fakeSong||playedSong<0)
@@ -1146,6 +1142,7 @@ void onLaunchEnd()
 		indivFreeze[q] = false;
 		forceActive[q] = false;
 	}
+	loadStoragePath();
 	TraceS("[MM2D] Finished init\n");
 }
 
