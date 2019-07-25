@@ -1476,8 +1476,15 @@ item script Pictograph
 	DEFINE FRAME_LENGTH = 24;
 	void run()
 	{
+		//Figure out what path to read/write the bitmap
+		loadStoragePath();
+		char ImagePath[32];
+		strcpy(ImagePath, STORAGE_PATH);
+		strcat(ImagePath, "PictoImage.png");
+		Debug::print("Using ImagePath '%s'",ImagePath);
+		//
 		unless(picto->isAllocated()) picto = Game->CreateBitmap(PICTO_HEIGHT,PICTO_WIDTH);
-		picto->Read(0,"MM2D/PictoImage.png");
+		picto->Read(0,ImagePath);
 		setGlobalBool(GVAR_PICTURE_MODE,GV_MISC_BOOL,true);
 		Hero->ScriptTile = TILE_INVIS;
 		Hero->CollDetection = false;
@@ -1491,7 +1498,6 @@ item script Pictograph
 		dmapdata thisDMAP = Game->LoadDMapData(Game->GetCurDMap());
 		int viewDMpal = getGlobalVar(GVAR_PICTO_LAST_DMAPPAL,GV_MISC);
 		int thisDMpal = thisDMAP->Palette;
-		printf("LastGray == %s\n",getGlobalBool(GVAR_PICTO_LAST_GRAY, GV_MISC_BOOL)?"true":"false");
 		while(true) 
 		{
 			if(getGlobalBool(GVAR_F6_MENU, GV_MISC_BOOL))
@@ -1578,7 +1584,7 @@ item script Pictograph
 			}
 			WaitTotalNoAction();
 			picto->BlitTo(7, RT_SCREEN, 0, 0, PICTO_WIDTH, PICTO_HEIGHT, 0, 0, PICTO_WIDTH, PICTO_HEIGHT, 0, 0, 0, BITDX_NORMAL, 0, false);
-			picto->Write(7, "MM2D/PictoImage.png", true);
+			picto->Write(7, ImagePath, true);
 			setGlobalBool(GVAR_PICTO_LAST_GRAY, GV_MISC_BOOL, !color);
 			setGlobalVar(GVAR_PICTO_LAST_DMAPPAL, GV_MISC, thisDMpal);
 		}
