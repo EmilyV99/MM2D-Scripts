@@ -214,6 +214,7 @@ void __Tango_UpdateCurrentSlot()
         if(__Tango_PressAdvance(timer))
         {
             state=__TANGO_STATE_ACTIVE;
+			waitingForA = false;
             __Tango_SetCurrSlotData(__TSDIDX_STATE, __TANGO_STATE_ACTIVE);
             __Tango_Data[__TDIDX_GLOBAL_FLAGS]|=__TANGO_GFLAG_UNPRESS_ADVANCE;
             
@@ -221,6 +222,7 @@ void __Tango_UpdateCurrentSlot()
                 __Tango_SlotData[ignoreSpeedKeys]=1;
             else if(__Tango_PressSuperSpeed())
                 __Tango_SlotData[ignoreSpeedKeys]=2;
+			__Tango_SetCurrSlotData(__TSDIDX_COUNTER, 10);
         }
         else
             __Tango_SetCurrSlotData(__TSDIDX_COUNTER, timer+1);
