@@ -1299,7 +1299,8 @@ namespace Fairies //start Fairy stuff
 					ffcInvis(greatFairy, false);
 					ShowNPCStringAndWait("Welcome, @savename()...@char(26)Allow me to ease your weariness",N_GREAT_FAIRY);
 					Game->DCounter[CR_LIFE] = Game->MCounter[CR_LIFE];
-					while(Game->DCounter[CR_LIFE]) Waitframe();
+					Game->DCounter[CR_MAGIC] = Game->MCounter[CR_MAGIC];
+					while(Game->DCounter[CR_LIFE] || Game->DCounter[CR_MAGIC]) Waitframe();
 					Waitframe();
 					switch(index)
 					{
@@ -1391,6 +1392,7 @@ namespace Fairies //start Fairy stuff
 			grow->TileWidth = 3;
 			grow->TileHeight = 2;
 			grow->NumFrames = 0;
+			grow->Pickup = IP_DUMMY;
 			if(flash)
 			{
 				hidePassive(true);
