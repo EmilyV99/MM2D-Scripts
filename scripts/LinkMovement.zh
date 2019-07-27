@@ -73,6 +73,7 @@ void __LinkMovement_SpeedChange(){
 	if(Link->Action==LA_NONE||Link->Action==LA_WALKING||Link->Action==LA_SWIMMING){
 		if(LinkMovement[LM_STICKX]!=0||LinkMovement[LM_STICKY]!=0){
 			float movementSpeed = LinkMovement[LM_MOVEBOOST];
+			if(Game->Suspend[susptLINK]) movementSpeed = 0; //Don't move while paused!
 			//We're calculating CanWalk for all directions in advance to hopefully save a bit on speed.
 			bool CanWalk[4];
 			CanWalk[DIR_UP] = CanWalk(Link->X, Link->Y, DIR_UP, 1, false);
