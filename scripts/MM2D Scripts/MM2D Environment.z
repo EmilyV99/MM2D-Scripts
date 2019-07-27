@@ -797,16 +797,20 @@ void quickSave(int scrn, int dmap)//start
 //start chests
 ffc script chest
 {
-	void run(int index, bool killAllEnemies, int FORCE_PRIZE)
+	void run(int index, bool killAllEnemies, int FORCE_PRIZE, bool triggerSecrets)
 	{
 		int itemID = FORCE_PRIZE>0 ? castItem(FORCE_PRIZE) : Items::getItem(<u>index);
 		if(this->Data==COMBO_INVIS||!this->Data)this->Data=COMBO_CHEST;
 		int closed = this->Data;
 		int open = this->Data+1;
-		if(getChestState(index))this->Data=open;
-		if(killAllEnemies&&EnemiesAlive())this->Data=COMBO_INVIS;
+		if(getChestState(index))
+		{
+			this->Data=open;
+			killAllEnemies = false;
+			triggerSecrets = false;
+		}
 		bool solid = (!(this->X%16)&&!(this->Y%16))&&!this->Flags[FFCF_TRANS];
-		if(solid&&(!killAllEnemies))Screen->ComboD[ComboAt(this->X,this->Y)]=COMBO_SOLID;
+		if(solid&&!(killAllEnemies||triggerSecrets))Screen->ComboD[ComboAt(this->X,this->Y)]=COMBO_SOLID;
 		while(true)
 		{
 			if(getChestState(index))
@@ -820,11 +824,21 @@ ffc script chest
 			}
 			else
 			{
-				while(killAllEnemies&&EnemiesAlive())Waitframe();
 				if(killAllEnemies)
 				{
+					this->Data = COMBO_INVIS;
+					while(EnemiesAlive())Waitframe();
 					killAllEnemies=false;
 					Game->PlaySound(SFX_CHEST_APPEAR);
+					this->Data=closed;
+					if(solid)Screen->ComboD[ComboAt(this->X,this->Y)]=COMBO_SOLID;
+				}
+				if(triggerSecrets)
+				{
+					this->Data = COMBO_INVIS;
+					until(Screen->State[ST_SECRET]) Waitframe();
+					triggerSecrets=false;
+					//Game->PlaySound(SFX_CHEST_APPEAR); //Should be handled by secrets sound
 					this->Data=closed;
 					if(solid)Screen->ComboD[ComboAt(this->X,this->Y)]=COMBO_SOLID;
 				}
@@ -834,7 +848,7 @@ ffc script chest
 					Input->Press[CB_A]=false;Input->Button[CB_A]=false;
 					if(Hero->Item[itemID])
 					{
-						itemID=I_RUP_5;
+						itemID=IT_RUP_5;
 					}
 					this->Data=open;
 					item itm = CreateItemAt(itemID,Hero->X,Hero->Y);

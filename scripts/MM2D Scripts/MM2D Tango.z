@@ -94,7 +94,7 @@ void handleMessageSlot(int slot, bool menu4way, bool isNPC)//start handleMessage
 {
 	int delay = 0;
 	char NPCname[MAXNAMELENGTH];
-	int lastid = 0;
+	int lastid = -1;
 	if(isNPC)initNPCSlot();
 	while(Tango_SlotIsActive(slot))
 	{
@@ -112,10 +112,10 @@ void handleMessageSlot(int slot, bool menu4way, bool isNPC)//start handleMessage
 				Tango_LoadString(getGlobalVar(GVAR_NPCTANGOSLOT,GV_MISC),NPCname);
 			}
 		}
+		int maxScroll = Tango_GetSlotMaxScrollPos(slot);
+		int scroll = Tango_GetSlotScrollPos(slot);
 		if(Tango_SlotIsFinished(slot)||menuActive||waitingForA)
 		{
-			int maxScroll = Tango_GetSlotMaxScrollPos(slot);
-			int scroll = Tango_GetSlotScrollPos(slot);
 			//Scrolling
 			float scrollSpeed = 1.5;
 			if(Input->Button[CB_A])scrollSpeed*=2;
@@ -134,10 +134,12 @@ void handleMessageSlot(int slot, bool menu4way, bool isNPC)//start handleMessage
 					Input->Button[CB_B]=false;
 					Tango_ScrollSlot(slot,maxScroll);
 				}
+				Input->Press[CB_A] = false;
+				Input->Button[CB_A] = false;
 			}
-			if(!menuActive&&(scroll==maxScroll||waitingForA))
+			if(!menuActive&&(scroll==maxScroll/*||waitingForA*/))
 			{
-				Screen->FastCombo(7,208,48+9,14088,0,OP_OPAQUE);//Press A indicatior
+				Screen->FastCombo(7,TANGOA_X,TANGOA_Y,COMBO_TANGOA,0,OP_OPAQUE);//Press A indicatior
 			}
 			if(scroll>0)
 			{
@@ -172,8 +174,9 @@ void handleMessageSlot(int slot, bool menu4way, bool isNPC)//start handleMessage
 				Input->Button[CB_A]=Input->Press[CB_A];
 				Input->Button[CB_B]=Input->Press[CB_B];
 			}
-			if(Input->Press[CB_A])waitingForA=false;
+			//if(Input->Press[CB_A])waitingForA=false;
 		}
+		else Tango_ScrollSlot(slot,maxScroll);
 		Input->Press[CB_START]=false;
 		Input->Button[CB_START]=false;
 		Waitframe();
@@ -221,7 +224,7 @@ int ShowString(char str, int style)
 	Tango_ClearSlot(slot);
 	Tango_LoadString(slot,str);
 	Tango_SetSlotStyle(slot,style);
-	Tango_SetSlotPosition(slot,32,25);//16
+	Tango_SetSlotPosition(slot,TANGO_MAIN_X,TANGO_MAIN_Y);//16
 	Tango_ActivateSlot(slot);
 	
 	return slot;
@@ -341,6 +344,8 @@ void setupStyles()//start styles
 		Tango_SetStyleAttribute(i,TANGO_STYLE_MENU_CURSOR_MOVE_SFX,5);
 		Tango_SetStyleAttribute(i,TANGO_STYLE_MENU_SELECT_SFX,83);
 		Tango_SetStyleAttribute(i,TANGO_STYLE_MENU_CANCEL_SFX,5);
+		
+		
 		if(i==TSTYLE_MAJORAS)
 		{
 			i = TSTYLE_SIGNS;

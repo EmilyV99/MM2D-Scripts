@@ -150,7 +150,7 @@ int getBottomScreen(bool mod)
 	int dmap = Game->GetCurDMap();
 	mapdata map = CurMapdata();
 	if(dmap >= SizeOfArray(DMAP_DOWN))return mod ? MapToDMap(map->Screen,dmap) : map->Screen;
-	while(DMAP_DOWN[dmap] != -1)
+	while(DMAP_DOWN[dmap] != -1 && map->LayerMap[3])
 	{
 		dmap = DMAP_DOWN[dmap];
 		map = Game->LoadMapData(map->LayerMap[3], map->LayerScreen[3]);
@@ -322,8 +322,13 @@ void linkPitfall()
 }
 //end FallDown
 //start Jump
-void checkJump()
+void checkJump(bool justDraw)
 {
+	if(justDraw)
+	{
+		jump(true);
+		return;
+	}
 	if(form!=FORM_GORON)
 	{
 		if(canFall&&!floating&&!Deku_flying)
@@ -341,7 +346,7 @@ void checkJump()
 	{
 		rampJump();
 	}
-	jump();
+	jump(false);
 }
 
 void setFloating()
@@ -373,46 +378,49 @@ int getFloating()
 	return -1;
 }
 
-void jump()//start jump
+void jump(bool justDraw)//start jump
 {
 	if(floating!=0)
 	{
+		if(!justDraw)
+		{
+			if(floating>0)
+			{
+				int movPix = floatPix;
+				if(LinkOnFlagMod(CF_SCRIPT20,dirX(floatDir)*floatPix,(dirY(floatDir)*floatPix),2,false))
+				{
+					movPix=0;
+				}
+				Hero->X+=dirX(floatDir)*movPix;
+				Hero->Y+=dirY(floatDir)*movPix;
+				--floating;
+			}
+			if(floating<=0)
+			{
+				if(floatDir==DIR_DOWN||floatDir==DIR_UP)
+				{
+					Hero->Y=GridY(Hero->Y+12);
+				}
+				else if(floatDir==DIR_RIGHT||floatDir==DIR_LEFT)
+				{
+					Hero->X=GridX(Hero->X+8);
+				}
+				int timeOut = 25;//Prevent infinite loop
+				int jumpDir = wouldJump();
+				while(jumpDir!=-1&&timeOut>0)
+				{
+					Hero->Y -= dirY(jumpDir);
+					Hero->X -= dirX(jumpDir);
+					jumpDir=wouldJump();
+					--timeOut;
+				}
+				canFall=true;
+				Hero->Invisible=false;
+				floating=0;
+				Hero->Action = LA_NONE;
+			}
+		}
 		if(floating>0)
-		{
-			int movPix = floatPix;
-			if(LinkOnFlagMod(CF_SCRIPT20,dirX(floatDir)*floatPix,(dirY(floatDir)*floatPix),2,false))
-			{
-				movPix=0;
-			}
-			Hero->X+=dirX(floatDir)*movPix;
-			Hero->Y+=dirY(floatDir)*movPix;
-			--floating;
-		}
-		if(floating<=0)
-		{
-			if(floatDir==DIR_DOWN||floatDir==DIR_UP)
-			{
-				Hero->Y=GridY(Hero->Y+12);
-			}
-			else if(floatDir==DIR_RIGHT||floatDir==DIR_LEFT)
-			{
-				Hero->X=GridX(Hero->X+8);
-			}
-			int timeOut = 25;//Prevent infinite loop
-			int jumpDir = wouldJump();
-			while(jumpDir!=-1&&timeOut>0)
-			{
-				Hero->Y -= dirY(jumpDir);
-				Hero->X -= dirX(jumpDir);
-				jumpDir=wouldJump();
-				--timeOut;
-			}
-			canFall=true;
-			Hero->Invisible=false;
-			floating=0;
-			Hero->Action = LA_NONE;
-		}
-		else
 		{
 			//Draw Hero's jumping tile over him, with a Y-Offset based on how far through the jump he is, peaking at the middle.
 			int maxFloating = getFloating();
@@ -421,13 +429,13 @@ void jump()//start jump
 				maxFloating=getRampFloat();
 			}
 			maxFloating*=floatPix;
-			int yOffSet = (floating*floatPix) - (maxFloating/2);
-			if(yOffSet>0)yOffSet*=-1;
-			yOffSet += (maxFloating/2);	
-			yOffSet *= -1;
-			yOffSet /= 2;//Reduce the absurdity of the height
-			//Trace(yOffSet);
-			replaceLinkTile(40,3,6,0,yOffSet,true);
+			HeroYOffset = (floating*floatPix) - (maxFloating/2);
+			if(HeroYOffset>0)HeroYOffset*=-1;
+			HeroYOffset += (maxFloating/2);	
+			HeroYOffset *= -1;
+			HeroYOffset /= 2;//Reduce the absurdity of the height
+			//Trace(HeroYOffset);
+			replaceLinkTile(40,3,6,0,HeroYOffset,true);
 			//
 			unless(form)
 			{
@@ -438,6 +446,7 @@ void jump()//start jump
 				NoAction();
 			}
 		}
+		else HeroYOffset = 0;
 	}
 }//end jump
 //start tilemods

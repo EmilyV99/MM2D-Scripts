@@ -23,8 +23,8 @@ void resetTime()
 	Game->Counter[CR_DEKUNUTS]=0;
 	Game->Counter[CR_MAGICBEANS]=0;
 	swordCounter = 0;
-	Hero->Item[I_SWORD_RAZOR]=false;
-	Hero->Item[I_SWORD_KOKIRI]=true;
+	Hero->Item[IT_SWORD_RAZOR]=false;
+	Hero->Item[IT_SWORD_KOKIRI]=true;
 	Hero->Item[INF_MAGIC]=false;
 	for(int i=0;i<6;i++)
 	{
@@ -39,10 +39,10 @@ void resetTime()
 	{
 		torchPuzzleStates[i] = false;
 	}
-	resetScreenItems();
+	resetScreenStates();
 }//end
 //start Special Reset Functions
-void resetScreenItems()
+void resetScreenStates()
 {
 	int mapcount = Game->MapCount();
 	for(int map = 1; map <= mapcount; ++map)
@@ -50,14 +50,15 @@ void resetScreenItems()
 		for(int screen = 0; screen < 0x80; ++screen)
 		{
 			mapdata m = Game->LoadMapData(map, screen);
-			if(m->State[ST_ITEM])
+			if(m->State[ST_ITEM]) //Reset item
 			{
 				if(onetimeitem(<ItemID>(m->Item)))
 				{
-					m->Item = I_RUP_5; //Blue-rupeeify single-grab items
+					m->Item = IT_RUP_5; //Blue-rupeeify single-grab items
 				}
 				m->State[ST_ITEM] = false; //Reset item state
 			}
+			m->State[ST_SECRET] = false; //Reset secret state
 		}
 	}
 }
@@ -66,8 +67,8 @@ bool onetimeitem(ItemID itm)
 {
 	switch(itm)
 	{
-		case I_HEART_CONTAINER:
-		case I_HEARTPIECE:
+		case IT_HEART_CONTAINER:
+		case IT_HEARTPIECE:
 			return true;
 		default:
 			return Game->LoadItemData(itm)->Keep;

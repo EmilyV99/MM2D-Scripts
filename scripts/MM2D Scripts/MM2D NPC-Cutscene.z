@@ -5,8 +5,6 @@
 ////////////////////////////////////////
 
 //start NPC
-char NPCNames[1000] = {"Tatl","Happy Mask Salesman","Banker","Bremor","Brac","","","Guard","Guard","Guard","Guard","",""};
-
 void getNPCName(char buf, int index)
 {
 	switch(index)
@@ -38,6 +36,9 @@ void getNPCName(char buf, int index)
 		/*case N_SHOOTING_GALLERY_TOWN:
 		case N_INVIS_MAZE_GIRL:
 			break;*/
+		case N_GREAT_FAIRY:
+			strcpy(buf,"Great Fairy");
+			break;
 	}
 }
 
@@ -55,7 +56,8 @@ enum NPCID
 	N_GUARD_NORTH,
 	N_GUARD_SOUTH,
 	N_SHOOTING_GALLERY_TOWN,
-	N_INVIS_MAZE_GIRL
+	N_INVIS_MAZE_GIRL,
+	N_GREAT_FAIRY
 };
 ffc script NPC
 {
@@ -398,7 +400,7 @@ ffc script NPC
 			//end
 			case N_DIFFCHANGE: //Difficulty-Changing Tablet start
 			{
-				unless(Hero->Item[I_OCARINA])
+				unless(Hero->Item[IT_OCARINA])
 				{
 					ShowNPCStringAndWait("Huh, this tablet seems like it's magical, but it isn't working now.",6);
 				}
@@ -548,7 +550,7 @@ ffc script NPC
 					{
 						while(true)
 						{
-							unless(Hero->Item[I_BOWARROW])
+							unless(Hero->Item[IT_BOWARROW])
 							{
 								if(day<3)ShowStringAndWait("Huh? You don't have a bow?@char(26)Then I guess you can't play.");
 								else ShowStringAndWait("Huh? You don't have a bow?@char(26)Well, that's too bad...");
@@ -592,7 +594,7 @@ ffc script NPC
 									ShowStringAndWait("Well look at that! You hit @number(@ttempi)! Well, here ya go!");
 									if(getFlagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG1))
 									{
-										item itm = CreateItemAt(I_RUP_50,Hero->X,Hero->Y);
+										item itm = CreateItemAt(IT_RUP_50,Hero->X,Hero->Y);
 										itm->Pickup = IP_HOLDUP;
 									}
 									else
@@ -610,7 +612,7 @@ ffc script NPC
 									ShowStringAndWait("Well, here ya go!");
 									if(getFlagGlobalVar(GVAR_MGOCTO,GV_MINIGAME,FLAG2))
 									{
-										item itm = CreateItemAt(I_RUP_200,Hero->X,Hero->Y);
+										item itm = CreateItemAt(IT_RUP_200,Hero->X,Hero->Y);
 										itm->Pickup = IP_HOLDUP;
 									}
 									else
@@ -643,7 +645,7 @@ ffc script NPC
 								ShowStringAndWait("Oh! When I saw that fairy, I thought you were that troublemakin' brat with the mask.");
 								setNPCflag(11,FLAG3);
 							}
-							if(Hero->Item[I_BOWARROW])ShowStringAndWait("Sorry, but you can't play if you can't shoot a bow.");
+							if(Hero->Item[IT_BOWARROW])ShowStringAndWait("Sorry, but you can't play if you can't shoot a bow.");
 							else ShowStringAndWait("Sorry, but you can't play if you don't have a bow.");
 							break;
 						case FORM_GORON:
@@ -653,7 +655,7 @@ ffc script NPC
 								ShowStringAndWait("But...");
 								setNPCflag(11,FLAG4);
 							}
-							if(Hero->Item[I_BOWARROW])ShowStringAndWait("Sorry...If you can't shoot a bow, you can't play.");
+							if(Hero->Item[IT_BOWARROW])ShowStringAndWait("Sorry...If you can't shoot a bow, you can't play.");
 							else ShowStringAndWait("Sorry...If you don't have a bow, you can't play.");
 							break;
 						case FORM_ZORA:
@@ -663,7 +665,7 @@ ffc script NPC
 								ShowStringAndWait("Well, let me tell ya");
 								setNPCflag(11,FLAG5);
 							}
-							if(Hero->Item[I_BOWARROW])ShowStringAndWait("If you can't shoot a bow, you can't play. Sorry.");
+							if(Hero->Item[IT_BOWARROW])ShowStringAndWait("If you can't shoot a bow, you can't play. Sorry.");
 							else ShowStringAndWait("If you don't have a bow, you can't play. Sorry.");
 							break;
 					}
@@ -690,7 +692,7 @@ ffc script NPC
 				{
 					case FORM_DEKU: //start
 						price = 10;
-						prize = I_DEKUNUTS_10;
+						prize = IT_DEKUNUTS_10;
 						unless(skip)ShowStringAndWait("Oh, what a cute little customer! So, do you want to play?");
 						ShowStringAndWait("For you, it's only ((10 Rupees)).@char(26)<<@choice(1)OK@choice(2)No thanks>>@domenu()@set(@ttempi @chosen)@close()");
 						if(tangoTempI==2)
@@ -713,7 +715,7 @@ ffc script NPC
 						break;//end
 					case FORM_GORON: //start
 						price = 30;
-						prize = getFlagGlobalVar(GVAR_CHESTGAME,GV_MINIGAME,FLAG1) ? I_RUP_50 : Items::getItem(IL_INVISMAZE_CHEST);
+						prize = getFlagGlobalVar(GVAR_CHESTGAME,GV_MINIGAME,FLAG1) ? IT_RUP_50 : Items::getItem(IL_INVISMAZE_CHEST);
 						unless(skip)ShowStringAndWait("Well, aren't you a fit fellow! Wanna play?");
 						ShowStringAndWait("For you, it's ((30 Rupees)).@char(26)<<@choice(1)OK@choice(2)No thanks>>@domenu()@set(@ttempi @chosen)@close()");
 						if(tangoTempI==2)
@@ -736,7 +738,7 @@ ffc script NPC
 						break;//end
 					case FORM_ZORA: //start
 						price = 5;
-						prize = I_RUP_20;
+						prize = IT_RUP_20;
 						unless(skip)ShowStringAndWait("Well, hello there, handsome! Wanna play?");
 						ShowStringAndWait("Hey...For you, it's only ((5 Rupees)).@char(26)<<@choice(1)OK@choice(2)No thanks>>@domenu()@set(@ttempi @chosen)@close()");
 						if(tangoTempI==2)
@@ -759,7 +761,7 @@ ffc script NPC
 						break;//end
 					default: //start
 						price = 20;
-						prize = I_RUP_50;
+						prize = IT_RUP_50;
 						unless(skip)ShowStringAndWait("Come in! Oh, is the kid collecting masks? How about it? Wanna play?");
 						ShowStringAndWait("For you, it's ((20 Rupees)).@char(26)<<@choice(1)OK@choice(2)No thanks>>@domenu()@set(@ttempi @chosen)@close()");
 						if(tangoTempI==2)
@@ -964,7 +966,15 @@ screendata script Festival_Door_Open //start FestivalDoor(R)
 			}
 			Quit();
 		}
-		
+		if(level==1)
+		{
+			unless(getGlobalBool(GVAR_TATL_CUTSCENE_1,GV_MISC_BOOL))
+			{
+				Waitframes(2);
+				ShowNPCStringAndWait("He gives me the creeps! That mask salesman was the...@char(26)Sorry...just thinking aloud.@pressa()@char(26)But [[three days]]? Even if we never sleep, that still leaves us with a measly [[72 hours]]!@char(26)Talk about demanding!@pressa()@char(26)Well, don't just stand there! We're going to see the [[Great Fairy]]!@pressa()@char(26)Look, you wanna find the Skull Kid, don't you?@pressa()@char(26)The [[Great Fairy]] will know what he's up to. She watches over everything.@pressa()@char(26)And just between you and me, the Skull Kid is no match for the [[Great Fairy]].@pressa()@char(26)Go to the [[shrine]] near the [[North Gate]]. You'll find the [[Great Fairy]] in there!",N_TATL);
+				setGlobalBool(GVAR_TATL_CUTSCENE_1,GV_MISC_BOOL,true);
+			}
+		}
 		if(level==2)
 		{
 			while(true)
@@ -1087,52 +1097,52 @@ screendata script SCTTower //start South Clock Town tower building (R)
 	}
 }
 //end
-screendata script SpawnStrayFairy //start A stray fairy appeared! (R)
+namespace Fairies //start Fairy stuff
 {
-	void run(int itemID, int x, int y, bool day, int offset)
+	screendata script SpawnStrayFairy //start A stray fairy appeared! (R)
 	{
-		item it;
-		mapdata map = CurMapdata();
-		for(int q = offset; q > 0; --q)
+		void run(int itemID, int x, int y, bool day, int offset)
 		{
-			map = upMapdata(map);
-		}
-		for(int q = offset; q < 0; ++q)
-		{
-			map = downMapdata(map);
-		}
-		if(map->State[ST_ITEM]) Quit(); //Don't re-spawn a grabbed fairy
-		for(int q = 1; q <= Screen->NumItems(); ++q)
-		{
-			item temp = Screen->LoadItem(q);
-			if(temp->Type == IC_STRAYFAIRY)
+			item it;
+			if(getGlobalBool(GVAR_TOWN_FAIRY_COLLECTED, GV_MISCRESETTABLEBOOL)) Quit();
+			for(int q = 1; q <= Screen->NumItems(); ++q)
 			{
-				it = temp;
-				break;
+				item temp = Screen->LoadItem(q);
+				if(temp->Type == IC_STRAYFAIRY)
+				{
+					it = temp;
+					break;
+				}
+			}
+			while(true)
+			{
+				if(this->State[ST_ITEM]) Quit();
+				if(day==isDay() && !it)
+				{
+					it = CreateItemAt(itemID, x, y);
+					it->Misc[ITEMMISC_LAYERDMAP] = Game->GetCurDMap() + 1 + offset;
+					it->Misc[FAIRYMISC_TYPE] = FAIRY_SCRIPT;
+					it->Misc[FAIRYMISC_VALUE] = GVAR_TOWN_FAIRY_COLLECTED;
+				}
+				while(day==isDay())
+					Waitframe();
+				Remove(it);
+				it = NULL;
+				until(day==isDay())
+					Waitframe();
 			}
 		}
-		while(true)
-		{
-			if(this->State[ST_ITEM]) Quit();
-			if(day==isDay() && !it)
-			{
-				it = CreateItemAt(itemID, x, y);
-				it->Misc[ITEMMISC_LAYERDMAP] = Game->GetCurDMap() + 1 + offset;
-				it->Misc[FAIRYMISC_TYPE] = FAIRY_MAPDATA;
-				it->Misc[FAIRYMISC_VALUE] = map;
-			}
-			while(day==isDay())
-				Waitframe();
-			Remove(it);
-			it = NULL;
-			until(day==isDay())
-				Waitframe();
-		}
-	}
-} //end
-screendata script GreatFairyFountain //start A great fairy's fountain! (R)
-{
-	enum
+	} //end
+
+	enum D_Index //start
+	{
+		D_MIN,
+		D_MAXTIME = D_MIN,
+		D_CURRTIME,
+		
+		D_MAX
+	};//end
+	enum FairyIndex //start
 	{
 		INDEX_MIN,
 		INDEX_TOWN = INDEX_MIN,
@@ -1141,81 +1151,357 @@ screendata script GreatFairyFountain //start A great fairy's fountain! (R)
 		INDEX_OCEAN,
 		INDEX_CANYON,
 		INDEX_MAX
-	};
-	void run(int index, int numStrays)
+	};//end
+	screendata script GreatFairyFountain //start A great fairy's fountain! (R)
 	{
-		if(index < INDEX_MIN || index >= INDEX_MAX)
+		DEFINE HERO_Y = 144;
+		DEFINE GROW_TIME = 120;
+		DEFINE FAIRY_DELAY = 10;
+		DEFINE FLASH_FRAMES = 10;
+		DEFINE FAIRY_X = 104;
+		DEFINE FAIRY_Y = 80;
+		void run(FairyIndex index, int numStrays)
 		{
-			printf("ERROR: BAD GREATFAIRY INDEX %d\n", index);
-		}
-		DEFINEB CANACTIVE = getGlobalVar(GVAR_FAIRY_START + index, GV_MISCRESETTABLE)==numStrays;
-		ffc greatFairy = LoadUnusedFFC();
-		//greatFairy->Data = //set combo
-		unless(getGlobalBool(GVAR_GFAIRY_START+index, GV_MISCRESETTABLEBOOL))
-		{
-			ffcInvis(greatFairy, true);
-			bool pleaded;
-			while(true)
+			if(index < INDEX_MIN || index >= INDEX_MAX)
 			{
-				if(Hero->Y <= 128)
+				Debug::print("ERROR: BAD GREATFAIRY INDEX %d", index);
+			}
+			DEFINEB CANACTIVE = getGlobalVar(GVAR_FAIRY_START + index, GV_MISCRESETTABLE)>=numStrays;
+			ffc greatFairy = LoadUnusedFFC();
+			greatFairy->Data = COMBO_GREATFAIRY;
+			greatFairy->TileWidth = 3;
+			greatFairy->TileHeight = 2;
+			greatFairy->EffectWidth = 16*3;
+			greatFairy->EffectHeight = 16*2;
+			greatFairy->X = FAIRY_X;
+			greatFairy->Y = FAIRY_Y;
+			ffcInvis(greatFairy, true);
+			itemdata stray = loadItem(index);
+			unless(getGlobalBool(GVAR_GFAIRY_START+index, GV_MISCRESETTABLEBOOL))
+			{
+				Waitframe();
+				spawnFairies(index);
+				if(index==INDEX_TOWN && !getGlobalBool(GVAR_TATL_CUTSCENE_2,GV_MISC_BOOL))
 				{
+					Waitframe();
+					ShowNPCStringAndWait("Oh no! The Great Fairy!",N_TATL);
+					setGlobalBool(GVAR_TATL_CUTSCENE_2,GV_MISC_BOOL,true);
+				}
+				while(true)
+				{
+					do Waitframe(); until(Hero->Y <= HERO_Y);
 					if(CANACTIVE)
 						break;
-					else unless(pleaded)
+					switch(index)
 					{
-						//Plead for help
-						pleaded = true;
+						case INDEX_TOWN:
+							ShowNPCStringAndWait("Young one! Please hear my plea! I have been broken and shattered to pieces by the masked Skull Kid.@pressa()@char(26)Please find the [[one]] Stray Fairy lost in town, and bring her to this [[Fairy Fountain]].",N_GREAT_FAIRY);
+							break;
+					}
+					Quit(); //Nothing left to do without a screen refresh
+				}
+				setGlobalBool(GVAR_GFAIRY_START+index, GV_MISCRESETTABLEBOOL, true);
+				//Draw strays leaving Link, into center
+				DEFINE numFairies = getGlobalVar(GVAR_FAIRY_START + index, GV_MISCRESETTABLE);
+				DEFINE scrpt = Game->GetItemSpriteScript("FloatingStrayFairy");
+				FreezeOne(susptLINK,true);
+				Screen->D[D_MAXTIME] = Max(getFairyTime(numFairies),50);
+				Screen->D[D_CURRTIME] = Screen->D[D_MAXTIME];
+				for(int q = 0; q < numFairies; ++q)
+				{
+					item dummy = Screen->CreateItem(IT_DUMMY);
+					dummy->OriginalTile = stray->Tile;
+					dummy->Tile = stray->Tile;
+					dummy->CSet = stray->CSet;
+					dummy->NumFrames = stray->AFrames;
+					dummy->ASpeed = stray->ASpeed;
+					dummy->Delay = stray->Delay;
+					dummy->Script = scrpt;
+					dummy->Pickup = IP_DUMMY;
+					dummy->TileWidth = 1;
+					dummy->TileHeight = 1;
+					dummy->InitD[0] = true;
+					dummy->X = Hero->X;
+					dummy->Y = Hero->Y;
+					for(int q = 0; q < FAIRY_DELAY; ++q)
+					{
+						--Screen->D[D_CURRTIME];
+						Waitframe();
 					}
 				}
-				//Draw stray fairies circling
-				Waitframe();
-			}
-			setGlobalBool(GVAR_GFAIRY_START+index, GV_MISCRESETTABLEBOOL, true);
-			//Draw strays leaving Link, into center
-			ffcInvis(greatFairy, false);
-			//Thank Link
-			unless(getGlobalBool(GVAR_GFAIRY_REW_START+index, GV_MISC_BOOL))
-			{
-				switch(index)
+				while(Screen->D[D_CURRTIME])
 				{
-					case INDEX_TOWN:
-						//Magic Meter + Deku Bubble
-						break;
-					case INDEX_SWAMP:
-						//Extended magic meter
-						break;
-					case INDEX_MOUNTAIN:
-						//Magic Spin Attack? Perhaps charge ring?
-						break;
-					case INDEX_OCEAN:
-						//Double Defense (needs special handling for Fierce Deity)
-						break;
-					case INDEX_CANYON:
-						//Great Fairy's Sword
-						break;
+					--Screen->D[D_CURRTIME];
+					Waitframe();
 				}
-				setGlobalBool(GVAR_GFAIRY_REW_START+index, GV_MISC_BOOL,true);
-			}
-			else unless(index!=INDEX_TOWN || getGlobalBool(GVAR_GFAIRY_TOWN_REW2, GV_MISC_BOOL))
-			{
-				//Give Great Fairy Mask
-				setGlobalBool(GVAR_GFAIRY_TOWN_REW2, GV_MISC_BOOL, true);
-			}
-			else
-			{
-				//No reward to give
-			}
-		}
-		while(true)
-		{
-			if(Hero->Y <= 128)
-			{
-				//Heal
+				Waitframes(30);
+				//
+				killFairies();
+				Screen->D[D_MAXTIME] = 0;
+				Screen->D[D_CURRTIME] = 0;
+				Waitframes(2);
+				//spawn growing sprite
+				growFairy(true);
+				ffcInvis(greatFairy, false);
+				Waitframes(5);
+				//Thank Link
+				unless(getGlobalBool(GVAR_GFAIRY_REW_START+index, GV_MISC_BOOL))
+				{
+					switch(index)
+					{
+						case INDEX_TOWN:
+							ShowNPCStringAndWait("Tatl, and you, young one of the altered shape...@pressa()@char(26)Thank you for returning my broken and shattered body to normal.@pressa()@char(26)I am the {{Great Fairy of Magic}}. I thought that masked child was helping me, and I grew careless.@pressa()@char(26)All I can offer you now is this:@char(26)I shall grant you {{Magic Power}} as a sign of my gratitude.@char(26)Please accept it!",N_GREAT_FAIRY);
+							Game->MCounter[CR_MAGIC] = MAX_MAGIC;
+							Game->DCounter[CR_MAGIC] = MAX_MAGIC;
+							Game->DCounter[CR_LIFE] = Game->MCounter[CR_LIFE];
+							Hero->Item[IT_DEKU_BUBBLE] = true;
+							while(Game->DCounter[CR_MAGIC] || Game->DCounter[CR_LIFE]) Waitframe();
+							ShowStringAndWait("You've been granted {{Magic Power}}! In your current form, press {{R}} to shoot [[bubble blasts]].@pressa()@char(26)Your {{Magic Power}} decreases when you shoot. Replenish it with [[Magic Jars]] and [[Potions]].");
+							ShowNPCStringAndWait("The [[man]] who lives in the [[observatory]] outside of town may know of the [[Skull Kid's]] whereabouts. But be careful!@pressa()@char(26)You must not underestimate that child's powers, kind young one.@pressa()@char(26)If you ever return to your [[former shape]], come see me. I shall give you [[more help]].",N_GREAT_FAIRY);
+							ffcInvis(greatFairy, true);
+							shrinkFairy();
+							FreezeOne(susptLINK,false);
+							Quit();
+						case INDEX_SWAMP:
+							Game->Generic[GEN_MAGICDRAINRATE] = 1; //Half Magic
+							break;
+						case INDEX_MOUNTAIN:
+							//Magic Spin Attack? Perhaps charge ring?
+							break;
+						case INDEX_OCEAN:
+							setGlobalBool(GVAR_HAS_DOUBLE_DEF,GV_MISC_BOOL,true);
+							break;
+						case INDEX_CANYON:
+							Hero->Item[IT_SWORD_GFAIRY_HAS] = true;
+							break;
+					}
+					setGlobalBool(GVAR_GFAIRY_REW_START+index, GV_MISC_BOOL,true);
+				}
+				else unless(index!=INDEX_TOWN || getGlobalBool(GVAR_GFAIRY_TOWN_REW2, GV_MISC_BOOL))
+				{
+					//Give Great Fairy Mask
+					setGlobalBool(GVAR_GFAIRY_TOWN_REW2, GV_MISC_BOOL, true);
+				}
+				else
+				{
+					//No reward to give
+				}
+				FreezeOne(susptLINK,false);
 				Quit();
 			}
-			Waitframe();
+			greatFairy->Script = FFC_SOLID;
+			while(true)
+			{
+				if(Hero->Y <= HERO_Y)
+				{
+					FreezeOne(susptLINK,true);
+					growFairy(false);
+					ffcInvis(greatFairy, false);
+					ShowNPCStringAndWait("Welcome, @savename()...@char(26)Allow me to ease your weariness",N_GREAT_FAIRY);
+					Game->DCounter[CR_LIFE] = Game->MCounter[CR_LIFE];
+					while(Game->DCounter[CR_LIFE]) Waitframe();
+					Waitframe();
+					switch(index)
+					{
+						case INDEX_TOWN:
+						{
+							unless(getGlobalBool(GVAR_GFAIRY_TOWN_REW2, GV_MISC_BOOL))
+							{
+								ShowNPCStringAndWait("Come see me again if ever you are returned to your [[former shape]]. I shall give you an item that will add to your [[strength]]...@pressa()@char(26)The [[Skull Kid]] is a childish demon... If you seek him, ask the [[children]] in town.",N_GREAT_FAIRY);
+							}
+							break;
+						}
+					}
+					ffcInvis(greatFairy, true);
+					shrinkFairy();
+					FreezeOne(susptLINK,false);
+					Quit();
+				}
+				Waitframe();
+			}
 		}
-	}
+		
+		int getFairyTime(int numFairies)
+		{
+			return FAIRY_DELAY * numFairies;
+		}
+		
+		void spawnFairies(int index)
+		{
+			Debug::print("Spawning fairies for index %d",index);
+			int count;
+			itemdata stray = loadItem(index);
+			switch(index)
+			{
+				case INDEX_TOWN:
+					count = 21;
+					break;
+			}
+			DEFINE scrpt = Game->GetItemSpriteScript("FloatingStrayFairy");
+			for(int q = 0; q < count; ++q)
+			{
+				item dummy = Screen->CreateItem(IT_DUMMY);
+				dummy->OriginalTile = stray->Tile;
+				dummy->Tile = stray->Tile;
+				dummy->CSet = stray->CSet;
+				dummy->NumFrames = stray->AFrames;
+				dummy->ASpeed = stray->ASpeed;
+				dummy->Delay = stray->Delay;
+				dummy->Script = scrpt;
+				dummy->Pickup = IP_DUMMY;
+				dummy->TileWidth = 1;
+				dummy->TileHeight = 1;
+				dummy->InitD[0] = false;
+			}
+		}
+		
+		void killFairies()
+		{
+			Debug::print("Killing dummy fairies");
+			for(int q = Screen->NumItems(); q > 0; --q)
+			{
+				item it = Screen->LoadItem(q);
+				if(it->ID == IT_DUMMY)
+				{
+					it->Script = 0;
+					Remove(it);
+				}
+			}
+		}
+		
+		itemdata loadItem(int index)
+		{
+			switch(index)
+			{
+				case INDEX_TOWN: return Game->LoadItemData(IT_STRAYFAIRY_TOWN);
+				case INDEX_SWAMP: return Game->LoadItemData(IT_STRAYFAIRY_SWAMP);
+				case INDEX_MOUNTAIN: return Game->LoadItemData(IT_STRAYFAIRY_MOUNTAIN);
+				case INDEX_OCEAN: return Game->LoadItemData(IT_STRAYFAIRY_OCEAN);
+				case INDEX_CANYON: return Game->LoadItemData(IT_STRAYFAIRY_CANYON);
+			}
+			return NULL;
+		}
+		
+		void growFairy(bool flash) //start
+		{
+			combodata cd = Game->LoadComboData(COMBO_GREATFAIRY);
+			item grow = CreateItemAt(IT_DUMMY, FAIRY_X, FAIRY_Y);
+			grow->OriginalTile = cd->Tile;
+			grow->CSet = cd->CSet;
+			grow->TileWidth = 3;
+			grow->TileHeight = 2;
+			grow->NumFrames = 0;
+			if(flash)
+			{
+				hidePassive(true);
+				repeat(FLASH_FRAMES)
+				{
+					FlashScreen(WHITE,true);
+					Waitframe();
+				}
+				hidePassive(false);
+			}
+			for(int q = GROW_TIME-1; q >= 0; --q)
+			{
+				if(flash && q==GROW_TIME/2)
+				{
+					hidePassive(true);
+					repeat(FLASH_FRAMES)
+					{
+						FlashScreen(WHITE,true);
+						Waitframe();
+					}
+					hidePassive(false);
+				}
+				grow->Scale = 1 - (q/GROW_TIME);
+				sprites::rectify(grow);
+				Waitframe();
+			}
+			Remove(grow);
+		} //end
+		
+		void shrinkFairy() //start
+		{
+			combodata cd = Game->LoadComboData(COMBO_GREATFAIRY);
+			item shrink = CreateItemAt(IT_DUMMY, FAIRY_X, FAIRY_Y);
+			shrink->OriginalTile = cd->Tile;
+			shrink->CSet = cd->CSet;
+			shrink->TileWidth = 3;
+			shrink->TileHeight = 2;
+			shrink->NumFrames = 0;
+			for(int q = GROW_TIME; q > 0; --q)
+			{
+				shrink->Scale = (q/GROW_TIME);
+				sprites::rectify(shrink);
+				Waitframe();
+			}
+			Remove(shrink);
+		} //end
+	}//end
+	itemsprite script FloatingStrayFairy //start Stray fairies floating in a great fairy fountain (R)
+	{
+		void run(bool floatToward)
+		{
+			DEFINE CX = 128;
+			DEFINE CY = 96;
+			int angle = WrapDegrees(floatToward ? WrapDegrees(RadtoDeg(TurnTowards(this->X+8,this->Y+8,CX,CY,0,1))-180) : Rand(360));
+			int startdist = (2*Rand(12))+16;
+			int startspeed = Rand(4)+1;
+			int factor = 1;
+			if(floatToward)
+			{
+				DEFINE movx = VectorX(4, angle), movy = VectorY(4, angle);
+				while(true)
+				{
+					if(Screen->D[D_MAXTIME])
+					{
+						factor = Screen->D[D_CURRTIME] / Screen->D[D_MAXTIME];
+					}
+					this->X -= movx;
+					this->Y -= movy;
+					if(Distance(this->X+8,this->Y+8,CX,CY)<Max(startdist*factor,8)) //Don't overshoot!
+					{
+						this->X = CX + VectorX(Max(startdist*factor,8), angle) - 8;
+						this->Y = CY + VectorY(Max(startdist*factor,8), angle) - 8;
+						break;
+					}
+					Waitframes(2);
+				}
+			}
+			while(true)
+			{
+				if(Screen->D[D_MAXTIME])
+				{
+					factor = Screen->D[D_CURRTIME] / Screen->D[D_MAXTIME];
+				}
+				angle += startspeed*(2-factor);
+				angle = WrapDegrees(angle);
+				this->X = CX + VectorX(Max(startdist*factor,8), angle) - 8;
+				this->Y = CY + VectorY(Max(startdist*factor,8), angle) - 8;
+				Waitframe();
+			}
+		}
+	}//end
+	int townFairyCutscene(item this) //start
+	{
+		int degrees = 0;
+		ForceUnfreeze(susptITEMS,true);
+		ForceUnfreeze(susptITEMSPRITESCRIPTS,true);
+		char buf[] = "Please, hear my plea!@char(26)The masked Skull Kid has broken me apart and scattered my pieces!@pressa()@char(26)Please find a way to return me to the [[Fairy Fountain]] in [[North Clock Town]].";
+		int ffid = RunFFCScript(FFC_SHOWSTRING, {buf,0,true});
+		ffc f = Screen->LoadFFC(ffid);
+		do
+		{
+			this->X = CenterLinkX() + VectorX(16, degrees) - 8;
+			this->Y = CenterLinkY() + HeroYOffset + VectorY(16, degrees) - 8;
+			degrees += 5;
+			this->Misc[ITEMMISC_LAYERDMAP] = Game->GetCurDMap() + 1; //Force to current layer
+			Waitframe();
+		} while(f->Script); //Wait for string to be closed
+		ForceUnfreeze(susptITEMS,false);
+		ForceUnfreeze(susptITEMSPRITESCRIPTS,false);
+		return degrees;
+	} //end
 }//end
 //start Signpost
 ffc script Signpost

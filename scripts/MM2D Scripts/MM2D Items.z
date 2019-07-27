@@ -118,11 +118,11 @@ void handleEXItems()
 		ItemID itID = ItemIDs[cursorIndex];
 		if(canEquip(itID))
 		{
-			if(itID==I_SWORD_GFAIRY_HAS)
+			if(itID==IT_SWORD_GFAIRY_HAS)
 			{
 				if(form==FORM_HUMAN&&pressA)
 				{
-					Hero->Item[210] = !Hero->Item[210];
+					Hero->Item[IT_SWORD_GFAIRY] = !Hero->Item[IT_SWORD_GFAIRY];
 					Game->PlaySound(83);
 				}
 			}
@@ -132,9 +132,9 @@ void handleEXItems()
 				int snd = 83;
 				switch(itID)
 				{
-					case I_FIREARROWS:{snd=84;break;}
-					case I_ICEARROWS:{snd=85;break;}
-					case I_LIGHTARROWS:{snd=86;break;}
+					case IT_FIREARROWS:{snd=84;break;}
+					case IT_ICEARROWS:{snd=85;break;}
+					case IT_LIGHTARROWS:{snd=86;break;}
 				}
 				Audio->EndSound(83);
 				Audio->EndSound(84);
@@ -176,7 +176,7 @@ void handleEXItems()
 
 bool isArrow(ItemID itID)
 {
-	return (itID==I_BOWARROW||itID==I_FIREARROWS||itID==I_ICEARROWS||itID==I_LIGHTARROWS);
+	return (itID==IT_BOWARROW||itID==IT_FIREARROWS||itID==IT_ICEARROWS||itID==IT_LIGHTARROWS);
 }
 
 bool canShootArrow()
@@ -211,11 +211,11 @@ bool canEquip(int itID)
 {
 	if(itID==3||itID==139)
 	{
-		return Hero->Item[81];
+		return Hero->Item[IT_BOMBBAG];
 	}
 	else if(itID==48)
 	{
-		return Hero->Item[106];
+		return Hero->Item[IT_BOMBBAG_POWDERKEG];
 	}
 	else
 	{
@@ -253,6 +253,8 @@ lweapon script throwableBombs_LW
 		int pix, dir;
 		while(this->isValid())
 		{
+			this->DrawXOffset = 0;
+			this->DrawYOffset = 0;
 			mapdata map = getLayerMapdata(getRelativeHeight(this));
 			holdingBomb = this->Misc[BOMB_MISC_MODE]==BOMB_STATE_HELD;
 			switch(this->Misc[BOMB_MISC_MODE])
@@ -357,6 +359,11 @@ lweapon script throwableBombs_LW
 				holdingBomb=false;
 				return;
 			}
+			int bx = this->X, by = this->Y;
+			this->X = forceonscreenx(this->X);
+			this->Y = forceonscreeny(this->Y);
+			this->DrawXOffset += (bx - this->X);
+			this->DrawYOffset += (by - this->Y);
 			Waitframe();
 		}
 	}
@@ -448,16 +455,16 @@ void runOmniArrows(int mult)
 		switch(arrowType) //Find proper parent item, and magic cost, based on type
 		{
 			case ARRTYPE_FIRE:
-				arr->Parent = I_FIREARROWS;
+				arr->Parent = IT_FIREARROWS;
 				break;
 			case ARRTYPE_ICE:
-				arr->Parent = I_ICEARROWS;
+				arr->Parent = IT_ICEARROWS;
 				break;
 			case ARRTYPE_LIGHT:
-				arr->Parent = I_LIGHTARROWS;
+				arr->Parent = IT_LIGHTARROWS;
 				break;
 			default:
-				arr->Parent = I_BOWARROW;
+				arr->Parent = IT_BOWARROW;
 		}
 		itemdata parentItem = Game->LoadItemData(arr->Parent);
 		Game->PlaySound(parentItem->UseSound);
@@ -578,7 +585,7 @@ void razorSwordCheck()
 {
 	if(swordCounter>=RAZSWORD_USES)
 	{
-		Hero->Item[I_SWORD_RAZOR]=false;
+		Hero->Item[IT_SWORD_RAZOR]=false;
 		swordCounter=0;
 	}
 }
@@ -618,12 +625,12 @@ DEFINE SFX_FAIRY = 53; //Sound that plays when a fairy appears
 
 DEFINE IC_BOTTLE = 70; //Item class used for bottles
 
-DEFINE I_BOTTLE1 = 146; //Item ID for the first bottle (Level 1)
-DEFINE I_BOTTLE2 = 147; //Item ID for the second bottle (Level 2)
-DEFINE I_BOTTLE3 = 148; //Item ID for the third bottle (Level 3)
-DEFINE I_BOTTLE4 = 149; //Item ID for the fourth bottle (Level 4)
-DEFINE I_BOTTLE5 = 150; //Item ID for the fifth bottle (Level 5)
-DEFINE I_BOTTLE6 = 151; //Item ID for the sixth bottle (Level 6)
+DEFINE IT_BOTTLE1 = 146; //Item ID for the first bottle (Level 1)
+DEFINE IT_BOTTLE2 = 147; //Item ID for the second bottle (Level 2)
+DEFINE IT_BOTTLE3 = 148; //Item ID for the third bottle (Level 3)
+DEFINE IT_BOTTLE4 = 149; //Item ID for the fourth bottle (Level 4)
+DEFINE IT_BOTTLE5 = 150; //Item ID for the fifth bottle (Level 5)
+DEFINE IT_BOTTLE6 = 151; //Item ID for the sixth bottle (Level 6)
 
 DEFINE FREQ_HEARTREFILL = 8; //Frequency in frames at which potions/fairies restore hearts
 DEFINE SFX_HEARTREFILL = 22; //Sound when potion/fairy restores a heart
@@ -634,9 +641,11 @@ DEFINE TIL_BOTTLESWING = 64111; //Tile of a right facing open bottle used when t
 DEFINE CS_BOTTLESWING = 11; //CSet of the swinging bottle
 DEFINE SFX_BOTTLESWING = 30; //Sound used for the bottle being swung
 
-DEFINE I_WATERBOTTLE = 175; //Item for bottle water pickup
-DEFINE I_FAIRYBOTTLE = 177; //Item for bottle fairy pickup
-DEFINE I_HOTWATERBOTTLE = 176; //Item for bottle hot water pickup
+/* Defined in constants file
+DEFINE IT_WATERBOTTLE = 175; //Item for bottle water pickup
+DEFINE IT_FAIRYBOTTLE = 177; //Item for bottle fairy pickup
+DEFINE IT_HOTWATERBOTTLE = 176; //Item for bottle hot water pickup
+*/
 
 DEFINE STR_CANTAFFORD = 29; //Message for when you can't afford an item
 DEFINE STR_NOBOTTLE = 42; //Message for when you don't have a bottle to store a potion in
@@ -737,7 +746,7 @@ int UsingEmptyBottle()
 
 bool CanFillBottle()
 {
-	int bottles[6] = {I_BOTTLE1, I_BOTTLE2, I_BOTTLE3, I_BOTTLE4, I_BOTTLE5, I_BOTTLE6};
+	int bottles[6] = {IT_BOTTLE1, IT_BOTTLE2, IT_BOTTLE3, IT_BOTTLE4, IT_BOTTLE5, IT_BOTTLE6};
 	for(int i=0; i<6; i++)
 	{
 		if(Hero->Item[bottles[i]]&&BottleState[i]==BS_EMPTY)
@@ -748,7 +757,7 @@ bool CanFillBottle()
 
 int FillBottle(int state)
 {
-	int bottles[6] = {I_BOTTLE1, I_BOTTLE2, I_BOTTLE3, I_BOTTLE4, I_BOTTLE5, I_BOTTLE6};
+	int bottles[6] = {IT_BOTTLE1, IT_BOTTLE2, IT_BOTTLE3, IT_BOTTLE4, IT_BOTTLE5, IT_BOTTLE6};
 	for(int i=0; i<6; i++)
 	{
 		if(Hero->Item[bottles[i]]&&BottleState[i]==BS_EMPTY)
@@ -762,7 +771,7 @@ int FillBottle(int state)
 
 int HasFairy()
 {
-	int bottles[6] = {I_BOTTLE1, I_BOTTLE2, I_BOTTLE3, I_BOTTLE4, I_BOTTLE5, I_BOTTLE6};
+	int bottles[6] = {IT_BOTTLE1, IT_BOTTLE2, IT_BOTTLE3, IT_BOTTLE4, IT_BOTTLE5, IT_BOTTLE6};
 	for(int i=0; i<6; i++)
 	{
 		if(Hero->Item[bottles[i]]&&BottleState[i]==BS_FAIRY)
@@ -1105,7 +1114,7 @@ ffc script Bottle_Empty
 				for(int j=1; j<=Screen->NumItems(); j++)
 				{
 					item itm = Screen->LoadItem(j);
-					if(itm->ID==I_FAIRY||itm->ID==I_FAIRYSTILL)
+					if(itm->ID==IT_FAIRY||itm->ID==IT_FAIRYSTILL)
 					{
 						if(RectCollision(itm->X+itm->HitXOffset, itm->Y+itm->HitYOffset, itm->X+itm->HitXOffset+itm->HitWidth, itm->Y+itm->HitYOffset+itm->HitHeight, X+4, Y+4, X+11, Y+11))
 						{
@@ -1122,7 +1131,7 @@ ffc script Bottle_Empty
 		{
 			BottleState[bottleid] = BS_WATER;
 			RefreshBottles();
-			item itm = CreateItemAt(I_WATERBOTTLE, Hero->X, Hero->Y);
+			item itm = CreateItemAt(IT_WATERBOTTLE, Hero->X, Hero->Y);
 			itm->Pickup = IP_HOLDUP;
 		}
 		else if(Collected==BS_HOTWATER)
@@ -1130,14 +1139,14 @@ ffc script Bottle_Empty
 			BottleState[bottleid] = BS_HOTWATER;
 			springTimers[bottleid] = trueTime + TIME_HOTWATER;
 			RefreshBottles();
-			item itm = CreateItemAt(I_HOTWATERBOTTLE, Hero->X, Hero->Y);
+			item itm = CreateItemAt(IT_HOTWATERBOTTLE, Hero->X, Hero->Y);
 			itm->Pickup = IP_HOLDUP;
 		}
 		else if(Collected==BS_FAIRY)
 		{
 			BottleState[bottleid] = BS_FAIRY;
 			RefreshBottles();
-			item itm = CreateItemAt(I_FAIRYBOTTLE, Hero->X, Hero->Y);
+			item itm = CreateItemAt(IT_FAIRYBOTTLE, Hero->X, Hero->Y);
 			itm->Pickup = IP_HOLDUP;
 		}
 		WaitNoAction(10);
@@ -1233,7 +1242,7 @@ ffc script ItemShop //start
 //custom emptybottles functions
 bool ClearBottle(int state)
 {
-	int bottles[6] = {I_BOTTLE1, I_BOTTLE2, I_BOTTLE3, I_BOTTLE4, I_BOTTLE5, I_BOTTLE6};
+	int bottles[6] = {IT_BOTTLE1, IT_BOTTLE2, IT_BOTTLE3, IT_BOTTLE4, IT_BOTTLE5, IT_BOTTLE6};
 	for(int i=5; i>=0; i--)
 	{
 		if(Hero->Item[bottles[i]]&&BottleState[i]==state)
@@ -1365,8 +1374,8 @@ item script Bombchu
 		bombchu->HitZHeight = 2;
 		bombchu->UseSprite(sprite);
 		bombchu->OriginalTile += bombchu->Dir*Max(1,bombchu->NumFrames);
-		bombchu->InitD[0] = this->Power;
 		bombchu->Script = this->WeaponScript;
+		bombchu->InitD[0] = this->Power;
 		switch(bombchu->Dir)
 		{
 			case DIR_RIGHT:
@@ -1458,6 +1467,7 @@ lweapon script Bombchu_LW
 			{
 				lweapon blast = CreateLWeaponAt(LW_BOMBBLAST, this->X, this->Y);
 				blast->Damage = damage;
+				Debug::print("Blast damage: %d",damage);
 				this->DeadState = WDS_DEAD;
 			}
 			Waitframe();
@@ -1544,7 +1554,7 @@ item script Pictograph
 					setTint(TINT_GREYSCALE, false);
 					changeBase(BASE_TINTED);
 				}
-				setGlobalBool(GVAR_HIDE_PASSIVESUB,GV_MISC_BOOL,true);
+				hidePassive(true);
 				//Show current image
 				FastRect(7,0,-56,255,175,BLACK,OP_OPAQUE);
 				picto->Blit(7, RT_SCREEN, 0, 0, PICTO_WIDTH, PICTO_HEIGHT, 0, 0, PICTO_WIDTH, PICTO_HEIGHT, 0, 0, 0, BITDX_NORMAL, 0, false);
@@ -1552,7 +1562,7 @@ item script Pictograph
 			else
 			{
 				thisDMAP->Palette = thisDMpal;
-				setGlobalBool(GVAR_HIDE_PASSIVESUB,GV_MISC_BOOL,psub);
+				hidePassive(psub);
 				FastRect(7, 0+(FRAME_SPACING), 0+(FRAME_SPACING), 0+(FRAME_SPACING+FRAME_LENGTH),0+(FRAME_SPACING+FRAME_WIDTH), WHITE, OP_OPAQUE);
 				FastRect(7, PICTO_WIDTH-(FRAME_SPACING), 0+(FRAME_SPACING), PICTO_WIDTH-(FRAME_SPACING+FRAME_LENGTH),0+(FRAME_SPACING+FRAME_WIDTH), WHITE, OP_OPAQUE);
 				FastRect(7, PICTO_WIDTH-(FRAME_SPACING), PICTO_HEIGHT-(FRAME_SPACING), PICTO_WIDTH-(FRAME_SPACING+FRAME_LENGTH),PICTO_HEIGHT-(FRAME_SPACING+FRAME_WIDTH), WHITE, OP_OPAQUE);
@@ -1569,7 +1579,7 @@ item script Pictograph
 			}
 			else if(Input->Press[CB_B] || Input->Press[CB_EX1] || Input->Press[CB_EX2]) break;
 		}
-		setGlobalBool(GVAR_HIDE_PASSIVESUB,GV_MISC_BOOL,psub);
+		hidePassive(psub);
 		if(snap)
 		{
 			if(color)
@@ -1612,136 +1622,148 @@ item script Pictograph
 }
 //end Pictograph
 //start Stray Fairy
-itemsprite script StrayFairy
+namespace Fairies
 {
-	void run(int dungeon, bool bubbled)
+	itemsprite script StrayFairy
 	{
-		this->Pickup &= ~IP_ST_ITEM; //Don't allow this to be considered a normal screen item (deleted on heightwarp)
-		int animtimer;
-		DEFINE delay = 10;
-		bool up;
-		this->Pickup |= IP_DUMMY;
-		if(this->Misc[FAIRYMISC_TYPE] == FAIRY_NULL)
+		void run(int dungeon, bool bubbled)
 		{
-			this->Misc[FAIRYMISC_TYPE] = FAIRY_MAPDATA;
-			this->Misc[FAIRYMISC_VALUE] = CurMapdata();
-		}
-		Waitframe();
-		while(true)
-		{
-			//Animation stuff
-			this->DrawYOffset = Div(animtimer%(5*delay),delay)-2; //Float slightly up and down; -2 to 2 frames
-			unless(up)
+			this->Pickup &= ~IP_ST_ITEM; //Don't allow this to be considered a normal screen item (deleted on heightwarp)
+			int animtimer;
+			DEFINE delay = 10;
+			bool up;
+			this->Pickup |= IP_DUMMY;
+			if(this->Misc[FAIRYMISC_TYPE] == FAIRY_NULL)
 			{
-				++animtimer;
-				if(animtimer==5*delay-1)
-					up=true;
+				this->Misc[FAIRYMISC_TYPE] = FAIRY_MAPDATA;
+				this->Misc[FAIRYMISC_VALUE] = CurMapdata();
 			}
-			else
-			{
-				--animtimer;
-				unless(animtimer)
-					up=false;
-			}
-			//Hit calc stuff
-			this->HitXOffset+=8;
-			if(bubbled)
-			{
-				for(int q = 1; q <= Screen->NumLWeapons(); ++q)
-				{
-					lweapon weap = Screen->LoadLWeapon(q);
-					switch(weap->ID)
-					{
-						case LW_BOMBBLAST:
-							if(Collision(this,weap))
-							{
-								bubbled = false;
-							}
-							break;
-						case LW_SWORD:
-							if(Collision(this,weap))
-							{
-								bubbled = false;
-								this->X = Hero->X;
-								this->Y = Hero->Y;
-							}
-							break;
-						case LW_BRANG:
-						case LW_HOOKSHOT:
-							if(HeightCollision(this,weap))
-							{
-								bubbled = false;
-								this->X = Hero->X;
-								this->Y = Hero->Y;
-							}
-							break;
-						case LW_MAGIC:
-						case LW_BEAM:
-						case LW_ARROW:
-							if(HeightCollision(this,weap))
-							{
-								bubbled = false;
-								Remove(weap);
-							}
-							break;
-					}
-					unless(bubbled)
-					{
-						this->OriginalTile+=20; //un-bubble visually
-						this->Tile = this->OriginalTile;
-						break;
-					}
-				}
-			}
-			else if(mask == MASK_GREATFAIRY)
-			{
-				this->Misc[ITEMMISC_LAYERDMAP] = Game->GetCurDMap() + 1; //Force to current layer
-				int degrees = RadtoDeg(TurnTowards(CenterX(this), CenterY(this), CenterLinkX(), CenterLinkY(), 0, 1));
-				this->X += VectorX(1, degrees);
-				this->Y += VectorY(1, degrees);
-			}
-			
-			unless(bubbled || !LinkCollision(this))
-			{
-				while(true)
-				{
-					int degrees = 0;
-					this->DrawYOffset=0;
-					incGlobalVar(GVAR_FAIRY_START + dungeon, GV_MISCRESETTABLE, 1);
-					switch(this->Misc[FAIRYMISC_TYPE])
-					{
-						case FAIRY_POT:
-							//UNFINISHED no pot handling
-							break;
-						case FAIRY_CHEST: //Fairies from chests are automatically collected, so, the chest can set the cheststate.
-							break;
-						case FAIRY_MAPDATA: //Mark the item collected, so it won't respawn
-							(<mapdata>(this->Misc[FAIRYMISC_VALUE]))->State[ST_ITEM] = true;
-							break;
-					}
-					for(int q = 0; q < 360; ++q)
-					{
-						this->X = CenterLinkX() + VectorX(16, degrees) - 8;
-						this->Y = CenterLinkY() + VectorY(16, degrees) - 8;
-						degrees += 5;
-						this->Misc[ITEMMISC_LAYERDMAP] = Game->GetCurDMap() + 1; //Force to current layer
-						Waitframe();
-					}
-					Remove(this);
-					Quit();
-				}
-			}
-			this->HitXOffset-=8;
 			Waitframe();
+			while(true)
+			{
+				//Animation stuff
+				this->DrawYOffset = Div(animtimer%(5*delay),delay)-2; //Float slightly up and down; -2 to 2 frames
+				unless(up)
+				{
+					++animtimer;
+					if(animtimer==5*delay-1)
+						up=true;
+				}
+				else
+				{
+					--animtimer;
+					unless(animtimer)
+						up=false;
+				}
+				//Hit calc stuff
+				this->HitXOffset+=8;
+				if(bubbled)
+				{
+					for(int q = 1; q <= Screen->NumLWeapons(); ++q)
+					{
+						lweapon weap = Screen->LoadLWeapon(q);
+						switch(weap->ID)
+						{
+							case LW_BOMBBLAST:
+								if(Collision(this,weap))
+								{
+									bubbled = false;
+								}
+								break;
+							case LW_SWORD:
+								if(Collision(this,weap))
+								{
+									bubbled = false;
+									this->X = Hero->X;
+									this->Y = Hero->Y;
+								}
+								break;
+							case LW_BRANG:
+							case LW_HOOKSHOT:
+								if(HeightCollision(this,weap))
+								{
+									bubbled = false;
+									this->X = Hero->X;
+									this->Y = Hero->Y;
+								}
+								break;
+							case LW_MAGIC:
+							case LW_BEAM:
+							case LW_ARROW:
+								if(HeightCollision(this,weap))
+								{
+									bubbled = false;
+									Remove(weap);
+								}
+								break;
+						}
+						unless(bubbled)
+						{
+							this->OriginalTile+=20; //un-bubble visually
+							this->Tile = this->OriginalTile;
+							break;
+						}
+					}
+				}
+				else if(mask == MASK_GREATFAIRY)
+				{
+					this->Misc[ITEMMISC_LAYERDMAP] = Game->GetCurDMap() + 1; //Force to current layer
+					int degrees = RadtoDeg(TurnTowards(CenterX(this), CenterY(this), CenterLinkX(), CenterLinkY(), 0, 1));
+					this->X += VectorX(1, degrees);
+					this->Y += VectorY(1, degrees);
+				}
+				
+				unless(bubbled || !LinkCollision(this))
+				{
+					while(true)
+					{
+						int degrees = 0;
+						this->DrawYOffset=0;
+						incGlobalVar(GVAR_FAIRY_START + dungeon, GV_MISCRESETTABLE, 1);
+						switch(this->Misc[FAIRYMISC_TYPE])
+						{
+							case FAIRY_POT:
+								//UNFINISHED no pot handling
+								break;
+							case FAIRY_CHEST: //Fairies from chests are automatically collected, so, the chest can set the cheststate.
+								break;
+							case FAIRY_MAPDATA: //Mark the item collected, so it won't respawn
+								(<mapdata>(this->Misc[FAIRYMISC_VALUE]))->State[ST_ITEM] = true;
+								break;
+							case FAIRY_SCRIPT:
+								setGlobalBool(this->Misc[FAIRYMISC_VALUE], GV_MISCRESETTABLEBOOL, true);
+								break;
+						}
+						int spintime = 360;
+						if(dungeon == INDEX_TOWN)
+						{
+							degrees = townFairyCutscene(this);
+							spintime = 90;
+						}
+						for(int q = 0; q < spintime; ++q)
+						{
+							this->X = CenterLinkX() + VectorX(16, degrees) - 8;
+							this->Y = CenterLinkY() + VectorY(16, degrees) - 8;
+							degrees += 5;
+							this->Misc[ITEMMISC_LAYERDMAP] = Game->GetCurDMap() + 1; //Force to current layer
+							Waitframe();
+						}
+						Remove(this);
+						Quit();
+					}
+				}
+				this->HitXOffset-=8;
+				Waitframe();
+			}
 		}
-	}
-	
-	bool HeightCollision(item this, lweapon weap)
-	{
-		return RectCollision(this->X, this->Y, this->X+this->HitWidth, this->Y+this->HitHeight,
-			weap->X, weap->Y, weap->X+weap->HitWidth, weap->Y+weap->HitHeight)
-			&& (this->Z + this->HitZHeight >= weap->Z)
-			&& (this->Z <= weap->Z + weap->HitZHeight);
+		
+		bool HeightCollision(item this, lweapon weap)
+		{
+			return RectCollision(this->X, this->Y, this->X+this->HitWidth, this->Y+this->HitHeight,
+				weap->X, weap->Y, weap->X+weap->HitWidth, weap->Y+weap->HitHeight)
+				&& (this->Z + this->HitZHeight >= weap->Z)
+				&& (this->Z <= weap->Z + weap->HitZHeight);
+		}
 	}
 }
 //end
@@ -1782,3 +1804,10 @@ void pitfall(lweapon weap)
 	}
 }
 //end misc
+//start Double Defense
+void reloadDoubleDef()
+{
+	itemdata id = Game->LoadItemData(IT_DOUBLEDEF);
+	id->Power = 100 / Max((form==FORM_FIERCE_DEITY?2:0) + (getGlobalBool(GVAR_HAS_DOUBLE_DEF,GV_MISC_BOOL)?2:0),1);
+}
+//end

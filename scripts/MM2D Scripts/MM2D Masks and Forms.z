@@ -17,7 +17,7 @@ void handleMasks()
 					lweapon blast = CreateLWeaponAt(LW_BOMBBLAST,Hero->X+dirX(Hero->Dir)*16,Hero->Y+dirY(Hero->Dir)*16);
 					blast->Damage=2;
 					setGlobalVar(GVAR_BLASTMASKCOOLDOWN,GV_MISC,360);
-					if(Hero->Item[8]||Hero->Item[37]) {Hero->InvFrames=40;freezeFrames=30;NoAction();}
+					if(Hero->Item[IT_HYLIANSHIELD]||Hero->Item[IT_MIRRORSHIELD]) {Hero->InvFrames=40;freezeFrames=30;NoAction();}
 				}
 			}
 			else
@@ -119,21 +119,21 @@ void handleTransformations()//start
 		switch(form)
 		{
 			case FORM_HUMAN: //start
-				if(Input->Press[CB_R]&&Hero->Action!=LA_SWIMMING&&!Hero->Item[210])
+				if(Input->Press[CB_R]&&Hero->Action!=LA_SWIMMING&&!Hero->Item[IT_SWORD_GFAIRY])
 				{
 					Game->PlaySound(SFX_SHIELD);
 				}
-				if(Input->Button[CB_R]&&Hero->Action!=LA_SWIMMING&&!Input->Button[CB_A]&&!Input->Button[CB_B]&&!Input->Button[CB_EX1]&&!Input->Button[CB_EX2]&&!Hero->Item[210])
+				if(Input->Button[CB_R]&&Hero->Action!=LA_SWIMMING&&!Input->Button[CB_A]&&!Input->Button[CB_B]&&!Input->Button[CB_EX1]&&!Input->Button[CB_EX2]&&!Hero->Item[IT_SWORD_GFAIRY])
 				{
-					Hero->Item[8]=true;
-					Hero->Item[37]=hasMirrorShield;
+					Hero->Item[IT_HYLIANSHIELD]=true;
+					Hero->Item[IT_MIRRORSHIELD]=hasMirrorShield;
 					Hero->Item[FORMITEM_SHIELD] = !hasMirrorShield;
 					Hero->Item[FORMITEM_M_SHIELD] = hasMirrorShield;
 				}
 				else
 				{
-					Hero->Item[8]=false;
-					Hero->Item[37]=false;
+					Hero->Item[IT_HYLIANSHIELD]=false;
+					Hero->Item[IT_MIRRORSHIELD]=false;
 					Hero->Item[FORMITEM_SHIELD] = false;
 					Hero->Item[FORMITEM_M_SHIELD] = false;
 				}
@@ -143,7 +143,7 @@ void handleTransformations()//start
 				{
 					if(Input->Press[CB_R])
 					{
-						useItem = I_DEKU_BUBBLE;
+						useItem = IT_DEKU_BUBBLE;
 						Input->Press[CB_R]=false;
 						Input->Button[CB_R]=false;
 					}
@@ -153,12 +153,12 @@ void handleTransformations()//start
 					dekuFly();
 				}
 				int linkcombot = Screen->ComboT[ComboAt(Hero->X+8,Hero->Y+12)];
-				if(!Deku_flying&&(linkcombot==CT_WATER||linkcombot==CT_SHALLOWWATER))
+				if(!Deku_flying&&(linkcombot==CT_WATER/*||linkcombot==CT_SHALLOWWATER*/))
 				{
 					--Deku_floating;
 					if(isTouchingComboBy(COMBO_LILYPAD,8))
 					{
-						Deku_floating=60;
+						Deku_floating=DEKU_FLOATING_LENGTH;
 					}
 					else if(Deku_floating>0&&Hero->Action!=LA_DROWNING&&!(Deku_floating%20))
 					{//Play every 20 frames
@@ -167,12 +167,12 @@ void handleTransformations()//start
 				}
 				else
 				{
-					Deku_floating = 60;
-					Hero->Item[51] = true;
+					Deku_floating = DEKU_FLOATING_LENGTH;
+					Hero->Item[IT_FLIPPERS] = true;
 				}
 				unless(Deku_floating)
 				{
-					Hero->Item[51]=false;
+					Hero->Item[IT_FLIPPERS]=false;
 					Hero->Action=LA_DROWNING;
 				}
 				break;//end
@@ -189,12 +189,12 @@ void handleTransformations()//start
 					Hero->SwordJinx = 10;
 					if(Input->Press[CB_A])
 					{
-						useItem = I_GORON_POUND;
+						useItem = IT_GORON_POUND;
 						Input->Press[CB_A]=false;
 						Input->Button[CB_A]=false;
 					}
-					Hero->Item[36]=false;
-					Hero->Item[54]=true;
+					Hero->Item[IT_GORON_PUNCH]=false;
+					Hero->Item[IT_GORON_POUND]=true;
 					if((Input->Button[CB_DOWN]||Input->Button[CB_RIGHT]||Input->Button[CB_LEFT]||Input->Button[CB_UP])&&(Hero->Action==LA_NONE||Hero->Action==LA_WALKING||Hero->Action==LA_GOTHURTLAND))
 					{
 						if(timeRolling<84)
@@ -263,8 +263,8 @@ void handleTransformations()//start
 					Audio->EndSound(SFX_GORONROLL_SPEEDLOOP);
 					Audio->EndSound(SFX_GORONROLL_SPEEDUP);
 					Audio->EndSound(SFX_GORONPOUND);
-					Hero->Item[36]=true;
-					Hero->Item[54]=false;
+					Hero->Item[IT_GORON_PUNCH]=true;
+					Hero->Item[IT_GORON_POUND]=false;
 					timeRolling = 0;
 					spikedRolling=false;
 				}
@@ -288,14 +288,14 @@ void handleTransformations()//start
 				}
 				if(Input->Button[CB_R]&&Hero->Action!=LA_SWIMMING&&!Input->Button[CB_A])
 				{
-					Hero->Item[8]=true;
-					Hero->Item[37]=hasMirrorShield;
+					Hero->Item[IT_HYLIANSHIELD]=true;
+					Hero->Item[IT_MIRRORSHIELD]=hasMirrorShield;
 					killActionsBut({CB_RIGHT,CB_LEFT,CB_UP,CB_DOWN,CB_EX4,CB_A});
 				}
 				else
 				{
-					Hero->Item[8]=false;
-					Hero->Item[37]=false;
+					Hero->Item[IT_HYLIANSHIELD]=false;
+					Hero->Item[IT_MIRRORSHIELD]=false;
 				}
 				break;//end
 		}
@@ -304,69 +304,68 @@ void handleTransformations()//start
 	{
 		Hero->Item[FORMITEM_SHIELD] = false;
 		Hero->Item[FORMITEM_M_SHIELD] = false;
-		Hero->Item[210] = false;
+		Hero->Item[IT_SWORD_GFAIRY] = false;
 		if(form!=FORM_FIERCE_DEITY)
 		{
-			Hero->Item[8]=false;
-			Hero->Item[37]=false;
+			Hero->Item[IT_HYLIANSHIELD]=false;
+			Hero->Item[IT_MIRRORSHIELD]=false;
 		}
 	}//end
 	if(form!=FORM_DEKU)//start
 	{
-		Hero->Item[133] = false;
-		Hero->Item[134] = false;
-		Hero->Item[135] = false;
-		Hero->Item[I_DEKU_BUBBLE] = false;
+		Hero->Item[IT_DEKUSPIN_SWORD] = false;
+		Hero->Item[IT_DEKUSPINSCROLL] = false;
+		Hero->Item[IT_DEKUSPINCHARGE] = false;
 	}//end
 	if(form!=FORM_GORON)//start
 	{
 		curled=false;
 		spikedRolling=false;
-		Hero->Item[36]=false;
-		Hero->Item[54]=false;
+		Hero->Item[IT_GORON_PUNCH]=false;
+		Hero->Item[IT_GORON_POUND]=false;
 	}//end
 	if(form!=FORM_ZORA)//start
 	{
-		Hero->Item[136] = false;
+		Hero->Item[IT_SWORD_ZORA_BLADE] = false;
 	}//end
 	if(form!=FORM_FIERCE_DEITY)//start
 	{
-		Hero->Item[208]=false;
-		Hero->Item[209]=false;
+		reloadDoubleDef();
+		Hero->Item[IT_SWORD_FIERCEDEITY]=false;
 	}//end
 	switch(form)
 	{
 		case FORM_HUMAN: //start
-			Hero->Item[51] = true;
-			Hero->Item[214]=false;
+			Hero->Item[IT_FLIPPERS] = true;
+			Hero->Item[IT_FLIPPERS2]=false;
 			break;//end
 		case FORM_DEKU: //start
-			Hero->Item[51] = true;
-			Hero->Item[214]=false;
-			Hero->Item[133] = true;
-			Hero->Item[134] = true;
-			Hero->Item[135] = true;
-			Hero->Item[I_DEKU_BUBBLE] = true;
-			Hero->Item[8]=false;
-			Hero->Item[37]=false;
+			Hero->Item[IT_FLIPPERS] = true;
+			Hero->Item[IT_FLIPPERS2]=false;
+			Hero->Item[IT_DEKUSPIN_SWORD] = true;
+			Hero->Item[IT_DEKUSPINSCROLL] = true;
+			Hero->Item[IT_DEKUSPINCHARGE] = true;
+			Hero->Item[IT_HYLIANSHIELD]=false;
+			Hero->Item[IT_MIRRORSHIELD]=false;
+			LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_DEKU);
 			break;//end
 		case FORM_GORON: //start
-			Hero->Item[51]=false;
-			Hero->Item[214]=false;
-			Hero->Item[8]=false;
-			Hero->Item[37]=false;
+			Hero->Item[IT_FLIPPERS]=false;
+			Hero->Item[IT_FLIPPERS2]=false;
+			Hero->Item[IT_HYLIANSHIELD]=false;
+			Hero->Item[IT_MIRRORSHIELD]=false;
 			break;//end
 		case FORM_ZORA: //start
-			Hero->Item[214]=true;
-			Hero->Item[8]=false;
-			Hero->Item[37]=false;
-			Hero->Item[136] = true;
+			Hero->Item[IT_FLIPPERS2]=true;
+			Hero->Item[IT_HYLIANSHIELD]=false;
+			Hero->Item[IT_MIRRORSHIELD]=false;
+			Hero->Item[IT_SWORD_ZORA_BLADE] = true;
 			if(Hero->Action==LA_SWIMMING)LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_ZORA_WATER);
 			handleZoraScreenChange();
 			break;//end
 		case FORM_FIERCE_DEITY: //start
-			Hero->Item[208]=true;
-			Hero->Item[209]=true;
+			reloadDoubleDef();
+			Hero->Item[IT_SWORD_FIERCEDEITY]=true;
 			break;//end
 	}
 }//end
@@ -379,7 +378,7 @@ bool itemAllowed(Form form, ItemID itemID)
 		case FORM_HUMAN:
 			switch(itemID)
 			{
-				case I_POWDERKEG:
+				case IT_POWDERKEG:
 					return false;
 				default:
 					return true;
@@ -387,14 +386,14 @@ bool itemAllowed(Form form, ItemID itemID)
 		case FORM_DEKU:
 			switch(itemID)
 			{
-				case I_OCARINA:
-				case I_MASK_DEKU:
-				case I_MASK_GORON:
-				case I_MASK_ZORA:
-				case I_MASK_DEITY:
-				case I_LENS_TRUTH:
-				case I_DEKU_BUBBLE:
-				case I_DEKUNUTS:
+				case IT_OCARINA:
+				case IT_MASK_DEKU:
+				case IT_MASK_GORON:
+				case IT_MASK_ZORA:
+				case IT_MASK_DEITY:
+				case IT_LENS:
+				case IT_DEKU_BUBBLE:
+				case IT_DEKUNUTS:
 					return true;
 				default:
 					return false;
@@ -403,14 +402,14 @@ bool itemAllowed(Form form, ItemID itemID)
 			if(curled) return false;
 			switch(itemID)
 			{
-				case I_OCARINA:
-				case I_MASK_DEKU:
-				case I_MASK_GORON:
-				case I_MASK_ZORA:
-				case I_MASK_DEITY:
-				case I_LENS_TRUTH:
-				case I_POWDERKEG:
-				case I_GORON_POUND:
+				case IT_OCARINA:
+				case IT_MASK_DEKU:
+				case IT_MASK_GORON:
+				case IT_MASK_ZORA:
+				case IT_MASK_DEITY:
+				case IT_LENS:
+				case IT_POWDERKEG:
+				case IT_GORON_POUND:
 					return true;
 				default:
 					return false;
@@ -418,12 +417,12 @@ bool itemAllowed(Form form, ItemID itemID)
 		case FORM_ZORA:
 			switch(itemID)
 			{
-				case I_OCARINA:
-				case I_MASK_DEKU:
-				case I_MASK_GORON:
-				case I_MASK_ZORA:
-				case I_MASK_DEITY:
-				case I_LENS_TRUTH:
+				case IT_OCARINA:
+				case IT_MASK_DEKU:
+				case IT_MASK_GORON:
+				case IT_MASK_ZORA:
+				case IT_MASK_DEITY:
+				case IT_LENS:
 					return true;
 				default:
 					return false;
@@ -431,11 +430,11 @@ bool itemAllowed(Form form, ItemID itemID)
 		case FORM_FIERCE_DEITY:
 			switch(itemID)
 			{
-				case I_MASK_DEKU:
-				case I_MASK_GORON:
-				case I_MASK_ZORA:
-				case I_MASK_DEITY:
-				case I_LENS_TRUTH:
+				case IT_MASK_DEKU:
+				case IT_MASK_GORON:
+				case IT_MASK_ZORA:
+				case IT_MASK_DEITY:
+				case IT_LENS:
 					return true;
 				default:
 					return false;
@@ -536,7 +535,7 @@ void dekuFly()//start DekuFly
 	}
 	else if((!(gameframe%6)&&Deku_flying>180)||(!(gameframe%12)&&Deku_flying>91)||(!(gameframe%24)||gameframe%24==6))
 		Game->PlaySound(69);
-	if(Input->Press[CB_A])useItem=I_DEKUNUTS;
+	if(Input->Press[CB_A])useItem=IT_DEKUNUTS;
 	killActionsBut({CB_RIGHT,CB_LEFT,CB_UP,CB_DOWN,CB_EX4});
 	LinkMovement_SetLinkSpeedBoost(DekuFlightSpeedMod);
 }//end
@@ -567,7 +566,7 @@ void fireZoraBoomerang()//start ZoraRang
 {
 	unless(countLWeaponType(LW_BRANG))
 	{
-		itemdata Parent = Game->LoadItemData(I_ZORABRANG);
+		itemdata Parent = Game->LoadItemData(IT_ZORABRANG);
 		lweapon zoraBoom1 = Screen->CreateLWeapon(LW_BRANG);
 		zoraBoom1->X=CenterLinkX();
 		zoraBoom1->Y=CenterLinkY();
@@ -601,8 +600,8 @@ void fireZoraBoomerang()//start ZoraRang
 				zoraBoom1->Angle=DIR16_RADS_RIGHTUP;
 				zoraBoom2->Angle=DIR16_RADS_RIGHTDOWN;
 		}
-		zoraBoom1->Step=5;
-		zoraBoom2->Step=5;
+		zoraBoom1->Step=100;
+		zoraBoom2->Step=100;
 		zoraBoom1->Damage=1;
 		zoraBoom2->Damage=1;
 		zoraBoom1->Misc[BRANG_MISC_ANGLEACC]=0.035;

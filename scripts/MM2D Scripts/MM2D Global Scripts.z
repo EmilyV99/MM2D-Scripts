@@ -115,10 +115,7 @@ global script Global
 				freezeFrames--;
 			}
 			++gameframe;
-			if(gameframe>=3600)
-			{
-				gameframe=0;
-			}//end FrameCounters
+			gameframe%=3600;//end FrameCounters
 			//start Time passing
 			unless(freezeTime||(isFrozen||(slowTime&&(gameframe%2))||ScreenFlag(SF_MISC,SFM_SCRIPT1)||songFrames))
 			{
@@ -189,12 +186,13 @@ global script Global
 			{
 				warpfloors();
 				varDecrements();
-				checkJump();
 				heightWarp();
 				checkFall();
 				handleMeltableIce();
 				handleFreezableWater();
-			}//end
+			}
+			checkJump(isFrozen);
+			//end
 			//start
 			LinkActionOld=Hero->Action;
 			raftingCheck();
@@ -202,7 +200,13 @@ global script Global
 			unless(isFrozen)
 				highLedgeFromWater();
 			//end
-			if(UsingItem(I_LENS_TRUTH)&&fullCounter(CR_MAGIC)>2)
+			bool temp = getGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL);
+			runExtraControls();
+			if(temp != getGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL))refreshTime = true;
+			handleTintPausing();
+			HeroDir8 = validateDir(getPressedDir8(), (HeroDir8 & 4) ? HeroDir8 : Hero->Dir);
+			Waitdraw();
+			if(UsingItem(IT_LENS)&&fullCounter(CR_MAGIC)>2)
 			{
 				unless(isLensTinted || (getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL)))
 				{
@@ -218,14 +222,8 @@ global script Global
 					isLensTinted=false;
 				}
 			}
-			bool temp = getGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL);
-			runExtraControls();
-			if(temp != getGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL))refreshTime = true;
-			handleTintPausing();
 			timePalette();
 			runTints();
-			HeroDir8 = validateDir(getPressedDir8(), (HeroDir8 & 4) ? HeroDir8 : Hero->Dir);
-			Waitdraw();
 			scrnChanged=false;
 			if(lastMap!=Game->GetCurMap()||lastScreen!=Game->GetCurScreen())
 			{
@@ -283,7 +281,7 @@ global script Global
 			Hero->WarpEx({WT_IWARP,0,32,-1,WARP_A,WARPEFFECT_NONE,SFX_DESTRUCTION,WARPFLAGS_DESTRUCTION});
 			Waitframes(2);
 			u args[8];
-			if(LEARNED_SONGS[SONG_SongOfTime]&&Hero->Item[31])
+			if(LEARNED_SONGS[SONG_SongOfTime]&&Hero->Item[IT_OCARINA])
 			{
 				args[0]=3;
 			}
@@ -449,6 +447,7 @@ global script Global
 				map = upMapdata(map);
 			}
 			cur->Pattern = PATTERN_NO_SPAWNING;
+			holdingBomb = false;
 		}
 	}
 	
@@ -782,6 +781,7 @@ global script Global
 					noSave = !noSave;
 				}
 				if(Input->ReadKey[KEY_0])Hero->Warp(0,0x24);//Warp to test area
+				if(Input->ReadKey[KEY_9])Hero->Warp(6,0x43);//Warp to Bomber's Hideout
 				if(Input->ReadKey[KEY_R])Hero->PitWarp(Game->GetCurDMap(),Game->GetCurDMapScreen());//Reset the screen by pitwarping to it
 				if(Input->ReadKey[KEY_BACKSLASH])dbdraw = !dbdraw;
 				if(Input->ReadKey[KEY_F])debugCanFall = !debugCanFall;
@@ -812,18 +812,18 @@ global script Global
 			if(ItemIDs[i]!=0)Hero->Item[ItemIDs[i]]=true;
 		}
 		//bbags
-		Hero->Item[81]=true;
-		Hero->Item[82]=true;
-		Hero->Item[83]=true;
-		Hero->Item[106]=true;
+		Hero->Item[IT_BOMBBAG]=true;
+		Hero->Item[IT_BOMBBAG_BIG]=true;
+		Hero->Item[IT_BOMBBAG_BIGGEST]=true;
+		Hero->Item[IT_BOMBBAG_POWDERKEG]=true;
 		//quivs
-		Hero->Item[74]=true;
-		Hero->Item[75]=true;
-		Hero->Item[76]=true;
+		Hero->Item[IT_QUIVER]=true;
+		Hero->Item[IT_QUIVER_BIG]=true;
+		Hero->Item[IT_QUIVER_BIGGEST]=true;
 		Game->MCounter[CR_LIFE]=320;
-		Game->MCounter[CR_MAGIC]=256;
+		Game->MCounter[CR_MAGIC]=MAX_MAGIC;
 		Game->Counter[CR_LIFE]=320;
-		Game->Counter[CR_MAGIC]=256;
+		Game->Counter[CR_MAGIC]=MAX_MAGIC;
 		Game->MCounter[CR_BOMBCHUS]=40;
 		Game->MCounter[CR_ARROWS]=50;
 		Game->MCounter[CR_BOMBS]=40;
@@ -1117,10 +1117,11 @@ void onLaunch() //Called from `Init` and `OnContinue`
 	initGame(); //Handle rando stuff here.
 	OptionsMenu.init();
 	arrowAimMode = false;
-	Game->MCounter[CR_BOMBCHUS]=Hero->Item[81]?40:0;
+	Game->MCounter[CR_BOMBCHUS]=Hero->Item[IT_BOMBBAG]?40:0;
 	LinkMovement_Init();
 	TangoInit();
 	HeroDir8 = validateDir(getPressedDir8(), Hero->Dir);
+	reloadDoubleDef(); //Set defense based on Fierce Deity + Double Def reward
 	//start Ocarina init
 	scarecrowMode = false;
 	scarecrowRecord = false;
@@ -1218,7 +1219,6 @@ hero script OptionsMenu
 	};
 	
 	int tabs[] = {STATE_RFS, STATE_OPTIONSKEY, STATE_OPT_MENU_FONT, STATE_MENU_MAX};
-	int foo[] = {10, 20, 30, 9001};
 	enum Tab
 	{
 		TAB_INVALID = -1,
@@ -1771,15 +1771,15 @@ hero script OptionsMenu
 		//Options control should not need reloading
 		//
 		//Set "Flip Right-Handed Slash" on all swords
-		itemdata it = Game->LoadItemData(I_SWORD_KOKIRI);
+		itemdata it = Game->LoadItemData(IT_SWORD_KOKIRI);
 		it->Flags[7] = opt[OPT_RFS];
-		it = Game->LoadItemData(I_SWORD_RAZOR);
+		it = Game->LoadItemData(IT_SWORD_RAZOR);
 		it->Flags[7] = opt[OPT_RFS];
-		it = Game->LoadItemData(I_SWORD_GILDED);
+		it = Game->LoadItemData(IT_SWORD_GILDED);
 		it->Flags[7] = opt[OPT_RFS];
-		it = Game->LoadItemData(I_SWORD_GFAIRY);
+		it = Game->LoadItemData(IT_SWORD_GFAIRY);
 		it->Flags[7] = opt[OPT_RFS];
-		it = Game->LoadItemData(I_SWORD_ZORA_BLADE);
+		it = Game->LoadItemData(IT_SWORD_ZORA_BLADE);
 		it->Flags[7] = opt[OPT_RFS];
 		//
 		//Lens tint should not need reloading
@@ -2093,7 +2093,7 @@ namespace GameOverMenu
 		if(opt[OPT_HIDE_TINT_IN_MENU]) hideAllTints(true);
 		QuitState state = NONE;
 		int cursor = 0;
-		DEFINE NUM_OPTIONS = 1 + <int>(allowCancel) + <int>(Hero->Item[I_OCARINA]) + <int>(day < 4);
+		DEFINE NUM_OPTIONS = 1 + <int>(allowCancel) + <int>(Hero->Item[IT_OCARINA]) + <int>(day < 4);
 		DEFINE START_TEXT = SCREEN_VCENTER - (((NUM_OPTIONS * MENU_FONT_HEIGHT) + ((NUM_OPTIONS - 1) * MENU_SPACING)) / 2);
 		int timer;
 		while(state==NONE)
@@ -2111,7 +2111,7 @@ namespace GameOverMenu
 				if(Input->Press[CB_START] && cursor==opt) state = CONTINUE;
 				drawOpt(SCREEN_HCENTER, START_TEXT + (opt * (MENU_FONT_HEIGHT + MENU_SPACING)), cursor==opt++, CONTINUE);
 			}
-			if(Hero->Item[I_OCARINA])
+			if(Hero->Item[IT_OCARINA])
 			{
 				if(Input->Press[CB_START] && cursor==opt) state = RESET_TIME;
 				drawOpt(SCREEN_HCENTER, START_TEXT + (opt * (MENU_FONT_HEIGHT + MENU_SPACING)), cursor==opt++, RESET_TIME);
@@ -2192,6 +2192,7 @@ namespace GameOverMenu
 
 void testrun() //Function for testing things quickly at the start of the game
 {
+	//setGlobalVar(GVAR_FAIRY_START + 0, GV_MISCRESETTABLE, 3);
 	return;
 }//end
 

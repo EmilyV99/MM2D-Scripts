@@ -28,7 +28,7 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 		DEFINE FRAMES_ROUND = 6 * FRAMES_MINUTE;
 		int startArrows = Game->Counter[CR_ARROWS];
 		ItemID items[] = {B_item, EX1_item, EX2_item};
-		B_item = I_BOWARROW;
+		B_item = IT_BOWARROW;
 		EX1_item = NULL;
 		EX2_item = NULL;
 		int timer = 15 * FRAMES_ROUND;
@@ -507,7 +507,7 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 			{
 				if(cooldown==0)
 				{
-					B_item = I_BOWARROW;
+					B_item = IT_BOWARROW;
 					cooldown = -1;
 				}
 				else if(cooldown>0)cooldown--;
@@ -516,8 +516,8 @@ ffc script octoShootingGame //Call RunFFCScript from the NPC->interact(), when y
 			Hero->Y = 112;
 			timer--;
 			phaseTimer--;
-			Screen->FastTile(6,0,136,loadItemTile(I_BOWARROW),loadItemCSet(I_BOWARROW),OP_OPAQUE);
-			Screen->FastTile(6,0,152,loadItemTile(I_CLOCK),loadItemCSet(I_CLOCK),OP_OPAQUE);
+			Screen->FastTile(6,0,136,loadItemTile(IT_BOWARROW),loadItemCSet(IT_BOWARROW),OP_OPAQUE);
+			Screen->FastTile(6,0,152,loadItemTile(IT_CLOCK),loadItemCSet(IT_CLOCK),OP_OPAQUE);
 			int buf[] = "  :  :  ";
 			buf[0] = Div(Div(timer,FRAMES_HOUR),10) + '0';
 			buf[1] = Div(timer,FRAMES_HOUR)%10 + '0';
@@ -596,7 +596,7 @@ ffc script invisMazeGame
 				else --timer;
 			}
 			//Draw timer
-			Screen->FastTile(6,0,8,loadItemTile(I_CLOCK),loadItemCSet(I_CLOCK),OP_OPAQUE);
+			Screen->FastTile(6,0,8,loadItemTile(IT_CLOCK),loadItemCSet(IT_CLOCK),OP_OPAQUE);
 			int buf[] = "  :  ";
 			buf[0] = Div(Div((timer%FRAMES_HOUR),FRAMES_MINUTE),10) + '0';
 			buf[1] = Div((timer%FRAMES_HOUR),FRAMES_MINUTE)%10 + '0';
