@@ -190,6 +190,12 @@ namespace Venrob
 		if(!n->isValid())return false;
 		return CanWalkM(n->X + (useHit ? n->HitXOffset : 0), n->Y + (useHit ? n->HitYOffset : 0), n->X + (useHit ?  n->HitWidth + n->HitXOffset :  n->TileWidth * 16) - 1, n->Y + (useHit ?  n->HitHeight + n->HitYOffset :  n->TileHeight * 16) - 1, map, dir, step);
 	}
+	//item
+	bool CanWalkM(item it, mapdata map, int dir, int step, bool useHit)
+	{
+		if(!it->isValid())return false;
+		return CanWalkM(it->X + (useHit ? it->HitXOffset : 0), it->Y + (useHit ? it->HitYOffset : 0), it->X + (useHit ?  it->HitWidth + it->HitXOffset :  it->TileWidth * 16) - 1, it->Y + (useHit ?  it->HitHeight + it->HitYOffset :  it->TileHeight * 16) - 1, map, dir, step);
+	}
 	//ffc
 	bool CanWalkM(ffc f, mapdata map, int dir, int step, bool useEffect)
 	{
@@ -261,6 +267,12 @@ namespace Venrob
 	{
 		if(!n->isValid())return false;
 		return CanWalkMFull(n->X + (useHit ? n->HitXOffset : 0), n->Y + (useHit ? n->HitYOffset : 0), n->X + (useHit ?  n->HitWidth + n->HitXOffset :  n->TileWidth * 16) - 1, n->Y + (useHit ?  n->HitHeight + n->HitYOffset :  n->TileHeight * 16) - 1, map, dir, step);
+	}
+	//item
+	bool CanWalkMFull(item it, mapdata map, int dir, int step, bool useHit)
+	{
+		if(!it->isValid())return false;
+		return CanWalkMFull(it->X + (useHit ? it->HitXOffset : 0), it->Y + (useHit ? it->HitYOffset : 0), it->X + (useHit ?  it->HitWidth + it->HitXOffset :  it->TileWidth * 16) - 1, it->Y + (useHit ?  it->HitHeight + it->HitYOffset :  it->TileHeight * 16) - 1, map, dir, step);
 	}
 	//ffc
 	bool CanWalkMFull(ffc f, mapdata map, int dir, int step, bool useEffect)
@@ -490,7 +502,7 @@ namespace Venrob
 			return;
 		}//end
 	}//end
-	
+		
 	/**
 	 * Returns true if Hero is scrolling, or about to begin scrolling. Any scripted draws intended to not draw during scrolling should run only if this returns false.
 	 * Due to variance with Hero's movement (1 or 2 pixels), this may sometimes return true extraneously.

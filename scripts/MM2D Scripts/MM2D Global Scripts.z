@@ -162,7 +162,7 @@ global script Global
 			//start
 			if(Tango_AnySlotIsActive())
 			{
-				unless(slotWasDisplayed)
+				unless(slotWasDisplayed||subscreen)
 				{
 					Screen_Freeze(FREEZE_ACTION_BUT_FFC);
 					slotWasDisplayed=true;
@@ -246,12 +246,7 @@ global script Global
 			{
 				if(scrnChanged)
 					layer4check();
-				DrawLayer3_4();
-				drawExtraLayerEffects();
-				lwLoop();
-				ewLoop();
-				itemLoop();
-				npcLoop();
+				doDrawAndLoops();
 			}	
 			runHeightBitmap();
 			clearBitmap(RT_BITMAP0,6);
@@ -293,6 +288,15 @@ global script Global
 		}
 	}
 	//end destruction
+	void doDrawAndLoops() //start
+	{
+		DrawLayer3_4();
+		drawExtraLayerEffects();
+		lwLoop();
+		ewLoop();
+		itemLoop();
+		npcLoop();
+	}//end
 	//start extra
 	void layer4Toggle()
 	{
@@ -388,6 +392,9 @@ global script Global
 				case FFC_TORCH:
 					HeightFastCombo(upper,upper?2:3,m->FFCX[i],m->FFCY[i],getTorchCombo(m->GetFFCInitD(i,0),m->GetFFCInitD(i,2),m->GetFFCInitD(i,3),m->GetFFCInitD(i,5)),m->FFCCSet[i],OP_OPAQUE);
 					break;
+				case FFC_BALLOON:
+					if(getGlobalBool(m->GetFFCInitD(i,0),GV_ONETIME_TARGETS_RESETTABLE)) break;
+					//fall-through
 				default:
 					if(data==0)break;
 					if(data==COMBO_INVIS)break;
@@ -447,7 +454,7 @@ global script Global
 				map = upMapdata(map);
 			}
 			cur->Pattern = PATTERN_NO_SPAWNING;
-			holdingBomb = false;
+			HoldingObject = HOLD_NONE;
 		}
 	}
 	
@@ -542,7 +549,7 @@ global script Global
 			{
 				warpUps(Rafting[RAFT_UP]);
 				Rafting[RAFT_UP]=-1;
-				u args[8] = {Rafting[RAFT_DIR],0,0,2};
+				u args[8] = {Rafting[RAFT_DIR],0,0,SSSTATE_GROWN};
 				Rafting[RAFT_DIR] = -1;
 				Waitframe();
 				RunFFCScript(FFC_SOFTSOIL,args);
@@ -551,7 +558,7 @@ global script Global
 			{
 				//
 				Hero->Dir=Rafting[RAFT_DIR];
-				if(Rafting[RAFT_X]!=-1&&Rafting[RAFT_Y]!=-1&&!(gameframe%5))
+				if(Rafting[RAFT_X]!=-1&&Rafting[RAFT_Y]!=-1&&!(gameframe%8))
 				{
 					Hero->X = Rafting[RAFT_X];
 					Hero->Y = Rafting[RAFT_Y];
@@ -820,10 +827,13 @@ global script Global
 		Hero->Item[IT_QUIVER]=true;
 		Hero->Item[IT_QUIVER_BIG]=true;
 		Hero->Item[IT_QUIVER_BIGGEST]=true;
+		//Misc
+		Hero->Item[IT_DEKU_BUBBLE] = true;
+		//Counters
 		Game->MCounter[CR_LIFE]=320;
-		Game->MCounter[CR_MAGIC]=MAX_MAGIC;
+		Game->MCounter[CR_MAGIC]=256;
 		Game->Counter[CR_LIFE]=320;
-		Game->Counter[CR_MAGIC]=MAX_MAGIC;
+		Game->Counter[CR_MAGIC]=256;
 		Game->MCounter[CR_BOMBCHUS]=40;
 		Game->MCounter[CR_ARROWS]=50;
 		Game->MCounter[CR_BOMBS]=40;
@@ -2168,6 +2178,11 @@ namespace GameOverMenu
 				fakeSong = true;
 				playSong(SONGNOTES_SongOfTime);
 				playedSong = -1;
+				Global.doDrawAndLoops();
+				runHeightBitmap();
+				passiveSubscreen();
+				Screen_Freeze(FREEZE_ACTION);
+				Game->Suspend[susptSCRIPDRAWCLEAR] = true;
 				while(songFrames)
 				{
 					Global.handleOcarina();
@@ -2192,7 +2207,6 @@ namespace GameOverMenu
 
 void testrun() //Function for testing things quickly at the start of the game
 {
-	//setGlobalVar(GVAR_FAIRY_START + 0, GV_MISCRESETTABLE, 3);
 	return;
 }//end
 

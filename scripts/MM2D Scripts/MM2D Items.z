@@ -256,7 +256,7 @@ lweapon script throwableBombs_LW
 			this->DrawXOffset = 0;
 			this->DrawYOffset = 0;
 			mapdata map = getLayerMapdata(getRelativeHeight(this));
-			holdingBomb = this->Misc[BOMB_MISC_MODE]==BOMB_STATE_HELD;
+			if(this->Misc[BOMB_MISC_MODE]==BOMB_STATE_HELD) HoldingObject = HOLD_BOMB;
 			switch(this->Misc[BOMB_MISC_MODE])
 			{
 				case BOMB_STATE_HELD:
@@ -273,6 +273,7 @@ lweapon script throwableBombs_LW
 						pix = Hero->Action==LA_WALKING ? (BOMB_STEP_MOVING/100) + (1.5+LinkMovement_GetLinkSpeedBoost()) : BOMB_STEP_STILL/100;
 						this->Misc[BOMB_MISC_MOVINGTIME] = 60;
 						this->Misc[BOMB_MISC_MODE] = BOMB_STATE_MOVING;
+						HoldingObject=HOLD_NONE;
 						Hero->SwordJinx=3;
 						Hero->ItemJinx=3;
 					}
@@ -299,6 +300,7 @@ lweapon script throwableBombs_LW
 						}
 						this->Dir = Hero->Dir;
 						this->Misc[BOMB_MISC_MODE] = BOMB_STATE_STILL;
+						HoldingObject=HOLD_NONE;
 						Input->Press[CB_R]=false;
 						Input->Button[CB_R]=false;
 					}
@@ -324,6 +326,20 @@ lweapon script throwableBombs_LW
 					}
 					else
 						this->Misc[BOMB_MISC_MODE] = BOMB_STATE_STILL;
+					int centerCombo = ComboAt(this->X + InFrontCenteredX(this->Dir,pix),this->Y + InFrontCenteredY(this->Dir,pix));
+					while(true)
+					{
+						if(map->ComboI[centerCombo] == CI_RAMP)
+						{
+							if(map->ComboF[centerCombo] == CF_RAMP_UP)
+							{
+								++this->Misc[LWMISC_LAYERDMAP];
+								map = getLayerMapdata(getRelativeHeight(this));
+								continue;
+							}
+						}
+						break;
+					}
 					
 					break;
 				}
@@ -356,7 +372,7 @@ lweapon script throwableBombs_LW
 				blast->UseSprite(9);
 				blast->Misc[LWMISC_LAYERDMAP] = this->Misc[LWMISC_LAYERDMAP];
 				this->DeadState=WDS_DEAD;
-				holdingBomb=false;
+				HoldingObject=HOLD_NONE;
 				return;
 			}
 			int bx = this->X, by = this->Y;
@@ -378,7 +394,6 @@ DEFINE BOMB_STATE_HELD = 0;
 DEFINE BOMB_STATE_MOVING = 1;
 DEFINE BOMB_STATE_STILL = 2;
 
-bool holdingBomb = false;
 DEFINE LW_THRBOMBS = 31;
 
 lweapon loadLWeaponType(int type,int num)
@@ -1756,14 +1771,6 @@ namespace Fairies
 				Waitframe();
 			}
 		}
-		
-		bool HeightCollision(item this, lweapon weap)
-		{
-			return RectCollision(this->X, this->Y, this->X+this->HitWidth, this->Y+this->HitHeight,
-				weap->X, weap->Y, weap->X+weap->HitWidth, weap->Y+weap->HitHeight)
-				&& (this->Z + this->HitZHeight >= weap->Z)
-				&& (this->Z <= weap->Z + weap->HitZHeight);
-		}
 	}
 }
 //end
@@ -1809,5 +1816,69 @@ void reloadDoubleDef()
 {
 	itemdata id = Game->LoadItemData(IT_DOUBLEDEF);
 	id->Power = 100 / Max((form==FORM_FIERCE_DEITY?2:0) + (getGlobalBool(GVAR_HAS_DOUBLE_DEF,GV_MISC_BOOL)?2:0),1);
+}
+//end
+//start Item Pickup
+item script ItemPickup
+{
+	void run()
+	{
+		if(gbuf[0]) Debug::print("ERROR: GLOBAL BUFFER NOT CLEAR ON ITEMPICKUP!");
+		remchr(gbuf,0); //Clear global buffer
+		switch(this->ID)
+		{
+			case IT_MASK_GFAIRY:
+			{
+				strcpy(gbuf, "You got the ((Great Fairy Mask))! Wear it with {{item buttons}}.@char(26)((Stray fairies)) will fly to you when you wear it.@pressa()@char(26)You'll know you're close to a ((fairy)) who's lost in a temple if the mask's hair begins to [[shimmer]].");
+				break;
+			}
+			case IT_MAGIC:
+			{
+				Hero->Item[IT_DEKU_BUBBLE] = true;
+				sprintf(gbuf, "You've been granted {{Magic Power}}! In your %s form, press {{R}} to shoot ((bubble blasts)).@pressa()@char(26)Your {{Magic Power}} decreases when you shoot. Replenish it with ((Magic Jars)) and ((Potions)).", form==FORM_DEKU?"current":"Deku");
+				break;
+			}
+			case IT_HEARTPIECE:
+			{
+				switch(Game->Generic[GEN_HEARTPIECES])
+				{
+					case 0:
+						strcpy(gbuf, "You got a ((Piece of Heart))!@char(26)Collect [[four]] Pieces of Heart to assemble a new Heart Container.@pressa()@char(26)Each new container you put together will increase the amount of life energy you can have.");
+						break;
+					case 1:
+						strcpy(gbuf, "You got a ((Piece of Heart))!@char(26)You've collected two pieces so far. Collect two more to extend your life energy!");
+						break;
+					case 2:
+						strcpy(gbuf, "You got a ((Piece of Heart))!@char(26)You've collected three pieces so far. Collect one more to extend your life energy!");
+						break;
+					case 3:
+						strcpy(gbuf, "You got a ((Piece of Heart))!@char(26)You've assembled a new Heart Container! Your maximum life energy has been increased!");
+						break;
+				}
+				break;
+			}
+			case IT_RUP_100:
+			{
+				strcpy(gbuf, "You got a ((Silver Rupee))!@char(26)It's worth ((100 Rupees))!@char(26)You're pretty happy!");
+				break;
+			}
+			case IT_RUP_20:
+			{
+				strcpy(gbuf,"You got a ((Red Rupee))!@char(26)It's worth ((20 Rupees))!@char(26)That's pretty nice!");
+				break;
+			}
+			case IT_RUP_50:
+			{
+				strcpy(gbuf,"You got a ((Purple Rupee))!@char(26)It's worth ((50 Rupees))!@char(26)Your face is beaming!");
+				break;
+			}
+			case IT_RUP_5:
+			{
+				strcpy(gbuf,"You got a ((Blue Rupee))!@char(26)It's worth ((5 Rupees))!@char(26)That's not too shabby...");
+				break;
+			}
+		}
+		if(gbuf[0]) RunFFCScript(FFC_SHOWSTRING, {gbuf, 0, true});
+	}
 }
 //end

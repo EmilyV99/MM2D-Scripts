@@ -274,7 +274,7 @@ void handleTransformations()//start
 				}
 				break;//end
 			case FORM_ZORA: //start
-				if(Input->Press[CB_R])
+				if(Input->Press[CB_R] && HoldingObject == HOLD_NONE)
 				{
 					fireZoraBoomerang();
 					Input->Press[CB_R]=false;
@@ -305,6 +305,7 @@ void handleTransformations()//start
 		Hero->Item[FORMITEM_SHIELD] = false;
 		Hero->Item[FORMITEM_M_SHIELD] = false;
 		Hero->Item[IT_SWORD_GFAIRY] = false;
+		Hero->Item[IT_SPINSCROLL] = false;
 		if(form!=FORM_FIERCE_DEITY)
 		{
 			Hero->Item[IT_HYLIANSHIELD]=false;
@@ -338,6 +339,7 @@ void handleTransformations()//start
 		case FORM_HUMAN: //start
 			Hero->Item[IT_FLIPPERS] = true;
 			Hero->Item[IT_FLIPPERS2]=false;
+			Hero->Item[IT_SPINSCROLL] = true;
 			break;//end
 		case FORM_DEKU: //start
 			Hero->Item[IT_FLIPPERS] = true;
@@ -348,6 +350,7 @@ void handleTransformations()//start
 			Hero->Item[IT_HYLIANSHIELD]=false;
 			Hero->Item[IT_MIRRORSHIELD]=false;
 			LinkMovement_SetLinkSpeedBoost(SPEEDBOOST_DEKU);
+			if(Deku_flying) LinkMovement_SetLinkSpeedBoost(DekuFlightSpeedMod);
 			break;//end
 		case FORM_GORON: //start
 			Hero->Item[IT_FLIPPERS]=false;
@@ -537,7 +540,6 @@ void dekuFly()//start DekuFly
 		Game->PlaySound(69);
 	if(Input->Press[CB_A])useItem=IT_DEKUNUTS;
 	killActionsBut({CB_RIGHT,CB_LEFT,CB_UP,CB_DOWN,CB_EX4});
-	LinkMovement_SetLinkSpeedBoost(DekuFlightSpeedMod);
 }//end
 void goronSpikeRoll()//start GoronRoll
 {

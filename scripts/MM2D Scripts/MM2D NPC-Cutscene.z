@@ -1167,15 +1167,6 @@ namespace Fairies //start Fairy stuff
 				Debug::print("ERROR: BAD GREATFAIRY INDEX %d", index);
 			}
 			DEFINEB CANACTIVE = getGlobalVar(GVAR_FAIRY_START + index, GV_MISCRESETTABLE)>=numStrays;
-			ffc greatFairy = LoadUnusedFFC();
-			greatFairy->Data = COMBO_GREATFAIRY;
-			greatFairy->TileWidth = 3;
-			greatFairy->TileHeight = 2;
-			greatFairy->EffectWidth = 16*3;
-			greatFairy->EffectHeight = 16*2;
-			greatFairy->X = FAIRY_X;
-			greatFairy->Y = FAIRY_Y;
-			ffcInvis(greatFairy, true);
 			itemdata stray = loadItem(index);
 			unless(getGlobalBool(GVAR_GFAIRY_START+index, GV_MISCRESETTABLEBOOL))
 			{
@@ -1205,6 +1196,8 @@ namespace Fairies //start Fairy stuff
 				DEFINE numFairies = getGlobalVar(GVAR_FAIRY_START + index, GV_MISCRESETTABLE);
 				DEFINE scrpt = Game->GetItemSpriteScript("FloatingStrayFairy");
 				FreezeOne(susptLINK,true);
+				ForceUnfreeze(susptITEMS,true);
+				ForceUnfreeze(susptITEMSCRIPTENGINE,true);
 				Screen->D[D_MAXTIME] = Max(getFairyTime(numFairies),50);
 				Screen->D[D_CURRTIME] = Screen->D[D_MAXTIME];
 				for(int q = 0; q < numFairies; ++q)
@@ -1241,81 +1234,124 @@ namespace Fairies //start Fairy stuff
 				Screen->D[D_CURRTIME] = 0;
 				Waitframes(2);
 				//spawn growing sprite
-				growFairy(true);
-				ffcInvis(greatFairy, false);
+				item gfairy = growFairy(true);
 				Waitframes(5);
 				//Thank Link
-				unless(getGlobalBool(GVAR_GFAIRY_REW_START+index, GV_MISC_BOOL))
+				switch(index)
 				{
-					switch(index)
-					{
-						case INDEX_TOWN:
+					case INDEX_TOWN:
+						unless(getGlobalBool(GVAR_GFAIRY_TOWN_REW, GV_MISC_BOOL))
+						{
 							ShowNPCStringAndWait("Tatl, and you, young one of the altered shape...@pressa()@char(26)Thank you for returning my broken and shattered body to normal.@pressa()@char(26)I am the {{Great Fairy of Magic}}. I thought that masked child was helping me, and I grew careless.@pressa()@char(26)All I can offer you now is this:@char(26)I shall grant you {{Magic Power}} as a sign of my gratitude.@char(26)Please accept it!",N_GREAT_FAIRY);
-							Game->MCounter[CR_MAGIC] = MAX_MAGIC;
-							Game->DCounter[CR_MAGIC] = MAX_MAGIC;
-							Game->DCounter[CR_LIFE] = Game->MCounter[CR_LIFE];
-							Hero->Item[IT_DEKU_BUBBLE] = true;
-							while(Game->DCounter[CR_MAGIC] || Game->DCounter[CR_LIFE]) Waitframe();
-							ShowStringAndWait("You've been granted {{Magic Power}}! In your current form, press {{R}} to shoot [[bubble blasts]].@pressa()@char(26)Your {{Magic Power}} decreases when you shoot. Replenish it with [[Magic Jars]] and [[Potions]].");
-							ShowNPCStringAndWait("The [[man]] who lives in the [[observatory]] outside of town may know of the [[Skull Kid's]] whereabouts. But be careful!@pressa()@char(26)You must not underestimate that child's powers, kind young one.@pressa()@char(26)If you ever return to your [[former shape]], come see me. I shall give you [[more help]].",N_GREAT_FAIRY);
-							ffcInvis(greatFairy, true);
-							shrinkFairy();
-							FreezeOne(susptLINK,false);
-							Quit();
-						case INDEX_SWAMP:
+							item it = CreateItemAt(Items::getItem(IL_GFAIRY_TOWN),Hero->X,Hero->Y);
+							it->Pickup = IP_HOLDUP;
+							WaitForItemPickup();
+							FairyHeal();
+							ShowNPCStringAndWait("The {{man}} who lives in the [[observatory]] outside of town may know of the {{Skull Kid's}} whereabouts. But be careful!@pressa()@char(26)You must not underestimate that child's powers, kind young one.@pressa()@char(26)If you ever return to your [[former shape]], come see me. I shall give you [[more help]].",N_GREAT_FAIRY);
+							setGlobalBool(GVAR_GFAIRY_TOWN_REW, GV_MISC_BOOL,true);
+						}
+						else unless(Hero->Item[IT_MASK_DEKU])
+						{
+							ShowNPCStringAndWait("Tatl, and you, young one of the altered shape...@pressa()@char(26)Thank you for returning my broken and shattered body to normal.@pressa()@char(26)I am the {{Great Fairy of Magic}}. I thought that masked child was helping me, and I grew careless.@pressa()@char(26)For now, this is all I can offer you, so allow me to ease your weariness.",N_GREAT_FAIRY);
+							FairyHeal();
+							ShowNPCStringAndWait("The {{man}} who lives in the [[observatory]] outside of town may know of the {{Skull Kid's}} whereabouts. But be careful!@pressa()@char(26)You must not underestimate that child's powers, kind young one.@pressa()@char(26)If you ever return to your [[former shape]], come see me. I shall give you [[more help]].",N_GREAT_FAIRY);
+						}
+						else unless(getGlobalBool(GVAR_GFAIRY_TOWN_REW2, GV_MISC_BOOL))
+						{
+							ShowNPCStringAndWait("Oh, kind young one!@pressa()@char(26)Scattered throughout the [[four temples]] of this land are broken ((Stray Fairies)) like me.@pressa()@char(26)Please find a way to save them and return them to their fountains. Surely, they will add to your strength.",N_GREAT_FAIRY);
+							item it = CreateItemAt(Items::getItem(IL_GFAIRY_TOWN2),FAIRY_X+16,FAIRY_Y+32);
+							ShowNPCStringAndWait("Allow me to grant you ((something good)) so that the Stray Fairies will not fear you.",N_GREAT_FAIRY);
+							it->Pickup = IP_HOLDUP;
+							it->X = Hero->X;
+							it->Y = Hero->Y;
+							WaitForItemPickup();
+							FairyHeal();
+							ShowNPCStringAndWait("Come see me whenever your quest has made you weary.",N_GREAT_FAIRY);
+							setGlobalBool(GVAR_GFAIRY_TOWN_REW2, GV_MISC_BOOL, true);
+						}
+						break;
+					case INDEX_SWAMP:
+						unless(getGlobalBool(GVAR_GFAIRY_SWAMP_REW, GV_MISC_BOOL))
+						{
 							Game->Generic[GEN_MAGICDRAINRATE] = 1; //Half Magic
-							break;
-						case INDEX_MOUNTAIN:
-							//Magic Spin Attack? Perhaps charge ring?
-							break;
-						case INDEX_OCEAN:
+							setGlobalBool(GVAR_GFAIRY_SWAMP_REW, GV_MISC_BOOL,true);
+						}
+						break;
+					case INDEX_MOUNTAIN:
+						unless(getGlobalBool(GVAR_GFAIRY_MOUNTAIN_REW, GV_MISC_BOOL))
+						{
+							//Magic Spin Attack? Hurricane spin with 2 spins, magic cost?
+							setGlobalBool(GVAR_GFAIRY_MOUNTAIN_REW, GV_MISC_BOOL,true);
+						}
+						break;
+					case INDEX_OCEAN:
+						unless(getGlobalBool(GVAR_GFAIRY_OCEAN_REW, GV_MISC_BOOL))
+						{
 							setGlobalBool(GVAR_HAS_DOUBLE_DEF,GV_MISC_BOOL,true);
-							break;
-						case INDEX_CANYON:
+							setGlobalBool(GVAR_GFAIRY_OCEAN_REW, GV_MISC_BOOL,true);
+						}
+						break;
+					case INDEX_CANYON:
+						unless(getGlobalBool(GVAR_GFAIRY_CANYON_REW, GV_MISC_BOOL))
+						{
 							Hero->Item[IT_SWORD_GFAIRY_HAS] = true;
-							break;
-					}
-					setGlobalBool(GVAR_GFAIRY_REW_START+index, GV_MISC_BOOL,true);
+							setGlobalBool(GVAR_GFAIRY_CANYON_REW, GV_MISC_BOOL,true);
+						}
+						break;
 				}
-				else unless(index!=INDEX_TOWN || getGlobalBool(GVAR_GFAIRY_TOWN_REW2, GV_MISC_BOOL))
-				{
-					//Give Great Fairy Mask
-					setGlobalBool(GVAR_GFAIRY_TOWN_REW2, GV_MISC_BOOL, true);
-				}
-				else
-				{
-					//No reward to give
-				}
+				shrinkFairy(gfairy);
 				FreezeOne(susptLINK,false);
+				ForceUnfreeze(susptITEMS,false);
+				ForceUnfreeze(susptITEMSCRIPTENGINE,false);
 				Quit();
 			}
-			greatFairy->Script = FFC_SOLID;
 			while(true)
 			{
 				if(Hero->Y <= HERO_Y)
 				{
 					FreezeOne(susptLINK,true);
-					growFairy(false);
-					ffcInvis(greatFairy, false);
+					ForceUnfreeze(susptITEMS,true);
+					ForceUnfreeze(susptITEMSCRIPTENGINE,true);
+					item gfairy = growFairy(false);
 					ShowNPCStringAndWait("Welcome, @savename()...@char(26)Allow me to ease your weariness",N_GREAT_FAIRY);
-					Game->DCounter[CR_LIFE] = Game->MCounter[CR_LIFE];
-					Game->DCounter[CR_MAGIC] = Game->MCounter[CR_MAGIC];
-					while(Game->DCounter[CR_LIFE] || Game->DCounter[CR_MAGIC]) Waitframe();
+					FairyHeal();
 					Waitframe();
+					bool done = false;
 					switch(index)
 					{
 						case INDEX_TOWN:
 						{
 							unless(getGlobalBool(GVAR_GFAIRY_TOWN_REW2, GV_MISC_BOOL))
 							{
-								ShowNPCStringAndWait("Come see me again if ever you are returned to your [[former shape]]. I shall give you an item that will add to your [[strength]]...@pressa()@char(26)The [[Skull Kid]] is a childish demon... If you seek him, ask the [[children]] in town.",N_GREAT_FAIRY);
+								unless(Hero->Item[IT_MASK_DEKU])
+								{
+									ShowNPCStringAndWait("Come see me again if ever you are returned to your [[former shape]]. I shall give you an item that will add to your [[strength]]...@pressa()@char(26)The {{Skull Kid}} is a childish demon... If you seek him, ask the {{children}} in town.",N_GREAT_FAIRY);
+								}
+								else
+								{
+									ShowNPCStringAndWait("Oh, kind young one!@pressa()@char(26)Scattered throughout the [[four temples]] of this land are broken [[Stray Fairies]] like me.@pressa()@char(26)Please find a way to save them and return them to their fountains. Surely, they will add to your strength.",N_GREAT_FAIRY);
+									item it = CreateItemAt(Items::getItem(IL_GFAIRY_TOWN2),FAIRY_X+16,FAIRY_Y+32);
+									ShowNPCStringAndWait("Allow me to grant you [[something good]] so that the Stray Fairies will not fear you.",N_GREAT_FAIRY);
+									it->Pickup = IP_HOLDUP;
+									it->X = Hero->X;
+									it->Y = Hero->Y;
+									WaitForItemPickup();
+									FairyHeal();
+									ShowNPCStringAndWait("Come see me whenever your quest has made you weary.",N_GREAT_FAIRY);
+									setGlobalBool(GVAR_GFAIRY_TOWN_REW2, GV_MISC_BOOL, true);
+								}
+							}
+							else
+							{
+								ShowNPCStringAndWait("Come see me whenever your quest has made you weary.",N_GREAT_FAIRY);
 							}
 							break;
 						}
 					}
-					ffcInvis(greatFairy, true);
-					shrinkFairy();
+					shrinkFairy(gfairy);
 					FreezeOne(susptLINK,false);
+					ForceUnfreeze(susptITEMS,false);
+					ForceUnfreeze(susptITEMSCRIPTENGINE,false);
 					Quit();
 				}
 				Waitframe();
@@ -1383,7 +1419,7 @@ namespace Fairies //start Fairy stuff
 			return NULL;
 		}
 		
-		void growFairy(bool flash) //start
+		item growFairy(bool flash) //start
 		{
 			combodata cd = Game->LoadComboData(COMBO_GREATFAIRY);
 			item grow = CreateItemAt(IT_DUMMY, FAIRY_X, FAIRY_Y);
@@ -1419,18 +1455,11 @@ namespace Fairies //start Fairy stuff
 				sprites::rectify(grow);
 				Waitframe();
 			}
-			Remove(grow);
+			return grow;
 		} //end
 		
-		void shrinkFairy() //start
+		void shrinkFairy(item shrink) //start
 		{
-			combodata cd = Game->LoadComboData(COMBO_GREATFAIRY);
-			item shrink = CreateItemAt(IT_DUMMY, FAIRY_X, FAIRY_Y);
-			shrink->OriginalTile = cd->Tile;
-			shrink->CSet = cd->CSet;
-			shrink->TileWidth = 3;
-			shrink->TileHeight = 2;
-			shrink->NumFrames = 0;
 			for(int q = GROW_TIME; q > 0; --q)
 			{
 				shrink->Scale = (q/GROW_TIME);
@@ -1439,6 +1468,13 @@ namespace Fairies //start Fairy stuff
 			}
 			Remove(shrink);
 		} //end
+	
+		void FairyHeal()
+		{
+			Game->DCounter[CR_MAGIC] = Game->MCounter[CR_MAGIC];
+			Game->DCounter[CR_LIFE] = Game->MCounter[CR_LIFE];
+			while(Game->DCounter[CR_MAGIC] || Game->DCounter[CR_LIFE]) Waitframe();
+		}
 	}//end
 	itemsprite script FloatingStrayFairy //start Stray fairies floating in a great fairy fountain (R)
 	{

@@ -906,15 +906,22 @@ void passiveSubscreen()//start PassiveSubscreen
 	if(isArrow(B_item)&&B_item!=IT_BOWARROW)++B_tile;
 	if(isArrow(EX1_item)&&EX1_item!=IT_BOWARROW)++EX1_tile;
 	if(isArrow(EX2_item)&&EX2_item!=IT_BOWARROW)++EX2_tile;
-	if(holdingBomb)
+	if(getGlobalBool(GVAR_AGAINST_PICKUP,GV_MISC_BOOL))
 	{
 		EX1_tile=TILE_INVIS;
 		EX2_tile=TILE_INVIS;
 		B_tile=TILE_INVIS;
-		A_tile=loadItemTile(3);
-		A_cset=loadItemCSet(3);
-		R_tile=TILE_DROP;
-		R_cset=CSET_DROP;
+		A_tile=TILE_GRAB;
+		R_tile=TILE_GRAB;
+		setGlobalBool(GVAR_AGAINST_PICKUP,GV_MISC_BOOL,false);
+	}
+	else if(HoldingObject)
+	{
+		EX1_tile=TILE_INVIS;
+		EX2_tile=TILE_INVIS;
+		B_tile=TILE_INVIS;
+		A_tile=TILE_THROW;
+		R_tile= (HoldingObject==HOLD_BOMB) ? TILE_DROP : TILE_THROW;
 	}
 	else if(Deku_flying>0)
 	{
@@ -924,7 +931,6 @@ void passiveSubscreen()//start PassiveSubscreen
 		A_tile=loadItemTile(IT_DEKUNUTS);
 		A_cset=loadItemCSet(IT_DEKUNUTS);
 		R_tile=TILE_DROP;
-		R_cset=CSET_DROP;
 	}
 	else if(arrowAimMode)
 	{

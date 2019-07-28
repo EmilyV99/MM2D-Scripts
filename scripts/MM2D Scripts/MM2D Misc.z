@@ -32,6 +32,12 @@ namespace MM2D
 		unless(n->isValid())return false;
 		return CanWalkM(n->X + (useHit ? n->Misc[SPRITE_MISC_HITXOFFSET] : 0), n->Y + (useHit ? n->HitYOffset : 0), n->X + (useHit ?  n->HitWidth + n->Misc[SPRITE_MISC_HITXOFFSET] :  n->TileWidth * 16) - 1, n->Y + (useHit ?  n->HitHeight + n->HitYOffset :  n->TileHeight * 16) - 1, map, dir, step);
 	}
+	//item
+	bool CanWalkM(item it, mapdata map, int dir, int step, bool useHit)
+	{
+		if(!it->isValid())return false;
+		return CanWalkM(it->X + (useHit ? it->Misc[SPRITE_MISC_HITXOFFSET] : 0), it->Y + (useHit ? it->HitYOffset : 0), it->X + (useHit ?  it->HitWidth + it->Misc[SPRITE_MISC_HITXOFFSET] :  it->TileWidth * 16) - 1, it->Y + (useHit ?  it->HitHeight + it->HitYOffset :  it->TileHeight * 16) - 1, map, dir, step);
+	}
 	//ffc
 	bool CanWalkM(ffc f, mapdata map, int dir, int step, bool useEffect)
 	{
@@ -70,6 +76,12 @@ namespace MM2D
 		unless(n->isValid())return false;
 		return CanWalkMFull(n->X + (useHit ? n->Misc[SPRITE_MISC_HITXOFFSET] : 0), n->Y + (useHit ? n->HitYOffset : 0), n->X + (useHit ?  n->HitWidth + n->Misc[SPRITE_MISC_HITXOFFSET] :  n->TileWidth * 16) - 1, n->Y + (useHit ?  n->HitHeight + n->HitYOffset :  n->TileHeight * 16) - 1, map, dir, step);
 	}
+	//item
+	bool CanWalkMFull(item it, mapdata map, int dir, int step, bool useHit)
+	{
+		if(!it->isValid())return false;
+		return CanWalkMFull(it->X + (useHit ? it->Misc[SPRITE_MISC_HITXOFFSET] : 0), it->Y + (useHit ? it->HitYOffset : 0), it->X + (useHit ?  it->HitWidth + it->Misc[SPRITE_MISC_HITXOFFSET] :  it->TileWidth * 16) - 1, it->Y + (useHit ?  it->HitHeight + it->HitYOffset :  it->TileHeight * 16) - 1, map, dir, step);
+	}
 	//ffc
 	bool CanWalkMFull(ffc f, mapdata map, int dir, int step, bool useEffect)
 	{
@@ -85,6 +97,20 @@ namespace MM2D
 	//end Full
 	//end CanWalkM
 }
+//start HeightCollision
+bool HeightCollision(item it, lweapon weap)
+{
+	return RectCollision(it->X, it->Y, it->X+it->HitWidth, it->Y+it->HitHeight,
+		weap->X, weap->Y, weap->X+weap->HitWidth, weap->Y+weap->HitHeight)
+		&& (it->Z + it->HitZHeight >= weap->Z)
+		&& (it->Z <= weap->Z + weap->HitZHeight);
+}
+bool HeightCollision(ffc f, lweapon weap)
+{
+	return RectCollision(f->X, f->Y, f->X+f->EffectWidth, f->Y+f->EffectHeight,
+		weap->X, weap->Y, weap->X+weap->HitWidth, weap->Y+weap->HitHeight);
+}
+//end
 //start Misc Functions
 void saveTheGame()//start
 {
@@ -314,6 +340,7 @@ void Screen_Freeze(FreezeState frz)
 					case susptSCREENDRAW:
 					case susptSCRIPDRAWCLEAR:
 					case susptONEFRAMECONDS:
+					case susptCOMBOANIM:
 						Game->Suspend[q] = indivFreeze[q] && !forceActive[q];
 						break;
 					case susptLINK:
@@ -767,6 +794,45 @@ void FlashScreen(Color color, bool subscreen)
 {
 	Screen->Rectangle(7, 0, subscreen?-56:0, 256, 176, color, 1, 0, 0, 0, true, OP_OPAQUE);
 }
+bool HeroIsHolding()
+{
+	switch(Hero->Action)
+	{
+		case LA_HOLD1LAND:
+		case LA_HOLD2LAND:
+		case LA_HOLD1WATER:
+		case LA_HOLD2WATER:
+			return true;
+	}
+	return false;
+}
+void WaitForItemPickup()
+{
+	FreezeOne(susptLINK,false);
+	until(HeroIsHolding()) Waitframe();
+	while(HeroIsHolding()) Waitframe();
+	do Waitframe(); while(Tango_AnySlotIsActive());
+	FreezeOne(susptLINK,true);
+}
+ItemID getDropsetDrop(int dset)
+{
+	switch(dset)
+	{
+		case DROPSET_GRASS:
+		{
+			int roll = Rand(200);
+			if(roll<75) return IT_INVALID;
+			else if(roll<75+40) return IT_RUP_1;
+			else if(roll<75+40+30) return IT_HEART;
+			else if(roll<75+40+30+3) return IT_BUGS;
+			else if(roll<75+40+30+3+1) return IT_RUP_20;
+			else if(roll<75+40+30+3+1+10) return IT_RUP_5;
+			else if(roll<75+40+30+3+1+10+8) return IT_BOMB_4;
+			else if(roll<75+40+30+3+1+10+8+8) return IT_ARROW_5;
+			else return IT_MAGIC_SMALL;
+		}
+	}
+}
 //end Misc Functions
 //start Keyboard
 void KeyToString(int key, char buf)
@@ -1151,4 +1217,65 @@ ffc script ShowString
 }
 //end ShowString
 
+//end
+//start Solidity
+void itemSolid(item it)//start
+{
+	int linkspeed = Ceiling(1.5);
+	int width = it->HitWidth;
+	int height = it->HitHeight;
+	int bottomheight = Hero->BigHitbox ? height : height - 8;
+	if(bottomheight<1) bottomheight = 1; //Ensure that it is actually solid, even if only 8 tall with non-big hitbox
+	if((Hero->Y>=it->Y-(16+linkspeed)) && (Hero->Y<=it->Y-16) && (Hero->X>=it->X-15) && (Hero->X<=it->X+(width-1)))//start inputdown
+	{
+		if(Hero->InputDown)
+		{
+			if(Hero->Y!=it->Y-16)Hero->Y=it->Y-16;
+			Hero->Dir=DIR_DOWN;
+			if(Hero->X>=it->X+(width-4))
+			{
+				if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(it->X+width)),false))Hero->X=it->X+width;
+			} else if(Hero->X<=it->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-it->X-16),false))Hero->X=it->X-16;
+		}
+		Hero->InputDown=false;
+		Hero->PressDown=false;
+		return;
+	}//end
+	if((Hero->Y<=it->Y+(bottomheight+linkspeed)) && (Hero->Y>=it->Y+bottomheight) && (Hero->X>=it->X-15) && (Hero->X<=it->X+(width-1))){//start inputup
+		if(Hero->InputUp){
+			if(Hero->Y!=it->Y+bottomheight)Hero->Y=it->Y+bottomheight;
+			Hero->Dir=DIR_UP;
+			if(Hero->X>=it->X+(width-4)){
+				if(CanWalk(Hero->X,Hero->Y,DIR_RIGHT,Abs(Hero->X-(it->X+width)),false))Hero->X=it->X+width;
+			} else if(Hero->X<=it->X-12)if(CanWalk(Hero->X,Hero->Y,DIR_LEFT,Abs(Hero->X-it->X-16),false))Hero->X=it->X-16;
+		}
+		Hero->InputUp=false;
+		Hero->PressUp=false;
+		return;
+	}//end
+	if((Hero->X>=it->X-(16+linkspeed)) && (Hero->X<=it->X-16) && (Hero->Y<=it->Y+(bottomheight-1)) && (Hero->Y>=it->Y-15)){//start inputright
+		if(Hero->InputRight){
+			if(Hero->X!=it->X-16)Hero->X=it->X-16;
+			Hero->Dir=DIR_RIGHT;
+			if(Hero->Y>=it->Y+(bottomheight-4)){
+				if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(it->Y+bottomheight)),false))Hero->Y=it->Y+bottomheight;
+			} else if(Hero->Y<=it->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(it->Y-16)),false))Hero->Y=it->Y-16;
+		}
+		Hero->InputRight=false;
+		Hero->PressRight=false;
+		return;
+	}//end
+	if((Hero->X<=it->X+(width+linkspeed)) && (Hero->X>=it->X+width) && (Hero->Y>=it->Y-15) && (Hero->Y<=it->Y+(bottomheight-1))){//start inputleft
+		if(Hero->InputLeft){
+			if(Hero->X!=it->X+width)Hero->X=it->X+width;
+			Hero->Dir=DIR_LEFT;
+			if(Hero->Y>=it->Y+(bottomheight-4)){
+				if(CanWalk(Hero->X,Hero->Y,DIR_DOWN,Abs(Hero->Y-(it->Y+bottomheight)),false))Hero->Y=it->Y+bottomheight;
+			} else if(Hero->Y<=it->Y-12)if(CanWalk(Hero->X,Hero->Y,DIR_UP,Abs(Hero->Y-(it->Y-16)),false))Hero->Y=it->Y-16;
+		}
+		Hero->InputLeft=false;
+		Hero->PressLeft=false;
+		return;
+	}//end
+}//end
 //end

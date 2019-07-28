@@ -326,12 +326,13 @@ ffc script SoftSoil
 			this->Y=GridY(Hero->Y+8);
 		}
 		if(startState)setSoilState(index,startState);
+		bool wasRafting = false;
+		if(getSoilState(index)==SSSTATE_ACTIVE) setSoilState(index,SSSTATE_GROWN);
 		while(true)
 		{
 			int state = getSoilState(index);
 			if(state!=SSSTATE_ACTIVE)
 			{
-				if(state==SSSTATE_WAITING)this->Data = COMBO_SOIL;
 				if(Hero->X>this->X-8&&Hero->X<this->X+8&&Hero->Y>this->Y-8&&Hero->Y<this->Y+8)
 				{
 					if(usingBugs>0&&!gskull)
@@ -361,14 +362,18 @@ ffc script SoftSoil
 						//UNFINISHED // Spawn Gold Skulltula
 						usingBugs=0;
 					}
-					if(beanCounter>0)
-					{
-						state = SSSTATE_PLANTED;
-						Game->Counter[CR_MAGICBEANS]--;
-						beanCounter=0;
-					}
 				}
-			} 
+			}
+			if(state==SSSTATE_WAITING)
+			{
+				this->Data = COMBO_SOIL;
+				if(beanCounter>0)
+				{
+					state = SSSTATE_PLANTED;
+					Game->Counter[CR_MAGICBEANS]--;
+					beanCounter=0;
+				}
+			}
 			if(state==SSSTATE_PLANTED)
 			{
 				this->Data = COMBO_BEANSPROUT;
@@ -399,7 +404,7 @@ ffc script SoftSoil
 					//if(startState==2)Waitframe();
 					Rafting[RAFT_DIR] = raftDir;
 					Rafting[RAFT_UP] = screensUp;
-					if(startState==2)
+					if(startState==SSSTATE_GROWN)
 					{
 						Rafting[RAFT_X] = this->X - 5*dirX(raftDir);
 						Rafting[RAFT_Y] = this->Y - 5*dirY(raftDir);
@@ -411,14 +416,13 @@ ffc script SoftSoil
 					}
 					state = SSSTATE_ACTIVE;
 					canFall=false;
-					waitTime=5;
 				}
 			}
 			if(state == SSSTATE_ACTIVE)
 			{
 				if(Hero->Action==LA_RAFTING)
 				{
-					if(startState==2)
+					if(startState==SSSTATE_GROWN)
 					{
 						this->Data = COMBO_INVIS;
 					}
@@ -427,11 +431,8 @@ ffc script SoftSoil
 						this->Data = COMBO_SOIL;
 					}
 				}
-				if(waitTime>0)
-				{
-					--waitTime;
-				}
-				else if(Hero->Action!=LA_RAFTING)
+				unless(wasRafting || Hero->Action!=LA_RAFTING) wasRafting = true;
+				if(wasRafting && Hero->Action!=LA_RAFTING)
 				{
 					if(startState==SSSTATE_GROWN)
 					{
@@ -478,22 +479,36 @@ item script MagicBean
 //start ladder/vine
 ffc script LadderClimb
 {
-	void run(int climbtime, int dir, int floorsUp)
+	void run(int climbtime, int dir, int floorsUp, int tiledist, int allowedOffset)
 	{
+		if(tiledist<1)tiledist = 1;
+		if(allowedOffset<1)allowedOffset=4;
 		int ctime = 0;
 		while(true)
 		{
+			while(isFrozen) Waitframe();
 			if(ctime>=climbtime)
 			{
-				Hero->X+=dirX(dir)*16;
-				Hero->Y+=dirY(dir)*16;
+				switch(dir)
+				{
+					case DIR_UP:
+					case DIR_DOWN:
+						Hero->X = this->X;
+						Hero->Y+=dirY(dir)*(16*tiledist);
+						break;
+					case DIR_LEFT:
+					case DIR_RIGHT:
+						Hero->X+=dirX(dir)*(16*tiledist);
+						Hero->Y = this->Y;
+						
+				}
 				warpNumFloors=floorsUp;
 			}
 			switch(dir)
 			{
 				case DIR_UP:
 				{
-					if(Hero->Y==this->Y)
+					if(Abs(Hero->X-this->X)<=allowedOffset && Hero->Y==this->Y)
 					{
 						if(Input->Button[CB_UP])ctime++;
 						else ctime=0;
@@ -502,7 +517,7 @@ ffc script LadderClimb
 					break;}
 				case DIR_DOWN:
 				{
-					if(Hero->Y==this->Y)
+					if(Abs(Hero->X-this->X)<=allowedOffset && Hero->Y==this->Y)
 					{
 						if(Input->Button[CB_DOWN])ctime++;
 						else ctime=0;
@@ -511,7 +526,7 @@ ffc script LadderClimb
 					break;}
 				case DIR_LEFT:
 				{
-					if(Hero->X==this->X)
+					if(Abs(Hero->Y-this->Y)<=allowedOffset && Hero->X==this->X)
 					{
 						if(Input->Button[CB_LEFT])ctime++;
 						else ctime=0;
@@ -520,7 +535,7 @@ ffc script LadderClimb
 					break;}
 				case DIR_RIGHT:
 				{
-					if(Hero->X==this->X)
+					if(Abs(Hero->Y-this->Y)<=allowedOffset && Hero->X==this->X)
 					{
 						if(Input->Button[CB_RIGHT])ctime++;
 						else ctime=0;
@@ -528,6 +543,8 @@ ffc script LadderClimb
 					else ctime=0;
 					break;}
 			}
+			if(ctime%20==1)Audio->PlaySound(SFX_LADDER_CLIMB);
+			Waitframe();
 		}
 	}
 }
@@ -852,7 +869,14 @@ ffc script chest
 					}
 					this->Data=open;
 					item itm = CreateItemAt(itemID,Hero->X,Hero->Y);
+					itemdata id = Game->LoadItemData(itemID);
 					itm->Pickup=IP_HOLDUP;
+					unless(id->PScript)
+					{
+						id->PScript = Game->GetItemScript("ItemPickup");
+						do Waitframe(); while(Tango_AnySlotIsActive());
+						id->PScript = 0;
+					}
 					setChestState(index,true);
 				}
 			}
@@ -951,3 +975,168 @@ ffc script Mirror
 
 int screenData[2048]; //cleared when screen changes, NOT for height change though!
 //end Mirror
+//start Pots
+DEFINE POT_STEP_MOVING = 75;
+DEFINE POT_STEP_STILL = 150;
+ffc script Pot
+{
+	void run(ItemID drop, int underCombo)
+	{
+		if(drop<0) drop = getDropsetDrop(DROPSET_GRASS);
+		unless(underCombo) underCombo = COMBO_INVIS;
+		combodata cd = Game->LoadComboData(this->Data);
+		bool dodrop = drop>-1;
+		while(true)
+		{
+			for(int q = Screen->NumLWeapons(); q>=MIN_LWEAPON; --q)
+			{
+				lweapon weap = Screen->LoadLWeapon(q);
+				switch(weap->ID)
+				{
+					case LW_SWORD:
+					case LW_BOMBBLAST:
+					case LW_BRANG:
+						if(Collision(this,weap))
+						{
+							Audio->PlaySound(SFX_POT_SHATTER);
+							item shards = CreateItemAt(IT_DUMMY,this->X,this->Y);
+							shards->Pickup = IP_DUMMY | IP_TIMEOUT;
+							shards->OriginalTile = cd->Tile + 20;
+							shards->Tile = cd->Tile + 20;
+							shards->NumFrames = cd->Frames;
+							shards->CSet = cd->CSet;
+							if(dodrop)
+							{
+								item it = CreateItemAt(drop, this->X, this->Y);
+								it->Pickup = IP_TIMEOUT;
+							}
+							this->Data = underCombo;
+							Quit();
+						}
+				}
+			}
+			if(AgainstFFCBase(this) && HoldingObject == HOLD_NONE)
+			{
+				setGlobalBool(GVAR_AGAINST_PICKUP,GV_MISC_BOOL,true);
+				if(Input->Press[CB_R])
+					break;
+			}
+			ffcSolid(this);
+			Waitframe();
+		}
+		//Picked up
+		Audio->PlaySound(SFX_PICKUP_OBJ);
+		HoldingObject = HOLD_POT;
+		item it = CreateItemAt(IT_DUMMY,Hero->X,Hero->Y-8);
+		it->Pickup = IP_DUMMY;
+		it->OriginalTile = cd->Tile;
+		it->Tile = cd->Tile;
+		it->NumFrames = cd->Frames;
+		it->CSet = cd->CSet;
+		it->Script = Game->GetItemSpriteScript("flyingPot");
+		it->InitD[0] = drop;
+		this->Data = underCombo;
+		TotalNoAction();
+	}
+}
+
+itemsprite script flyingPot
+{
+	void run(ItemID dropItem)
+	{
+		bool dodrop = dropItem>-1;
+		until(Input->Press[CB_A]||Input->Press[CB_B]||Input->Press[CB_EX1]||Input->Press[CB_EX2]||Input->Press[CB_R]||Input->Press[CB_L])
+		{
+			this->Misc[ITEMMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+			this->X = Hero->X;
+			this->Y = Hero->Y - 8;
+			Waitframe();
+		}
+		TotalNoAction();
+		mapdata map = getLayerMapdata(getRelativeHeight(this));
+		this->X = Hero->X;
+		this->Y = Hero->Y;
+		HoldingObject = HOLD_NONE;
+		int dir = HeroDir8,
+		    pix = Hero->Action==LA_WALKING ? (POT_STEP_MOVING/100) + (1.5+LinkMovement_GetLinkSpeedBoost()) : POT_STEP_STILL/100;
+		for(int q = 0; q < 60; ++q)
+		{
+			while(true)
+			{
+				int centerCombo = ComboAt(this->X + InFrontCenteredX(dir,pix),this->Y + InFrontCenteredY(dir,pix));
+				if(map->ComboI[centerCombo] == CI_RAMP)
+				{
+					if(map->ComboF[centerCombo] == CF_RAMP_UP)
+					{
+						++this->Misc[ITEMMISC_LAYERDMAP];
+						map = getLayerMapdata(getRelativeHeight(this));
+						continue;
+					}
+				}
+				break;
+			}
+			unless(MM2D::CanWalkM(this, map, dir, Ceiling(pix),true))
+				break;
+			if(offscreen(this->X + (dirX(dir) * pix), this->Y + (dirY(dir) * pix)))
+				break;
+			this->X += dirX(dir) * pix;
+			this->Y += dirY(dir) * pix;
+			Waitframe();
+		}
+		Audio->PlaySound(SFX_POT_SHATTER);
+		this->OriginalTile += 20; //shatter
+		//Fall down pits
+		for(int x = this->X+3; x<this->X+13; x+=9)
+		{
+			for(int y = this->Y+9; y<this->Y+13; y+=3)
+			{
+				if(map->ComboT[ComboAt(x,y)] == CT_PITFALL)
+				{
+					--this->Misc[ITEMMISC_LAYERDMAP];
+					//Reset loop to re-check next layer:
+					x = this->X+3;
+					y = this->Y+9;
+					map = getLayerMapdata(getRelativeHeight(this));
+				}
+			}
+		}
+		if(dodrop)
+		{
+			item it = CreateItemAt(dropItem,this->X,this->Y);
+			it->Misc[ITEMMISC_LAYERDMAP] = this->Misc[ITEMMISC_LAYERDMAP];
+		}
+		this->Pickup |= IP_TIMEOUT;
+		Quit();
+	}
+}
+//end
+//start BalloonTarget
+ffc script BalloonTarget
+{
+	void run(int index, bool solid)
+	{
+		until(getGlobalBool(index,GV_ONETIME_TARGETS_RESETTABLE))
+		{
+			if(solid)ffcSolid(this);
+			Waitframe();
+			for(int q = Screen->NumLWeapons(); q >= MIN_LWEAPON; --q)
+			{
+				lweapon weap = Screen->LoadLWeapon(q);
+				switch(weap->ID)
+				{
+					case LW_MAGIC:
+					case LW_ARROW:
+					{
+						if(HeightCollision(this,weap))
+						{
+							Audio->PlaySound(SFX_BALLOON_POP);
+							setGlobalBool(index,GV_ONETIME_TARGETS_RESETTABLE,true);
+						}
+					}
+				}
+			}
+		}
+		this->Data = COMBO_INVIS;
+	}
+}
+//end

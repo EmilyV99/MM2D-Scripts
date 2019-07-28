@@ -11,9 +11,9 @@
 DEFINE CF_UP = 108;
 DEFINE CF_DOWN = 109;
 //For the DMap equivalent to the array index, what DMap is "above" this? -1 for "this is the top"
-int DMAP_UP[] = {1,2,-1,4,5,-1};
+int DMAP_UP[] = {1,2,-1,4,5,-1,7,-1};
 //For the DMap equivalent to the array index, what DMap is "below" this? -1 for "this is the bottom"
-int DMAP_DOWN[] = {-1,0,1,-1,3,4};
+int DMAP_DOWN[] = {-1,0,1,-1,3,4,-1,6};
 void heightWarp()
 {
 	if(isCenteredOnPlacedFlag(CF_DOWN,true,false,CT_WATER,false,true,CF_SCRIPT1))
@@ -664,14 +664,20 @@ int getRelativeHeight(lweapon weap)
 
 int getRelativeHeight(eweapon weap)
 {
-	unless(weap->Misc[LWMISC_LAYERDMAP])weap->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	unless(weap->Misc[EWMISC_LAYERDMAP])weap->Misc[EWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
 	return weap->Misc[EWMISC_LAYERDMAP] - (Game->GetCurDMap() + 1);
 }
 
 int getRelativeHeight(npc n)
 {
-	unless(n->Misc[LWMISC_LAYERDMAP])n->Misc[LWMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	unless(n->Misc[NPCMISC_LAYERDMAP])n->Misc[NPCMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
 	return n->Misc[NPCMISC_LAYERDMAP] - (Game->GetCurDMap() + 1);
+}
+
+int getRelativeHeight(item it)
+{
+	unless(it->Misc[ITEMMISC_LAYERDMAP])it->Misc[ITEMMISC_LAYERDMAP] = Game->GetCurDMap() + 1;
+	return it->Misc[ITEMMISC_LAYERDMAP] - (Game->GetCurDMap() + 1);
 }
 
 int getRelativeHeight(lweapon o1, lweapon o2)

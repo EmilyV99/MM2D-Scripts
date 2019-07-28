@@ -116,6 +116,20 @@ void DrawLayer3_4()
 				HeightFastComboScreen(upper, upper?1:3, ComboX(pos), ComboY(pos),
 							m->ComboD[pos], m->ComboC[pos], OP_OPAQUE);
 		}
+		for(int layerlayer = 1; layerlayer <= 6; ++layerlayer)
+		{
+			if(layerlayer==3) continue;
+			if(layerlayer==4) continue;
+			unless(m->LayerMap[layerlayer]) continue;
+			mapdata m2 = Game->LoadMapData(m->LayerMap[layerlayer], m->LayerScreen[layerlayer]);
+			int opacity = (m->LayerOpacity[layerlayer]==255)?OP_OPAQUE:OP_TRANS;
+			for(int pos = 0; pos < 176; ++pos)
+			{
+				if(m2->ComboD[pos])
+					HeightFastComboScreen(upper, upper?1:3, ComboX(pos), ComboY(pos),
+								m2->ComboD[pos], m2->ComboC[pos], opacity);
+			}
+		}
 	}
 }
 //end LayerOverhead
