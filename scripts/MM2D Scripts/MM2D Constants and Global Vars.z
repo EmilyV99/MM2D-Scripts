@@ -5,6 +5,8 @@
 /////////////////////////////////////////////////
 
 DEFINE __DEBUG = 1;
+DEFINE RANDO_DEBUG = 1;
+DEFINE DEMO = 1;
 //start Custom Types
 enum CompType
 {
@@ -997,6 +999,7 @@ namespace GVars
 //start Global Items Array
 enum ItemLoc
 {
+	IL_INVALID = -1,
 	IL_MIN,
 	//Chest locations; equivalent to chest ID #
 	IL_CHEST = IL_MIN,
@@ -1027,7 +1030,7 @@ enum ItemLoc
 };
 namespace Items
 {
-	ItemID items[MAX_INT];
+	ItemID items[IL_MAX];
 	ItemID itUpgrade[512];
 	
 	void initUpgrade()
@@ -1039,7 +1042,7 @@ namespace Items
 		itUpgrade[IT_QUIVER] = IT_QUIVER_BIG;
 		itUpgrade[IT_QUIVER_BIG] = IT_QUIVER_BIGGEST;
 		itUpgrade[IT_WALLET] = IT_WALLET_BIG;
-		//UNFINISHED // Sidequest items!
+		//UNFINISHED // Sidequest items! // Should not be upgrades? Need a menu to view all sidequest items on subscreen, then...
 	}
 	void defaultItemInit()
 	{
@@ -1047,6 +1050,7 @@ namespace Items
 	}
 	void defaultItemInit(ItemID items)
 	{
+		memset(items, IT_INVALID, SizeOfArray(items));
 		//Chest
 		items[IL_CTLEDGE20_CHEST] = IT_RUP_20;
 		items[IL_CTTOWERMONEY_CHEST] = IT_RUP_50;
@@ -1084,6 +1088,7 @@ namespace Items
 			return IT_INVALID;
 		}
 		ItemID it = items[location];
+		if(it==IT_INVALID) return IT_INVALID;
 		while(itUpgrade[it] && Hero->Item[it]) it = itUpgrade[it]; //Upgrade if Hero already has the item, and it has an upgrade
 		return it;
 	}

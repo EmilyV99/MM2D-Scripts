@@ -70,6 +70,7 @@ bool onetimeitem(ItemID itm)
 	{
 		case IT_HEART_CONTAINER:
 		case IT_HEARTPIECE:
+		case IT_MAGIC:
 			return true;
 		default:
 			return Game->LoadItemData(itm)->Keep;

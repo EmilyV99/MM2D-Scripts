@@ -871,13 +871,13 @@ ffc script chest
 					item itm = CreateItemAt(itemID,Hero->X,Hero->Y);
 					itemdata id = Game->LoadItemData(itemID);
 					itm->Pickup=IP_HOLDUP;
+					setChestState(index,true);
 					unless(id->PScript)
 					{
 						id->PScript = Game->GetItemScript("ItemPickup");
-						do Waitframe(); while(Tango_AnySlotIsActive());
+						WaitForItemPickup();
 						id->PScript = 0;
 					}
-					setChestState(index,true);
 				}
 			}
 			Waitframe();

@@ -584,6 +584,7 @@ ffc script invisMazeGame
 		{
 			if(getChestState(IL_INVISMAZE_CHEST))
 			{
+				WaitForItemPickup();
 				if(goodprize) flagGlobalVar(GVAR_CHESTGAME,GV_MINIGAME,FLAG1);
 				break;
 			}
@@ -629,7 +630,6 @@ ffc script invisMazeGame
 		chest->Script = 0;
 		setGlobalVar(GVAR_MGSTATE,GV_MISC,MG_NONE);
 		Hero->BigHitbox = false;
-		do Waitframe(); while(Hero->Action==LA_HOLD2LAND);
 		Hero->X = 208;
 		Hero->Y = 112;
 		Hero->Dir = DIR_DOWN;

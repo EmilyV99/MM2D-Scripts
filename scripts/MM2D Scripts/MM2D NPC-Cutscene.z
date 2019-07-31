@@ -1671,26 +1671,26 @@ int bankMaxDeposit()
 
 void bankGiveRewards()
 {
-	if(fullCounter(CR_BANKBAL)>=200&&!getGlobalVar(GVAR_BANK_REW1,GV_MISC))
+	if(fullCounter(CR_BANKBAL)>=200&&!getGlobalBool(GVAR_BANK_REW1,GV_MISC_BOOL))
 	{
 		item i = CreateItemAt(Items::getItem(Items::IL_BANKER1),Hero->X,Hero->Y);
 		i->Pickup = IP_HOLDUP;
 		ShowStringAndWait("Here, you've deposited enough rupees to earn a reward!");
-		setGlobalVar(GVAR_BANK_REW1,GV_MISC,1);
+		setGlobalBool(GVAR_BANK_REW1,GV_MISC_BOOL,true);
 	}
-	if(fullCounter(CR_BANKBAL)>=1000&&!getGlobalVar(GVAR_BANK_REW2,GV_MISC))
+	if(fullCounter(CR_BANKBAL)>=1000&&!getGlobalBool(GVAR_BANK_REW2,GV_MISC_BOOL))
 	{
 		item i = CreateItemAt(Items::getItem(Items::IL_BANKER2),Hero->X,Hero->Y);
 		i->Pickup = IP_HOLDUP;
 		ShowStringAndWait("Here, you've deposited enough rupees to earn another reward!");
-		setGlobalVar(GVAR_BANK_REW2,GV_MISC,1);
+		setGlobalBool(GVAR_BANK_REW2,GV_MISC_BOOL,true);
 	}
-	if(fullCounter(CR_BANKBAL)>=5000&&!getGlobalVar(GVAR_BANK_REW3,GV_MISC))
+	if(fullCounter(CR_BANKBAL)>=5000&&!getGlobalBool(GVAR_BANK_REW3,GV_MISC_BOOL))
 	{
 		item i = CreateItemAt(Items::getItem(Items::IL_BANKER3),Hero->X,Hero->Y);
 		i->Pickup = IP_HOLDUP;
 		ShowStringAndWait("Here, you've deposited enough rupees to earn the final reward!");
-		setGlobalVar(GVAR_BANK_REW3,GV_MISC,1);
+		setGlobalBool(GVAR_BANK_REW3,GV_MISC_BOOL,true);
 	}
 }
 

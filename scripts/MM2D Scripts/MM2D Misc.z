@@ -367,11 +367,15 @@ void FreezeOne(int q, bool frz)
 	Screen_Freeze(Get_Freeze()); //Refresh the freeze state
 }
 
+bool getFreezeOne(int q) {return indivFreeze[q];}
+
 void ForceUnfreeze(int q, bool unfrz)
 {
 	forceActive[q] = unfrz;
 	Screen_Freeze(Get_Freeze()); //Refresh the freeze state
 }
+
+bool getForceUnfreeze(int q) {return forceActive[q];}
 
 void oldScreen_Freeze(int freeze)
 {
@@ -790,11 +794,11 @@ ffc LoadUnusedFFC() //start
 	}
 	return NULL;
 }//end
-void FlashScreen(Color color, bool subscreen)
+void FlashScreen(Color color, bool subscreen) //start
 {
 	Screen->Rectangle(7, 0, subscreen?-56:0, 256, 176, color, 1, 0, 0, 0, true, OP_OPAQUE);
-}
-bool HeroIsHolding()
+}//end
+bool HeroIsHolding() //start
 {
 	switch(Hero->Action)
 	{
@@ -805,16 +809,18 @@ bool HeroIsHolding()
 			return true;
 	}
 	return false;
-}
-void WaitForItemPickup()
+}//end
+void WaitForItemPickup() //start
 {
+	bool wasFroze = getFreezeOne(susptLINK);
 	FreezeOne(susptLINK,false);
-	until(HeroIsHolding()) Waitframe();
+	int waitcount = 10;
+	until(HeroIsHolding() || !--waitcount) Waitframe();
 	while(HeroIsHolding()) Waitframe();
-	do Waitframe(); while(Tango_AnySlotIsActive());
-	FreezeOne(susptLINK,true);
-}
-ItemID getDropsetDrop(int dset)
+	while(Tango_AnySlotIsActive()) Waitframe();;
+	FreezeOne(susptLINK,wasFroze);
+}//end
+ItemID getDropsetDrop(int dset) //start
 {
 	switch(dset)
 	{
@@ -832,8 +838,49 @@ ItemID getDropsetDrop(int dset)
 			else return IT_MAGIC_SMALL;
 		}
 	}
-}
+}//end
 //end Misc Functions
+//start Arrays
+int shiftBackArray(u arr, u emptyVal) //start
+{
+	int sz = SizeOfArray(arr);
+	for(int index = 0; index < sz; ++index)
+	{
+		int count;
+		if(arr[index]==emptyVal)
+		{
+			do
+			{
+				++count;
+				unless(index+count<sz)
+				{
+					return index;
+				}
+			} while(arr[index+count]==emptyVal);
+			arr[index] = arr[index+count];
+			arr[index+count] = emptyVal;
+		}
+	}
+	return sz;
+}//end
+int FirstPosOf(u arr, u val) //start
+{
+	return FirstPosOf(arr, val, 0);
+}//end
+int FirstPosOf(u arr, u val, int start) //start
+{
+	DEFINE sz = SizeOfArray(arr);
+	for(int q = start; q < sz; ++q)
+	{
+		if(arr[q]==val) return q;
+	}
+	return -1;
+}//end
+void memcpy(untyped dest, untyped src) //start
+{
+	memcpy(dest, src, Min(SizeOfArray(dest),SizeOfArray(src)));
+}//end
+//end
 //start Keyboard
 void KeyToString(int key, char buf)
 {

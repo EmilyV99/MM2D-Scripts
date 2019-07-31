@@ -1,0 +1,208 @@
+namespace Rando
+{
+	#option BINARY_32BIT on
+	using namespace Items;
+	enum RandFlag
+	{
+		FLAG_MIN,
+		FLAG_ACTIVE,
+		FLAG_MAX
+	};
+
+	//start flaghandlers
+	void setFlag(RandFlag index, bool flag)
+	{
+		if(flag)
+		{
+			randflags[Div(index,BITS_INT)] |= 1b << (index % BITS_INT);
+		}
+		else
+		{
+			randflags[Div(index,BITS_INT)] &= ~(1b << (index % BITS_INT));
+		}
+	}
+
+	bool getFlag(RandFlag index)
+	{
+		return ((randflags[Div(index,BITS_INT)] >> (index % BITS_INT))&1b)== 1b;
+	}
+
+	bool toggleFlag(RandFlag index)
+	{
+		bool state = !getFlag(index);
+		setFlag(index,state);
+		return state;
+	}
+	//end flaghandlers
+	
+	DEFINE FLAGS_SIZE = ((FLAG_MAX/BITS_INT)%1)?(((FLAG_MAX/BITS_INT)+1)/10000)*10000:FLAG_MAX/BITS_INT;
+	u randflags[FLAGS_SIZE];
+	
+	void randoItemInit()
+	{
+		randoItemInit(items);
+	}
+	
+	void randoItemInit(ItemID items)
+	{
+		while(true)
+		{
+			memset(items, IT_INVALID, SizeOfArray(items));
+			//Load standard placement
+			ItemID defaultItems[IL_MAX];
+			defaultItemInit(defaultItems);
+			//Create buffers
+			//Locations
+			ItemLoc availableLocations[IL_MAX];
+			memset(availableLocations, IL_INVALID, IL_MAX);
+			bool unlockedLocations[IL_MAX];
+			//Items
+			ItemID itembuf[IL_MAX];
+			memcpy(itembuf, defaultItems);
+			int placedItem[IT_MAX];
+			//
+			int numItems = shiftBackArray(itembuf, IT_INVALID);
+			int numLocs = loadSphere0(availableLocations);
+			for(int q = 0; q < numLocs; ++q)
+				unlockedLocations[availableLocations[q]] = true;
+			
+			while(numLocs)
+			{
+				int randLoc = Rand(numLocs);
+				int randItem = Rand(numItems);
+				//Pull the location/item, and remove from buffer
+				ItemLoc l = availableLocations[randLoc];
+				ItemID it = itembuf[randItem];
+				itembuf[randItem] = IT_INVALID;
+				availableLocations[randLoc] = IL_INVALID;
+				//Place the item, and count it
+				items[l] = it;
+				++placedItem[it];
+				//
+				unlockLocations(unlockedLocations, availableLocations, placedItem);
+				numLocs = shiftBackArray(availableLocations, IL_INVALID); //push valid locs to left side
+				numItems = shiftBackArray(itembuf, IT_INVALID); //Push valid items to left side
+			}
+			Internal::forcePopulate(items, defaultItems, itembuf);
+			break;
+		}
+		if(RANDO_DEBUG) printRando(items);
+	}
+	
+	void printRando(ItemID items)
+	{
+		for(int q = 0; q < IL_MAX; ++q)
+		{
+			if(items[q]==IT_INVALID) continue;
+			Debug::print("IL %d has item %d", q, items[q]);
+		}
+	}
+	
+	int loadSphere0(ItemLoc locations)
+	{
+		int q = 0;
+		locations[q++] = IL_BANKER1;
+		locations[q++] = IL_BANKER2;
+		locations[q++] = IL_BANKER3;
+		locations[q++] = IL_GFAIRY_TOWN;
+		//locations[q++] = ;
+		return q;
+	}
+	
+	void unlockLocations(bool unlockedLocations, ItemLoc availableLocations, int placedItem)
+	{
+		int index = FirstPosOf(availableLocations,IL_INVALID);
+		for(int q = 0; q < IL_MAX; ++q)
+		{
+			if(unlockedLocations[q]) continue;
+			switch(q)
+			{
+				case IL_CTLEDGE20_CHEST: //Requires Human form
+					unless(placedItem[IT_MASK_DEKU]||placedItem[IT_MASK_GORON]||placedItem[IT_MASK_ZORA])
+						continue;
+					break;
+					
+				case IL_CTTOWERMONEY_CHEST: //Requires Deku and Moon's Tear, to access town plot
+					unless(placedItem[IT_MOONSTEAR]&&placedItem[IT_MASK_DEKU])
+						continue;
+					break;
+					
+				case IL_CTLEDGE100_CHEST: //Requires...
+					unless(placedItem[IT_MASK_ZORA] //Zora
+						||(placedItem[IT_MASK_BUNNYHOOD]&&(placedItem[IT_MASK_DEKU]||placedItem[IT_MASK_GORON])) //Human Form + Bunny Hood
+						||(placedItem[IT_MOONSTEAR]&&placedItem[IT_MASK_DEKU])) //Deku and Moon's Tear, for Town Plot
+						continue;
+					break;
+					
+				case IL_INVISMAZE_CHEST: //Requires Goron form
+					unless(placedItem[IT_MASK_GORON])
+						continue;
+					break;
+					
+				case IL_BOMBERS_BOMBCHEST: //Requires hideout access + Explosives
+					unless(placedItem[IT_MAGIC]&&(placedItem[IT_BOMBBAG]||placedItem[IT_MASK_BLAST]))
+						continue;
+					break;
+					
+				case IL_CTTOWERHEARTPIECE: //Requires...
+					unless(placedItem[IT_MASK_DEKU]||placedItem[IT_MASK_GORON]||placedItem[IT_MASK_ZORA] //Human Form
+						|| placedItem[IT_MOONSTEAR]) //Town Plot Access
+						continue;
+					break;
+					
+				case IL_CTSLIDEHEARTPIECE: //Requires Human Form
+					unless(placedItem[IT_MASK_DEKU]||placedItem[IT_MASK_GORON]||placedItem[IT_MASK_ZORA])
+						continue;
+					break;
+					
+				case IL_TCSHOOTING1:
+				case IL_TCSHOOTING2: //Requires Human Form, Bow
+					unless((placedItem[IT_MASK_DEKU]||placedItem[IT_MASK_GORON]||placedItem[IT_MASK_ZORA])
+						&&placedItem[IT_BOWARROW])
+						continue;
+					break;
+					
+				case IL_GFAIRY_TOWN2: //Requires Deku Mask item
+					unless(placedItem[IT_MASK_DEKU])
+						continue;
+					break;
+				
+				case IL_BANKER1:
+				case IL_BANKER2:
+				case IL_BANKER3:
+				case IL_GFAIRY_TOWN:
+					//Sphere 0; should be unreachable, if not, no requirements.
+					break;
+				
+				default: continue;
+			}
+			availableLocations[index] = <ItemLoc>(q);
+			unlockedLocations[q] = true;
+			index = FirstPosOf(availableLocations,IL_INVALID,index+1);
+		}
+	}
+	
+	namespace Internal
+	{
+		//Only used for 'only beatable' logic
+		//Can place items in impossible locations
+		void forcePopulate(ItemID items, ItemID defaultItems, ItemID itembuf)
+		{
+			int index;
+			for(int q = 0; q < IL_MAX; ++q)
+			{
+				if(items[q]==IT_INVALID && defaultItems[q]!=IT_INVALID)
+				{
+					items[q] = itembuf[index++];
+				}
+			}
+		}
+		
+		//Check if the entire game is beatable with the items that have been placed thus far
+		//To be used to check 'only beatable' logic
+		bool canWinGame(int placedItem)
+		{
+			return false;
+		}
+	}
+}

@@ -207,7 +207,7 @@ bool SetBItem(int itemID)
 	return GetEquipmentB()==itemID;
 }
 
-bool canEquip(int itID)
+bool canEquip(ItemID itID)
 {
 	if(itID==3||itID==139)
 	{
@@ -216,6 +216,10 @@ bool canEquip(int itID)
 	else if(itID==48)
 	{
 		return Hero->Item[IT_BOMBBAG_POWDERKEG];
+	}
+	else if(isArrow(itID))
+	{
+		return Hero->Item[IT_BOWARROW];
 	}
 	else
 	{
@@ -1834,8 +1838,16 @@ item script ItemPickup
 			}
 			case IT_MAGIC:
 			{
-				Hero->Item[IT_DEKU_BUBBLE] = true;
-				sprintf(gbuf, "You've been granted {{Magic Power}}! In your %s form, press {{R}} to shoot ((bubble blasts)).@pressa()@char(26)Your {{Magic Power}} decreases when you shoot. Replenish it with ((Magic Jars)) and ((Potions)).", form==FORM_DEKU?"current":"Deku");
+				unless(Game->MCounter[CR_MAGIC])
+				{
+					Hero->Item[IT_DEKU_BUBBLE] = true;
+					sprintf(gbuf, "You've been granted {{Magic Power}}! In your %s form, press {{R}} to shoot ((bubble blasts)).@pressa()@char(26)Your {{Magic Power}} decreases when you shoot. Replenish it with ((Magic Jars)) and ((Potions)).", form==FORM_DEKU?"current":"Deku");
+				}
+				else
+				{
+					Game->Generic[GEN_MAGICDRAINRATE] = 1;
+					sprintf(gbuf, "PLACEHOLDER FOR HALF MAGIC"); //UNFINISHED
+				}
 				break;
 			}
 			case IT_HEARTPIECE:

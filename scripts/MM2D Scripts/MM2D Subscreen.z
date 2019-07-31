@@ -423,7 +423,7 @@ void runSubscreen()
 		//CURSOR:
 		drawTileToLoc(loadItemTile(CURSOR_ITEM),loadItemCSet(CURSOR_ITEM),cursorRow,cursorCol,6);
 		//Equipping of items is handled in //EX_ITEMS//
-		int itOnCursor = ItemIDs[cursorIndex];
+		ItemID itOnCursor = ItemIDs[cursorIndex];
 		if(itOnCursor!=0&&canEquip(itOnCursor))
 		{
 			if(itOnCursor>=146&&itOnCursor<=151)
@@ -908,10 +908,6 @@ void passiveSubscreen()//start PassiveSubscreen
 	if(isArrow(EX2_item)&&EX2_item!=IT_BOWARROW)++EX2_tile;
 	if(getGlobalBool(GVAR_AGAINST_PICKUP,GV_MISC_BOOL))
 	{
-		EX1_tile=TILE_INVIS;
-		EX2_tile=TILE_INVIS;
-		B_tile=TILE_INVIS;
-		A_tile=TILE_GRAB;
 		R_tile=TILE_GRAB;
 		setGlobalBool(GVAR_AGAINST_PICKUP,GV_MISC_BOOL,false);
 	}

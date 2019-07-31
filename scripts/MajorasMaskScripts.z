@@ -58,4 +58,5 @@ always using namespace TintZH;
 #include "scripts/MM2D Scripts/MM2D Minigames.z"
 #include "scripts/MM2D Scripts/MM2D Misc.z"
 #include "scripts/MM2D Scripts/MM2D Enemies.z"
+#include "scripts/MM2D Scripts/MM2D Randomizer.z"
 //end
