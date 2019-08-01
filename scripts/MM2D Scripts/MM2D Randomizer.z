@@ -6,6 +6,7 @@ namespace Rando
 	{
 		FLAG_MIN,
 		FLAG_ACTIVE,
+		FLAG_START_SOS,
 		FLAG_MAX
 	};
 
@@ -37,6 +38,7 @@ namespace Rando
 	
 	DEFINE FLAGS_SIZE = ((FLAG_MAX/BITS_INT)%1)?(((FLAG_MAX/BITS_INT)+1)/10000)*10000:FLAG_MAX/BITS_INT;
 	u randflags[FLAGS_SIZE];
+	u seed;
 	
 	void randoItemInit()
 	{
@@ -45,6 +47,7 @@ namespace Rando
 	
 	void randoItemInit(ItemID items)
 	{
+		SRand(seed); //Set the chosen/generated seed
 		while(true)
 		{
 			memset(items, IT_INVALID, SizeOfArray(items));
@@ -91,6 +94,7 @@ namespace Rando
 	
 	void printRando(ItemID items)
 	{
+		Debug::print("Printing layout for seed %d",seed);
 		for(int q = 0; q < IL_MAX; ++q)
 		{
 			if(items[q]==IT_INVALID) continue;

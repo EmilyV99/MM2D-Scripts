@@ -839,10 +839,50 @@ ItemID getDropsetDrop(int dset) //start
 		}
 	}
 }//end
-bool SubscreenHidden()
+bool SubscreenHidden() //start
 {
 	return ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN);
+}//end
+int ftoia(char buf, int pos, float f) //start
+{
+	DEFINE IPART = Floor(f);
+	DEFINE DPART = Abs((f%1)*10000);
+	int ilen = itoa(buf, pos, IPART);
+	int dlen = itoa(buf, pos+ilen, DPART);
+	while(dlen<4)
+	{
+		strcat(buf,"0");
+		++dlen;
+	}
+	return ilen + dlen;
 }
+int ftoia(char buf, float f)
+{
+	return ftoia(buf, 0, f);
+}
+//end
+float iatof(char origbuf) //start
+{
+	char buf[16];
+	strcpy(buf, origbuf);
+	bool negative;
+	int index = 0;
+	if(buf[0]=='-')
+	{
+		++index;
+		negative = true;
+	}
+	char tbuf[16];
+	strncpy(tbuf, 0, buf, index, 6);
+	index += 6;
+	float output = atoi(tbuf);
+	remchr(tbuf, 0);
+	strncpy(tbuf, 0, buf, index, 4);
+	output += atoi(tbuf)/10000;
+	unless(output<0) //handle '-214747.3648'
+		output *= negative ? -1 : 1;
+	return output;
+}//end
 //end Misc Functions
 //start Arrays
 int shiftBackArray(u arr, u emptyVal) //start
