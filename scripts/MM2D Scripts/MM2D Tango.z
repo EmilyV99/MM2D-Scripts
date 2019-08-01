@@ -234,8 +234,9 @@ void TangoInit()
 {
 	setupStyles();
 	Tango_Start();
-	setGlobalVar(GVAR_MAINTANGOSLOT,GV_MISC,TANGO_INVALID);
-	setGlobalVar(GVAR_NPCTANGOSLOT,GV_MISC,TANGO_INVALID);
+	setGlobalVar(GVAR_MAINTANGOSLOT,GV_MISC,0);
+	setGlobalVar(GVAR_NPCTANGOSLOT,GV_MISC,1);
+	subscreenTangoSlot = 2;
 	setGlobalVar(GVAR_ACTIVENPCID,GV_MISC,0);
 }
 
