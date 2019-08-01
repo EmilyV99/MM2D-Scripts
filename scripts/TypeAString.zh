@@ -1,8 +1,8 @@
 /*
 	Script Header: TypeAString.zh
 	Author: Venrob
-	Version: 1.3
-	31 Mar 19
+	Version: 1.4
+	31 Jul 19
 */
 
 #option HEADER_GUARD on
@@ -21,17 +21,32 @@ namespace TypeAString
 
 	DEFINE KEY_FINAL = KEY_SEMICOLON; //Last input key to check
 
-	DEFINE TVAR_TYPING = 0;
-	DEFINE TVAR_MAXCHARS = 1;
-	DEFINE TVAR_CAPSLOCK = 2;
-	DEFINE TVAR_INDEX = 3;
-	DEFINE TVAR_ALLOWSYMBOLS = 4;
-	DEFINE TVAR_ENTERENDS = 5;
-	DEFINE TVAR_TYPING_ENDED = 6;
-	DEFINE TVAR_BACKSPACEANDDELETE = 7;
-	DEFINE TVAR_WRAP = 8;
-	//DEFINE TVAR_LEFTRIGHT = 9; /Planned feature: Left/Right arrows will move the index, and you will be able to type in-between already typed letters.
-	//DEFINE TVAR_
+	enum
+	{
+		TVAR_TYPING,
+		TVAR_MAXCHARS,
+		TVAR_INDEX,
+		TVAR_ALLOWSYMBOLS,
+		TVAR_ENTERENDS,
+		TVAR_TYPING_ENDED,
+		TVAR_BACKSPACEANDDELETE,
+		TVAR_WRAP,
+		TVAR_MODE,
+		//TVAR_LEFTRIGHT = 9, /Planned feature: Left/Right arrows will move the index, and you will be able to type in-between already typed letters.
+		//TVAR_
+		TVAR_MAX
+	};
+	
+	enum TMode
+	{
+		TMODE_LEGACY = -1, //Internal use only!
+		TMODE_ALPHANUMERIC, //Letters/Numbers
+		TMODE_ALPHANUMERIC_SYMBOLS, //Letters/Numbers/'typing_allowed_symbols'
+		TMODE_ALPHABETIC, //Letters only
+		TMODE_NUMERIC_POSITIVE, //Numbers only
+		TMODE_NUMERIC, //Numbers, and `-` if it is the first character
+		TMODE_ANY //Any character at all
+	};
 
 	char typing_allowed_symbols[] = {'"','!','@','#','$','%','^','&','*','(',')','-','_','=','+','[',']','{','}',';',':',',','.','<','>','/','?','|','`','~','\'','\\'};
 
@@ -45,6 +60,7 @@ namespace TypeAString
 		__setTvar(TVAR_MAXCHARS,Clamp(maxChars,0,MAX_LENGTH));
 		if(allowSymbols)__setTvar(TVAR_ALLOWSYMBOLS,1);
 		else __setTvar(TVAR_ALLOWSYMBOLS,0);
+		__setTvar(TVAR_MODE,TMODE_LEGACY);
 	}
 
 	//Begin taking keyboard input, up to maxChars characters. Only alphanumeric.
@@ -58,6 +74,17 @@ namespace TypeAString
 	{
 		startTypingMode(128,false);
 	}
+	
+	void startTypingMode(int maxChars, TMode mode)
+	{
+		if(mode==TMODE_LEGACY) startTypingMode(maxChars,false);
+		__setTvar(TVAR_MODE, mode);
+		clearTypedInput();
+		__setTvar(TVAR_TYPING,1);
+		__setTvar(TVAR_INDEX,0);
+		Game->TypingMode = true;
+		__setTvar(TVAR_MAXCHARS,Clamp(maxChars,0,MAX_LENGTH));
+	}
 
 	//End typing mode
 	void endTypingMode()
@@ -70,7 +97,7 @@ namespace TypeAString
 	void handleTyping()
 	{
 		if(__getTvar(TVAR_TYPING_ENDED))__setTvar(TVAR_TYPING_ENDED,0);
-		if(!__getTvar(TVAR_TYPING))return;
+		unless(__getTvar(TVAR_TYPING))return;
 		if(__getTvar(TVAR_BACKSPACEANDDELETE))
 		{
 			if(ReadKey(KEY_BACKSPACE))
@@ -98,7 +125,6 @@ namespace TypeAString
 			if(__getTvar(TVAR_WRAP))__setTvar(TVAR_INDEX,0);//If max characters specified is reached, wrap around
 			else return;
 		}
-		if(CapsLock())__setTvar(TVAR_CAPSLOCK,(__getTvar(TVAR_CAPSLOCK) + 1) % 2);
 		bool shift = PressShift();
 		char localBuf[MAX_CHARS_PER_FRAME + 1]; //+1 to ensure a NULL terminator is present
 		int localIndex = 0;
@@ -106,23 +132,20 @@ namespace TypeAString
 		{
 			if(!ReadKey(i))continue;
 			char c = KeyToChar(i,shift);
-			if(__getTvar(TVAR_CAPSLOCK))c = LowerToUpper(c);
-			bool valid = isAlphaNumeric(c);
-			if(!valid)
-			{
-				for(int q = SizeOfArray(typing_allowed_symbols)-1; q>=0; q--)
-				{
-					if(c == typing_allowed_symbols[q])
-					{
-						valid = true;
-						break;
-					}
-				} 
-			}
-			if(valid)
+			if(CapsLock())c = ConvertCase(c);
+			CharValidate valid = validateChar(c);
+			if(valid==CV_VALID)
 			{
 				localBuf[localIndex] = c;
 				++localIndex;
+			}
+			else if(valid==CV_VALIDFIRSTONLY)
+			{
+				if(localIndex==0 && __getTvar(TVAR_INDEX)==0)
+				{
+					localBuf[localIndex] = c;
+					++localIndex;
+				}
 			}
 		}
 		int startindex = __getTvar(TVAR_INDEX);
@@ -137,6 +160,66 @@ namespace TypeAString
 		//strcpy(keyboardInput,__getTvar(TVAR_INDEX),localBuf,__getTvar(TVAR_MAXCHARS)-__getTvar(TVAR_INDEX));
 		//__incTvar(TVAR_INDEX,localIndex);
 	}
+	
+	CharValidate validateChar(char c)
+	{
+		bool valid;
+		switch(__getTvar(TVAR_MODE))
+		{
+			case TMODE_LEGACY:
+				valid = isAlphaNumeric(c);
+				unless(valid || !__getTvar(TVAR_ALLOWSYMBOLS))
+				{
+					for(int q = SizeOfArray(typing_allowed_symbols)-1; q>=0; q--)
+					{
+						if(c == typing_allowed_symbols[q])
+						{
+							valid = true;
+							break;
+						}
+					} 
+				}
+				break;
+			case TMODE_ALPHABETIC:
+				valid = isAlphabetic(c);
+				break;
+				
+			case TMODE_ALPHANUMERIC:
+				valid = isAlphaNumeric(c);
+				break;
+				
+			case TMODE_ALPHANUMERIC_SYMBOLS:
+				valid = isAlphaNumeric(c);
+				unless(valid)
+				{
+					for(int q = SizeOfArray(typing_allowed_symbols)-1; q>=0; q--)
+					{
+						if(c == typing_allowed_symbols[q])
+						{
+							valid = true;
+							break;
+						}
+					} 
+				}
+				break;
+				
+			case TMODE_NUMERIC:
+				if(c=='-') return CV_VALIDFIRSTONLY;
+			case TMODE_NUMERIC_POSITIVE:
+				valid = isNumber(c);
+				break;
+				
+			case TMODE_ANY: return CV_VALID;
+		}
+		return valid ? CV_VALID : CV_INVALID;
+	}
+	
+	enum CharValidate
+	{
+		CV_INVALID,
+		CV_VALID,
+		CV_VALIDFIRSTONLY
+	};
 
 	//Example of how it works. Load this into any .QST as Slot 2, then type stuff. Pressing ENTER will write what you typed to the console. Feel free to play around with the settings.
 	//By default, BACKSPACE and DELETE will work as well. The character max is 8 (in "startTypingMode(8)"). "int buf[9]" should be one larger than this.
@@ -150,7 +233,7 @@ namespace TypeAString
 			setAllowBackspaceDelete(true);
 			setOverflowWraps(false);
 			//
-			startTypingMode(8);
+			startTypingMode(8, TMODE_ALPHABETIC); //letters only
 			while(true)
 			{
 				handleTyping();
@@ -246,7 +329,7 @@ namespace TypeAString
 	void getType(char buf, int start, int end)
 	{
 		int bufsize = SizeOfArray(buf);
-		Debug::print(keyboardInput);
+		//Debug::print(keyboardInput);
 		for(int i = 0; i<=end-start && keyboardInput[i+start] != 0 && i < bufsize; i++)
 		{
 			buf[i] = keyboardInput[i+start];
