@@ -839,6 +839,10 @@ ItemID getDropsetDrop(int dset) //start
 		}
 	}
 }//end
+bool SubscreenHidden()
+{
+	return ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN);
+}
 //end Misc Functions
 //start Arrays
 int shiftBackArray(u arr, u emptyVal) //start

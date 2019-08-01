@@ -1529,11 +1529,6 @@ item script Pictograph
 		int thisDMpal = thisDMAP->Palette;
 		while(true) 
 		{
-			if(getGlobalBool(GVAR_F6_MENU, GV_MISC_BOOL))
-			{
-				while(getGlobalBool(GVAR_F6_MENU, GV_MISC_BOOL)) Waitframe();
-				TotalNoAction();
-			}
 			if(Input->Press[CB_L])
 				color = !color;
 			if(color)

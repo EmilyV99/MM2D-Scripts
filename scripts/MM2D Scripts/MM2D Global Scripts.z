@@ -8,18 +8,26 @@ global script Init
 {
 	void run()
 	{
+		Log::print("Launching TLoZ: Majora's Mask 2D, firstrun Init");
 		//Check debug mode
 		char saveName[16];
 		Game->GetSaveName(saveName);
-		unless(strcmp(saveName,"Link"))debugEnabled=false;
+		debugEnabled=strcmp(saveName,"Link");
 		unless(strcmp(saveName,"Rando"))
 		{
+			debugEnabled = false;
+			LEARNED_SONGS[SONG_SongOfDoubleTime] = true;
+			LEARNED_SONGS[SONG_SongOfTime] = true;
+			LEARNED_SONGS[SONG_SongOfInvertedTime] = true;
+			Hero->Item[IT_OCARINA] = true;
 			Game->Cheat = 4;
 			Log::print("Activating experimental randomizer mode. Not all items are guaranteed to be obtainable. [Cheat Level 4] has been activated, so that you can explore regardless of item limitations.");
 			Rando::setFlag(Rando::FLAG_ACTIVE, true);
 		}
-		else debugEnabled=true;
-		onLaunch();
+		unless(strcmp(saveName,"MM2D"))
+		{
+			noSave = true;
+		}
 		//Starting settings
 		Game->MCounter[CR_DEKUNUTS] = 20;
 		Game->MCounter[CR_MAGICBEANS] = 20;
@@ -40,7 +48,6 @@ global script Init
 		setEnterEndsTyping(true);
 		setAllowBackspaceDelete(true);
 		setOverflowWraps(false);
-		onLaunchEnd();
 	}
 }
 //end
@@ -72,7 +79,7 @@ global script Global
 				}
 				refreshTime = false;
 			}
-			unless(ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN))
+			unless(SubscreenHidden())
 			{
 				if(getGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL))
 				{
@@ -1026,7 +1033,6 @@ global script Global
 		{
 			unless(toggleGlobalBool(GVAR_B_SPECTHEME_ACTIVE,GV_MISC_BOOL))reskinSubscreen(1);
 		}
-		GameOverMenu::checkF6();
 	}//end
 	void handleOcarina()//start
 	{
@@ -1094,12 +1100,12 @@ global script Global
 		else hideAllTints(false);
 	}//end
 //end Global Script
-//start OnContinue Script
+//start OnSaveLoad Script
 global script onFileLoad
 {
 	void run()
 	{
-		onLaunch();
+		Log::print("Launching TLoZ: Majora's Mask 2D, loading from save...");
 		if(daysAgo() >= DAYS_TO_HINT_RESET)
 		{
 			resetHintBools();
@@ -1119,7 +1125,6 @@ global script onFileLoad
 		}
 		tintOnContinue();
 		OptionsMenu.reloadOptions();
-		onLaunchEnd();
 	}
 }//end
 //start OnExit Script
@@ -1131,45 +1136,38 @@ global script onExit
 	}
 }
 //end OnExit Script
-//start onLaunch
-void onLaunch() //Called from `Init` and `OnContinue`
+//start OnLaunch Script
+global script OnLaunch
 {
-	//ClearTrace();
-	Log::print("Launching TLoZ: Majora's Mask 2D...");
-	Game->DisableActiveSubscreen = true; //Disable engine subscreen.
-	refreshDisable();
-	testrun();
-	initGame(); //Handle rando stuff here.
-	OptionsMenu.init();
-	arrowAimMode = false;
-	Game->MCounter[CR_BOMBCHUS]=Hero->Item[IT_BOMBBAG]?40:0;
-	LinkMovement_Init();
-	TangoInit();
-	HeroDir8 = validateDir(getPressedDir8(), Hero->Dir);
-	reloadDoubleDef(); //Set defense based on Fierce Deity + Double Def reward
-	//start Ocarina init
-	scarecrowMode = false;
-	scarecrowRecord = false;
-	ocIndex = 0;
-	playedSong = -1;
-	songFrames = 0;
-	midiToReturn = 0;
-	//end Ocarina init
-	subscreen = false;
-	clearBitmap(RT_BITMAP0);
-	setGlobalBool(GVAR_PICTURE_MODE,GV_MISC_BOOL,false);
-}
-
-void onLaunchEnd()
-{
-	for(int q = 0; q < susptLAST; ++q)
+	void run()
 	{
-		Game->Suspend[q] = false;
-		indivFreeze[q] = false;
-		forceActive[q] = false;
+		Game->DisableActiveSubscreen = true; //Disable engine subscreen.
+		refreshDisable();
+		testrun();
+		//Title Screen Here // UNFINISHED
+		OptionsMenu.init();
+		initGame(); //Handle rando stuff here.
+		arrowAimMode = false;
+		Game->MCounter[CR_BOMBCHUS]=Hero->Item[IT_BOMBBAG]?40:0;
+		LinkMovement_Init();
+		TangoInit();
+		HeroDir8 = validateDir(getPressedDir8(), Hero->Dir);
+		reloadDoubleDef(); //Set defense based on Fierce Deity + Double Def reward
+		//start Ocarina init
+		scarecrowMode = false;
+		scarecrowRecord = false;
+		ocIndex = 0;
+		playedSong = -1;
+		songFrames = 0;
+		midiToReturn = 0;
+		//end Ocarina init
+		subscreen = false;
+		clearBitmap(RT_BITMAP0);
+		setGlobalBool(GVAR_PICTURE_MODE,GV_MISC_BOOL,false);
+		Screen_Freeze(FREEZE_FORCE_NONE);
+		loadStoragePath();
+		Log::print("Finished init");
 	}
-	loadStoragePath();
-	Log::print("Finished init");
 }
 
 void refreshDisable()
@@ -1183,7 +1181,6 @@ void refreshDisable()
 		switch(q)
 		{
 			//Always disable
-			case KEY_F6: //Custom F6 Menu
 			case KEY_ENTER: //OptionsMenu
 			case KEY_ENTER_PAD: //OptionsMenu
 			case KEY_BACKSPACE: //OptionsMenu
@@ -1200,6 +1197,15 @@ void refreshDisable()
 	Input->DisableKey[Controls[CONTROL_OPTIONS]] = true;
 }
 //end
+//start OnContGame Script
+global script OnContGame
+{
+	void run()
+	{
+		Hero->HP = Hero->MaxHP; //Refill life
+		Hero->MP = Clamp(Hero->MP, (Hero->MaxMP/2), Hero->MaxMP); //Restore up to 50% magic
+	}
+}//end
 //start Game Init
 void initGame()
 {
@@ -1223,14 +1229,16 @@ void initGame()
 }
 //end Game Init
 //start Options Menu
-untyped opt[256] = {false, true, 1, 30, OptionsMenu.MENU_FONT_DEFAULT};
+untyped opt[256] = {false, true, 1, 30, OptionsMenu.MENU_FONT_DEFAULT, false, false};
 enum
 {
 	OPT_RFS,
 	OPT_HIDE_TINT_IN_MENU,
 	OPT_MENU_SCROLL_MULT,
 	OPT_MENU_HOLD_DELAY,
-	OPT_OPTIONS_FONT
+	OPT_OPTIONS_FONT,
+	OPT_INFDUR_RAZSWORD,
+	OPT_SKIPBEAVER
 };
 
 hero script OptionsMenu
@@ -1285,10 +1293,8 @@ hero script OptionsMenu
 	//start Menu constants & vars
 	CONFIG MENU_SPACING = 16;
 	CONFIG MENU_FONT_DEFAULT = FONT_Z3SMALL;
-	int MENU_FONT_HEIGHT = FONT_Z3SMALL_HEIGHT;
-	CONFIG TOP_MENU = -56;
-	CONFIG MENU_OPTMENUTAB_MARGIN = 24;
-	CONFIG MENU_TOP_MARGIN_HEIGHT = 16 + MENU_OPTMENUTAB_MARGIN;
+	CONFIG MENU_TAB_MARGIN = 24;
+	CONFIG MENU_TOP_MARGIN_HEIGHT = 16 + MENU_TAB_MARGIN;
 	CONFIG MENU_LEFT_MARGIN_WIDTH = 16;
 	CONFIG MENU_RIGHT_MARGIN_WIDTH = 16;
 	CONFIG MENU_BOTTOM_MARGIN_HEIGHT = 32;
@@ -1304,41 +1310,72 @@ hero script OptionsMenu
 	CONFIG MENU_ENFORCE_MARGINS = 1;
 	//
 	DEFINE MENU_SCREEN_WIDTH = 256;
-	DEFINE NUM_MENU_BITMAPS = OPTMENUTAB_END + 1;
-	DEFINE VIS_SCREEN_HEIGHT = 168 - TOP_MENU;
-	int maxOptPerTab;
-	int __MHEIGHT = (OPTMENUSTATE_MENU_MAX * (MENU_SPACING + MENU_FONT_HEIGHT + MENU_FONT_HEIGHT)) - MENU_SPACING + MENU_TOP_MARGIN_HEIGHT + MENU_BOTTOM_MARGIN_HEIGHT;
-	int OP_HEIGHT = __MHEIGHT < VIS_SCREEN_HEIGHT ? VIS_SCREEN_HEIGHT : __MHEIGHT;
-	DEFINE MENU_TOP_MARGIN = TOP_MENU + MENU_TOP_MARGIN_HEIGHT;
+	DEFINE M_NUM_MENU_BITMAPS = OPTMENUTAB_END + 1;
+	DEFINE S_NUM_MENU_BITMAPS = SETUPMENUTAB_END + 1;
 	DEFINE MENU_LEFT_MARGIN = MENU_LEFT_MARGIN_WIDTH;
 	DEFINE MENU_RIGHT_MARGIN = 255 - MENU_RIGHT_MARGIN_WIDTH;
 	DEFINE MENU_BOTTOM_MARGIN = 168 - MENU_BOTTOM_MARGIN_HEIGHT;
-	DEFINE MENU_TABLABEL_Y = MENU_TOP_MARGIN - FONT_Z3SMALL_HEIGHT - MENU_OPTMENUTAB_MARGIN;
 	
 	DEFINE MENU_CONTROL_X = 0;
 	DEFINE MENU_CONTROL_Y = 0;
 	DEFINE MENU_START_TABS_X = MENU_SCREEN_WIDTH;
 	DEFINE MENU_PERM_Y = 0;
-	int MENU_TEMP_Y = OP_HEIGHT;
 	
-	int MENU_BITMAP_HEIGHT = OP_HEIGHT * 2;
-	DEFINE MENU_BITMAP_WIDTH = MENU_SCREEN_WIDTH * NUM_MENU_BITMAPS;
-	DEFINE TABS_WIDTH = OPTMENUTAB_END * MENU_SCREEN_WIDTH;
+	DEFINE M_MENU_BITMAP_WIDTH = MENU_SCREEN_WIDTH * M_NUM_MENU_BITMAPS;
+	DEFINE S_MENU_BITMAP_WIDTH = MENU_SCREEN_WIDTH * S_NUM_MENU_BITMAPS;
+	DEFINE M_TABS_WIDTH = OPTMENUTAB_END * MENU_SCREEN_WIDTH;
+	DEFINE S_TABS_WIDTH = SETUPMENUTAB_END * MENU_SCREEN_WIDTH;
 	
-	int MAX_SCROLL = OP_HEIGHT - VIS_SCREEN_HEIGHT;
 	DEFINE MENU_CONTROL_LIST = MENU_SCREEN_WIDTH*2;
+	int MenuVars[MSV_MAX];
+	enum MV
+	{
+		MSV_MENU_FONT_HEIGHT,
+		MV_MAX_OPT_PER_TAB,
+		SV_MAX_OPT_PER_TAB,
+		MV_MHEIGHT,
+		SV_MHEIGHT,
+		MV_OPHEIGHT,
+		SV_OPHEIGHT,
+		MV_TEMPY,
+		SV_TEMPY,
+		MV_BMPHEIGHT,
+		SV_BMPHEIGHT,
+		MV_MAXSCROLL,
+		SV_MAXSCROLL,
+		MSV_TOP_MENU,
+		MSV_VIS_SCREEN_HEIGHT,
+		MSV_TOP_MARGIN,
+		MSV_TABLABEL_Y,
+		MSV_MAX
+	};
 	//end
+	void updateSize() //start
+	{
+		MenuVars[MSV_TOP_MENU] = SubscreenHidden() ? 0 : -56;
+		MenuVars[MSV_VIS_SCREEN_HEIGHT] = 168 - MenuVars[MSV_TOP_MENU];
+		MenuVars[MSV_TOP_MARGIN] = MenuVars[MSV_TOP_MENU] + MENU_TOP_MARGIN_HEIGHT;
+		MenuVars[MSV_TABLABEL_Y] = MenuVars[MSV_TOP_MARGIN] - FONT_Z3SMALL_HEIGHT - MENU_TAB_MARGIN;
+	}//end
 	void updateOptFont(int font) //start
 	{
+		updateSize();
 		opt[OPT_OPTIONS_FONT] = font;
-		MENU_FONT_HEIGHT = Text->FontHeight(font);
-		__MHEIGHT = (maxOptPerTab * (MENU_SPACING + MENU_FONT_HEIGHT + MENU_FONT_HEIGHT)) - MENU_SPACING + MENU_TOP_MARGIN_HEIGHT + MENU_BOTTOM_MARGIN_HEIGHT;
-		OP_HEIGHT = __MHEIGHT < VIS_SCREEN_HEIGHT ? VIS_SCREEN_HEIGHT : __MHEIGHT;
-		MENU_TEMP_Y = OP_HEIGHT;
-		MAX_SCROLL = OP_HEIGHT - VIS_SCREEN_HEIGHT;
-		MENU_BITMAP_HEIGHT = OP_HEIGHT * 2;
+		MenuVars[MSV_MENU_FONT_HEIGHT] = Text->FontHeight(font);
+		MenuVars[MV_MHEIGHT] = (MenuVars[MV_MAX_OPT_PER_TAB] * (MENU_SPACING + MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT])) - MENU_SPACING + MENU_TOP_MARGIN_HEIGHT + MENU_BOTTOM_MARGIN_HEIGHT;
+		MenuVars[SV_MHEIGHT] = (MenuVars[SV_MAX_OPT_PER_TAB] * (MENU_SPACING + MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT])) - MENU_SPACING + MENU_TOP_MARGIN_HEIGHT + MENU_BOTTOM_MARGIN_HEIGHT;
+		MenuVars[MV_OPHEIGHT] = MenuVars[MV_MHEIGHT] < MenuVars[MSV_VIS_SCREEN_HEIGHT] ? MenuVars[MSV_VIS_SCREEN_HEIGHT] : MenuVars[MV_MHEIGHT];
+		MenuVars[SV_OPHEIGHT] = MenuVars[SV_MHEIGHT] < MenuVars[MSV_VIS_SCREEN_HEIGHT] ? MenuVars[MSV_VIS_SCREEN_HEIGHT] : MenuVars[SV_MHEIGHT];
+		MenuVars[MV_TEMPY] = MenuVars[MV_OPHEIGHT];
+		MenuVars[SV_TEMPY] = MenuVars[SV_OPHEIGHT];
+		MenuVars[MV_MAXSCROLL] = MenuVars[MV_OPHEIGHT] - MenuVars[MSV_VIS_SCREEN_HEIGHT];
+		MenuVars[SV_MAXSCROLL] = MenuVars[SV_OPHEIGHT] - MenuVars[MSV_VIS_SCREEN_HEIGHT];
+		MenuVars[MV_BMPHEIGHT] = MenuVars[MV_OPHEIGHT] * 2;
+		MenuVars[SV_BMPHEIGHT] = MenuVars[SV_OPHEIGHT] * 2;
 		init_menu_bitmap(true); //Force re-create bitmap for new size
-		menu->Rectangle(6, 0, 0, MENU_BITMAP_WIDTH, MENU_BITMAP_HEIGHT, 0x00, 1, 0, 0, 0, true, OP_OPAQUE); //Clear bitmap for 1 frame, for reloading
+		init_setup_bitmap(true); //Force re-create bitmap for new size
+		menu->Rectangle(6, 0, 0, M_MENU_BITMAP_WIDTH, MenuVars[MV_BMPHEIGHT], 0x00, 1, 0, 0, 0, true, OP_OPAQUE); //Clear bitmap for 1 frame, for reloading
+		//Not needed for setup bitmap as this cannot be called while it is active.
 	}//end
 	DEFINE MAX_FONT = FONT_LISA;
 	DEFINE MIN_FONT = FONT_Z1;
@@ -1397,9 +1434,9 @@ hero script OptionsMenu
 	{
 		option -= optmenutabs[getTab(<OptMenuState>option)];
 		int optTop = menuposy(<OptMenuState>option);
-		int optBot = optTop + MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		int optBot = optTop + MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		if(optTop < scroll + (MENU_ENFORCE_MARGINS ? MENU_TOP_MARGIN_HEIGHT : 0)) return -1;
-		if(optBot > scroll + VIS_SCREEN_HEIGHT - (MENU_ENFORCE_MARGINS ? MENU_BOTTOM_MARGIN_HEIGHT : 0)) return 1;
+		if(optBot > scroll + MenuVars[MSV_VIS_SCREEN_HEIGHT] - (MENU_ENFORCE_MARGINS ? MENU_BOTTOM_MARGIN_HEIGHT : 0)) return 1;
 		return 0;
 	}
 	
@@ -1408,10 +1445,15 @@ hero script OptionsMenu
 		for(int q = 0; q < OPTMENUTAB_END; ++q)
 		{
 			int numopt = tabNumOpts(<OptMenuTab>q);
-			if(numopt > maxOptPerTab) maxOptPerTab = numopt;
+			if(numopt > MenuVars[MV_MAX_OPT_PER_TAB]) MenuVars[MV_MAX_OPT_PER_TAB] = numopt;
 		}
+		for(int q = 0; q < SETUPMENUTAB_END; ++q)
+		{
+			int numopt = tabNumOpts(<SetupMenuTab>q);
+			if(numopt > MenuVars[SV_MAX_OPT_PER_TAB]) MenuVars[SV_MAX_OPT_PER_TAB] = numopt;
+		}
+		updateSize();
 		updateOptFont(opt[OPT_OPTIONS_FONT]);
-		//init_menu_bitmap(); //This is called from updateOptFont!
 	}
 	
 	void init_menu_bitmap()
@@ -1420,8 +1462,8 @@ hero script OptionsMenu
 	}
 	void init_menu_bitmap(bool force)
 	{
-		unless(menu->isAllocated()) menu = Game->CreateBitmap(MENU_BITMAP_HEIGHT, MENU_BITMAP_WIDTH);
-		else if(force || !menu->isValid()) menu->Create(0, MENU_BITMAP_HEIGHT, MENU_BITMAP_WIDTH);
+		unless(menu->isAllocated()) menu = Game->CreateBitmap(MenuVars[MV_BMPHEIGHT], M_MENU_BITMAP_WIDTH);
+		else if(force || !menu->isValid()) menu->Create(0, MenuVars[MV_BMPHEIGHT], M_MENU_BITMAP_WIDTH);
 	}
 	
 	void init_setup_bitmap()
@@ -1430,15 +1472,13 @@ hero script OptionsMenu
 	}
 	void init_setup_bitmap(bool force)
 	{
-		//unless(setupmenu->isAllocated()) setupmenu = Game->CreateBitmap(MENU_BITMAP_HEIGHT, MENU_BITMAP_WIDTH);
-		//else if(force || !setupmenu->isValid()) setupmenu->Create(0, MENU_BITMAP_HEIGHT, MENU_BITMAP_WIDTH);
+		unless(setupmenu->isAllocated()) setupmenu = Game->CreateBitmap(MenuVars[MV_BMPHEIGHT], M_MENU_BITMAP_WIDTH);
+		else if(force || !setupmenu->isValid()) setupmenu->Create(0, MenuVars[MV_BMPHEIGHT], M_MENU_BITMAP_WIDTH);
 	}
 	
 	void run() //start
 	{
 		init_menu_bitmap();
-		//init_setup_bitmap();
-		//runGameSetupMenu(); //run until exit
 		while(1)
 		{
 			Waitframe();
@@ -1463,21 +1503,13 @@ hero script OptionsMenu
 			int cooldown = 0;
 			int inputTimer = 0;
 			OptMenuState state = OPTMENUSTATE_MAIN;
+			updateOptFont(opt[OPT_OPTIONS_FONT]);
+			WaitTotalNoAction();
+			Waitdraw();
 			reloadMenuBitmap(menu);
-			int font = opt[OPT_OPTIONS_FONT];
 			while(getGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL))
 			{
-				if(getGlobalBool(GVAR_F6_MENU, GV_MISC_BOOL))
-				{
-					while(getGlobalBool(GVAR_F6_MENU, GV_MISC_BOOL)) Waitframe();
-					TotalNoAction();
-				}
 				Waitdraw();
-				if(font != opt[OPT_OPTIONS_FONT])
-				{
-					reloadMenuBitmap(menu);
-					font = opt[OPT_OPTIONS_FONT];
-				}
 				if(cooldown>0)--cooldown;
 				++inputTimer;
 				inputTimer %= opt[OPT_MENU_HOLD_DELAY];
@@ -1508,7 +1540,7 @@ hero script OptionsMenu
 					{
 						//Scroll the menu visual based on currently selected option
 						unless(mainOption-optmenutabs[getTab(<OptMenuState>mainOption)]) scroll = 0;
-						else if(getTab(<OptMenuState>mainOption)!=getTab(<OptMenuState>(mainOption+1))) scroll = MAX_SCROLL;
+						//else if(getTab(<OptMenuState>mainOption)!=getTab(<OptMenuState>(mainOption+1))) scroll = MenuVars[MV_MAXSCROLL];
 						else if(optionScrollCheck(mainOption, scroll) != 0)
 						{
 							while(optionScrollCheck(mainOption, scroll) == 1)
@@ -1519,46 +1551,46 @@ hero script OptionsMenu
 							{
 								scroll -= MENU_SCROLL_INC;
 							}
-							scroll = VBound(scroll, MAX_SCROLL, 0);
+							scroll = VBound(scroll, MenuVars[MV_MAXSCROLL], 0);
 						}
 						switch(mainOption)
 						{
 							// "Options"
 							
 							case OPTMENUSTATE_RFS:
-								DrawMenuString("Flip Right-Facing Slash", menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
+								DrawMenuString("Flip Right-Facing Slash", menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
 								break;
 								
 							case OPTMENUSTATE_LT:
-								DrawMenuString("Lens Tint Color", menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
+								DrawMenuString("Lens Tint Color", menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
 								break;
 								
 							case OPTMENUSTATE_TINTHIDE:
-								DrawMenuString("Hide Tint In Menus", menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
+								DrawMenuString("Hide Tint In Menus", menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
 								break;
 								
 							case OPTMENUSTATE_MENU_SCROLL_SPEED:
-								DrawMenuString("Menu Scroll Speed", menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
+								DrawMenuString("Menu Scroll Speed", menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
 								break;
 							
 							case OPTMENUSTATE_MENU_HOLD_DELAY:
-								DrawMenuString("Menu Input Hold Delay", menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
+								DrawMenuString("Menu Input Hold Delay", menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
 								break;
 							
 							// "Controls"
 							
 							case OPTMENUSTATE_OPTIONSKEY:
-								DrawMenuString("Options Menu", menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
+								DrawMenuString("Options Menu", menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
 								break;
 								
 							// "System"
 							
 							case OPTMENUSTATE_OPT_MENU_FONT:
-								DrawMenuString("Font", menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
+								DrawMenuString("Font", menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
 								break;
 								
 							case OPTMENUSTATE_RESET_DEFAULT:
-								DrawMenuString("Reset All to Default", menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
+								DrawMenuString("Reset All to Default", menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_LEFT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption), MENU_TCOLOR_ACTIVE, TF_NORMAL);
 								break;
 						}
 						if(confirm)
@@ -1602,7 +1634,7 @@ hero script OptionsMenu
 					{
 						char buf0[64];
 						KeyToString(Controls[CONTROL_OPTIONS], buf0, true, true);
-						DrawMenuString(buf0, menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption) + MENU_FONT_HEIGHT, MENU_TCOLOR_ACTIVE, TF_RIGHT);
+						DrawMenuString(buf0, menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption) + MenuVars[MSV_MENU_FONT_HEIGHT], MENU_TCOLOR_ACTIVE, TF_RIGHT);
 						if(Input->Button[CB_A]) break; //Don't take input while `A` is held
 						int key = getKeyPress();
 						switch(isValidKey(key))
@@ -1621,7 +1653,7 @@ hero script OptionsMenu
 					
 					case OPTMENUSTATE_RFS:
 					{
-						DrawMenuString(opt[OPT_RFS] ? "  On" : "Off", menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption) + MENU_FONT_HEIGHT, opt[OPT_RFS] ? GREEN : RED, TF_RIGHT);
+						DrawMenuString(opt[OPT_RFS] ? "  On" : "Off", menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption) + MenuVars[MSV_MENU_FONT_HEIGHT], opt[OPT_RFS] ? GREEN : RED, TF_RIGHT);
 						if(confirm)
 							opt[OPT_RFS] = !opt[OPT_RFS];
 						break;
@@ -1649,7 +1681,7 @@ hero script OptionsMenu
 						switch(subOption)
 						{
 							case PREVIEW:
-								DrawMenuString("Preview ", menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN - (RWID+GWID+BWID), MENU_TEMP_Y + menuposy(<OptMenuState>mainOption) + MENU_FONT_HEIGHT, MENU_TCOLOR_ACTIVE, TF_RIGHT);
+								DrawMenuString("Preview ", menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN - (RWID+GWID+BWID), MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption) + MenuVars[MSV_MENU_FONT_HEIGHT], MENU_TCOLOR_ACTIVE, TF_RIGHT);
 								if(confirm)
 								{
 									setGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL, false);
@@ -1663,19 +1695,19 @@ hero script OptionsMenu
 								break;
 								
 							case _RED:
-								DrawMenuString(rbuf, menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN - (GWID+BWID), MENU_TEMP_Y + menuposy(<OptMenuState>mainOption) + MENU_FONT_HEIGHT, RED, TF_RIGHT);
+								DrawMenuString(rbuf, menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN - (GWID+BWID), MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption) + MenuVars[MSV_MENU_FONT_HEIGHT], RED, TF_RIGHT);
 								__tintR[getGlobalVar(TINT_LENS, GV_PAL)] += inc;
 								__tintR[getGlobalVar(TINT_LENS, GV_PAL)] = VBound(__tintR[getGlobalVar(TINT_LENS, GV_PAL)], 63, -63);
 								break;
 								
 							case _GREEN:
-								DrawMenuString(gbuf, menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN - (BWID), MENU_TEMP_Y + menuposy(<OptMenuState>mainOption) + MENU_FONT_HEIGHT, GREEN, TF_RIGHT);
+								DrawMenuString(gbuf, menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN - (BWID), MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption) + MenuVars[MSV_MENU_FONT_HEIGHT], GREEN, TF_RIGHT);
 								__tintG[getGlobalVar(TINT_LENS, GV_PAL)] += inc;
 								__tintG[getGlobalVar(TINT_LENS, GV_PAL)] = VBound(__tintG[getGlobalVar(TINT_LENS, GV_PAL)], 63, -63);
 								break;
 								
 							case _BLUE:
-								DrawMenuString(bbuf, menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption) + MENU_FONT_HEIGHT, BLUE, TF_RIGHT);
+								DrawMenuString(bbuf, menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption) + MenuVars[MSV_MENU_FONT_HEIGHT], BLUE, TF_RIGHT);
 								__tintB[getGlobalVar(TINT_LENS, GV_PAL)] += inc;
 								__tintB[getGlobalVar(TINT_LENS, GV_PAL)] = VBound(__tintB[getGlobalVar(TINT_LENS, GV_PAL)], 63, -63);
 								break;
@@ -1685,7 +1717,7 @@ hero script OptionsMenu
 					
 					case OPTMENUSTATE_TINTHIDE:
 					{
-						DrawMenuString(opt[OPT_HIDE_TINT_IN_MENU] ? "  On" : "Off", menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption) + MENU_FONT_HEIGHT, opt[OPT_HIDE_TINT_IN_MENU] ? GREEN : RED, TF_RIGHT);
+						DrawMenuString(opt[OPT_HIDE_TINT_IN_MENU] ? "  On" : "Off", menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption) + MenuVars[MSV_MENU_FONT_HEIGHT], opt[OPT_HIDE_TINT_IN_MENU] ? GREEN : RED, TF_RIGHT);
 						if(confirm)
 							opt[OPT_HIDE_TINT_IN_MENU] = !opt[OPT_HIDE_TINT_IN_MENU];
 						break;
@@ -1696,7 +1728,7 @@ hero script OptionsMenu
 						char buf4[16] = "      x";
 						if(opt[OPT_MENU_SCROLL_MULT]<1) strcat(buf4,"0.5");
 						else itoa(buf4, 7, opt[OPT_MENU_SCROLL_MULT]);
-						DrawMenuString(buf4, menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption) + MENU_FONT_HEIGHT, MENU_TCOLOR_ACTIVE, TF_RIGHT);
+						DrawMenuString(buf4, menu, 2, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption) + MenuVars[MSV_MENU_FONT_HEIGHT], MENU_TCOLOR_ACTIVE, TF_RIGHT);
 						if(up || right) opt[OPT_MENU_SCROLL_MULT] = opt[OPT_MENU_SCROLL_MULT] < 1 ? 1 : opt[OPT_MENU_SCROLL_MULT] << 1;
 						else if(down || left) opt[OPT_MENU_SCROLL_MULT] >>= 1;
 						opt[OPT_MENU_SCROLL_MULT] = VBound(opt[OPT_MENU_SCROLL_MULT], 8, 0.5);
@@ -1707,7 +1739,7 @@ hero script OptionsMenu
 					{
 						char buf5[16] = "    ";
 						itoa(buf5, 4, opt[OPT_MENU_HOLD_DELAY]);
-						DrawMenuString(buf5, menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption) + MENU_FONT_HEIGHT, MENU_TCOLOR_ACTIVE, TF_RIGHT);
+						DrawMenuString(buf5, menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption) + MenuVars[MSV_MENU_FONT_HEIGHT], MENU_TCOLOR_ACTIVE, TF_RIGHT);
 						if(up) opt[OPT_MENU_HOLD_DELAY] += 10;
 						else if(down) opt[OPT_MENU_HOLD_DELAY] -= 10;
 						else if(left) --opt[OPT_MENU_HOLD_DELAY];
@@ -1720,7 +1752,7 @@ hero script OptionsMenu
 					{
 						char buf[32];
 						getFontName(buf, opt[OPT_OPTIONS_FONT]);
-						DrawMenuString(buf, menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption) + MENU_FONT_HEIGHT, MENU_TCOLOR_ACTIVE, TF_RIGHT);
+						DrawMenuString(buf, menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption) + MenuVars[MSV_MENU_FONT_HEIGHT], MENU_TCOLOR_ACTIVE, TF_RIGHT);
 						if(down || right) incOptFont(DIR_UP);
 						else if(up || left) incOptFont(DIR_DOWN);
 						break;
@@ -1728,7 +1760,7 @@ hero script OptionsMenu
 					
 					case OPTMENUSTATE_RESET_DEFAULT:
 					{
-						DrawMenuString("Are you sure?", menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MENU_TEMP_Y + menuposy(<OptMenuState>mainOption) + MENU_FONT_HEIGHT, MENU_TCOLOR_ACTIVE, TF_RIGHT);
+						DrawMenuString("Are you sure?", menu, 1, getTabPos(<OptMenuState>mainOption) + MENU_RIGHT_MARGIN, MenuVars[MV_TEMPY] + menuposy(<OptMenuState>mainOption) + MenuVars[MSV_MENU_FONT_HEIGHT], MENU_TCOLOR_ACTIVE, TF_RIGHT);
 						if(confirm)
 						{
 							resetAllOpts();
@@ -1738,7 +1770,7 @@ hero script OptionsMenu
 					}
 				}//end
 				//printf("State: %d\nMainOpt: %d\nSubOpt: %d\nScroll: %d\n\n", state, mainOption, subOption, scroll);
-				Screen->Rectangle(MENU_LAYER, 0, TOP_MENU, 256, VIS_SCREEN_HEIGHT, BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+				Screen->Rectangle(MENU_LAYER, 0, MenuVars[MSV_TOP_MENU], 256, MenuVars[MSV_VIS_SCREEN_HEIGHT], BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
 				//start tab calcs
 				int destx = getTabPos(<OptMenuTab>tab);
 				//Calculate left/right distances
@@ -1748,52 +1780,52 @@ hero script OptionsMenu
 					int ldist, rdist;
 					for(int lx = x; lx != destx; --lx)
 					{
-						if(lx < MENU_START_TABS_X) lx += TABS_WIDTH;
+						if(lx < MENU_START_TABS_X) lx += M_TABS_WIDTH;
 						++ldist;
 					}
 					for(int rx = x; rx != destx; ++rx)
 					{
-						if(rx >= TABS_WIDTH + MENU_START_TABS_X - 1) rx -= TABS_WIDTH;
+						if(rx >= M_TABS_WIDTH + MENU_START_TABS_X - 1) rx -= M_TABS_WIDTH;
 						++rdist;
 					}
 					x += ldist < rdist ? -(MENU_SCROLL_SPEED * opt[OPT_MENU_SCROLL_MULT]) : (rdist < ldist ? (MENU_SCROLL_SPEED * opt[OPT_MENU_SCROLL_MULT]) : (lastLR == DIR_LEFT ? -(MENU_SCROLL_SPEED * opt[OPT_MENU_SCROLL_MULT]) : (MENU_SCROLL_SPEED * opt[OPT_MENU_SCROLL_MULT]))); //Choose the closer direction
 					if(cmp != comp(destx, x)) x = destx; //Prevent passing it if scroll speed is odd
-					else if(x < MENU_START_TABS_X) x += TABS_WIDTH; //Wrap
-					else if(x >= MENU_START_TABS_X + TABS_WIDTH) x -= TABS_WIDTH; //Wrap
+					else if(x < MENU_START_TABS_X) x += M_TABS_WIDTH; //Wrap
+					else if(x >= MENU_START_TABS_X + M_TABS_WIDTH) x -= M_TABS_WIDTH; //Wrap
 				}
 				//end
 				
-				int yoffs = (ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN)) ? (TOP_MENU < 0 ? -TOP_MENU : 0) : 0;
+				int yoffs = (ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN)) ? (MenuVars[MSV_TOP_MENU] < 0 ? -MenuVars[MSV_TOP_MENU] : 0) : 0;
 				
 				if(Input->Button[CB_START])
-					menu->Blit(MENU_LAYER, RT_SCREEN, MENU_CONTROL_X, MENU_CONTROL_Y, 256, VIS_SCREEN_HEIGHT - yoffs, 0, TOP_MENU + yoffs, 256, VIS_SCREEN_HEIGHT - yoffs, 0, 0, 0, 0, 0, true);
+					menu->Blit(MENU_LAYER, RT_SCREEN, MENU_CONTROL_X, MENU_CONTROL_Y, 256, MenuVars[MSV_VIS_SCREEN_HEIGHT] - yoffs, 0, MenuVars[MSV_TOP_MENU] + yoffs, 256, MenuVars[MSV_VIS_SCREEN_HEIGHT] - yoffs, 0, 0, 0, 0, 0, true);
 				else
 				{
-					menu->Blit(MENU_LAYER, RT_SCREEN, x, scroll + MENU_PERM_Y, 256, VIS_SCREEN_HEIGHT - yoffs, 0, TOP_MENU + yoffs, 256, VIS_SCREEN_HEIGHT - yoffs, 0, 0, 0, 0, 0, true);
-					menu->Blit(MENU_LAYER, RT_SCREEN, x, scroll + MENU_TEMP_Y, 256, VIS_SCREEN_HEIGHT - yoffs, 0, TOP_MENU + yoffs, 256, VIS_SCREEN_HEIGHT - yoffs, 0, 0, 0, 0, 0, true);
-					int wid = MENU_BITMAP_WIDTH - x + 1;
+					menu->Blit(MENU_LAYER, RT_SCREEN, x, scroll + MENU_PERM_Y, 256, MenuVars[MSV_VIS_SCREEN_HEIGHT] - yoffs, 0, MenuVars[MSV_TOP_MENU] + yoffs, 256, MenuVars[MSV_VIS_SCREEN_HEIGHT] - yoffs, 0, 0, 0, 0, 0, true);
+					menu->Blit(MENU_LAYER, RT_SCREEN, x, scroll + MenuVars[MV_TEMPY], 256, MenuVars[MSV_VIS_SCREEN_HEIGHT] - yoffs, 0, MenuVars[MSV_TOP_MENU] + yoffs, 256, MenuVars[MSV_VIS_SCREEN_HEIGHT] - yoffs, 0, 0, 0, 0, 0, true);
+					int wid = M_MENU_BITMAP_WIDTH - x + 1;
 					if(wid < 256)
 					{
-						menu->Blit(MENU_LAYER, RT_SCREEN, MENU_START_TABS_X, scroll + MENU_PERM_Y, 256 - wid, VIS_SCREEN_HEIGHT - yoffs, wid, TOP_MENU + yoffs, 256 - wid, VIS_SCREEN_HEIGHT - yoffs, 0, 0, 0, 0, 0, true);
-						menu->Blit(MENU_LAYER, RT_SCREEN, MENU_START_TABS_X, scroll + MENU_TEMP_Y, 256 - wid, VIS_SCREEN_HEIGHT - yoffs, wid, TOP_MENU + yoffs, 256 - wid, VIS_SCREEN_HEIGHT - yoffs, 0, 0, 0, 0, 0, true);
+						menu->Blit(MENU_LAYER, RT_SCREEN, MENU_START_TABS_X, scroll + MENU_PERM_Y, 256 - wid, MenuVars[MSV_VIS_SCREEN_HEIGHT] - yoffs, wid, MenuVars[MSV_TOP_MENU] + yoffs, 256 - wid, MenuVars[MSV_VIS_SCREEN_HEIGHT] - yoffs, 0, 0, 0, 0, 0, true);
+						menu->Blit(MENU_LAYER, RT_SCREEN, MENU_START_TABS_X, scroll + MenuVars[MV_TEMPY], 256 - wid, MenuVars[MSV_VIS_SCREEN_HEIGHT] - yoffs, wid, MenuVars[MSV_TOP_MENU] + yoffs, 256 - wid, MenuVars[MSV_VIS_SCREEN_HEIGHT] - yoffs, 0, 0, 0, 0, 0, true);
 					}
 				}
-				//menu->Blit(MENU_LAYER, RT_SCREEN, 0, scroll, 256, VIS_SCREEN_HEIGHT, 0, TOP_MENU, 256, VIS_SCREEN_HEIGHT, 0, 0, 0, 0, 0, true);
+				//menu->Blit(MENU_LAYER, RT_SCREEN, 0, scroll, 256, MenuVars[MSV_VIS_SCREEN_HEIGHT], 0, MenuVars[MSV_TOP_MENU], 256, MenuVars[MSV_VIS_SCREEN_HEIGHT], 0, 0, 0, 0, 0, true);
 				if(MENU_ENFORCE_MARGINS)
 				{
-					Screen->Rectangle(MENU_LAYER, 0,                 TOP_MENU + yoffs,                256,                  MENU_TOP_MARGIN - 1 + yoffs, BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
-					Screen->Rectangle(MENU_LAYER, 0,                 TOP_MENU + yoffs,                MENU_LEFT_MARGIN - 1, 176,                         BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
-					Screen->Rectangle(MENU_LAYER, MENU_RIGHT_MARGIN, TOP_MENU + yoffs,                256,                  176,                         BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+					Screen->Rectangle(MENU_LAYER, 0,                 MenuVars[MSV_TOP_MENU] + yoffs,                256,                  MenuVars[MSV_TOP_MARGIN] - 1 + yoffs, BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+					Screen->Rectangle(MENU_LAYER, 0,                 MenuVars[MSV_TOP_MENU] + yoffs,                MENU_LEFT_MARGIN - 1, 176,                         BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+					Screen->Rectangle(MENU_LAYER, MENU_RIGHT_MARGIN, MenuVars[MSV_TOP_MENU] + yoffs,                256,                  176,                         BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
 					Screen->Rectangle(MENU_LAYER, 0,                 168 - MENU_BOTTOM_MARGIN_HEIGHT, 256,                  176,                         BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
 				}
 				//OptMenuTab names
 				char buf1[32], buf2[32], buf3[32];
-				getTabName(buf1, wrapTab(tab-1));
-				getTabName(buf2, wrapTab(tab));
-				getTabName(buf3, wrapTab(tab+1));
-				Screen->DrawString(MENU_LAYER,  64, MENU_TABLABEL_Y + yoffs, FONT_Z3SMALL, MENU_TCOLOR_TABS, TRANSBG, TF_CENTERED, buf1, OP_OPAQUE);
-				Screen->DrawString(MENU_LAYER, 128, MENU_TABLABEL_Y + yoffs, FONT_Z3SMALL, MENU_TCOLOR_TABS, TRANSBG, TF_CENTERED, buf2, OP_OPAQUE);
-				Screen->DrawString(MENU_LAYER, 192, MENU_TABLABEL_Y + yoffs, FONT_Z3SMALL, MENU_TCOLOR_TABS, TRANSBG, TF_CENTERED, buf3, OP_OPAQUE);
+				getTabName(buf1, wrapOptTab(tab-1));
+				getTabName(buf2, wrapOptTab(tab));
+				getTabName(buf3, wrapOptTab(tab+1));
+				Screen->DrawString(MENU_LAYER,  64, MenuVars[MSV_TABLABEL_Y] + yoffs, FONT_Z3SMALL, MENU_TCOLOR_TABS, TRANSBG, TF_CENTERED, buf1, OP_OPAQUE);
+				Screen->DrawString(MENU_LAYER, 128, MenuVars[MSV_TABLABEL_Y] + yoffs, FONT_Z3SMALL, MENU_TCOLOR_TABS, TRANSBG, TF_CENTERED, buf2, OP_OPAQUE);
+				Screen->DrawString(MENU_LAYER, 192, MenuVars[MSV_TABLABEL_Y] + yoffs, FONT_Z3SMALL, MENU_TCOLOR_TABS, TRANSBG, TF_CENTERED, buf3, OP_OPAQUE);
 				//Controls
 				DrawStrings(MENU_LAYER, 128, MENU_BOTTOM_MARGIN + FONT_Z3SMALL_HEIGHT, FONT_Z3SMALL, MENU_TCOLOR_CONTROLS, -1, TF_CENTERED, "ENTER/(A): Confirm | BACKSPACE/(B): Back\n(START): Info | (UP)/(DOWN): Switch options\n(LEFT)/(RIGHT): Switch optmenutabs", OP_OPAQUE, 2, 256-(MENU_RIGHT_MARGIN_WIDTH + MENU_LEFT_MARGIN_WIDTH));
 				//
@@ -1817,13 +1849,19 @@ hero script OptionsMenu
 	
 	void runGameSetupMenu() //start
 	{
-	
+		init_setup_bitmap();
 	}//end
 	
 	int menuposy(OptMenuState opt)
 	{
 		int opthei = opt - optmenutabs[getTab(opt)];
-		return MENU_TOP_MARGIN_HEIGHT + ((MENU_SPACING + MENU_FONT_HEIGHT + MENU_FONT_HEIGHT) * opthei);
+		return MENU_TOP_MARGIN_HEIGHT + ((MENU_SPACING + MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT]) * opthei);
+	}
+	
+	int menuposy(SetupMenuState opt)
+	{
+		int opthei = opt - setupmenutabs[getTab(opt)];
+		return MENU_TOP_MARGIN_HEIGHT + ((MENU_SPACING + MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT]) * opthei);
 	}
 	
 	int tabNumOpts(OptMenuState opt)
@@ -1836,12 +1874,20 @@ hero script OptionsMenu
 		return optmenutabs[tab+1] - optmenutabs[tab]; 
 	}
 	
-	//Call in OnContinue(), and when exiting options menu.
+	int tabNumOpts(SetupMenuState opt)
+	{
+		return tabNumOpts(getTab(opt));
+	}
+	
+	int tabNumOpts(SetupMenuTab tab)
+	{
+		return setupmenutabs[tab+1] - setupmenutabs[tab]; 
+	}
+	
+	//Call in OnSaveLoad, and when exiting options menu.
 	void reloadOptions() //start
 	{
 		//Forcibly ensure that all option settings are in effect
-		//
-		//Options control should not need reloading
 		//
 		//Set "Flip Right-Handed Slash" on all swords
 		itemdata it = Game->LoadItemData(IT_SWORD_KOKIRI);
@@ -1855,16 +1901,12 @@ hero script OptionsMenu
 		it = Game->LoadItemData(IT_SWORD_ZORA_BLADE);
 		it->Flags[7] = opt[OPT_RFS];
 		//
-		//Lens tint should not need reloading
-		//
-		//Tint hide should not need reloading
-		//
 	}//end
 	
 	//start Drawing
 	void reloadMenuBitmap(bitmap menu) //start
 	{
-		menu->Rectangle(0, 0, 0, MENU_BITMAP_WIDTH, MENU_BITMAP_HEIGHT, 0x00, 1, 0, 0, 0, true, OP_OPAQUE);
+		menu->Rectangle(0, 0, 0, M_MENU_BITMAP_WIDTH, MenuVars[MV_BMPHEIGHT], 0x00, 1, 0, 0, 0, true, OP_OPAQUE);
 		int x = MENU_START_TABS_X + MENU_LEFT_MARGIN_WIDTH;
 		DEFINE TOP_Y = MENU_TOP_MARGIN_HEIGHT;
 		int y = TOP_Y;
@@ -1872,27 +1914,27 @@ hero script OptionsMenu
 		// "Options"
 		//
 		DrawMenuString("Flip Right-Facing Slash", menu, 1, x, y, MENU_TCOLOR_INACTIVE_PERM, TF_NORMAL);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//
 		DrawMenuString("Lens Tint Color", menu, 1, x, y, MENU_TCOLOR_INACTIVE_PERM, TF_NORMAL);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//
 		DrawMenuString("Hide Tint In Menus", menu, 1, x, y, MENU_TCOLOR_INACTIVE_PERM, TF_NORMAL);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//
 		DrawMenuString("Menu Scroll Speed", menu, 1, x, y, MENU_TCOLOR_INACTIVE_PERM, TF_NORMAL);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//
 		DrawMenuString("Menu Input Hold Delay", menu, 1, x, y, MENU_TCOLOR_INACTIVE_PERM, TF_NORMAL);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//{}Module
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//{}Module
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//{}Module
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//{}Module
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//{}Module
 		//
 		// "Controls"
@@ -1901,13 +1943,13 @@ hero script OptionsMenu
 		y = TOP_Y;
 		//
 		DrawMenuString("Options Menu", menu, 1, x, y, MENU_TCOLOR_INACTIVE_PERM, TF_NORMAL);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//{}Module
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//{}Module
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//{}Module
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//{}Module
 		//
 		// "System"
@@ -1915,36 +1957,36 @@ hero script OptionsMenu
 		x += MENU_SCREEN_WIDTH;
 		y = TOP_Y;
 		//
-		//y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		//y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//Last slot.
 		DrawMenuString("Font", menu, 1, x, y, MENU_TCOLOR_INACTIVE_PERM, TF_NORMAL);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		DrawMenuString("Reset All to Default", menu, 1, x, y, MENU_TCOLOR_INACTIVE_PERM, TF_NORMAL);
 		///////////////////////
 		x = MENU_CONTROL_X + 128;
 		y = TOP_Y;
 		//
 		DrawMenuStrings("Default Lens of Truth:\n-17, -48, 5", menu, 1, x, y, MENU_TCOLOR_INACTIVE_PERM, TF_CENTERED, 0, 256-(MENU_RIGHT_MARGIN_WIDTH + MENU_LEFT_MARGIN_WIDTH));
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//
 		DrawMenuStrings("When control binding:\nPress any keyboard key to bind it.\nConflicting binds may cause issues.", menu, 1, x, y, MENU_TCOLOR_INACTIVE_PERM, TF_CENTERED, 0, 256-(MENU_RIGHT_MARGIN_WIDTH + MENU_LEFT_MARGIN_WIDTH));
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		/*
 		DrawMenuString(, menu, 1, x, y, MENU_TCOLOR_INACTIVE_PERM, TF_CENTERED);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;*/
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;*/
 	}//end
 	
 	void loadMenuTempBitmap(bitmap menu) //start
 	{
-		menu->Rectangle(0, MENU_START_TABS_X, MENU_TEMP_Y, MENU_BITMAP_WIDTH, OP_HEIGHT * 2, 0x00, 1, 0, 0, 0, true, OP_OPAQUE);
+		menu->Rectangle(0, MENU_START_TABS_X, MenuVars[MV_TEMPY], M_MENU_BITMAP_WIDTH, MenuVars[MV_OPHEIGHT] * 2, 0x00, 1, 0, 0, 0, true, OP_OPAQUE);
 		int x = MENU_START_TABS_X + MENU_RIGHT_MARGIN;
-		DEFINE TOP_Y = MENU_TEMP_Y + MENU_TOP_MARGIN_HEIGHT + MENU_FONT_HEIGHT; //Font offset to make it one row lower
+		DEFINE TOP_Y = MenuVars[MV_TEMPY] + MENU_TOP_MARGIN_HEIGHT + MenuVars[MSV_MENU_FONT_HEIGHT]; //Font offset to make it one row lower
 		int y = TOP_Y;
 		//
 		// "Options"
 		//
 		DrawMenuString(opt[OPT_RFS] ? "  On" : "Off", menu, 1, x, y, opt[OPT_RFS] ? DARKGREEN : DARKRED, TF_RIGHT);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//
 		char rbuf[16], gbuf[16], bbuf[16];
 		itoa(rbuf, __tintR[getGlobalVar(TINT_LENS, GV_PAL)]);
@@ -1959,16 +2001,16 @@ hero script OptionsMenu
 		DrawMenuString(rbuf, menu, 1, x - (GWID+BWID), y, DARKRED, TF_RIGHT);
 		DrawMenuString(gbuf, menu, 1, x - (BWID), y, DARKGREEN, TF_RIGHT);
 		DrawMenuString(bbuf, menu, 1, x, y, DARKBLUE, TF_RIGHT);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//
 		DrawMenuString(opt[OPT_HIDE_TINT_IN_MENU] ? "  On" : "Off", menu, 2, x, y, opt[OPT_HIDE_TINT_IN_MENU] ? DARKGREEN : DARKRED, TF_RIGHT);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//
 		char buf4[16] = "      x";
 		if(opt[OPT_MENU_SCROLL_MULT]<1) strcat(buf4,"0.5");
 		else itoa(buf4, 7, opt[OPT_MENU_SCROLL_MULT]);
 		DrawMenuString(buf4, menu, 1, x, y, MENU_TCOLOR_INACTIVE_TEMP, TF_RIGHT);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//
 		char buf5[16] = "    ";
 		itoa(buf5, 4, opt[OPT_MENU_HOLD_DELAY]);
@@ -1981,7 +2023,7 @@ hero script OptionsMenu
 		char buf0[64];
 		KeyToString(Controls[CONTROL_OPTIONS], buf0, true, true);
 		DrawMenuString(buf0, menu, 1, x, y, MENU_TCOLOR_INACTIVE_TEMP, TF_RIGHT);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//
 		// "System"
 		//
@@ -1990,12 +2032,13 @@ hero script OptionsMenu
 		char buf6[32];
 		getFontName(buf6, opt[OPT_OPTIONS_FONT]);
 		DrawMenuString(buf6, menu, 1, x, y, MENU_TCOLOR_INACTIVE_TEMP, TF_RIGHT);
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//Reset default; no temp text
-		y += MENU_FONT_HEIGHT + MENU_FONT_HEIGHT + MENU_SPACING;
+		y += MenuVars[MSV_MENU_FONT_HEIGHT] + MenuVars[MSV_MENU_FONT_HEIGHT] + MENU_SPACING;
 		//
 	}//end
 	
+	//start DrawMenuString(s)
 	void DrawMenuString(char str, bitmap menu, int layer, int x, int y, int color, int format)
 	{
 		DrawMenuString(str, menu, layer, x, y, color, format, false);
@@ -2015,6 +2058,7 @@ hero script OptionsMenu
 	{
 		DrawStringsBitmap(menu, layer, x, y, opt[OPT_OPTIONS_FONT], color, transbg ? TRANSBG : BLACK, format, str, OP_OPAQUE, verticalSpacing, MaxWidth);
 	}//end
+	//end
 	
 	
 	enum KeyValidation
@@ -2085,22 +2129,73 @@ hero script OptionsMenu
 				break;
 				
 			default:
-				if(__DEBUG) printf("[MM2D] [Error] Invalid tab %d passed to 'getTabName()'\n", tab);
+				Debug::print("[Error] Invalid tab %d passed to 'getTabName()'", tab);
 		}
 	}
 	
-	OptMenuTab wrapTab(int tab)
+	OptMenuTab wrapOptTab(int t)
 	{
-		int t = tab;
 		if(t >= OPTMENUTAB_END) t %= OPTMENUTAB_END;
 		while(t <= OPTMENUTAB_INVALID) t += OPTMENUTAB_END;
 		return <OptMenuTab>t;
 	}
 	//end
 	
+	//start SetupMenuTab stuff
+	SetupMenuTab getTab(SetupMenuState opt)
+	{
+		if(opt == SETUPMENUSTATE_MAIN) return SETUPMENUTAB_INVALID;
+		int tab = 0;
+		for(; tab < SETUPMENUTAB_END; ++tab)
+		{
+			if(opt < setupmenutabs[tab+1]) break;
+		}
+		return <SetupMenuTab>(tab == SETUPMENUTAB_END ? -1 : tab);
+	}
+	
+	int getTabPos(SetupMenuState opt)
+	{
+		return getTabPos(getTab(opt));
+	}
+	
+	int getTabPos(SetupMenuTab tab)
+	{
+		if(tab == SETUPMENUTAB_INVALID) return -1;
+		return MENU_START_TABS_X + (MENU_SCREEN_WIDTH * tab);
+	}
+	
+	void getTabName(char buf, SetupMenuTab tab)
+	{
+		switch(tab)
+		{
+			case SETUPMENUTAB_SETUP:
+				strcat(buf, "Setup");
+				break;
+				
+			case SETUPMENUTAB_RANDOMAIN:
+				strcat(buf, "Rando");
+				break;
+				
+			case SETUPMENUTAB_RANDOFLAGS:
+				strcat(buf, "RandFlags");
+				break;
+				
+			default:
+				Debug::print("[Error] Invalid tab %d passed to 'getTabName()'", tab);
+		}
+	}
+	
+	SetupMenuTab wrapSetupTab(int t)
+	{
+		if(t >= SETUPMENUTAB_END) t %= SETUPMENUTAB_END;
+		while(t <= SETUPMENUTAB_INVALID) t += SETUPMENUTAB_END;
+		return <SetupMenuTab>t;
+	}
+	//end
+	
 	void printDraws()
 	{
-		printf("[MM2D] [Draws] Draws this frame: %d/%d\n", Graphics->NumDraws(), Graphics->MaxDraws());
+		Log::print("[Draws] Draws this frame: %d/%d", Graphics->NumDraws(), Graphics->MaxDraws());
 	}
 	
 	void resetAllOpts()
@@ -2113,7 +2208,7 @@ hero script OptionsMenu
 		opt[OPT_HIDE_TINT_IN_MENU] = true;
 		opt[OPT_MENU_SCROLL_MULT] = 1;
 		opt[OPT_MENU_HOLD_DELAY] = 30;
-		updateOptFont(FONT_Z3SMALL);
+		updateOptFont(MENU_FONT_DEFAULT);
 	}
 }
 //end
@@ -2130,8 +2225,6 @@ namespace GameOverMenu
 	CONFIG MENU_COLOR_ACTIVE = RED;
 	CONFIG MENU_COLOR_INACTIVE = GRAY;
 	//
-	DEFINE SCREEN_HEIGHT = SCREEN_BOTTOM - SUBSCREEN_TOP;
-	DEFINE SCREEN_VCENTER = (SCREEN_HEIGHT / 2) + SUBSCREEN_TOP;
 	DEFINE SCREEN_WIDTH = SCREEN_RIGHT - SCREEN_LEFT;
 	DEFINE SCREEN_HCENTER = (SCREEN_WIDTH / 2) + SCREEN_LEFT;
 	//end
@@ -2146,18 +2239,15 @@ namespace GameOverMenu
 		}
 	}
 
-	void checkF6()
+	global script OnF6
 	{
-		if(Input->ReadKey[KEY_F6])
+		void run()
 		{
 			FreezeState frz = Get_Freeze();
-			Screen_Freeze(FREEZE_ACTION);
 			pauseAllSfx();
-			setGlobalBool(GVAR_F6_MENU, GV_MISC_BOOL, true);
-			QuitState state = runGameOverMenu(true);
-			//Bool is reset in `end()`
+			runGameOverMenu(true);
 			resumeAllSfx();
-			if(state == CANCEL) Screen_Freeze(frz);
+			Screen_Freeze(frz);
 		}
 	}
 
@@ -2167,7 +2257,9 @@ namespace GameOverMenu
 		QuitState state = NONE;
 		int cursor = 0;
 		DEFINE NUM_OPTIONS = 1 + <int>(allowCancel) + <int>(Hero->Item[IT_OCARINA]) + <int>(day < 4);
-		DEFINE START_TEXT = SCREEN_VCENTER - (((NUM_OPTIONS * MENU_FONT_HEIGHT) + ((NUM_OPTIONS - 1) * MENU_SPACING)) / 2);
+		DEFINE M_TOP = SubscreenHidden() ? 0 : -56;
+		DEFINE VCENTER = (((SCREEN_BOTTOM-8) - M_TOP) / 2) + M_TOP;
+		DEFINE START_TEXT = VCENTER - (((NUM_OPTIONS * MENU_FONT_HEIGHT) + ((NUM_OPTIONS - 1) * MENU_SPACING)) / 2);
 		int timer;
 		while(state==NONE)
 		{
@@ -2177,7 +2269,7 @@ namespace GameOverMenu
 			if(Input->Press[CB_DOWN] || Input->Press[CB_UP]) timer=0;
 			while(cursor<0)cursor+=NUM_OPTIONS;
 			cursor %= NUM_OPTIONS;
-			Screen->Rectangle(7, SCREEN_LEFT, SUBSCREEN_TOP, SCREEN_RIGHT, SCREEN_BOTTOM, BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
+			Screen->Rectangle(7, SCREEN_LEFT, M_TOP, SCREEN_RIGHT, SCREEN_BOTTOM, BLACK, 1, 0, 0, 0, true, OP_OPAQUE);
 			int opt = 0;
 			if(day < 4)
 			{
@@ -2228,12 +2320,9 @@ namespace GameOverMenu
 	
 	void end(QuitState opt)
 	{
-		setGlobalBool(GVAR_F6_MENU, GV_MISC_BOOL, false);
 		switch(opt)
 		{
 			case CONTINUE:
-				Hero->HP = Hero->MaxHP;
-				Hero->MP = Clamp(Hero->MP, (Hero->MaxMP / 2), Hero->MaxMP);
 				Screen_Freeze(FREEZE_NONE);
 				Game->Continue();
 				break;
@@ -2241,18 +2330,12 @@ namespace GameOverMenu
 				fakeSong = true;
 				playSong(SONGNOTES_SongOfTime);
 				playedSong = -1;
-				Global.doDrawAndLoops();
-				runHeightBitmap();
-				passiveSubscreen();
-				Screen_Freeze(FREEZE_ACTION);
-				Game->Suspend[susptSCRIPDRAWCLEAR] = true;
 				while(songFrames)
 				{
 					Global.handleOcarina();
 					playedSong = -1;
 					Waitframe();
 				}
-				Screen_Freeze(FREEZE_NONE);
 				saveTheGame();
 				resetTime();
 				break;
