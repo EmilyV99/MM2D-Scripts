@@ -613,7 +613,8 @@ item script razorSword
 {
 	void run()
 	{
-		swordCounter++;
+		unless(opt[OPT_INFDUR_RAZSWORD])
+			swordCounter++;
 	}
 }
 //end RazorSword
@@ -1512,7 +1513,7 @@ item script Pictograph
 		strcat(ImagePath, "PictoImage.png");
 		Debug::print("Using ImagePath '%s'",ImagePath);
 		//
-		unless(picto->isAllocated()) picto = Game->CreateBitmap(PICTO_HEIGHT,PICTO_WIDTH);
+		unless(picto->isAllocated()) picto = Game->CreateBitmap(PICTO_WIDTH,PICTO_HEIGHT);
 		picto->Read(0,ImagePath);
 		setGlobalBool(GVAR_PICTURE_MODE,GV_MISC_BOOL,true);
 		Hero->ScriptTile = TILE_INVIS;

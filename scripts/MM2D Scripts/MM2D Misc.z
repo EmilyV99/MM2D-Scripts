@@ -798,6 +798,10 @@ void FlashScreen(Color color, bool subscreen) //start
 {
 	Screen->Rectangle(7, 0, subscreen?-56:0, 256, 176, color, 1, 0, 0, 0, true, OP_OPAQUE);
 }//end
+void FlashScreenTrans(Color color, bool subscreen) //start
+{
+	Screen->Rectangle(7, 0, subscreen?-56:0, 256, 176, color, 1, 0, 0, 0, true, OP_TRANS);
+}//end
 bool HeroIsHolding() //start
 {
 	switch(Hero->Action)
@@ -843,45 +847,65 @@ bool SubscreenHidden() //start
 {
 	return ScreenFlag(SF_VIEW,SFV_NOSUBSCREEN);
 }//end
-int ftoia(char buf, int pos, float f) //start
+int ftoia(char ptr, int pos, float num) //start
 {
-	DEFINE IPART = Floor(f);
-	DEFINE DPART = Abs((f%1)*10000);
-	int ilen = itoa(buf, pos, IPART);
-	int dlen = itoa(buf, pos+ilen, DPART);
-	while(dlen<4)
+	if(OPTION_VALUE(TRUE_INT_SIZE) && num == -214748.3648)
 	{
-		strcat(buf,"0");
-		++dlen;
+		strcpy(ptr,pos,"-2147483648",0);
+		return 11;
 	}
-	return ilen + dlen;
+	int oldPos=pos;
+	int place=100000;
+	int digit;
+	bool printZero=false;
+	
+	if(num<0)
+	{
+		ptr[pos]='-';
+		++pos;
+		num=-num;
+	}
+	 
+	for(int i=0; i<10; ++i)
+	{
+		digit=((num/place)<<0)%10;
+		
+		if(digit>0 || printZero)
+		{
+			ptr[pos]=digit+'0';
+			++pos;
+			
+			// Start printing 0 at the first non-zero digit.
+			printZero=true;
+		}
+		
+		num%=place; // To make sure num/place doesn't overflow when place<1
+		place/=10;
+		
+		if(place==0.0001) // Last digit
+			printZero=true;
+	}
+	
+	return pos-oldPos;
 }
 int ftoia(char buf, float f)
 {
 	return ftoia(buf, 0, f);
 }
 //end
-float iatof(char origbuf) //start
+float iatof(char ptr) //start
 {
-	char buf[16];
-	strcpy(buf, origbuf);
-	bool negative;
-	int index = 0;
-	if(buf[0]=='-')
+	DEFINE sz = SizeOfArray(ptr);
+	int output;
+	bool neg = ptr[0]=='-';
+	for(int q = (neg ? 1 : 0); q < sz && ptr[q]!=0; ++q)
 	{
-		++index;
-		negative = true;
+		output *= 10;
+		output += (ptr[q]-'0')/10000;
+		if(neg ? (q>10) : (q>9)) break;
 	}
-	char tbuf[16];
-	strncpy(tbuf, 0, buf, index, 6);
-	index += 6;
-	float output = atoi(tbuf);
-	remchr(tbuf, 0);
-	strncpy(tbuf, 0, buf, index, 4);
-	output += atoi(tbuf)/10000;
-	unless(output<0) //handle '-214747.3648'
-		output *= negative ? -1 : 1;
-	return output;
+	if(output<0) return output; //handle -2147483648
+	return output * (neg ? -1 : 1);
 }//end
 //end Misc Functions
 //start Arrays
@@ -1238,7 +1262,7 @@ ffc script renameLink
 			}
 			//32-126 inclusive
 			if(typingJustEnded())
-			{    
+			{
 				if(getTypeLength()>1)
 				{
 					Game->SetSaveName(buf);

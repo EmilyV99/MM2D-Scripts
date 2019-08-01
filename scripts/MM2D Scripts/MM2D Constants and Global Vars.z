@@ -246,11 +246,15 @@ DEFINE RAFT_Y = 3;
 enum MIDI
 {
 	MIDI_NULL = -3,
+	MIDI_STOP = 0,
 	MIDI_MMOVERWORLD = 1,
 	MIDI_CLOCK_TOWER,
 	MIDI_CLOCK_TOWN,
 	MIDI_MINIGAME,
 	MIDI_MINIGAME_HOUSE,
+	MIDI_LTTP_CAVE,
+	MIDI_GREAT_FAIRY,
+	MIDI_TITLE,
 	MIDI_THESTORM = 204,
 	SONGMIDI_SongOfDoubleTime = 205,
 	SONGMIDI_SongOfInvertedTime = 209,
@@ -272,6 +276,7 @@ DEFINE SFX_POT_SHATTER = 90;
 DEFINE SFX_PICKUP_OBJ = 91;
 DEFINE SFX_BALLOON_POP = 92;
 DEFINE SFX_LADDER_CLIMB = 93;
+DEFINE SFX_MENU_BEEP = 94;
 //end Sound Constants
 //start LayerScreens
 DEFINE LAYERSMAP1 = 2;
@@ -1050,6 +1055,7 @@ namespace Items
 	}
 	void defaultItemInit(ItemID items)
 	{
+		const bool rand = Rando::getFlag(Rando::FLAG_ACTIVE);
 		memset(items, IT_INVALID, SizeOfArray(items));
 		//Chest
 		items[IL_CTLEDGE20_CHEST] = IT_RUP_20;
@@ -1068,6 +1074,9 @@ namespace Items
 		items[IL_TCSHOOTING2] = IT_HEARTPIECE;
 		items[IL_GFAIRY_TOWN] = IT_MAGIC;
 		items[IL_GFAIRY_TOWN2] = IT_MASK_GFAIRY;
+		
+		//Replace song location for Song of Soaring with some dummy item, when it has a location
+		if(rand&&Rando::getFlag(Rando::FLAG_START_SOS)) LEARNED_SONGS[SONG_SongOfSoaring] = true;
 	}
 	void updateItemMapdata() //Handle free-standing items
 	{

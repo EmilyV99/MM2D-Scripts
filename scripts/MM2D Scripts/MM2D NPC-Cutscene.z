@@ -118,6 +118,7 @@ ffc script NPC
 							Waitframe();
 						}
 						visible=true;
+						ffcInvis(this,false);
 						this->Data = NPCcombo;
 						Screen->ComboD[loc]=comboUnder;
 						while(visible)
@@ -189,11 +190,11 @@ ffc script NPC
 							this->Y += yoff;
 							if(NPCid<9)
 							{
-								Screen->ComboD[loc+32] = 38406;
+								Screen->ComboD[loc+32] = 38489;
 							}
 							else
 							{
-								Screen->ComboD[loc+16] = 38406;
+								Screen->ComboD[loc+16] = 38489;
 							}
 						}
 						else if(lastform != 1 && form == 1 && getGlobalVar(GVAR_GUARDSMOVED,GV_MISCRESETTABLE))
@@ -231,11 +232,11 @@ ffc script NPC
 								this->Y += Cond(NPCid>8,0,-8);
 								if(NPCid<9)
 								{
-									Screen->ComboD[loc+32] = 38406;
+									Screen->ComboD[loc+32] = 38489;
 								}
 								else
 								{
-									Screen->ComboD[loc+16] = 38406;
+									Screen->ComboD[loc+16] = 38489;
 								}
 							}
 							interact(this, NPCid, 0, {0});

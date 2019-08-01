@@ -24,7 +24,7 @@ void resetTime()
 	Game->Counter[CR_DEKUNUTS]=0;
 	Game->Counter[CR_MAGICBEANS]=0;
 	swordCounter = 0;
-	Hero->Item[IT_SWORD_RAZOR]=false;
+	unless(opt[OPT_INFDUR_RAZSWORD]) Hero->Item[IT_SWORD_RAZOR]=false;
 	Hero->Item[IT_SWORD_KOKIRI]=true;
 	Hero->Item[INF_MAGIC]=false;
 	for(int i=0;i<6;i++)
