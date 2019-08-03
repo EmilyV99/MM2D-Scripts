@@ -2233,20 +2233,23 @@ hero script OptionsMenu
 					if(confirm)
 					{
 						startTypingMode(11, TMODE_NUMERIC);
+						int timer;
 						while(true)
 						{
+							timer = ((timer+1)%32);
 							FlashScreen(BLACK, true); //Full-screen black rect
 							handleTyping();
 							char buf[16];
 							getType(buf);
 							unless(typingJustEnded())
 							{
-								DrawStrings(7, SCREEN_HCENTER, SCREEN_VCENTER, opt[OPT_OPTIONS_FONT], MENU_TCOLOR_ACTIVE, BLACK, TF_CENTERED, buf, OP_OPAQUE, 2, 256);
+								DrawStrings(7, SCREEN_HCENTER, SCREEN_VCENTER, opt[OPT_OPTIONS_FONT], WHITE, BLACK, TF_CENTERED, buf, OP_OPAQUE, 2, 256);
+								if((timer&16) && buf[10]==0)DrawStrings(7, SCREEN_HCENTER+(Text->StringWidth(buf,opt[OPT_OPTIONS_FONT])/2)+1, SCREEN_VCENTER, opt[OPT_OPTIONS_FONT], WHITE, BLACK, TF_NORMAL, "_", OP_OPAQUE, 2, 256);
+								DrawStrings(7, SCREEN_HCENTER, SCREEN_VCENTER+Text->FontHeight(opt[OPT_OPTIONS_FONT])+10, opt[OPT_OPTIONS_FONT], MENU_TCOLOR_CONTROLS, BLACK, TF_CENTERED, "-, 0-9: Enter Seed\nEnter: Confirm Seed\nBackspace: Backspace text", OP_OPAQUE, 2, 256);
 							}
 							else
 							{
 								Rando::seed = iatof(buf);
-								Debug::print("Seed Text %s converts to %f", buf, Rando::seed);
 								break;
 							}
 							Waitframe();
