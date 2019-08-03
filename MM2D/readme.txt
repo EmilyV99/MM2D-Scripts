@@ -6,7 +6,17 @@
 //                           //
 ///////////////////////////////
 
-Current script source: https://github.com/venrob/MM2D-Scripts/tree/BACKUP/DEMO/Demo5
+Current script source:
+https://github.com/venrob/MM2D-Scripts/tree/BACKUP/DEMO/Demo5
+
+/////////////////
+//  Save Name  //
+/////////////////
+
+Presently, any name other than 'Link' will set you to debug mode.
+This means you will start with all items, songs, etc.
+Naming yourself 'Link' will begin the game normally, as Deku Link,
+with no items.
 
 //////////////////
 //  Setup Menu  //
