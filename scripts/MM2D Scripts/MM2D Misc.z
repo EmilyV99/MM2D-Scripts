@@ -1104,7 +1104,7 @@ void KeyToString(int key, char buf, bool ShowPad, bool AllCaps)
 			
 		default:
 			char keyChar = KeyToChar(key, false, false);
-			strcat(buf, (char[2]){AllCaps ? LowerToUpper(keyChar) : keyChar});
+			strcat(buf, <char[2]>{AllCaps ? LowerToUpper(keyChar) : keyChar});
 			if(ShowPad)
 			{
 				switch(key)

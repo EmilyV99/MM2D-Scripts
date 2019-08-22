@@ -1058,6 +1058,10 @@ screendata script SCTTower //start South Clock Town tower building (R)
 							{
 								HeightFastCombo(true,4,ComboX(combos[i]),ComboY(combos[i]),COMBO_PLANKS,2,OP_OPAQUE);
 							}
+							if(day==2)
+							{
+								HeightFastCombo(true,4,X,Y+16,COMBO_BREMOR,0,OP_OPAQUE);//Draw Bremor from the third layer
+							}
 							if(day==3)
 							{
 								HeightFastCombo(true,4,X+16,Y,getChestCombo(COMBO_CHEST,IL_CTTOWERMONEY_CHEST),0,OP_OPAQUE);
@@ -1676,21 +1680,21 @@ void bankGiveRewards()
 	{
 		item i = CreateItemAt(Items::getItem(Items::IL_BANKER1),Hero->X,Hero->Y);
 		i->Pickup = IP_HOLDUP;
-		ShowStringAndWait("Here, you've deposited enough rupees to earn a reward!");
+		ShowNPCStringAndWait("Here, you've deposited enough rupees to earn a reward!",N_BANKER);
 		setGlobalBool(GVAR_BANK_REW1,GV_MISC_BOOL,true);
 	}
 	if(fullCounter(CR_BANKBAL)>=1000&&!getGlobalBool(GVAR_BANK_REW2,GV_MISC_BOOL))
 	{
 		item i = CreateItemAt(Items::getItem(Items::IL_BANKER2),Hero->X,Hero->Y);
 		i->Pickup = IP_HOLDUP;
-		ShowStringAndWait("Here, you've deposited enough rupees to earn another reward!");
+		ShowNPCStringAndWait("Here, you've deposited enough rupees to earn another reward!",N_BANKER);
 		setGlobalBool(GVAR_BANK_REW2,GV_MISC_BOOL,true);
 	}
 	if(fullCounter(CR_BANKBAL)>=5000&&!getGlobalBool(GVAR_BANK_REW3,GV_MISC_BOOL))
 	{
 		item i = CreateItemAt(Items::getItem(Items::IL_BANKER3),Hero->X,Hero->Y);
 		i->Pickup = IP_HOLDUP;
-		ShowStringAndWait("Here, you've deposited enough rupees to earn the final reward!");
+		ShowNPCStringAndWait("Here, you've deposited enough rupees to earn the final reward!",N_BANKER);
 		setGlobalBool(GVAR_BANK_REW3,GV_MISC_BOOL,true);
 	}
 }

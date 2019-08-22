@@ -195,6 +195,7 @@ void handleTransformations()//start
 					}
 					Hero->Item[IT_GORON_PUNCH]=false;
 					Hero->Item[IT_GORON_POUND]=true;
+					if(Hero->Action==LA_SCROLLING) break;
 					if((Input->Button[CB_DOWN]||Input->Button[CB_RIGHT]||Input->Button[CB_LEFT]||Input->Button[CB_UP])&&(Hero->Action==LA_NONE||Hero->Action==LA_WALKING||Hero->Action==LA_GOTHURTLAND))
 					{
 						if(timeRolling<84)

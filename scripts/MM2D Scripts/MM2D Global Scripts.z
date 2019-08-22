@@ -1551,7 +1551,7 @@ hero script OptionsMenu
 			updateOptFont(opt[OPT_OPTIONS_FONT]);
 			hidePassive(true);
 			FlashScreen(BLACK, true);
-			Audio->AdjustSFXVolume(30);
+			//Audio->AdjustSFXVolume(30);
 			WaitTotalNoAction();
 			Waitdraw();
 			reloadMenuBitmap(optmenu);
@@ -1896,7 +1896,7 @@ hero script OptionsMenu
 				TotalNoAction();
 				Waitframe();
 			}
-			Audio->AdjustSFXVolume(100);
+			//Audio->AdjustSFXVolume(100);
 			TotalNoAction();
 			reloadOptions();
 			Screen_Freeze(FREEZE_NONE);
@@ -1927,7 +1927,7 @@ hero script OptionsMenu
 		SetupMenuState state = SETUPMENUSTATE_MAIN;
 		updateOptFont(opt[OPT_OPTIONS_FONT]);
 		hidePassive(true);
-		Audio->AdjustSFXVolume(30);
+		//Audio->AdjustSFXVolume(30);
 		WaitTotalNoAction();
 		while(true)
 		{
@@ -2193,7 +2193,7 @@ hero script OptionsMenu
 			TotalNoAction();
 			Waitframe();
 		}
-		Audio->AdjustSFXVolume(100);
+		//Audio->AdjustSFXVolume(100);
 		TotalNoAction();
 		reloadOptions();
 		Screen_Freeze(FREEZE_NONE);
