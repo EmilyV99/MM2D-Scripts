@@ -1,22 +1,12 @@
 ///////////////////////////////////
 //         Tint.zh Header        //
 //             Venrob            //
-//        Version: 1.01          //
-//           22 Jul 19           //
+//        Version: 1.02          //
+//           03 Sep 19           //
 ///////////////////////////////////
 
 #option HEADER_GUARD on
 import "std.zh"
-
-//Typed Enum listed outside of namespace due to some issues with namespaces and types
-enum Base
-{
-	BASE_MIN,
-	BASE_TINTED = BASE_MIN,
-	BASE_UNIFORM,
-	BASE_DISTRIBUTED,
-	BASE_MAX = BASE_DISTRIBUTED
-};
 
 namespace TintZH
 {
@@ -33,11 +23,19 @@ namespace TintZH
 	//
 	DEFINE TINT_GREYSCALE = 0; //The tint at ID 0 will always be "0,0,0". In BASE_TINTED, this will do nothing; in either other base, it will perform greyscale.
 	//Configs:
-	CONFIG MAX_TINT_PALETTES = 200; //The maximum number of saved tint palettes
+	CONFIG MAX_TINT_PALETTES = 512; //The maximum number of saved tint palettes
 	CONFIG BASE_DEFAULT = BASE_TINTED; //This will be the default base used.
 	CONFIG GRADIENT_RATE = 1; //Every how many frames should the gradient update? Max 3600, Min 1.
 	CONFIGB DEBUG = false; //Set to true to enable debug traces
 	//end
+	enum Base
+	{
+		BASE_MIN,
+		BASE_TINTED = BASE_MIN,
+		BASE_UNIFORM,
+		BASE_DISTRIBUTED,
+		BASE_MAX = BASE_DISTRIBUTED
+	};
 	//start Internal Array Indexes
 	enum TintDataIndex
 	{
@@ -67,7 +65,8 @@ namespace TintZH
 		DATA_B_GRADIENT_C, 		//What is the current blue of the current gradient?
 		DATA_GRADIENT_KEEP,		//What palette does the gradient finish on, if it supposed to be kept?
 		DATA_TINT_CLOCK, 		//A clock for checking every-x-frame things
-		DATA_GRADIENT_STATE		//Is the gradient currently hidden or paused?
+		DATA_GRADIENT_STATE,	//Is the gradient currently hidden or paused?
+		DATA_CURR_DMAP			//The current DMap
 	};
 	//end
 	//start Data
@@ -75,6 +74,15 @@ namespace TintZH
 	int __tintG[MAX_TINT_PALETTES];
 	int __tintB[MAX_TINT_PALETTES];
 	int __tintData[DATA_SIZE + MAX_TINT_PALETTES];
+	int __DMap_TintData[NUM_DMTD * MAX_DMAPS];
+	enum
+	{
+		DMTD_R,
+		DMTD_G,
+		DMTD_B,
+		DMTD_BASE,
+		NUM_DMTD
+	};
 	//end
 	//start main functions
 	/*
@@ -123,18 +131,29 @@ namespace TintZH
 				}
 			}
 		}
+		if(Game->GetCurDMap() != getTintVar(DATA_CURR_DMAP))
+		{	
+			int odmap = getTintVar(DATA_CURR_DMAP);
+			int ndmap = Game->GetCurDMap();
+			incTintVar(DATA_R_CHANGED, getDMTD(ndmap, DMTD_R) - getDMTD(odmap, DMTD_R));
+			incTintVar(DATA_G_CHANGED, getDMTD(ndmap, DMTD_G) - getDMTD(odmap, DMTD_G));
+			incTintVar(DATA_B_CHANGED, getDMTD(ndmap, DMTD_B) - getDMTD(odmap, DMTD_B));
+			setTintVar(DATA_CURR_DMAP, ndmap);
+			setTintVar(DATA_UPDATED, 0);
+		}
 		if(!getTintVar(DATA_UPDATED) || (isGradient() && !(getTintVar(DATA_TINT_CLOCK)%GRADIENT_RATE)))
 		{
 			if(!getTintVar(DATA_TINT_PAUSED))
 			{
 				Tint_Debug_Trace("Updating screen...");
-				if(getTintVar(DATA_BASE) == BASE_TINTED)
+				const Base b = actualBase();
+				if(b == BASE_TINTED)
 				{
 					Graphics->Tint(getTintVar(DATA_R_CHANGED),getTintVar(DATA_G_CHANGED),getTintVar(DATA_B_CHANGED));
 				}
 				else
 				{
-					Graphics->MonochromeHue(getTintVar(DATA_R_CHANGED),getTintVar(DATA_G_CHANGED),getTintVar(DATA_B_CHANGED),getTintVar(DATA_BASE)==BASE_DISTRIBUTED);
+					Graphics->MonochromeHue(getTintVar(DATA_R_CHANGED),getTintVar(DATA_G_CHANGED),getTintVar(DATA_B_CHANGED),b==BASE_DISTRIBUTED);
 				}
 				incTintVar(DATA_R_SUM,getTintVar(DATA_R_CHANGED));
 				incTintVar(DATA_G_SUM,getTintVar(DATA_G_CHANGED));
@@ -155,12 +174,20 @@ namespace TintZH
 		setTintVar(DATA_NEXT_PALETTE,1);
 		setTintVar(DATA_GRADIENT_KEEP,-1);
 		setTintVar(DATA_BASE, BASE_DEFAULT);
+		setTintVar(DATA_CURR_DMAP, -1); //Force update on first run cycle.
 	}
 
 	/*
-		OnContinue() function; run in an onContinue() script. Makes tints properly save/load.
+		Overload from old versions.
 	*/
 	void tintOnContinue()
+	{
+		tintOnSaveLoad();
+	}
+	/*
+		SaveLoad function; run in an 'onSaveLoad' script. Makes tints properly save/load.
+	*/
+	void tintOnSaveLoad()
 	{
 		//Clear the tint, and set all current tint in the queue to be tinted next frame- i.e. first frame after loading
 		Graphics->ClearTint();
@@ -174,7 +201,10 @@ namespace TintZH
 		setTintVar(DATA_R_GRADIENT_C,0);
 		setTintVar(DATA_G_GRADIENT_C,0);
 		setTintVar(DATA_B_GRADIENT_C,0);
+		//Force update on first run cycle.
+		setTintVar(DATA_CURR_DMAP, -1);
 	}
+	
 	/*
 		Add a tint palette to the list of palettes.
 		
@@ -188,6 +218,35 @@ namespace TintZH
 		__tintB[palID] = b;
 		incTintVar(DATA_NEXT_PALETTE,1);
 		return palID;
+	}
+	
+	/*
+		Tint a given DMap to always have a tint.
+		If a DMap is given a non-'BASE_TINTED' base, that will take priority over other bases while on that dmap.
+	*/
+	void tintDMap(int dmap, int r, int g, int b, Base base)
+	{
+		if(dmap<0||dmap>=MAX_DMAPS) return;
+		setDMTD(dmap, DMTD_R, r);
+		setDMTD(dmap, DMTD_G, g);
+		setDMTD(dmap, DMTD_B, b);
+		setDMTD(dmap, DMTD_BASE, base);
+	}
+	
+	/*
+		Tint a given DMap to always have a tint.
+		If a DMap is given a non-'BASE_TINTED' base, that will take priority over other bases while on that dmap.
+		This version will copy the R/G/B from an existing palID.
+		Will fail if: DMap is invalid, palID is invalid
+	*/
+	void tintDMap(int dmap, int palID, Base base)
+	{
+		if(dmap<0||dmap>=MAX_DMAPS) return;
+		if(palID<0||palID>=getTintVar(DATA_NEXT_PALETTE)) return;
+		setDMTD(dmap, DMTD_R, __tintR[palID]);
+		setDMTD(dmap, DMTD_G, __tintG[palID]);
+		setDMTD(dmap, DMTD_B, __tintB[palID]);
+		setDMTD(dmap, DMTD_BASE, base);
 	}
 
 	/*
@@ -208,11 +267,28 @@ namespace TintZH
 	}
 	
 	/*
-		Returns the current base.
+		Returns the current base set.
 	*/
 	Base getBase()
 	{
 		return <Base>(getTintVar(DATA_BASE));
+	}
+	
+	/*
+		Returns the current in-use base.
+	*/
+	Base actualBase()
+	{
+		switch(getDMTD(getTintVar(DATA_CURR_DMAP), DMTD_BASE))
+		{
+			case BASE_DISTRIBUTED:
+				return BASE_DISTRIBUTED;
+			case BASE_UNIFORM:
+				return BASE_UNIFORM;
+			case BASE_TINTED:
+			default:
+				return getBase();
+		}
 	}
 	
 	/*
@@ -592,6 +668,24 @@ namespace TintZH
 	void Tint_Debug_Trace(int str)
 	{
 		if(DEBUG)printf("[TINT.ZH] %s\n", str);
+	}
+	
+	/*
+		Sets an index of __DMap_TintData[] to a value
+	*/
+	void setDMTD(int dmap, int DMTD, int val)
+	{
+		if(dmap < 0 || dmap >= MAX_DMAPS) return;
+		__DMap_TintData[(dmap*NUM_DMTD)+DMTD] = val;
+	}
+	
+	/*
+		Gets the value from an index of __DMap_TintData[]
+	*/
+	int getDMTD(int dmap, int DMTD)
+	{
+		if(dmap < 0 || dmap >= MAX_DMAPS) return 0;
+		return __DMap_TintData[(dmap*NUM_DMTD)+DMTD];
 	}
 	//end
 }
