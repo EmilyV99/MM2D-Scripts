@@ -442,7 +442,7 @@ void stopScreenTransition(int pxAway)
 //start omniArrows
 item script omniArrows
 {
-	void run(int type)
+	void run(ArrType type)
 	{
 		arrowType = type;
 		//Restore the spent magic cost; it should not be charged yet, though it has been already!

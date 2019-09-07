@@ -626,9 +626,13 @@ DEFINE MAXNAMELENGTH = 75; //This must be >= the longest NPC name, + the length 
 DEFINE RAZSWORD_USES = 100;
 DEFINE INF_MAGIC = 152;
 DEFINE DEKU_MAX_TIMER = 240;
-DEFINE ARRTYPE_FIRE = 1;
-DEFINE ARRTYPE_ICE = 2;
-DEFINE ARRTYPE_LIGHT = 3;
+enum ArrType
+{
+	ARRTYPE_NORMAL,
+	ARRTYPE_FIRE,
+	ARRTYPE_ICE,
+	ARRTYPE_LIGHT
+};
 //
 DEFINE MAX_LEVEL = 10; //Max DMap "Level" used
 DEFINE MAX_NONRESERVED_FFC = 26;
@@ -720,7 +724,7 @@ bool isBottleFrozen = false;
 //Item vars
 bool hasMirrorShield = false;
 int usingItem = 0;
-int arrowType = 0;//1=fire,2=ice,3=light
+ArrType arrowType = ARRTYPE_NORMAL;//1=fire,2=ice,3=light
 int beanCounter = 0;
 //Subscreen Vars
 bool pressA = false;
@@ -785,9 +789,9 @@ void loadStoragePath()
 
 //start Global Vars Array
 always using namespace GVars;
+always using namespace GVars::binary;
 namespace GVars
 {
-	#option BINARY_32BIT on
 	int gvars[MAX_INT];
 	char gbuf[MAX_INT];
 	//
@@ -951,33 +955,37 @@ namespace GVars
 		flagGlobalVar(index, GV_NPCDIA, flag);
 	}
 
-	void setGlobalBool(int index, int add, int flag)
+	namespace binary
 	{
-		setGlobalBool(index,add,flag!=0);
-	}
-
-	void setGlobalBool(int index, int add, bool flag)
-	{
-		if(flag)
+		#option BINARY_32BIT on
+		void setGlobalBool(int index, int add, int flag)
 		{
-			gvars[Div(index,BITS_INT) + add] |= 1b << (index % BITS_INT);
+			setGlobalBool(index,add,flag!=0);
 		}
-		else
+		
+		void setGlobalBool(int index, int add, bool flag)
 		{
-			gvars[Div(index,BITS_INT) + add] &= ~(1b << (index % BITS_INT));
+			if(flag)
+			{
+				gvars[Div(index,BITS_INT) + add] |= 1b << (index % BITS_INT);
+			}
+			else
+			{
+				gvars[Div(index,BITS_INT) + add] &= ~(1b << (index % BITS_INT));
+			}
 		}
-	}
 
-	bool getGlobalBool(int index, int add)
-	{
-		return ((gvars[Div(index,BITS_INT) + add] >> (index % BITS_INT))&1b)== 1b;
-	}
+		bool getGlobalBool(int index, int add)
+		{
+			return ((gvars[Div(index,BITS_INT) + add] >> (index % BITS_INT))&1b)== 1b;
+		}
 
-	bool toggleGlobalBool(int index, int add)
-	{
-		bool old = getGlobalBool(index,add);
-		setGlobalBool(index,add,!old);
-		return !old;
+		bool toggleGlobalBool(int index, int add)
+		{
+			bool old = getGlobalBool(index,add);
+			setGlobalBool(index,add,!old);
+			return !old;
+		}
 	}
 
 	void storeTime()

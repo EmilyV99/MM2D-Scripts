@@ -540,7 +540,7 @@ ffc script NPC
 						else ShowStringAndWait("If you still have time, why don'tcha try it, sonny?");
 						setNPCflag(N_SHOOTING_GALLERY_TOWN, FLAG2);
 					}
-					ShowStringAndWait("One game is 20 rupees.@char(26)<<@choice(1)OK@choice(2)No thanks>>@domenu()@set(@ttempi @chosen)@close()");
+					ShowStringAndWait("One game is ((20 rupees)).@char(26)<<@choice(1)OK@choice(2)No thanks>>@domenu()@set(@ttempi @chosen)@close()");
 					if(tangoTempI==2)
 					{
 						if(day<3)ShowStringAndWait("...Well, then, be that way!");
@@ -784,7 +784,6 @@ ffc script NPC
 						}
 						//end
 				}
-				if(day!=1)startMazeGame(price,prize,form==FORM_GORON,person);
 				break;
 			}
 			//end

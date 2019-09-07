@@ -76,7 +76,8 @@ void SignShowMessageAndWait(char msg)
 {
 	int slot = ShowMessage(msg,TSTYLE_SIGNS);
 	while(Tango_SlotIsActive(slot)&&Tango_SlotIsFinished(slot))Waitframe();
-	Tango_ScrollSlot(slot,-Tango_GetSlotMaxScrollPos(slot));
+	Waitframe();
+	Tango_ScrollSlot(slot,-MAX_INT);
 	handleMessageSlot(slot,false,false);
 }
 

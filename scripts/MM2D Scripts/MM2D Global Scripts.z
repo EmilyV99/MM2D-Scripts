@@ -1110,7 +1110,7 @@ global script onFileLoad
 		{
 			resetTime();
 			Game->ContinueDMap=0;
-			Game->ContinueScreen=0;
+			Game->ContinueScreen=0x10;
 			Game->Save();
 		}
 		tintOnContinue();
@@ -1562,8 +1562,8 @@ hero script OptionsMenu
 				++inputTimer;
 				inputTimer %= opt[OPT_MENU_HOLD_DELAY];
 				loadMenuTempBitmap(optmenu);
-				bool confirm = Input->Press[CB_A] || Input->ReadKey[KEY_ENTER] || Input->ReadKey[KEY_ENTER_PAD];
-				bool deny = Input->Press[CB_B] || Input->ReadKey[KEY_BACKSPACE];
+				bool confirm = Input->Press[CB_A] || EnterKey() || Input->ReadKey[KEY_ENTER_PAD];
+				bool deny = Input->Press[CB_B] || BkspcKey();
 				const bool up = (Input->Press[CB_UP] || (Input->Button[CB_UP] && !inputTimer));
 				const bool down = (Input->Press[CB_DOWN] || (Input->Button[CB_DOWN] && !inputTimer));
 				const bool left = (Input->Press[CB_LEFT] || (Input->Button[CB_LEFT] && !inputTimer));
@@ -1929,6 +1929,8 @@ hero script OptionsMenu
 		hidePassive(true);
 		//Audio->AdjustSFXVolume(30);
 		WaitTotalNoAction();
+		EnterKey();
+		BkspcKey();
 		while(true)
 		{
 			Waitdraw();
@@ -1938,8 +1940,8 @@ hero script OptionsMenu
 			inputTimer %= opt[OPT_MENU_HOLD_DELAY];
 			reloadSetupBitmap(setupmenu); //Unlike opt menu, this needs reloading every frame, for disabled options!
 			loadSetupTempBitmap(setupmenu);
-			bool confirm = Input->Press[CB_A] || Input->ReadKey[KEY_ENTER] || Input->ReadKey[KEY_ENTER_PAD];
-			bool deny = Input->Press[CB_B] || Input->ReadKey[KEY_BACKSPACE];
+			bool confirm = Input->Press[CB_A] || EnterKey() || Input->ReadKey[KEY_ENTER_PAD];
+			bool deny = Input->Press[CB_B] || BkspcKey();
 			const bool up = (Input->Press[CB_UP] || (Input->Button[CB_UP] && !inputTimer));
 			const bool down = (Input->Press[CB_DOWN] || (Input->Button[CB_DOWN] && !inputTimer));
 			const bool left = (Input->Press[CB_LEFT] || (Input->Button[CB_LEFT] && !inputTimer));
@@ -2074,6 +2076,7 @@ hero script OptionsMenu
 						setGlobalBool(GVAR_OPTIONS_MENU, GV_MISC_BOOL, true);
 						runOptMenu();
 						Screen_Freeze(FREEZE_ACTION);
+						state = SETUPMENUSTATE_MAIN;
 						continue; //continue to top of `while(true)`, for next frame
 					}
 					break;
@@ -2210,8 +2213,8 @@ hero script OptionsMenu
 		while(true)
 		{
 			FlashScreen(BLACK, true); //Full-screen black rect
-			const bool confirm = Input->Press[CB_A] || Input->ReadKey[KEY_ENTER];
-			const bool deny = Input->Press[CB_B] || Input->ReadKey[KEY_BACKSPACE];
+			const bool confirm = Input->Press[CB_A] || EnterKey();
+			const bool deny = Input->Press[CB_B] || BkspcKey();
 			const bool up = Input->Press[CB_UP];
 			const bool down = Input->Press[CB_DOWN];
 			if(confirm||deny||up||down) Audio->PlaySound(SFX_MENU_BEEP);
@@ -2608,6 +2611,24 @@ hero script OptionsMenu
 				}
 				return KV_VALID;
 		}
+	}
+	
+	bool EnterKey()
+	{
+		for(int q = 0; q < 14; ++q)
+		{
+			if(Input->KeyBindings[q] == KEY_ENTER) return false;
+		}
+		return Input->ReadKey[KEY_ENTER];
+	}
+	
+	bool BkspcKey()
+	{
+		for(int q = 0; q < 14; ++q)
+		{
+			if(Input->KeyBindings[q] == KEY_BACKSPACE) return false;
+		}
+		return Input->ReadKey[KEY_BACKSPACE];
 	}
 	
 	//start OptMenuTab stuff

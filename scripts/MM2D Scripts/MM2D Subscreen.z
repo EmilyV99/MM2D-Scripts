@@ -928,9 +928,9 @@ void passiveSubscreen()//start PassiveSubscreen
 		A_cset=loadItemCSet(IT_DEKUNUTS);
 		R_tile=TILE_DROP;
 	}
-	else if(arrowAimMode)
+	else if(arrowAimMode || getGlobalVar(GVAR_MGSTATE,GV_MISC)==MG_SHOOTING)
 	{
-		L_tile = TILE_QUIT;
+		L_tile = (getGlobalVar(GVAR_MGSTATE,GV_MISC)==MG_SHOOTING) ? TILE_INVIS : TILE_QUIT;
 		L_cset=0;
 		R_tile = TILE_AIM;
 		R_cset=0;
